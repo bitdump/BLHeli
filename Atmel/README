@@ -1,0 +1,26 @@
+This tree contains the BLHeli assembly code for sensorless brushless motor electronic speed control (ESC) boards.
+It is designed specifically for use with Eflite mCP X, but may also be used on other copters/planes.
+
+This tree contains AVR assembly code for Atmel MCU based ESCs. 
+
+Features and Changes
+--------------------
+- Can be configured for main motor or tail motor operation
+- Main motor operation has governor functionality
+- Many parmeters can be programmed from the TX
+- Supports 1kHz, 2kHz, 4kHz or 8kHz positive or negative pwm as input signal
+
+Supported Hardware
+------------------
+- HC 5A
+- Walkera WK-WST-10A-LT
+- Feigao 6A
+
+Installation and use
+--------------------
+The software is written, compiled and debugged in the AVR Studio 4 IDE.
+
+For more information, check out this thread:
+
+http://www.helifreak.com/showthread.php?t=357151
+
