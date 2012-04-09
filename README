@@ -1,0 +1,12 @@
+This tree contains the BLHeli assembly code for sensorless brushless motor electronic speed control (ESC) boards.
+It is designed specifically for use with Eflite mCP X, but may also be used on other copters/planes.
+
+There is one version of the software for Silabs MCU based ESCs, and another for Atmel MCU based ESCs.
+
+For more information, check out these threads on Helifreak:
+
+http://www.helifreak.com/showthread.php?t=390517 (for SiLabs MCU based ESCs)
+http://www.helifreak.com/showthread.php?t=357151 (for Atmel MCU based ESCs)
+
+April 2012,
+Steffen Skaug
