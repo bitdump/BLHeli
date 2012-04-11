@@ -35,8 +35,8 @@ $NOMOD51
 ; The code adapts itself to one of the three pwm frequencies
 ;
 ; The first lines of the software must be modified according to the chosen environment:
-; - $include ("ESC".inc)		; Select ESC pinout
-; - TAIL		EQU 0		; Choose main or tail mode
+; Uncomment the selected ESC and main/tail mode
+; BESC EQU "ESC"_"mode" 						
 ; 
 ;**** **** **** **** ****
 ; Revision history:
@@ -47,6 +47,16 @@ $NOMOD51
 ;           Added programmable low voltage limit
 ;           Added programmable damped tail mode (only for 1S ESCs)
 ;           Added programmable motor rotation direction
+; - Rev2.1: (minor changes by 4712)
+;		  Added Disable TX Programming by PC Setup Application 
+;		  therfore changed EEPROM_LAYOUT_REVISION = 8					
+;		  Âdded Vdd Monitor as reset source when writing to "EEProm"
+;		  Changed for use of batch file to assemble, link and make hex files	
+; - Rev2.2: (minor changes by 4712)
+;           Added Disable Throttle Re-Arming every motor start by PC Setup Application 
+; - Rev2.3: (minor changes by 4712)
+;           Added bugfixed (2x CLR C before j(n)c operations)thx Steffen!			
+; - Rev2.4: Revisions 2.1 to 2.3 integrated
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -93,15 +103,96 @@ $NOMOD51
 ; Aquisition phase is the final phase, for stabilisation before normal bemf commutation run begins.
 ;
 ;**** **** **** **** ****
+; List of enumerated supported ESCs and modes  (main or tail)
+DP_3A_Main 			EQU 1
+DP_3A_Tail  			EQU 2
+Supermicro_3p5A_Main 	EQU 3
+Supermicro_3p5A_Tail 	EQU 4   
+Turnigy6A_Main 		EQU 5
+Turnigy6A_Tail 		EQU 6   
+XP_3A_Main 			EQU 7
+XP_3A_Tail 			EQU 8
+XP_7A_Main 			EQU 9
+XP_7A_Tail 			EQU 10
+XP_12A_Main 			EQU 11
+XP_12A_Tail 			EQU 12
 
-;$include (DP_3A.inc)			; Select DP 3A pinout
-;$include (Supermicro_3p5A.inc)	; Select Supermicro 3.5A pinout
-$include (XP_3A.inc)			; Select XP 3A pinout
-;$include (XP_7A.inc)			; Select XP 7A pinout
-;$include (XP_12A.inc)			; Select XP 12A pinout
-;$include (Turnigy6A.inc)	  	; Select Turnigy 6A pinout
+;**** **** **** **** ****
+; Select the ESC and mode to use (or unselect all for use with external batch compile file)
+;BESC EQU DP_3A_Main 						
+;BESC EQU DP_3A_Tail  				
+;BESC EQU Supermicro_3p5A_Main
+;BESC EQU Supermicro_3p5A_Tail
+;BESC EQU Turnigy6A_Main 
+;BESC EQU Turnigy6A_Tail 
+;BESC EQU XP_3A_Main 
+;BESC EQU XP_3A_Tail 
+;BESC EQU XP_7A_Main 
+;BESC EQU XP_7A_Tail 
+;BESC EQU XP_12A_Main 
+;BESC EQU XP_12A_Tail 
 
-TAIL 		EQU 	1			; Choose mode. Set to 0 for main motor and 1 for tail motor
+;**** **** **** **** ****
+; ESC selection statements
+IF BESC == DP_3A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (DP_3A.inc)		; Select DP 3A pinout
+ENDIF
+
+IF BESC == DP_3A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (DP_3A.inc)		; Select DP 3A pinout
+ENDIF
+
+IF BESC == Supermicro_3p5A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (Supermicro_3p5A.inc); Select Supermicro 3.5A pinout
+ENDIF
+
+IF BESC == Supermicro_3p5A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (Supermicro_3p5A.inc); Select Supermicro 3.5A pinout
+ENDIF
+
+IF BESC == Turnigy6A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (Turnigy6A.inc)		; Select Turnigy 6A pinout
+ENDIF
+
+IF BESC == Turnigy6A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (Turnigy6A.inc)		; Select Turnigy 6A pinout
+ENDIF
+
+IF BESC == XP_3A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (XP_3A.inc)		; Select XP 3A pinout
+ENDIF
+
+IF BESC == XP_3A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (XP_3A.inc)		; Select XP 3A pinout
+ENDIF
+
+IF BESC == XP_7A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (XP_7A.inc)		; Select XP 7A pinout
+ENDIF
+
+IF BESC == XP_7A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (XP_7A.inc)		; Select XP 7A pinout
+ENDIF
+
+IF BESC == XP_12A_Main
+TAIL 	EQU 	0			; Choose mode. Set to 0 for main motor
+$include (XP_12A.inc)		; Select XP 12A pinout
+ENDIF
+
+IF BESC == XP_12A_Tail
+TAIL 	EQU 	1			; Choose mode. Set to 1 for tail motor
+$include (XP_12A.inc)		; Select XP 12A pinout
+ENDIF
 
 ;**** **** **** **** ****
 
@@ -128,6 +219,9 @@ DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 1 ; 1=High 	2=Low 		3=Damped
 ENDIF
 DEFAULT_PGM_TAIL_DIRECTION_REV	EQU 1 ; 1=Normal 	2=Reversed
 DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 ; 1=Positive 	2=Negative
+
+DEFAULT_ENABLE_TX_PGM 			EQU 1 ; 1=Enabled 	0=Disabled
+DEFAULT_MAIN_REARM_START			EQU 1 ; 1=Enabled 	0=Disabled
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -250,59 +344,62 @@ PGM_RCP_PWM_POL	EQU	7		; Programmed RC pulse pwm polarity. 0=positive, 1=negativ
 ; RAM definitions
 DSEG AT 30h					; Ram data segment 
 
-Startup_Rot_Cnt:	DS	1		; Startup mode rotations counter (decrementing) 
+Startup_Rot_Cnt:		DS	1		; Startup mode rotations counter (decrementing) 
 
-Prev_Comm_L:		DS	1		; Previous commutation timer3 timestamp (lo byte)
-Prev_Comm_H:		DS	1		; Previous commutation timer3 timestamp (hi byte)
-Comm_Period4x_L:	DS	1		; Timer3 counts between the last 4 commutations (lo byte)
-Comm_Period4x_H:	DS	1		; Timer3 counts between the last 4 commutations (hi byte)
+Prev_Comm_L:			DS	1		; Previous commutation timer3 timestamp (lo byte)
+Prev_Comm_H:			DS	1		; Previous commutation timer3 timestamp (hi byte)
+Comm_Period4x_L:		DS	1		; Timer3 counts between the last 4 commutations (lo byte)
+Comm_Period4x_H:		DS	1		; Timer3 counts between the last 4 commutations (hi byte)
 
-Gov_Target_L:		DS	1		; Governor target (lo byte)
-Gov_Target_H:		DS	1		; Governor target (hi byte)
-Gov_Integral_L:	DS	1		; Governor integral error (lo byte)
-Gov_Integral_H:	DS	1		; Governor integral error (hi byte)
-Gov_Integral_X:	DS	1		; Governor integral error (ex byte)
-Gov_Proportional_L:	DS	1		; Governor proportional error (lo byte)
-Gov_Proportional_H:	DS	1		; Governor proportional error (hi byte)
-Gov_Prop_Pwm:		DS	1		; Governor calculated new pwm based upon proportional error
-Gov_Arm_Target:	DS	1		; Governor arm target value
-Gov_Active:		DS	1		; Governor active (enabled and speed above minimum)
+Gov_Target_L:			DS	1		; Governor target (lo byte)
+Gov_Target_H:			DS	1		; Governor target (hi byte)
+Gov_Integral_L:		DS	1		; Governor integral error (lo byte)
+Gov_Integral_H:		DS	1		; Governor integral error (hi byte)
+Gov_Integral_X:		DS	1		; Governor integral error (ex byte)
+Gov_Proportional_L:		DS	1		; Governor proportional error (lo byte)
+Gov_Proportional_H:		DS	1		; Governor proportional error (hi byte)
+Gov_Prop_Pwm:			DS	1		; Governor calculated new pwm based upon proportional error
+Gov_Arm_Target:		DS	1		; Governor arm target value
+Gov_Active:			DS	1		; Governor active (enabled and speed above minimum)
 
-Wt_Advance_L:		DS	1		; Timer3 counts for commutation advance timing (lo byte)
-Wt_Advance_H:		DS	1		; Timer3 counts for commutation advance timing (hi byte)
-Wt_Zc_Scan_L:		DS	1		; Timer3 counts from commutation to zero cross scan (lo byte)
-Wt_Zc_Scan_H:		DS	1		; Timer3 counts from commutation to zero cross scan (hi byte)
-Wt_Comm_L:		DS	1		; Timer3 counts from zero cross to commutation (lo byte)
-Wt_Comm_H:		DS	1		; Timer3 counts from zero cross to commutation (hi byte)
-Wt_Stepper_Step_L:	DS	1		; Timer3 counts for stepper step (lo byte)
-Wt_Stepper_Step_H:	DS	1		; Timer3 counts for stepper step (hi byte)
+Wt_Advance_L:			DS	1		; Timer3 counts for commutation advance timing (lo byte)
+Wt_Advance_H:			DS	1		; Timer3 counts for commutation advance timing (hi byte)
+Wt_Zc_Scan_L:			DS	1		; Timer3 counts from commutation to zero cross scan (lo byte)
+Wt_Zc_Scan_H:			DS	1		; Timer3 counts from commutation to zero cross scan (hi byte)
+Wt_Comm_L:			DS	1		; Timer3 counts from zero cross to commutation (lo byte)
+Wt_Comm_H:			DS	1		; Timer3 counts from zero cross to commutation (hi byte)
+Wt_Stepper_Step_L:		DS	1		; Timer3 counts for stepper step (lo byte)
+Wt_Stepper_Step_H:		DS	1		; Timer3 counts for stepper step (hi byte)
 
-Rcp_PrePrev_Edge_L:	DS	1		; RC pulse pre previous edge pca timestamp (lo byte)
-Rcp_PrePrev_Edge_H:	DS	1		; RC pulse pre previous edge pca timestamp (hi byte)
-Rcp_Edge_L:		DS	1		; RC pulse edge pca timestamp (lo byte)
-Rcp_Edge_H:		DS	1		; RC pulse edge pca timestamp (hi byte)
-New_Rcp:			DS	1		; New RC pulse value in pca counts
-Prev_Rcp_Pwm_Freq:	DS	1		; Previous RC pulse pwm frequency (used during pwm frequency measurement)
-Curr_Rcp_Pwm_Freq:	DS	1		; Current RC pulse pwm frequency (used during pwm frequency measurement)
-Rcp_Stop_Cnt:		DS	1		; Counter for RC pulses below stop value 
+Rcp_PrePrev_Edge_L:		DS	1		; RC pulse pre previous edge pca timestamp (lo byte)
+Rcp_PrePrev_Edge_H:		DS	1		; RC pulse pre previous edge pca timestamp (hi byte)
+Rcp_Edge_L:			DS	1		; RC pulse edge pca timestamp (lo byte)
+Rcp_Edge_H:			DS	1		; RC pulse edge pca timestamp (hi byte)
+New_Rcp:				DS	1		; New RC pulse value in pca counts
+Prev_Rcp_Pwm_Freq:		DS	1		; Previous RC pulse pwm frequency (used during pwm frequency measurement)
+Curr_Rcp_Pwm_Freq:		DS	1		; Current RC pulse pwm frequency (used during pwm frequency measurement)
+Rcp_Stop_Cnt:			DS	1		; Counter for RC pulses below stop value 
 
-Pwm_Limit:		DS	1		; Maximum allowed pwm 
-Pwm_Tail_Idle:		DS	1		; Tail idle speed pwm
-Lipo_Cells:		DS	1		; Number of lipo cells 
-Lipo_Adc_Limit_L:	DS	1		; Low voltage limit adc minimum (lo byte)
-Lipo_Adc_Limit_H:	DS	1		; Low voltage limit adc minimum (hi byte)
+Pwm_Limit:			DS	1		; Maximum allowed pwm 
+Pwm_Tail_Idle:			DS	1		; Tail idle speed pwm
+Lipo_Cells:			DS	1		; Number of lipo cells 
+Lipo_Adc_Limit_L:		DS	1		; Low voltage limit adc minimum (lo byte)
+Lipo_Adc_Limit_H:		DS	1		; Low voltage limit adc minimum (hi byte)
 
-Tx_Pgm_Func_No:	DS	1		; Function number when doing programming by tx
-Tx_Pgm_Paraval_No:	DS	1		; Parameter value number when doing programming by tx
-Tx_Pgm_Beep_No:	DS	1		; Beep number when doing programming by tx
+Tx_Pgm_Func_No:		DS	1		; Function number when doing programming by tx
+Tx_Pgm_Paraval_No:		DS	1		; Parameter value number when doing programming by tx
+Tx_Pgm_Beep_No:		DS	1		; Beep number when doing programming by tx
 
-Pgm_Gov_P_Gain:	DS	1		; Programmed governor P gain
-Pgm_Gov_I_Gain:	DS	1		; Programmed governor I gain
-Pgm_Gov_Mode:		DS	1		; Programmed governor mode
-Pgm_Low_Voltage_Lim:DS	1		; Programmed low voltage limit
-Pgm_Tail_Gain:		DS	1		; Programmed tail gain
-Pgm_Tail_Idle:		DS	1		; Programmed tail idle speed
-Pgm_Startup_Pwr:	DS	1		; Programmed startup power
+Pgm_Gov_P_Gain:		DS	1		; Programmed governor P gain
+Pgm_Gov_I_Gain:		DS	1		; Programmed governor I gain
+Pgm_Gov_Mode:			DS	1		; Programmed governor mode
+Pgm_Low_Voltage_Lim:	DS	1		; Programmed low voltage limit
+Pgm_Tail_Gain:			DS	1		; Programmed tail gain
+Pgm_Tail_Idle:			DS	1		; Programmed tail idle speed
+Pgm_Startup_Pwr:		DS	1		; Programmed startup power
+
+Pgm_Enable_TX_Pgm:		DS 	1		; Programmed enable/disable value for TX programming
+Pgm_Main_Rearm_Start:	DS 	1		; Programmed enable/disable re-arming main every start 
 
 DSEG AT 80h					
 Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
@@ -311,8 +408,8 @@ Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
 CSEG AT 1A00h			; "Eeprom" segment
 
 EEPROM_FW_MAIN_REVISION	EQU 	2 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	0 	; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION	EQU 	7 	; Revision of the EEPROM layout
+EEPROM_FW_SUB_REVISION	EQU 	4 	; Sub revision of the firmware
+EEPROM_LAYOUT_REVISION	EQU 	9 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:	DB	EEPROM_FW_SUB_REVISION 			; EEPROM firmware sub revision number
@@ -338,6 +435,9 @@ Eep_Pgm_Input_Pol:		DB	DEFAULT_PGM_TAIL_RCP_PWM_POL		; EEPROM copy of programmed
 Eep_Initialized_L:		DB	05Ah							; EEPROM initialized signature low byte
 Eep_Initialized_H:		DB	0A5h							; EEPROM initialized signature high byte
 ENDIF
+Eep_Enable_TX_Pgm: 		DB 	DEFAULT_ENABLE_TX_PGM 			; EEPROM TX programming enable
+Eep_Main_Rearm_Start:	DB 	DEFAULT_MAIN_REARM_START			; EEPROM re-arming main enable
+Eep_Dummy:			DB	0FFh							; EEPROM address for safety reason
 
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
@@ -346,7 +446,7 @@ CSEG AT 1A60h
 Eep_Name:				DB 	"                "	; Name tag (16 Bytes)
 
 ;**** **** **** **** ****
- 	Interrupt_Table_Definition		; SiLabs interrupts
+	Interrupt_Table_Definition		; SiLabs interrupts
 CSEG AT 80h			; Code segment after interrupt vectors 
 
 ;**** **** **** **** ****
@@ -2385,6 +2485,8 @@ ELSE
 	setb	Flags2.PGM_RCP_PWM_POL
 	mov	Pgm_Gov_Mode, #3
 ENDIF
+	mov 	Pgm_Enable_TX_Pgm, #DEFAULT_ENABLE_TX_PGM
+	mov 	Pgm_Main_Rearm_Start, #DEFAULT_MAIN_REARM_START 
 	ret
 
 
@@ -2411,6 +2513,9 @@ reset:
 	anl	PCA0MD, #NOT(40h)	; Clear watchdog enable bit
 	; Initialize stack
 	mov	SP, #0c0h			; Stack = 64 upper bytes of RAM
+	; Initialize VDD monitor
+	orl	VDM0CN, #080h    	; Enable the VDD monitor
+	call	wait1ms			; Wait at least 100us
 	; Set clock frequency
 	orl	OSCICN, #03h		; Set clock divider to 1
 	mov	A, OSCICL				
@@ -2530,7 +2635,11 @@ arming_start:
 	jc	program_by_tx_checked	; No - branch
 
 IF TX_PGM == 1
-	jmp program_by_tx			; Yes - start programming mode entry
+	mov 	A, Pgm_Enable_TX_Pgm	; Yes - start programming mode entry if enabled
+	clr	C
+	subb	A, #1				; Is TX programming enabled?
+	jc 	program_by_tx_checked	; No - branch
+	jmp	program_by_tx			; Yes - enter programming mode
 ENDIF
 
 program_by_tx_checked:
@@ -2587,19 +2696,6 @@ init_start:
 	mov	Flags0, A				; Clear flags0
 	mov	Rcp_Stop_Cnt, A		; Set RC pulse stop count to zero
 	call initialize_all_timings	; Initialize timing
-
-;stsk
-setb	Flags1.RUN_PWM_OFF_DAMPED	; Set damped operation
-call comm1comm2				; Initialize commutation
-call comm2comm3				; Initialize commutation
-runbrushed:
-call wait1ms
-clr	C
-mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
-subb	A, #RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
-jc	runbrushed
-jmp	run_to_wait_for_power_on		; Yes, go back to wait for poweron
-
 	;**** **** **** **** ****
 	; Settle mode beginning
 	;**** **** **** **** **** 
@@ -2987,7 +3083,15 @@ run_to_wait_for_power_on:
 IF TAIL == 1
 	jmp	wait_for_power_on		; Tail - Go back to wait for power on
 ELSE
-	jmp	validate_rcp_start		; Main - Go back to validate RC pulse
+	mov 	A, Pgm_Main_Rearm_Start
+	clr	C
+	subb	A, #1				; Is re-armed start enabled?
+	jc 	jmp_wait_for_power_on	; No - do like tail and start immediately
+
+	jmp	validate_rcp_start		; Yes - go back to validate RC pulse
+
+jmp_wait_for_power_on:
+	jmp	wait_for_power_on		; Go back to wait for power on
 ENDIF
 
 

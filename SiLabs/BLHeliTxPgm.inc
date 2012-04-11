@@ -57,6 +57,7 @@ read_eeprom_byte:
 write_eeprom_byte:
 	orl	PSCTL, #01h			; Set the PSWE bit
 	anl	PSCTL, #0FDh			; Clear the PSEE bit
+	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                                
 	mov	FLKEY, #0A5h			; First key code
 	mov	FLKEY, #0F1h			; Second key code
 	mov	A, Temp1				; Load value to be written
@@ -76,6 +77,7 @@ clear_eeprom_signature:
 	; Erase flash
 	orl	PSCTL, #02h			; Set the PSEE bit
 	orl	PSCTL, #01h			; Set the PSWE bit
+	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                                
 	mov	FLKEY, #0A5h			; First key code
 	mov	FLKEY, #0F1h			; Second key code
 	mov	DPTR, #Eep_Initialized_L	
@@ -235,6 +237,16 @@ ELSE
 
 	mov	Pgm_Gov_Mode, #3
 ENDIF
+	mov	DPTR, #Eep_Enable_TX_Pgm
+	call read_eeprom_byte
+	mov	Pgm_Enable_TX_Pgm, Temp1
+
+	mov	DPTR, #Eep_Main_Rearm_Start
+	call read_eeprom_byte
+	mov	Pgm_Main_Rearm_Start, Temp1
+
+	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
+
 	jmp	read_eeprom_exit
 
 read_eeprom_store_defaults:
@@ -381,8 +393,17 @@ ELSE
 	mov	Temp1, #2
 	call write_eeprom_byte
 ENDIF
+	mov	DPTR, #Eep_Enable_TX_Pgm
+	mov	Temp1, Pgm_Enable_TX_Pgm
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Main_Rearm_Start
+	mov	Temp1, Pgm_Main_Rearm_Start
+	call write_eeprom_byte
+
 	call	write_tags
 	call write_eeprom_signature
+	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
 	ret	
 
 
@@ -663,6 +684,7 @@ func_paraval_wait:
 	call	store_all_in_eeprom		; Store all values in EEPROM
 	call success_beep			; Beep success
 	clr	EA					; Disable all interrupts
+	mov 	RSTSRC, #00h   		; Clear VDD monitor as a reset source (PORSF)                                
 	orl	RSTSRC, #10h			; Generate hardware reset
 	call wait1s
 
@@ -738,6 +760,7 @@ ENDIF
 
 program_by_tx_exit:
 	clr	EA					; Disable all interrupts
+	mov 	RSTSRC, #00h   		; Clear VDD monitor as a reset source (PORSF)                                
 	orl	RSTSRC, #10h			; Generate hardware reset
 	call wait1s
 
