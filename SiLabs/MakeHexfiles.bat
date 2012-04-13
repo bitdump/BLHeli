@@ -2,9 +2,9 @@
 rem ***** Batch file for BlHeli (from 4712) ****
 
 rem ***** adapt settings to your enviroment ****
-DEL Output\Hex\*.*
+DEL Output\Hex\*.* /Q
 RMDIR Output\Hex
-DEL Output\*.*
+DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
@@ -90,7 +90,7 @@ copy "Output\%BESCTYPE%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%.HEX"
 
 
-SET BESCTYPE=XP_3A_TAIL 
+SET BESCTYPE=XP_3A_TAIL
 SET BESC=8
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 
@@ -99,7 +99,7 @@ SET BESC=8
 copy "Output\%BESCTYPE%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%.HEX"
 
-SET BESCTYPE=XP_7A_MAIN 
+SET BESCTYPE=XP_7A_MAIN
 SET BESC=9
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 
@@ -108,7 +108,7 @@ SET BESC=9
 copy "Output\%BESCTYPE%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%.HEX"
 
-SET BESCTYPE=XP_7A_TAIL 
+SET BESCTYPE=XP_7A_TAIL
 SET BESC=10
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 
@@ -117,7 +117,7 @@ SET BESC=10
 copy "Output\%BESCTYPE%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%.HEX"
 
-SET BESCTYPE=XP_12A_MAIN 
+SET BESCTYPE=XP_12A_MAIN
 SET BESC=11
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 
@@ -126,7 +126,7 @@ SET BESC=11
 copy "Output\%BESCTYPE%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%.HEX"
 
-SET BESCTYPE=XP_12A_TAIL 
+SET BESCTYPE=XP_12A_TAIL
 SET BESC=12
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 
