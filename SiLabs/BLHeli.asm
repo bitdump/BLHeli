@@ -50,13 +50,25 @@ $NOMOD51
 ; - Rev2.1: (minor changes by 4712)
 ;		  Added Disable TX Programming by PC Setup Application 
 ;		  therfore changed EEPROM_LAYOUT_REVISION = 8					
-;		  Âdded Vdd Monitor as reset source when writing to "EEProm"
+;		  Added Vdd Monitor as reset source when writing to "EEProm"
 ;		  Changed for use of batch file to assemble, link and make hex files	
 ; - Rev2.2: (minor changes by 4712)
 ;           Added Disable Throttle Re-Arming every motor start by PC Setup Application 
 ; - Rev2.3: (minor changes by 4712)
 ;           Added bugfixed (2x CLR C before j(n)c operations)thx Steffen!			
 ; - Rev2.4: Revisions 2.1 to 2.3 integrated
+; - Rev3.0: Added PPM (1050us-1866us) as accepted input signal
+;           Added startup rpm as a programming parameter
+;           Added startup acceleration as a programming parameter
+;           Added option for using voltage measurements to compensate motor power
+;           Added governor target by setup as a governor mode option
+;           Governor is kept active regardless of rpm
+;           Smooth governor spoolup/down in arm and setup modes
+;           Increased governor P and I gain programming ranges
+;           Increased and changed low voltage limit programming range
+;           Disabled tx programming entry for all but the first arming sequence after power on
+;           Made it possible to skip parameters in tx programming by setting throttle midstick
+;           Made it default not to rearm for every restart
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -200,28 +212,35 @@ TX_PGM		EQU	1			; Set to 0 to disable tx programming (reduces code size)
 
 ;**** **** **** **** ****
 ; TX programming defaults
-DEFAULT_PGM_MAIN_P_GAIN 			EQU 4 ; 1=0.38 	2=0.50 	3=0.75 	4=1.00 	5=1.50
-DEFAULT_PGM_MAIN_I_GAIN 			EQU 4 ; 1=0.38 	2=0.50 	3=0.75 	4=1.00 	5=1.50
-DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 ; 1=Tx 		2=Arm 	3=Off
-DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	EQU 2 ; 1=2.7V/cell	2=3V/cell	3=3.3V/cell
-DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 ; 1=0.50 	2=0.75 	3=1.00 	4=1.25 	5=1.50
+DEFAULT_PGM_MAIN_P_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 	8=1.50	9=2.00
+DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 	8=1.50	9=2.00
+DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 ; 1=Tx 		2=Arm 		3=Setup	4=Off
+DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	EQU 3 ; 1=3.0V/c	2=3.1V/c		3=3.2V/c	4=3.3V/c		5=3.4V/c		
+DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 ; 1=0.50 	2=0.75 		3=1.00 	4=1.25 		5=1.50
+DEFAULT_PGM_MAIN_STARTUP_RPM		EQU 3 ; 1=0.50		2=0.75 		3=1.00 	4=1.25 		5=1.5
+DEFAULT_PGM_MAIN_STARTUP_ACCEL	EQU 1 ; 1=0.4 		2=0.7 		3=1.0 	4=1.5 		5=2.3
 DEFAULT_PGM_MAIN_PWM_FREQ 		EQU 2 ; 1=High 	2=Low
+DEFAULT_PGM_MAIN_VOLT_COMP 		EQU 1 ; 1=Disabled	2=Enabled
 DEFAULT_PGM_MAIN_DIRECTION_REV	EQU 1 ; 1=Normal 	2=Reversed
 DEFAULT_PGM_MAIN_RCP_PWM_POL 		EQU 1 ; 1=Positive 	2=Negative
 
 DEFAULT_PGM_TAIL_GAIN 			EQU 3 ; 1=0.75 	2=0.88 		3=1.00 	4=1.12 		5=1.25
 DEFAULT_PGM_TAIL_IDLE_SPEED 		EQU 3 ; 1=Low 		2=MediumLow 	3=Medium 	4=MediumHigh 	5=High
 DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 3 ; 1=0.50 	2=0.75 		3=1.00 	4=1.25 		5=1.50
+DEFAULT_PGM_TAIL_STARTUP_RPM		EQU 3 ; 1=0.50		2=0.75 		3=1.00 	4=1.25 		5=1.5
+DEFAULT_PGM_TAIL_STARTUP_ACCEL	EQU 5 ; 1=0.4 		2=0.7 		3=1.0 	4=1.5 		5=2.3
 IF DAMPED_TAIL_ENABLE == 1
 DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 3 ; 1=High 	2=Low 		3=Damped
 ELSE
 DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 1 ; 1=High 	2=Low 		3=Damped
 ENDIF
+DEFAULT_PGM_TAIL_VOLT_COMP 		EQU 1 ; 1=Disabled	2=Enabled
 DEFAULT_PGM_TAIL_DIRECTION_REV	EQU 1 ; 1=Normal 	2=Reversed
 DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 ; 1=Positive 	2=Negative
 
 DEFAULT_ENABLE_TX_PGM 			EQU 1 ; 1=Enabled 	0=Disabled
-DEFAULT_MAIN_REARM_START			EQU 1 ; 1=Enabled 	0=Disabled
+DEFAULT_MAIN_REARM_START			EQU 0 ; 1=Enabled 	0=Disabled
+DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Corresponds to 70% throttle
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -244,10 +263,6 @@ PWM_INITIAL_RUN	EQU 	40 	; PWM used when in initial run mode
 
 COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
-
-STEPPER_STEP_BEG		EQU 	3000	; ~3300 eRPM 
-STEPPER_STEP_END		EQU 	1000	; ~10000 eRPM
-STEPPER_STEP_DECREMENT	EQU 	5	; Amount to decrease stepper step by per commutation
 
 AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
 DAMPED_RUN_ROTATIONS	EQU 	1	; Number of rotations to do in the damped run phase
@@ -273,10 +288,6 @@ PWM_INITIAL_RUN	EQU 	40 	; PWM used when in initial run mode
 COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
 
-STEPPER_STEP_BEG		EQU 	3000	; ~3300 eRPM 
-STEPPER_STEP_END		EQU 	1000	; ~10000 eRPM
-STEPPER_STEP_DECREMENT	EQU 	30	; Amount to decrease stepper step by per commutation
-
 AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
 DAMPED_RUN_ROTATIONS	EQU 	1	; Number of rotations to do in the damped run phase
 
@@ -298,15 +309,16 @@ Temp8		EQU	R7
 DSEG AT 20h					; Variables segment 
 
 Bit_Access:		DS	1		; Variable at bit accessible address (for non interrupt routines)
+Bit_Access_Int:	DS	1		; Variable at bit accessible address (for interrupts)
 
 Requested_Pwm:		DS	1		; Requested pwm (from RC pulse value)
 Governor_Req_Pwm:	DS	1		; Governor requested pwm (sets governor target)
 Current_Pwm:		DS	1		; Current pwm
+Current_Pwm_Comp:	DS	1		; Current pwm that is voltage compensated
 Current_Pwm_Limited:DS	1		; Current pwm that is limited (applied to the motor output)
 Rcp_Prev_Edge_L:	DS	1		; RC pulse previous edge timer3 timestamp (lo byte)
 Rcp_Prev_Edge_H:	DS	1		; RC pulse previous edge timer3 timestamp (hi byte)
 Rcp_Timeout_Cnt:	DS	1		; RC pulse timeout counter (decrementing) 
-Bit_Access_Int:	DS	1		; Variable at bit accessible address (for interrupts)
 Rcp_Skip_Cnt:		DS	1		; RC pulse skip counter (decrementing) 
 Rcp_Edge_Cnt:		DS	1		; RC pulse edge counter 
 
@@ -344,6 +356,12 @@ PGM_RCP_PWM_POL	EQU	7		; Programmed RC pulse pwm polarity. 0=positive, 1=negativ
 ; RAM definitions
 DSEG AT 30h					; Ram data segment 
 
+Initial_Arm:			DS	1		; Variable that is set during the first arm sequence after power on
+
+Stepper_Step_Beg_L:		DS	1		; Stepper mode step time at the beginning (lo byte)
+Stepper_Step_Beg_H:		DS	1		; Stepper mode step time at the beginning (hi byte)
+Stepper_Step_End_L:		DS	1		; Stepper mode step time at the end (lo byte)
+Stepper_Step_End_H:		DS	1		; Stepper mode step time at the end (hi byte)
 Startup_Rot_Cnt:		DS	1		; Startup mode rotations counter (decrementing) 
 
 Prev_Comm_L:			DS	1		; Previous commutation timer3 timestamp (lo byte)
@@ -360,7 +378,7 @@ Gov_Proportional_L:		DS	1		; Governor proportional error (lo byte)
 Gov_Proportional_H:		DS	1		; Governor proportional error (hi byte)
 Gov_Prop_Pwm:			DS	1		; Governor calculated new pwm based upon proportional error
 Gov_Arm_Target:		DS	1		; Governor arm target value
-Gov_Active:			DS	1		; Governor active (enabled and speed above minimum)
+Gov_Active:			DS	1		; Governor active (enabled when speed is above minimum)
 
 Wt_Advance_L:			DS	1		; Timer3 counts for commutation advance timing (lo byte)
 Wt_Advance_H:			DS	1		; Timer3 counts for commutation advance timing (hi byte)
@@ -383,8 +401,11 @@ Rcp_Stop_Cnt:			DS	1		; Counter for RC pulses below stop value
 Pwm_Limit:			DS	1		; Maximum allowed pwm 
 Pwm_Tail_Idle:			DS	1		; Tail idle speed pwm
 Lipo_Cells:			DS	1		; Number of lipo cells 
-Lipo_Adc_Limit_L:		DS	1		; Low voltage limit adc minimum (lo byte)
-Lipo_Adc_Limit_H:		DS	1		; Low voltage limit adc minimum (hi byte)
+Lipo_Adc_Reference_L:	DS	1		; Voltage reference adc value (lo byte)
+Lipo_Adc_Reference_H:	DS	1		; Voltage reference adc value (hi byte)
+Lipo_Adc_Limit_L:		DS	1		; Low voltage limit adc value (lo byte)
+Lipo_Adc_Limit_H:		DS	1		; Low voltage limit adc value (hi byte)
+Voltage_Comp_Factor:	DS	1		; Voltage compensation factor for pwm
 
 Tx_Pgm_Func_No:		DS	1		; Function number when doing programming by tx
 Tx_Pgm_Paraval_No:		DS	1		; Parameter value number when doing programming by tx
@@ -400,6 +421,11 @@ Pgm_Startup_Pwr:		DS	1		; Programmed startup power
 
 Pgm_Enable_TX_Pgm:		DS 	1		; Programmed enable/disable value for TX programming
 Pgm_Main_Rearm_Start:	DS 	1		; Programmed enable/disable re-arming main every start 
+Pgm_Gov_Setup_Target:	DS 	1		; Programmed main governor setup target
+Pgm_Startup_Rpm:		DS	1		; Programmed startup rpm
+Pgm_Startup_Accel:		DS	1		; Programmed startup acceleration
+Pgm_Volt_Comp:			DS	1		; Programmed voltage compensation
+
 
 DSEG AT 80h					
 Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
@@ -407,9 +433,9 @@ Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
 ;**** **** **** **** ****
 CSEG AT 1A00h			; "Eeprom" segment
 
-EEPROM_FW_MAIN_REVISION	EQU 	2 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	4 	; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION	EQU 	9 	; Revision of the EEPROM layout
+EEPROM_FW_MAIN_REVISION	EQU 	3 	; Main revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	0 	; Sub revision of the firmware
+EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:	DB	EEPROM_FW_SUB_REVISION 			; EEPROM firmware sub revision number
@@ -437,7 +463,17 @@ Eep_Initialized_H:		DB	0A5h							; EEPROM initialized signature high byte
 ENDIF
 Eep_Enable_TX_Pgm: 		DB 	DEFAULT_ENABLE_TX_PGM 			; EEPROM TX programming enable
 Eep_Main_Rearm_Start:	DB 	DEFAULT_MAIN_REARM_START			; EEPROM re-arming main enable
-Eep_Dummy:			DB	0FFh							; EEPROM address for safety reason
+Eep_Pgm_Gov_Setup_Target:DB 	DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	; EEPROM main governor setup target
+IF TAIL == 0
+Eep_Pgm_Startup_Rpm:	DB	DEFAULT_PGM_MAIN_STARTUP_RPM 		; EEPROM copy of programmed startup rpm
+Eep_Pgm_Startup_Accel:	DB	DEFAULT_PGM_MAIN_STARTUP_ACCEL 	; EEPROM copy of programmed startup acceleration
+Eep_Pgm_Volt_Comp:		DB	DEFAULT_PGM_MAIN_VOLT_COMP		; EEPROM copy of programmed voltage compensation
+ELSE
+Eep_Pgm_Startup_Rpm:	DB	DEFAULT_PGM_TAIL_STARTUP_RPM 		; EEPROM copy of programmed startup rpm
+Eep_Pgm_Startup_Accel:	DB	DEFAULT_PGM_TAIL_STARTUP_ACCEL 	; EEPROM copy of programmed startup acceleration
+Eep_Pgm_Volt_Comp:		DB	DEFAULT_PGM_TAIL_VOLT_COMP		; EEPROM copy of programmed voltage compensation
+ENDIF
+Eep_Dummy:					DB	0FFh							; EEPROM address for safety reason
 
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
@@ -611,7 +647,11 @@ t2_int:	; Happens every 128us for low byte and every 32ms for high byte
 	mov	A, Rcp_Timeout_Cnt			; RC pulse timeout count zero?
 	jz	t2_int_pulses_absent		; Yes - pulses are absent
 
-	; Decrement timeout counter
+	; Decrement timeout counter (if PWM)
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jz	t2_int_skip_start			; If no flag is set (PPM) - branch
+
 	dec	Rcp_Timeout_Cnt			; Decrement
 	ajmp	t2_int_skip_start
 
@@ -622,7 +662,6 @@ t2_int_pulses_absent:
 	Read_Rcp_Int 					; Look at value of Rcp_In
 	jnb	ACC.Rcp_In, ($+5)			; Is it high?
 	mov	Temp1, #RCP_MAX			; Yes - set RCP_MAX
-
 	Rcp_Int_First 					; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags1.RCP_EDGE_NO			; Set first edge flag
@@ -635,6 +674,13 @@ t2_int_pulses_absent:
 	jnz 	t2_int_pulses_absent		; Go back if they are not equal
 
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Set timeout count to start value
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jnz	t2_int_ppm_timeout_set		; If a flag is set (PWM) - branch
+
+	mov	Rcp_Timeout_Cnt, #255		; No flag set means PPM. Set timeout count to max
+
+t2_int_ppm_timeout_set:
 	mov	New_Rcp, Temp1				; Store new pulse length
 	setb	Flags1.RCP_UPDATED		 	; Set updated flag
 
@@ -648,6 +694,10 @@ t2_int_skip_start:
 	ajmp	t2_int_rcp_update_start
 
 t2_int_skip_end:
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jz	t2_int_rcp_update_start		; If no flag is set (PPM) - branch
+
 	; Skip counter has reached zero, start looking for RC pulses again
 	Rcp_Int_Enable 				; Enable RC pulse interrupt
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
@@ -734,13 +784,10 @@ t2_int_pwm_update:
 	mov	Requested_Pwm, Temp1		; Set requested pwm
 
 	mov	Temp1, Pgm_Gov_Mode			; Governor mode?
-	cjne	Temp1, #3, t2_int_pwm_exit	; Yes - branch
+	cjne	Temp1, #4, t2_int_pwm_exit	; Yes - branch
 
 	; Update current pwm
 	mov	Current_Pwm, Requested_Pwm
-IF TAIL==1
-	mov	Current_Pwm_Limited, Requested_Pwm
-ENDIF
 
 t2_int_pwm_exit:	
 	; Check if high byte flag is set
@@ -755,6 +802,18 @@ t2h_int:
 	; High byte interrupt (happens every 32ms)
 	clr	TF2H					; Clear interrupt flag
 	mov	Temp1, #GOV_SPOOLRATE	; Load governor spool rate
+	; Check RC pulse timeout counter (used here for PPM only)
+	mov	A, Rcp_Timeout_Cnt			; RC pulse timeout count zero?
+	jz	t2h_int_rcp_stop_check		; Yes - do not decrement
+
+	; Decrement timeout counter (if PPM)
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jnz	t2h_int_rcp_stop_check		; If a flag is set (PWM) - branch
+
+	dec	Rcp_Timeout_Cnt			; No flag set (PPM) - decrement
+
+t2h_int_rcp_stop_check:
 	; Check RC pulse against stop value
 	mov	A, New_Rcp			; Load new pulse value
 	clr	C
@@ -776,9 +835,30 @@ t2h_int_rcp_stop:
 t2h_int_rcp_gov_pwm:
 IF TAIL == 0
 	mov	A, Pgm_Gov_Mode				; Governor target by arm mode?
-	cjne	A, #2, t2h_int_rcp_gov_by_tx		; No - branch
+	cjne	A, #2, t2h_int_rcp_gov_by_setup	; No - branch
+
+	mov	A, Gov_Active					; Is governor active?
+	jz	t2h_int_rcp_gov_by_tx			; No - branch (this ensures soft spoolup by tx)
+
+	clr	C
+	mov	A, Requested_Pwm
+	subb	A, #50						; Is requested pwm below 20%?
+	jc	t2h_int_rcp_gov_by_tx			; Yes - branch (this enables a soft spooldown)
 
 	mov	Requested_Pwm, Gov_Arm_Target		; Yes - load arm target
+
+t2h_int_rcp_gov_by_setup:
+	cjne	A, #3, t2h_int_rcp_gov_by_tx		; If not gov by setup - branch
+
+	mov	A, Gov_Active					; Is governor active?
+	jz	t2h_int_rcp_gov_by_tx			; No - branch (this ensures soft spoolup by tx)
+
+	clr	C
+	mov	A, Requested_Pwm
+	subb	A, #50						; Is requested pwm below 20%?
+	jc	t2h_int_rcp_gov_by_tx			; Yes - branch (this enables a soft spooldown)
+
+	mov	Requested_Pwm, Pgm_Gov_Setup_Target; Gov by setup - load setup target
 
 t2h_int_rcp_gov_by_tx:
 	clr	C
@@ -786,9 +866,9 @@ t2h_int_rcp_gov_by_tx:
 	subb	A, Requested_Pwm				; Is governor requested pwm equal to requested pwm?
 	jz	t2h_int_rcp_exit;				; Yes - branch
 
-	jc	t2h_int_rcp_gov_pwm_inc			; No - if lower then increment
+	jc	t2h_int_rcp_gov_pwm_inc			; No - if lower, then increment
 
-	dec	Governor_Req_Pwm				; No - if higher then decrement
+	dec	Governor_Req_Pwm				; No - if higher, then decrement
 	ajmp	t2h_int_rcp_gov_pwm_exit
 
 t2h_int_rcp_gov_pwm_inc:
@@ -938,9 +1018,9 @@ pca_int_check_1kHz:
 	; Check if pwm frequency is 1kHz
 	clr	C
 	mov	A, Temp1
-	subb	A, #low(2880)				; If below 1440us, 1kHz pwm is assumed
+	subb	A, #low(2200)				; If below 1100us, 1kHz pwm is assumed
 	mov	A, Temp2
-	subb	A, #high(2880)
+	subb	A, #high(2200)
 	jnc	pca_int_restore_edge
 
 	clr	A
@@ -989,6 +1069,44 @@ pca_int_fall:
 	rrc	A
 	mov	Temp1, A
 
+	jnb	Flags2.RCP_PWM_FREQ_1KHZ, ($+5)	; Is RC input pwm frequency 1kHz?
+	ajmp	pca_int_pwm_divide				; Yes - branch forward
+
+	mov	A, Temp1						; No - PPM. Subtract 1050us and multiply by 1.25
+	clr	C
+	subb	A, #low(525)
+	mov	Temp1, A
+	mov	A, Temp2					
+	subb	A, #high(525)
+	mov	Temp2, A
+	jnc	pca_int_ppm_neg_checked			; Is result negative?
+
+	mov	Temp1, #RCP_MIN				; Yes - set to minimum
+	mov	Temp2, #0
+	ajmp	pca_int_limited
+
+pca_int_ppm_neg_checked:
+	mov	A, Temp2						; Divide by 2 and move to Temp5/6
+	clr	C
+	rrc	A
+	mov	Temp6, A
+	mov	A, Temp1					
+	rrc	A
+	mov	Temp5, A
+	mov	A, Temp6						; Divide by 2 again
+	clr	C
+	rrc	A
+	mov	Temp6, A
+	mov	A, Temp5				
+	rrc	A
+	mov	Temp5, A
+	mov	A, Temp1						; Add a quarter
+	add	A, Temp5
+	mov	Temp1, A
+	mov	A, Temp2					
+	addc	A, Temp6
+	mov	Temp2, A
+
 pca_int_pwm_divide:
 	mov	A, Temp2						; Divide by 2
 	clr	C
@@ -1024,14 +1142,31 @@ pca_int_limited:
 
 pca_int_set_timeout:
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Set timeout count to start value
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jnz	pca_int_ppm_timeout_set		; If a flag is set - branch
+
+	mov	Rcp_Timeout_Cnt, #255		; No flag set means PPM. Set timeout count to max
+
+pca_int_ppm_timeout_set:
 	setb	Flags1.RCP_UPDATED		 	; Set updated flag
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
 	ajmp pca_int_exit				; Yes - exit
+
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jz	pca_int_exit				; If no flag is set (PPM) - branch
 
 	Rcp_Int_Disable 				; Disable RC pulse interrupt
 
 pca_int_exit:	; Exit interrupt routine	
 	mov	Rcp_Skip_Cnt, #RCP_SKIP_RATE	; Load number of skips
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, Flags2					; Check pwm frequency flags
+	jnz	($+5)					; If a flag is set (PWM) - branch
+
+	mov	Rcp_Skip_Cnt, #10			; Load number of skips
+
 	pop	ACC			; Restore preserved registers
 	pop	PSW
 	clr	PSW.3		; Select register bank 0 for main program routines	
@@ -1149,17 +1284,20 @@ beep_off:		; Fets off loop
 ; First governor routine - calculate governor target
 calc_governor_target:
 	mov	A, Pgm_Gov_Mode			; Governor mode?
-	cjne	A, #3, governor_speed_check	; Yes
+	cjne	A, #4, governor_speed_check	; Yes
 	ajmp	calc_governor_target_exit	; No
 
 governor_speed_check:
+	; Skip speed check if governor is alrady active
+	mov	A, Gov_Active
+	jnz	governor_target_calc
 	; Check speed (do not run governor for low speeds)
 	clr	C
 	mov	A, Comm_Period4x_L
 	subb	A, #00h
 	mov	A, Comm_Period4x_H
 	subb	A, #05h
-	jc	governor_target_calc		; If speed above min limit (~62500 eRPM) - run governor
+	jc	governor_activate			; If speed above min limit (~62500 eRPM) - run governor
 
 	mov	Current_Pwm, Requested_Pwm	; Set current pwm to requested
 	clr	A
@@ -1171,6 +1309,8 @@ governor_speed_check:
 	mov	Gov_Active, A
 	ajmp	calc_governor_target_exit
 
+governor_activate:
+	mov	Gov_Active, #1
 governor_target_calc:
 	; Governor calculations
 	mov	A, Governor_Req_Pwm		; Load governor requested pwm
@@ -1196,8 +1336,6 @@ governor_target_calc:
 	; Store governor target
 	mov	Gov_Target_L, Temp1
 	mov	Gov_Target_H, Temp2
-	; Set governor active
-	mov	Gov_Active, #1
 calc_governor_target_exit:
 	ret						
 
@@ -1359,15 +1497,56 @@ calc_governor_prop_corr:
 	mov	Temp2, A
 
 	mov	A, Pgm_Gov_P_Gain			; Load proportional gain
-	jnb	ACC.0, ($+5)				; Is lsb 1?
-	ajmp	calc_governor_prop_corr_15	; Yes - go to multiply by 1.5	
+	jb	ACC.0, ($+5)				; Is lsb 1?
+	ajmp	calc_governor_prop_corr_15	; No - go to multiply by 1.5	
 
 	clr	C
 	mov	A, Pgm_Gov_P_Gain
-	subb	A, #4					; Is proportional gain 1?
+	subb	A, #7					; Is proportional gain 1?
+	jnz	calc_governor_prop_corr_not1	; No - branch
+	ajmp	governor_limit_prop_corr
+
+calc_governor_prop_corr_not1:
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #9					; Is proportional gain 2?
+	jnz	calc_governor_prop_corr_lt1	; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+	ajmp	governor_limit_prop_corr
+
+calc_governor_prop_corr_lt1:
+	mov	A, Temp2					; Divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #5					; Is proportional gain 0.5?
 	jz	governor_limit_prop_corr		; Yes - branch
 
-	mov	A, Temp2					; Gain is 0.5 - divide by 2
+	mov	A, Temp2					; No - divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #3					; Is proportional gain 0.25?
+	jz	governor_limit_prop_corr		; Yes - branch
+
+	mov	A, Temp2					; No - divide by 2
 	mov	C, ACC.7
 	rrc	A
 	mov	Temp2, A
@@ -1394,9 +1573,9 @@ calc_governor_prop_corr_15:
 	mov	A, Temp2
 	addc	A, Temp4					
 	mov	Temp2, A
-	mov	A, Pgm_Gov_P_Gain
 	clr	C
-	subb	A, #5					; Is proportional gain 1.5?
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #8					; Is proportional gain 1.5?
 	jz	governor_limit_prop_corr		; Yes - branch
 
 	mov	A, Temp2					; No - divide by 2
@@ -1406,9 +1585,21 @@ calc_governor_prop_corr_15:
 	mov	A, Temp1
 	rrc	A
 	mov	Temp1, A
-	mov	A, Pgm_Gov_P_Gain
 	clr	C
-	subb	A, #3					; Is proportional gain 0.75?
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #6					; Is proportional gain 0.75?
+	jz	governor_limit_prop_corr		; Yes - branch
+
+	mov	A, Temp2					; No - divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #4					; Is proportional gain 0.375?
 	jz	governor_limit_prop_corr		; Yes - branch
 
 	mov	A, Temp2					; No - divide by 2
@@ -1506,15 +1697,56 @@ calc_governor_int_corr:
 	mov	Temp2, Gov_Integral_X
 	; Apply integrator gain
 	mov	A, Pgm_Gov_I_Gain			; Load integral gain
-	jnb	ACC.0, ($+5)				; Is lsb 1?
-	ajmp	calc_governor_int_corr_15	; Yes - go to multiply by 1.5	
+	jb	ACC.0, ($+5)				; Is lsb 1?
+	ajmp	calc_governor_int_corr_15	; No - go to multiply by 1.5	
 
 	clr	C
 	mov	A, Pgm_Gov_I_Gain
-	subb	A, #4					; Is integral gain 1?
+	subb	A, #7					; Is integral gain 1?
+	jnz	calc_governor_int_corr_not1	; No - branch
+	ajmp	governor_limit_int_corr
+
+calc_governor_int_corr_not1:
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #9					; Is integral gain 2?
+	jnz	calc_governor_int_corr_lt1	; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+	ajmp	governor_limit_int_corr
+
+calc_governor_int_corr_lt1:
+	mov	A, Temp2					; Divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #5					; Is integral gain 0.5?
 	jz	governor_limit_int_corr		; Yes - branch
 
-	mov	A, Temp2					; Gain is 0.5 - divide by 2
+	mov	A, Temp2					; No - divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #3					; Is integral gain 0.25?
+	jz	governor_limit_int_corr		; Yes - branch
+
+	mov	A, Temp2					; No - divide by 2
 	mov	C, ACC.7
 	rrc	A
 	mov	Temp2, A
@@ -1543,7 +1775,7 @@ calc_governor_int_corr_15:
 	mov	Temp2, A
 	mov	A, Pgm_Gov_I_Gain
 	clr	C
-	subb	A, #5					; Is integral gain 1.5?
+	subb	A, #8					; Is integral gain 1.5?
 	jz	governor_limit_int_corr		; Yes - branch
 
 	mov	A, Temp2					; No - divide by 2
@@ -1555,7 +1787,19 @@ calc_governor_int_corr_15:
 	mov	Temp1, A
 	mov	A, Pgm_Gov_I_Gain
 	clr	C
-	subb	A, #3					; Is integral gain 0.75?
+	subb	A, #6					; Is integral gain 0.75?
+	jz	governor_limit_int_corr		; Yes - branch
+
+	mov	A, Temp2					; No - divide by 2
+	mov	C, ACC.7
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #4					; Is integral gain 0.375?
 	jz	governor_limit_int_corr		; Yes - branch
 
 	mov	A, Temp2					; No - divide by 2
@@ -1652,7 +1896,16 @@ calc_governor_int_corr_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 measure_lipo_cells:
-IF TAIL == 0
+IF TAIL == 1
+	; If tail, then exit if voltage compensation is not enabled
+	clr	C
+	mov	A, Pgm_Volt_Comp
+	subb	A, #2
+	jnc	measure_lipo_start
+	jmp	measure_lipo_exit
+ENDIF
+measure_lipo_start:
+	; Start adc
 	Start_Adc 
 	; Wait for ADC conversion to complete
 	Get_Adc_Status 
@@ -1702,9 +1955,9 @@ IF TAIL == 0
 	mov	Lipo_Cells, #3
 
 measure_lipo_adjust:
-	mov	Temp3, Lipo_Adc_Limit_L
-	mov	Temp4, Lipo_Adc_Limit_H
-	; Calculate 9.375%
+	mov	Temp7, Lipo_Adc_Limit_L
+	mov	Temp8, Lipo_Adc_Limit_H
+	; Calculate 3.125%
 	clr	C
 	mov	A, Lipo_Adc_Limit_H
 	rrc	A
@@ -1719,68 +1972,91 @@ measure_lipo_adjust:
 	mov	A, Temp1	
 	rrc	A
 	mov	Temp1, A			; After this 25%
+	mov	A, Lipo_Adc_Limit_L			; Set adc reference
+	add	A, Temp1
+	mov	Lipo_Adc_Reference_L, A
+	mov	A, Lipo_Adc_Limit_H
+	addc	A, Temp2
+	mov	Lipo_Adc_Reference_H, A
 	clr	C
 	mov	A, Temp2
 	rrc	A
 	mov	Temp2, A
+	mov	Temp6, A	; Store 12.5%
 	mov	A, Temp1	
 	rrc	A
 	mov	Temp1, A			; After this 12.5%
+	mov	Temp5, A	; Store 12.5%
 	clr	C
 	mov	A, Temp2
 	rrc	A
 	mov	Temp2, A
+	mov	Temp4, A	; Store 6.25%
 	mov	A, Temp1	
 	rrc	A
 	mov	Temp1, A			; After this 6.25%
+	mov	Temp3, A	; Store 6.25%
 	clr	C
 	mov	A, Temp2
 	rrc	A
-	mov	Temp6, A
+	mov	Temp2, A
 	mov	A, Temp1	
 	rrc	A
-	mov	Temp5, A			; After this 3.125%
-	mov	A, Temp1			; Add 6.25% and 3.125%
-	add	A, Temp5	
-	mov	Temp1, A
-	mov	A, Temp2
+	mov	Temp1, A			; After this 3.125%
+	clr	C
+	mov	A, Pgm_Low_Voltage_Lim
+	subb	A, #1			; Is limit 3.0V?
+	jz	measure_lipo_update	; Yes - branch
+
+	clr	C
+	mov	A, Pgm_Low_Voltage_Lim
+	subb	A, #5			; Is limit 3.4V?
+	jnz	measure_lipo_625	; No - branch
+
+	mov	A, Temp7			; Add 12.5%
+	add	A, Temp5
+	mov	Temp7, A
+	mov	A, Temp8
 	addc	A, Temp6
-	mov	Temp2, A
-	; Add or subtract
+	mov	Temp8, A
+	ajmp measure_lipo_update
+
+measure_lipo_625:
 	clr	C
 	mov	A, Pgm_Low_Voltage_Lim
-	subb	A, #1
-	jz	measure_lipo_reduce	
+	subb	A, #3			; Is limit 3.2V or higher?
+	jc	measure_lipo_3125	; No - branch
+
+	mov	A, Temp7			; Add 6.25%
+	add	A, Temp3
+	mov	Temp7, A
+	mov	A, Temp8
+	addc	A, Temp4
+	mov	Temp8, A
+
+measure_lipo_3125:
 	clr	C
 	mov	A, Pgm_Low_Voltage_Lim
-	subb	A, #3
-	jz	measure_lipo_increase	
-	ajmp	measure_lipo_exit
+	subb	A, #1			; Is limit 3.0V?
+	jz	measure_lipo_update	; Yes - branch
 
-measure_lipo_reduce:
 	clr	C
-	mov	A, Temp3
-	subb	A, Temp1
-	mov	Temp3, A
-	mov	A, Temp4
-	subb	A, Temp2
-	mov	Temp4, A
-	mov	Lipo_Adc_Limit_L, Temp3
-	mov	Lipo_Adc_Limit_H, Temp4
-	ajmp	measure_lipo_exit
+	mov	A, Pgm_Low_Voltage_Lim
+	subb	A, #3			; Is limit 3.2V?
+	jz	measure_lipo_update	; Yes - branch
 
-measure_lipo_increase:
-	mov	A, Temp3
+	mov	A, Temp7			; Add 3.125%
 	add	A, Temp1
-	mov	Temp3, A
-	mov	A, Temp4
+	mov	Temp7, A
+	mov	A, Temp8
 	addc	A, Temp2
-	mov	Temp4, A
-	mov	Lipo_Adc_Limit_L, Temp3
-	mov	Lipo_Adc_Limit_H, Temp4
+	mov	Temp8, A
+
+measure_lipo_update:
+	mov	Lipo_Adc_Limit_L, Temp7
+	mov	Lipo_Adc_Limit_H, Temp8
 
 measure_lipo_exit:
-ENDIF
 	ret
 
 
@@ -1794,30 +2070,142 @@ ENDIF
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 start_adc_conversion:
-IF TAIL == 0
-	Start_Adc 
+IF TAIL == 1
+	; If tail, then exit if voltage compensation is not enabled
+	clr	C
+	mov	A, Pgm_Volt_Comp
+	subb	A, #2
+	jc	start_adc_exit
 ENDIF
+	; Start adc
+	Start_Adc 
+start_adc_exit:
 	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Check power supply voltage and limit power
+; Check power supply voltage, compensate current pwm and limit power
 ;
 ; No assumptions
 ;
-; Used to limit main motor power in order to maintain the required voltage
+; Used to compensate main motor power for battery voltage and
+; to limit main motor power in order to maintain the required voltage
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-check_voltage_and_limit_power:
-IF TAIL == 0
+check_voltage_compensate_and_limit_power:
+IF TAIL == 1
+	; If tail, then skip if voltage compensation is not enabled
+	clr	C
+	mov	A, Pgm_Volt_Comp
+	subb	A, #2
+	jc	check_voltage_comp_skip
+ENDIF
 	; Wait for ADC conversion to complete
 	Get_Adc_Status 
-	jb	AD0BUSY, check_voltage_and_limit_power
+	jb	AD0BUSY, check_voltage_compensate_and_limit_power
 	; Read ADC result
 	Read_Adc_Result
 	; Stop ADC
 	Stop_Adc
+
+check_voltage_comp_start:
+	; Skip compensation part if voltage compensation is not enabled
+	clr	C
+	mov	A, Pgm_Volt_Comp
+	subb	A, #2
+	jc	check_voltage_comp_skip
+	; Check range of adc reading and adc reference
+	mov	A, Temp2
+	mov	Temp4, A
+	mov	A, Temp1
+	mov	Temp3, A
+	mov	Temp6, Lipo_Adc_Reference_H
+	mov	Temp5, Lipo_Adc_Reference_L
+	mov	A, Temp4
+	orl	A, Temp6
+	mov	Bit_Access, A
+	jnb	Bit_Access.1, check_voltage_input_shifted_once
+
+	clr	C
+	mov	A, Temp4
+	rrc	A
+	mov	Temp4, A
+	mov	A, Temp3	
+	rrc	A
+	mov	Temp3, A			; After this adc reading is shifted once
+	clr	C
+	mov	A, Temp6
+	rrc	A
+	mov	Temp6, A
+	mov	A, Temp5	
+	rrc	A
+	mov	Temp5, A			; After this adc reference is shifted once
+
+check_voltage_input_shifted_once:
+	mov	A, Temp4
+	orl	A, Temp6
+	mov	Bit_Access, A
+	jnb	Bit_Access.0, check_voltage_input_shifted_twice
+
+	clr	C
+	mov	A, Temp4
+	rrc	A
+	mov	Temp4, A
+	mov	A, Temp3	
+	rrc	A
+	mov	Temp3, A			; After this shifted twice and guaranteed to be within 8bit
+	clr	C
+	mov	A, Temp6
+	rrc	A
+	mov	Temp6, A
+	mov	A, Temp5	
+	rrc	A
+	mov	Temp5, A			; After this adc reference is shifted once
+
+check_voltage_input_shifted_twice:
+	; Multiply adc value with voltage compensation factor
+	mov	A, Temp3
+	mov	B, Voltage_Comp_Factor
+	mul	AB			
+	; Compare result with adc reference
+	mov	A, B					; Shift result left once, to match ADC scale
+	rlc	A				
+	clr	C
+	subb	A, Temp5				; Compare with reference
+	clr	C
+	rrc	A					; Divide error by 2
+	mov	Temp3, A				; Store error
+	mov	A, Voltage_Comp_Factor
+	subb	A, Temp3				; Subract error
+	mov	Voltage_Comp_Factor, A	; Set new factor
+
+check_voltage_compensate_power:
+	; Multiply current pwm with voltage compensation factor
+	mov	A, Current_Pwm
+	mov	B, Voltage_Comp_Factor
+	mul	AB			
+	; Shift result
+	mov	Temp4, B
+	mov	Temp3, A
+	mov	A, Temp3
+	rlc	A
+	mov	A, Temp4
+	rlc	A
+	jnc	($+4)				; If result is below max pwm - branch 
+
+	mov	A, #0FFh
+
+	mov	Current_Pwm_Comp, A
+	mov	Current_Pwm_Limited, A	; Set this too here, for tail operation
+	ajmp	check_voltage_limit_start
+
+check_voltage_comp_skip:
+	mov	Current_Pwm_Comp, Current_Pwm
+	mov	Current_Pwm_Limited, Current_Pwm	; Set this too here, for tail operation
+
+check_voltage_limit_start:
+IF TAIL == 0
 	; Check if ADC is saturated
 	clr	C
 	mov	A, Temp1
@@ -1836,27 +2224,27 @@ IF TAIL == 0
 
 	; Decrease pwm limit
 	mov  A, Pwm_Limit
-	jz	check_voltage_lim	; If limit zero - branch
+	jz	check_voltage_lim		; If limit zero - branch
 
-	dec	Pwm_Limit			; Decrement limit
-	ajmp	check_voltage_lim
+	dec	Pwm_Limit				; Decrement limit
+	jmp	check_voltage_lim
 
 check_voltage_good:
 	; Increase pwm limit
 	mov  A, Pwm_Limit
 	cpl	A			
-	jz	check_voltage_lim	; If limit max - branch
+	jz	check_voltage_lim		; If limit max - branch
 
-	inc	Pwm_Limit			; Increment limit
+	inc	Pwm_Limit				; Increment limit
 
 check_voltage_lim:
-	mov	Temp1, Pwm_Limit	; Set limit
+	mov	Temp1, Pwm_Limit		; Set limit
 	clr	C
-	mov	A, Current_Pwm
+	mov	A, Current_Pwm_Comp
 	subb	A, Temp1
-	jnc	check_voltage_exit	; If current pwm above limit - branch and limit	
+	jnc	check_voltage_exit		; If current pwm above limit - branch and limit	
 
-	mov	Temp1, Current_Pwm	; Set current pwm (no limiting)
+	mov	Temp1, Current_Pwm_Comp	; Set current pwm (no limiting)
 
 check_voltage_exit:
 	mov  Current_Pwm_Limited, Temp1
@@ -1891,8 +2279,8 @@ set_startup_pwm:
 
 	; Adjust startup power
 	mov	Temp2, Pgm_Startup_Pwr	
-	cjne	Temp2, #3, ($+5)			; Is gain 1?
-	ajmp	startup_pwm_set_pwm			; Yes - skip adjustment
+	cjne	Temp2, #3, ($+6)			; Is gain 1?
+	ljmp	startup_pwm_set_pwm			; Yes - skip adjustment
 
 	clr	C
 	rrc	A			; After this "0.5"
@@ -1909,7 +2297,7 @@ startup_pwm_corr:
 	clr	C
 	subb	A, Temp1					; Apply negative correction
 	mov	Temp1, A
-	ajmp	startup_pwm_set_pwm
+	jmp	startup_pwm_set_pwm
 
 startup_pwm_gain_pos:
 	add	A, Temp1					; Apply positive correction
@@ -1923,6 +2311,7 @@ startup_pwm_set_pwm:
 	; Set pwm variables
 	mov	Requested_Pwm, Temp1		; Update requested pwm
 	mov	Current_Pwm, Temp1			; Update current pwm
+	mov	Current_Pwm_Comp, Temp1		; Update compensated version of current pwm
 	mov	Current_Pwm_Limited, Temp1	; Update limited version of current pwm
 
 startup_pwm_exit:
@@ -1939,8 +2328,62 @@ startup_pwm_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 initialize_all_timings: 
-	mov	Wt_Stepper_Step_L, #low(STEPPER_STEP_BEG SHL 1)	; Initialize stepper step time 
-	mov	Wt_Stepper_Step_H, #high(STEPPER_STEP_BEG SHL 1)
+	; Check startup rpm setting and set step accordingly
+	clr	C
+	mov	A, Pgm_Startup_Rpm
+	subb	A, #5
+	jnc	stepper_step_high
+	clr	C
+	mov	A, Pgm_Startup_Rpm
+	subb	A, #4
+	jnc	stepper_step_med_high
+	clr	C
+	mov	A, Pgm_Startup_Rpm
+	subb	A, #3
+	jnc	stepper_step_med
+	clr	C
+	mov	A, Pgm_Startup_Rpm
+	subb	A, #2
+	jnc	stepper_step_med_low
+	clr	C
+	mov	A, Pgm_Startup_Rpm
+	subb	A, #1
+	jnc	stepper_step_low
+
+stepper_step_high:
+	mov	Stepper_Step_Beg_L, #low(2000 SHL 1)
+	mov	Stepper_Step_Beg_H, #high(2000 SHL 1)
+	mov	Stepper_Step_End_L, #low(670 SHL 1)
+	mov	Stepper_Step_End_H, #high(670 SHL 1)
+	ajmp	stepper_step_set
+stepper_step_med_high:
+	mov	Stepper_Step_Beg_L, #low(2400 SHL 1)
+	mov	Stepper_Step_Beg_H, #high(2400 SHL 1)
+	mov	Stepper_Step_End_L, #low(800 SHL 1)
+	mov	Stepper_Step_End_H, #high(800 SHL 1)
+	ajmp	stepper_step_set
+stepper_step_med:
+	mov	Stepper_Step_Beg_L, #low(3000 SHL 1)	; ~3300 eRPM 
+	mov	Stepper_Step_Beg_H, #high(3000 SHL 1)
+	mov	Stepper_Step_End_L, #low(1000 SHL 1)	; ~10000 eRPM
+	mov	Stepper_Step_End_H, #high(1000 SHL 1)
+	ajmp	stepper_step_set
+stepper_step_med_low:
+	mov	Stepper_Step_Beg_L, #low(3750 SHL 1)
+	mov	Stepper_Step_Beg_H, #high(3750 SHL 1)
+	mov	Stepper_Step_End_L, #low(1250 SHL 1)
+	mov	Stepper_Step_End_H, #high(1250 SHL 1)
+	ajmp	stepper_step_set
+stepper_step_low:
+	mov	Stepper_Step_Beg_L, #low(4500 SHL 1)
+	mov	Stepper_Step_Beg_H, #high(4500 SHL 1)
+	mov	Stepper_Step_End_L, #low(1500 SHL 1)
+	mov	Stepper_Step_End_H, #high(1500 SHL 1)
+	ajmp	stepper_step_set
+
+stepper_step_set:
+	mov	Wt_Stepper_Step_L, Stepper_Step_Beg_L	; Initialize stepper step time 
+	mov	Wt_Stepper_Step_H, Stepper_Step_Beg_H
 	mov	Temp3, #0FFh			; Initialization value ~8.2ms
 	mov	Temp4, #3Fh
 	mov	Wt_Comm_L, Temp3		; Initialize wait from zero cross to commutation
@@ -1969,7 +2412,7 @@ initialize_all_timings:
 calc_next_comm_timing_start:	; Entry point for startup
 	mov	Temp1, Wt_Stepper_Step_L	; Set up stepper step wait 
 	mov	Temp2, Wt_Stepper_Step_H
-	ajmp	read_timer
+	jmp	read_timer
 
 calc_next_comm_timing:		; Entry point for run mode
 	mov	Temp1, Wt_Advance_L		; Set up advance timing wait 
@@ -2144,7 +2587,7 @@ store_times:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_before_zc_scan:	
 	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_before_zc_scan
+	jmp	wait_before_zc_scan
 
 	mov	TMR3CN, #00h		; Timer3 disabled
 	clr	C
@@ -2399,19 +2842,69 @@ switch_power_off:
 decrement_stepper_step:
 	clr	C
 	mov	A, Wt_Stepper_Step_L
-	subb	A, #low(STEPPER_STEP_END SHL 1)	; Minimum STEPPER_STEP_END
+	subb	A, Stepper_Step_End_L		; Minimum Stepper_Step_End
 	mov	A, Wt_Stepper_Step_H
-	subb	A, #high(STEPPER_STEP_END SHL 1)	
-	jnc	decrement_step					; Branch if same or higher than minimum
+	subb	A, Stepper_Step_End_H	
+	jnc	decrement_step				; Branch if same or higher than minimum
 	ret
 
 decrement_step:
+	; Check acceleration setting and set step size accordingly
+	clr	C
+	mov	A, Pgm_Startup_Accel
+	subb	A, #5
+	jnc	dec_step_high
+	clr	C
+	mov	A, Pgm_Startup_Accel
+	subb	A, #4
+	jnc	dec_step_med_high
+	clr	C
+	mov	A, Pgm_Startup_Accel
+	subb	A, #3
+	jnc	dec_step_med
+	clr	C
+	mov	A, Pgm_Startup_Accel
+	subb	A, #2
+	jnc	dec_step_med_low
+	clr	C
+	mov	A, Pgm_Startup_Accel
+	subb	A, #1
+	jnc	dec_step_low
+
+dec_step_high:
 	clr	C
 	mov	A, Wt_Stepper_Step_L
-	subb	A, #low(STEPPER_STEP_DECREMENT SHL 1)		
+	subb	A, #low(30 SHL 1)		
 	mov	Temp1, A
+	ajmp	decrement_step_exit
+dec_step_med_high:
+	clr	C
+	mov	A, Wt_Stepper_Step_L
+	subb	A, #low(20 SHL 1)		
+	mov	Temp1, A
+	ajmp	decrement_step_exit
+dec_step_med:
+	clr	C
+	mov	A, Wt_Stepper_Step_L
+	subb	A, #low(13 SHL 1)		
+	mov	Temp1, A
+	ajmp	decrement_step_exit
+dec_step_med_low:
+	clr	C
+	mov	A, Wt_Stepper_Step_L
+	subb	A, #low(9 SHL 1)		
+	mov	Temp1, A
+	ajmp	decrement_step_exit
+dec_step_low:
+	clr	C
+	mov	A, Wt_Stepper_Step_L
+	subb	A, #low(5 SHL 1)		
+	mov	Temp1, A
+	ajmp	decrement_step_exit
+
+decrement_step_exit:
 	mov	A, Wt_Stepper_Step_H
-	subb	A, #high(STEPPER_STEP_DECREMENT SHL 1)		
+	subb	A, #0		
 	mov	Temp2, A
 	mov	Wt_Stepper_Step_L, Temp1		
 	mov	Wt_Stepper_Step_H, Temp2
@@ -2449,10 +2942,13 @@ IF TAIL == 0
 	mov	Pgm_Gov_Mode, #DEFAULT_PGM_MAIN_GOVERNOR_MODE
 	mov	Pgm_Low_Voltage_Lim, #DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM
 	mov	Pgm_Startup_Pwr, #DEFAULT_PGM_MAIN_STARTUP_PWR
+	mov	Pgm_Startup_Rpm, #DEFAULT_PGM_MAIN_STARTUP_RPM
+	mov	Pgm_Startup_Accel, #DEFAULT_PGM_MAIN_STARTUP_ACCEL
 	setb	Flags2.PGM_PWM_HIGH_FREQ
 	mov	A, #DEFAULT_PGM_MAIN_PWM_FREQ
 	jnb	ACC.1, ($+5)
 	clr	Flags2.PGM_PWM_HIGH_FREQ
+	mov	Pgm_Volt_Comp, #DEFAULT_PGM_MAIN_VOLT_COMP
 	clr	Flags2.PGM_DIRECTION_REV
 	mov	A, #DEFAULT_PGM_MAIN_DIRECTION_REV
 	jnb	ACC.1, ($+5)
@@ -2465,10 +2961,13 @@ ELSE
 	mov	Pgm_Tail_Gain, #DEFAULT_PGM_TAIL_GAIN
 	mov	Pgm_Tail_Idle, #DEFAULT_PGM_TAIL_IDLE_SPEED
 	mov	Pgm_Startup_Pwr, #DEFAULT_PGM_TAIL_STARTUP_PWR
+	mov	Pgm_Startup_Rpm, #DEFAULT_PGM_TAIL_STARTUP_RPM
+	mov	Pgm_Startup_Accel, #DEFAULT_PGM_TAIL_STARTUP_ACCEL
 	clr	Flags2.PGM_PWM_HIGH_FREQ
 	mov	A, #DEFAULT_PGM_TAIL_PWM_FREQ
 	jnb	ACC.0, ($+5)
 	setb	Flags2.PGM_PWM_HIGH_FREQ
+	mov	Pgm_Volt_Comp, #DEFAULT_PGM_TAIL_VOLT_COMP
 	clr	Flags2.PGM_PWM_OFF_DAMPED
 	clr	C
 	mov	A, #DEFAULT_PGM_TAIL_PWM_FREQ
@@ -2483,10 +2982,11 @@ ELSE
 	mov	A, #DEFAULT_PGM_TAIL_RCP_PWM_POL
 	jnb	ACC.1, ($+5)
 	setb	Flags2.PGM_RCP_PWM_POL
-	mov	Pgm_Gov_Mode, #3
+	mov	Pgm_Gov_Mode, #4
 ENDIF
 	mov 	Pgm_Enable_TX_Pgm, #DEFAULT_ENABLE_TX_PGM
 	mov 	Pgm_Main_Rearm_Start, #DEFAULT_MAIN_REARM_START 
+	mov	Pgm_Gov_Setup_Target, #DEFAULT_PGM_MAIN_GOV_SETUP_TARGET
 	ret
 
 
@@ -2574,6 +3074,7 @@ ENDIF
 	call wait30ms
 	call beep_f3
 	call wait30ms
+
 	; Enable interrupts
 	mov	IE, #22h			; Enable timer0 and timer2 interrupts
 	mov	IP, #02h			; High priority to timer0 interrupts
@@ -2591,28 +3092,39 @@ ENDIF
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags1.RCP_EDGE_NO			; Set first edge flag
 	call wait200ms
+	; Set initial arm variable
+	mov	Initial_Arm, #1
 
-	; Validate RC pulse and measure PWM frequency
+	; Measure PWM frequency
 	setb	Flags0.RCP_MEAS_PWM_FREQ 		; Set measure pwm frequency flag
-validate_rcp_start:	
-	mov	Temp3, #5						; Number of pulses to validate
-validate_rcp_loop:	
+measure_pwm_freq_start:	
+	mov	Temp3, #5						; Number of pulses to measure
+measure_pwm_freq_loop:	
 	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
-	jnb	Flags1.RCP_UPDATED, $			; Wait for an updated RC pulse
-
 	mov	A, New_Rcp					; Load value
 	clr	C
 	subb	A, #RCP_VALIDATE				; Higher than validate level?
-	jc	validate_rcp_start				; No - start over
+	jc	measure_pwm_freq_start			; No - start over
+
 	mov	A, Flags2						; Check pwm frequency flags
 	anl	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
 	mov	Prev_Rcp_Pwm_Freq, Curr_Rcp_Pwm_Freq		; Store as previous flags for next pulse 
 	mov	Curr_Rcp_Pwm_Freq, A					; Store current flags for next pulse 
-	cjne	A, Prev_Rcp_Pwm_Freq, validate_rcp_start	; Go back if new flags not same as previous
+	cjne	A, Prev_Rcp_Pwm_Freq, measure_pwm_freq_start	; Go back if new flags not same as previous
 
-	djnz	Temp3, validate_rcp_loop					; Go back if not required number of pulses seen
+	djnz	Temp3, measure_pwm_freq_loop				; Go back if not required number of pulses seen
 
 	clr	Flags0.RCP_MEAS_PWM_FREQ 		; Clear measure pwm frequency flag
+	call wait100ms						; Wait for new RC pulse
+
+	; Validate RC pulse
+validate_rcp_start:	
+	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
+	mov	A, New_Rcp					; Load value
+	clr	C
+	subb	A, #RCP_VALIDATE				; Higher than validate level?
+	jc	validate_rcp_start				; No - start over
+
 	; Set up RC pulse interrupts after pwm frequency measurement
 	Rcp_Int_First 						; Enable interrupt and set to first edge
 	Rcp_Clear_Int_Flag 					; Clear interrupt flag
@@ -2639,6 +3151,12 @@ IF TX_PGM == 1
 	clr	C
 	subb	A, #1				; Is TX programming enabled?
 	jc 	program_by_tx_checked	; No - branch
+
+	mov	A, Initial_Arm			; Yes - check if it is initial arm sequence
+	clr	C
+	subb	A, #1				; Is it the initial arm sequence?
+	jc 	program_by_tx_checked	; No - branch
+
 	jmp	program_by_tx			; Yes - enter programming mode
 ENDIF
 
@@ -2664,6 +3182,9 @@ arm_target_updated:
 	setb	EA					; Enable all interrupts
 	call wait200ms
 
+	; Clear initial arm variable
+	mov	Initial_Arm, #0
+
 	; Armed and waiting for power on
 wait_for_power_on:
 	call wait3ms
@@ -2683,6 +3204,7 @@ init_start:
 	mov	Requested_Pwm, A		; Set requested pwm to zero
 	mov	Governor_Req_Pwm, A		; Set governor requested pwm to zero
 	mov	Current_Pwm, A			; Set current pwm to zero
+	mov	Current_Pwm_Comp, A		; Set compensated current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
 	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	mov	Pwm_Tail_Idle, Pgm_Tail_Idle		; Set tail idle pwm to programmed value
@@ -2692,6 +3214,7 @@ init_start:
 	mov	Gov_Integral_L, A		; Set integral to zero
 	mov	Gov_Integral_H, A
 	mov	Gov_Integral_X, A
+	mov	Voltage_Comp_Factor, #80h; Set voltage compensation factor to "1"
 	mov	Gov_Active, A
 	mov	Flags0, A				; Clear flags0
 	mov	Rcp_Stop_Cnt, A		; Set RC pulse stop count to zero
@@ -2762,9 +3285,9 @@ stepper_rot_beg:
 	; Check stepper step versus end criteria
 	clr	C
 	mov	A, Wt_Stepper_Step_L
-	subb	A, #low(STEPPER_STEP_END SHL 1)	; Minimum STEPPER_STEP_END
+	subb	A, Stepper_Step_End_L		; Minimum Stepper_Step_End
 	mov	A, Wt_Stepper_Step_H
-	subb	A, #high(STEPPER_STEP_END SHL 1)
+	subb	A, Stepper_Step_End_H
 	jc	stepper_rot_exit			; Branch if lower than minimum
 	; Wait for step
 	call stepper_timer_wait
@@ -3052,7 +3575,7 @@ run6:
 	ljmp	run_to_wait_for_power_on
 
 	call setup_comm_wait	
-	call check_voltage_and_limit_power
+	call check_voltage_compensate_and_limit_power
 	call wait_for_comm
 	call comm6comm1
 	call calc_next_comm_timing
@@ -3079,6 +3602,7 @@ run_to_wait_for_power_on:
 	mov	Requested_Pwm, A		; Set requested pwm to zero
 	mov	Governor_Req_Pwm, A		; Set governor requested pwm to zero
 	mov	Current_Pwm, A			; Set current pwm to zero
+	mov	Current_Pwm_Comp, A		; Set compensated current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
 IF TAIL == 1
 	jmp	wait_for_power_on		; Tail - Go back to wait for power on

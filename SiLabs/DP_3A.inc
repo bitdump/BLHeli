@@ -59,9 +59,9 @@ Mux_A		EQU	5	;i
 Mux_B		EQU	3	;i
 Comp_Com		EQU	2	;i
 Mux_C		EQU	1	;i
-;			EQU	0	;i
+Vref			EQU	0	;i
 
-P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com))
+P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Vref))
 P0_INIT		EQU	0FFh
 P0_PUSHPULL	EQU	0
 P0_SKIP		EQU	NOT(1 SHL Rcp_In) AND 0FFh
@@ -111,7 +111,7 @@ AnFET		EQU	0	;i
 P1_DIGITAL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)+(1 SHL Ref_Gnd)
 P1_INIT		EQU 	(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)+(1 SHL Adc_Ip)		; Setting pFET outputs turn them off
 P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_SKIP		EQU	0
+P1_SKIP		EQU	(1 SHL Adc_Ip)
 
 MACRO AnFET_on
 	jb	Flags2.PGM_DIRECTION_REV, ($+5)
