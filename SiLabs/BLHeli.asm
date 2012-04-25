@@ -69,6 +69,7 @@ $NOMOD51
 ;           Disabled tx programming entry for all but the first arming sequence after power on
 ;           Made it possible to skip parameters in tx programming by setting throttle midstick
 ;           Made it default not to rearm for every restart
+; - Rev3.1: Fixed bug that prevented chosen parameter to be set in tx programming
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash

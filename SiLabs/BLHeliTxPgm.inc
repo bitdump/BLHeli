@@ -782,17 +782,30 @@ func_paraval:
 	call function_paraval_beep
 	mov	Temp5, #5				; Wait is 5x 200ms
 func_paraval_wait:
+	mov	Temp6, New_Rcp			; Store RC pulse
 	call wait200ms
+	clr	C
+	mov	A, Temp6
+	subb	A, New_Rcp			; Is RC pulse stable? (Avoid issues from 3in1 interference)
+	jnz	func_paraval_wait		; No - branch
+	clr	C
+	mov	A, New_Rcp			; Load new RC pulse value
+	subb	A, #RCP_STOP			; Below stop?
+	jc	func_paraval_store		; Yes - branch
+
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #RCP_MAX			; Below max?
 	jc	function_next			; Yes - branch
 
-	clr	C
-	mov	A, New_Rcp			; Load new RC pulse value
-	subb	A, #RCP_STOP			; Below stop?
-	jnc	func_paraval_cont_wait	; No - branch
+	ajmp	func_paraval_cont_wait	; No - branch
 
+;stsk	clr	C
+;stsk	mov	A, New_Rcp			; Load new RC pulse value
+;stsk	subb	A, #RCP_STOP			; Below stop?
+;stsk	jnc	func_paraval_cont_wait	; No - branch
+
+func_paraval_store:
 	call	store_in_ram			; Yes - store new value in RAM
 	call	store_all_in_eeprom		; Store all values in EEPROM
 	call success_beep			; Beep success
