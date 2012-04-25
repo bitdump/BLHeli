@@ -70,6 +70,7 @@ $NOMOD51
 ;           Made it possible to skip parameters in tx programming by setting throttle midstick
 ;           Made it default not to rearm for every restart
 ; - Rev3.1: Fixed bug that prevented chosen parameter to be set in tx programming
+; - Rev3.2: ...also updated the EEPROM revision parameter
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -435,7 +436,7 @@ Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
 CSEG AT 1A00h			; "Eeprom" segment
 
 EEPROM_FW_MAIN_REVISION	EQU 	3 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	0 	; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	2 	; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
