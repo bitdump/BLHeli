@@ -29,6 +29,9 @@
 ;*********************
 .include "m88Pdef.inc"
 
+.equ	ICP  = 1					; Choose input pin. Set to 0 for INT0 (pin32) and 1 for ICP1 (pin12)
+
+
 ;**** **** **** **** ****
 ; Fuses must be set to external oscillator 8.0- MHz
 ;**** **** **** **** ****

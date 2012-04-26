@@ -29,6 +29,8 @@
 ;*********************
 .include "m48def.inc"
 
+.equ	ICP  = 0					; Choose input pin. Set to 0 for INT0 (pin32) and 1 for ICP1 (pin12)
+
 ;**** **** **** **** ****
 ; Fuses must be set to internal calibrated oscillator = 8Mhz
 ;**** **** **** **** ****

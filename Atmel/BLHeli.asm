@@ -109,12 +109,14 @@
 ;
 ;**** **** **** **** ****
 
-.include "WalkeraWST10LT.inc"		; Select Walkera LT pinout (INT0 or ICP1 input)
+;.include "WalkeraWST10LT.inc"		; Select Walkera LT pinout (INT0 or ICP1 input)
 ;.include "Feigao6.inc"			; Select Feigao 6A pinout (INT0 input only!!!)
 ;.include "HC5A1SA8.inc"			; Select HobbyCity 5A 1S pinout with Atmega8 (INT0 or ICP1 input)
 ;.include "HC5A1SA48V.inc"		; Select HobbyCity 5A 1S pinout with Atmega48V (INT0 input only!!!)
-.equ	TAIL = 1					; Choose mode. Set to 0 for main motor and 1 for tail motor
-.equ	ICP  = 1					; Choose input pin. Set to 0 for INT0 (pin32) and 1 for ICP1 (pin12)
+;.include "tail.inc"			; Set to tail ESC
+; include "main.inc"			; Set to main ESC
+
+;.equ	ICP  = 1					; Choose input pin. Set to 0 for INT0 (pin32) and 1 for ICP1 (pin12)
 
 ;**** **** **** **** ****
 
