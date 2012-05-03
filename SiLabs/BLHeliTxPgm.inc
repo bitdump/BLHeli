@@ -800,11 +800,6 @@ func_paraval_wait:
 
 	ajmp	func_paraval_cont_wait	; No - branch
 
-;stsk	clr	C
-;stsk	mov	A, New_Rcp			; Load new RC pulse value
-;stsk	subb	A, #RCP_STOP			; Below stop?
-;stsk	jnc	func_paraval_cont_wait	; No - branch
-
 func_paraval_store:
 	call	store_in_ram			; Yes - store new value in RAM
 	call	store_all_in_eeprom		; Store all values in EEPROM

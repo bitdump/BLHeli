@@ -71,6 +71,12 @@ $NOMOD51
 ;           Made it default not to rearm for every restart
 ; - Rev3.1: Fixed bug that prevented chosen parameter to be set in tx programming
 ; - Rev3.2: ...also updated the EEPROM revision parameter
+; - Rev3.3: Fixed negative number bug in voltage compensation
+;           Fixed bug in startup power calculation for non-default power
+;           Prevented possibility for voltage compensation fighting low voltage limiting
+;           Applied overall spoolup control to ensure soft spoolup in any mode
+;           Added a delay of 3 seconds from initiation of main motor stop until new startup is allowed
+;           Reduced beep power to reduce power consumption for very strong motors/ESCs
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -139,9 +145,9 @@ XP_12A_Tail 			EQU 12
 ;BESC EQU Supermicro_3p5A_Tail
 ;BESC EQU Turnigy6A_Main 
 ;BESC EQU Turnigy6A_Tail 
-;BESC EQU XP_3A_Main 
+;BESC EQU XP_3A_Main
 ;BESC EQU XP_3A_Tail 
-;BESC EQU XP_7A_Main 
+;BESC EQU XP_7A_Main
 ;BESC EQU XP_7A_Tail 
 ;BESC EQU XP_12A_Main 
 ;BESC EQU XP_12A_Tail 
@@ -242,7 +248,7 @@ DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 ; 1=Positive 	2=Negative
 
 DEFAULT_ENABLE_TX_PGM 			EQU 1 ; 1=Enabled 	0=Disabled
 DEFAULT_MAIN_REARM_START			EQU 0 ; 1=Enabled 	0=Disabled
-DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Corresponds to 70% throttle
+DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Target for governor in setup mode. Corresponds to 70% throttle
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -401,6 +407,7 @@ Curr_Rcp_Pwm_Freq:		DS	1		; Current RC pulse pwm frequency (used during pwm freq
 Rcp_Stop_Cnt:			DS	1		; Counter for RC pulses below stop value 
 
 Pwm_Limit:			DS	1		; Maximum allowed pwm 
+Pwm_Limit_Spoolup:		DS	1		; Maximum allowed pwm during spoolup of main
 Pwm_Tail_Idle:			DS	1		; Tail idle speed pwm
 Lipo_Cells:			DS	1		; Number of lipo cells 
 Lipo_Adc_Reference_L:	DS	1		; Voltage reference adc value (lo byte)
@@ -434,9 +441,8 @@ Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
 
 ;**** **** **** **** ****
 CSEG AT 1A00h			; "Eeprom" segment
-
 EEPROM_FW_MAIN_REVISION	EQU 	3 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	2 	; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	3 	; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -475,7 +481,7 @@ Eep_Pgm_Startup_Rpm:	DB	DEFAULT_PGM_TAIL_STARTUP_RPM 		; EEPROM copy of programm
 Eep_Pgm_Startup_Accel:	DB	DEFAULT_PGM_TAIL_STARTUP_ACCEL 	; EEPROM copy of programmed startup acceleration
 Eep_Pgm_Volt_Comp:		DB	DEFAULT_PGM_TAIL_VOLT_COMP		; EEPROM copy of programmed voltage compensation
 ENDIF
-Eep_Dummy:					DB	0FFh							; EEPROM address for safety reason
+Eep_Dummy:			DB	0FFh							; EEPROM address for safety reason
 
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
@@ -871,13 +877,20 @@ t2h_int_rcp_gov_by_tx:
 	jc	t2h_int_rcp_gov_pwm_inc			; No - if lower, then increment
 
 	dec	Governor_Req_Pwm				; No - if higher, then decrement
-	ajmp	t2h_int_rcp_gov_pwm_exit
+	ajmp	t2h_int_rcp_gov_pwm_done
 
 t2h_int_rcp_gov_pwm_inc:
 	inc	Governor_Req_Pwm				; Increment
 
-t2h_int_rcp_gov_pwm_exit:
+t2h_int_rcp_gov_pwm_done:
 	djnz	Temp1, t2h_int_rcp_gov_pwm		; If not number of steps processed - go back
+	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 8 seconds spoolup
+	inc	A
+	jnz	($+3)						; Limit to 255
+
+	dec	A
+
+	mov	Pwm_Limit_Spoolup, A
 ENDIF
 
 t2h_int_rcp_exit:
@@ -1255,12 +1268,16 @@ beep_onoff:
 	djnz	ACC, $		; Allow some time after pfet is turned on
 	; Turn on nfet
 	AnFET_on			; AnFET on
-	mov	A, 64
-	djnz	ACC, $		; 11탎 on
+IF TAIL == 0
+	mov	A, 18		; 3탎 on
+ELSE
+	mov	A, 48		; 8탎 on
+ENDIF
+	djnz	ACC, $		
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	mov	A, 64
-	djnz	ACC, $		; 11탎 off
+	mov	A, 64		; 11탎 off
+	djnz	ACC, $		
 djnz	Temp2, beep_onoff
 	; Copy variable
 	mov	A, Temp3
@@ -1497,7 +1514,6 @@ calc_governor_prop_corr:
 	mov	A, Temp2
 	rlc	A
 	mov	Temp2, A
-
 	mov	A, Pgm_Gov_P_Gain			; Load proportional gain
 	jb	ACC.0, ($+5)				; Is lsb 1?
 	ajmp	calc_governor_prop_corr_15	; No - go to multiply by 1.5	
@@ -2175,12 +2191,18 @@ check_voltage_input_shifted_twice:
 	rlc	A				
 	clr	C
 	subb	A, Temp5				; Compare with reference
-	clr	C
+	mov	C, ACC.7				; Preserve sign of 2's complement number
 	rrc	A					; Divide error by 2
 	mov	Temp3, A				; Store error
 	mov	A, Voltage_Comp_Factor
 	subb	A, Temp3				; Subract error
-	mov	Voltage_Comp_Factor, A	; Set new factor
+	mov	Temp3, A
+	; Do not update voltage compensation factor if low voltage limit is activated (to avoid interaction)
+	mov	A, Pwm_Limit
+	cpl	A
+	jnz	check_voltage_compensate_power
+
+	mov	Voltage_Comp_Factor, Temp3; Set new factor
 
 check_voltage_compensate_power:
 	; Multiply current pwm with voltage compensation factor
@@ -2240,16 +2262,26 @@ check_voltage_good:
 	inc	Pwm_Limit				; Increment limit
 
 check_voltage_lim:
-	mov	Temp1, Pwm_Limit		; Set limit
+	mov	Temp1, Pwm_Limit			; Set limit
 	clr	C
 	mov	A, Current_Pwm_Comp
 	subb	A, Temp1
-	jnc	check_voltage_exit		; If current pwm above limit - branch and limit	
+	jnc	check_voltage_spoolup_lim	; If current pwm above limit - branch and limit	
 
-	mov	Temp1, Current_Pwm_Comp	; Set current pwm (no limiting)
+	mov	Temp1, Current_Pwm_Comp		; Set current pwm (no limiting)
+
+check_voltage_spoolup_lim:
+	mov  Current_Pwm_Limited, Temp1
+	; Slow spoolup
+	clr	C
+	mov	A, Current_Pwm_Limited
+	subb	A, Pwm_Limit_Spoolup
+	jc	check_voltage_exit			; If current pwm below limit - branch	
+
+	mov	Current_Pwm_Limited, Pwm_Limit_Spoolup
+	mov	Pwm_Limit, Pwm_Limit_Spoolup	; Set pwm limit to spoolup limit (to avoid governor integral buildup)
 
 check_voltage_exit:
-	mov  Current_Pwm_Limited, Temp1
 ENDIF
 	ret
 
@@ -2285,6 +2317,7 @@ set_startup_pwm:
 	ljmp	startup_pwm_set_pwm			; Yes - skip adjustment
 
 	clr	C
+	mov	A, Temp1
 	rrc	A			; After this "0.5"
 	mov	Bit_Access_Int, Pgm_Startup_Pwr	
 	jb	Bit_Access_Int.0, startup_pwm_corr		; Branch if bit 0 in gain is set
@@ -3485,6 +3518,8 @@ damped_transition:
 	clr	Flags1.RUN_PWM_OFF_DAMPED; Clear damped flag
 	All_pFETs_Off 				; Turn off all pfets
 	BpFET_on					; Bp on
+	mov	A, #45				; 8us delay for pfets to go off
+	djnz	ACC, $
 	mov	DPTR, #pwm_cfet_on		; Set DPTR register to desired pwm_nfet_on label		
 	setb	EA					; Enable interrupts
 
@@ -3585,6 +3620,10 @@ run6:
 	call calc_new_wait_times
 	call wait_before_zc_scan	
 
+	jnb	Flags0.INITIAL_RUN_MODE, ($+6); If not initial run mode - branch
+
+	mov	Pwm_Limit_Spoolup, #25		; Set initial slow spoolup throttle
+
 	clr	Flags0.INITIAL_RUN_MODE		; Clear initial run mode flag
 
 	clr	C
@@ -3609,6 +3648,9 @@ run_to_wait_for_power_on:
 IF TAIL == 1
 	jmp	wait_for_power_on		; Tail - Go back to wait for power on
 ELSE
+	call	wait1s				; 3 seconds delay before new startup
+	call	wait1s
+	call	wait1s
 	mov 	A, Pgm_Main_Rearm_Start
 	clr	C
 	subb	A, #1				; Is re-armed start enabled?
