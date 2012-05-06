@@ -77,6 +77,9 @@ $NOMOD51
 ;           Applied overall spoolup control to ensure soft spoolup in any mode
 ;           Added a delay of 3 seconds from initiation of main motor stop until new startup is allowed
 ;           Reduced beep power to reduce power consumption for very strong motors/ESCs
+; - Rev3.4: Fixed bug that prevented full power in governor arm and setup modes
+;           Increased NFETON_DELAY for XP_7A and XP_12A to allow for more powerful fets
+;           Increased initial spoolup power, and linked to startup power
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -408,6 +411,7 @@ Rcp_Stop_Cnt:			DS	1		; Counter for RC pulses below stop value
 
 Pwm_Limit:			DS	1		; Maximum allowed pwm 
 Pwm_Limit_Spoolup:		DS	1		; Maximum allowed pwm during spoolup of main
+Pwm_Spoolup_Beg:		DS	1		; Pwm to begin main spoolup with
 Pwm_Tail_Idle:			DS	1		; Tail idle speed pwm
 Lipo_Cells:			DS	1		; Number of lipo cells 
 Lipo_Adc_Reference_L:	DS	1		; Voltage reference adc value (lo byte)
@@ -437,12 +441,12 @@ Pgm_Volt_Comp:			DS	1		; Programmed voltage compensation
 
 
 DSEG AT 80h					
-Tag_Temporary_Storage:	DS	48	; Temporary storage for tags when updating "Eeprom"
+Tag_Temporary_Storage:	DS	48		; Temporary storage for tags when updating "Eeprom"
 
 ;**** **** **** **** ****
 CSEG AT 1A00h			; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION	EQU 	3 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	3 	; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	4 	; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -856,7 +860,8 @@ IF TAIL == 0
 	mov	Requested_Pwm, Gov_Arm_Target		; Yes - load arm target
 
 t2h_int_rcp_gov_by_setup:
-	cjne	A, #3, t2h_int_rcp_gov_by_tx		; If not gov by setup - branch
+	mov	A, Pgm_Gov_Mode				; Governor target by setup mode?
+	cjne	A, #3, t2h_int_rcp_gov_by_tx		; No - branch
 
 	mov	A, Gov_Active					; Is governor active?
 	jz	t2h_int_rcp_gov_by_tx			; No - branch (this ensures soft spoolup by tx)
@@ -872,7 +877,7 @@ t2h_int_rcp_gov_by_tx:
 	clr	C
 	mov	A, Governor_Req_Pwm
 	subb	A, Requested_Pwm				; Is governor requested pwm equal to requested pwm?
-	jz	t2h_int_rcp_exit;				; Yes - branch
+	jz	t2h_int_rcp_gov_pwm_done			; Yes - branch
 
 	jc	t2h_int_rcp_gov_pwm_inc			; No - if lower, then increment
 
@@ -2221,12 +2226,16 @@ check_voltage_compensate_power:
 	mov	A, #0FFh
 
 	mov	Current_Pwm_Comp, A
+IF TAIL == 1
 	mov	Current_Pwm_Limited, A	; Set this too here, for tail operation
+ENDIF
 	ajmp	check_voltage_limit_start
 
 check_voltage_comp_skip:
 	mov	Current_Pwm_Comp, Current_Pwm
+IF TAIL == 1
 	mov	Current_Pwm_Limited, Current_Pwm	; Set this too here, for tail operation
+ENDIF
 
 check_voltage_limit_start:
 IF TAIL == 0
@@ -2279,7 +2288,11 @@ check_voltage_spoolup_lim:
 	jc	check_voltage_exit			; If current pwm below limit - branch	
 
 	mov	Current_Pwm_Limited, Pwm_Limit_Spoolup
-	mov	Pwm_Limit, Pwm_Limit_Spoolup	; Set pwm limit to spoolup limit (to avoid governor integral buildup)
+	mov	A, Pwm_Limit_Spoolup		; Check if spoolup limit is max
+	cpl	A
+	jz	check_voltage_exit			; If max - branch
+ 
+	mov	Pwm_Limit, Pwm_Limit_Spoolup	; Set pwm limit to spoolup limit during ramp (to avoid governor integral buildup)
 
 check_voltage_exit:
 ENDIF
@@ -2348,6 +2361,9 @@ startup_pwm_set_pwm:
 	mov	Current_Pwm, Temp1			; Update current pwm
 	mov	Current_Pwm_Comp, Temp1		; Update compensated version of current pwm
 	mov	Current_Pwm_Limited, Temp1	; Update limited version of current pwm
+	jnb	Flags0.SETTLE_MODE, startup_pwm_exit	; Is it motor start aquisition mode?
+
+	mov	Pwm_Spoolup_Beg, Temp1				; Update spoolup beginning pwm (will use PWM_SETTLE)
 
 startup_pwm_exit:
 	ret
@@ -3241,6 +3257,7 @@ init_start:
 	mov	Current_Pwm, A			; Set current pwm to zero
 	mov	Current_Pwm_Comp, A		; Set compensated current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
+	mov	Pwm_Spoolup_Beg, A		; Set spoolup beginning pwm to zero
 	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	mov	Pwm_Tail_Idle, Pgm_Tail_Idle		; Set tail idle pwm to programmed value
 	jnb	Flags2.PGM_DIRECTION_REV, ($+5)	; If reverse - Increment tail idle by 1
@@ -3622,7 +3639,7 @@ run6:
 
 	jnb	Flags0.INITIAL_RUN_MODE, ($+6); If not initial run mode - branch
 
-	mov	Pwm_Limit_Spoolup, #25		; Set initial slow spoolup throttle
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg		; Set initial slow spoolup power
 
 	clr	Flags0.INITIAL_RUN_MODE		; Clear initial run mode flag
 
@@ -3645,6 +3662,7 @@ run_to_wait_for_power_on:
 	mov	Current_Pwm, A			; Set current pwm to zero
 	mov	Current_Pwm_Comp, A		; Set compensated current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
+	mov	Pwm_Spoolup_Beg, A		; Set spoolup beginning pwm to zero
 IF TAIL == 1
 	jmp	wait_for_power_on		; Tail - Go back to wait for power on
 ELSE

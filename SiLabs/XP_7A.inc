@@ -43,7 +43,7 @@ $include (c8051f330.inc)
 CSEG AT 1A40h
 Eep_ESC_Layout:		DB	"#XP7A#          "	; ESC layout tag
 DAMPED_TAIL_ENABLE		EQU	0	; Damped tail mode disabled
-NFETON_DELAY			EQU	22	; Wait delay from pfets off to nfets on
+NFETON_DELAY			EQU	30	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	5	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	116	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
