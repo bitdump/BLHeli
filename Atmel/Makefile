@@ -1,4 +1,4 @@
-AVRASM:=wine "/win/Program Files (x86)/Atmel/AVR Tools/AvrAssembler2/avrasm2.exe"
+AVRASM:=wine "avrasm2/avrasm2.exe"
 
 ASMFLAGS =  -fI
 
