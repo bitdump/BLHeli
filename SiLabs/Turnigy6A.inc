@@ -47,6 +47,9 @@ NFETON_DELAY			EQU	22	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	12	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	136	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	1	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
+TEMP_LIMIT_L			EQU 	60	; Temperature measurement ADC value for which main motor power is limited (low byte)
+TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 MSBs)
+TEMP_LIMIT_STEP		EQU	14	; Temperature measurement ADC value increment for which main motor power is further limited
 
 
 ;*********************
@@ -235,11 +238,17 @@ CSEG AT 73h			; Timer3 interrupt
 ENDM
 
 MACRO Initialize_Adc
-	mov	REF0CN, #04h	; Set vdd (3.3V) as reference
+	mov	REF0CN, #0Eh	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 	mov	ADC0CF, #0B8h	; ADC clock 1MHz
 	mov	AMX0P, #Adc_Ip	; Select positive input
 	mov	AMX0N, #11h	; Select negative input as ground
 	mov	ADC0CN, #80h	; ADC enabled
+ENDM
+MACRO Set_Adc_Ip_Volt
+	mov	AMX0P, #Adc_Ip	; Select positive input
+ENDM
+MACRO Set_Adc_Ip_Temp
+	mov	AMX0P, #10h	; Select temp sensor input
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h	; ADC start

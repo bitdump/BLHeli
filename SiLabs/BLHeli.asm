@@ -80,6 +80,12 @@ $NOMOD51
 ; - Rev3.4: Fixed bug that prevented full power in governor arm and setup modes
 ;           Increased NFETON_DELAY for XP_7A and XP_12A to allow for more powerful fets
 ;           Increased initial spoolup power, and linked to startup power
+; - Rev4.0: Fixed bug that made tail tx program beeps very weak
+;           Added thermal protection feature
+;           Governor P and I gain ranges are extended up to 8.0x gain
+;           Startup sequence is aborted upon zero throttle
+;           Avoided voltage compensation function induced latency for tail when voltage compensation is not enabled
+;           Improved input signal frequency detection robustness
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -143,7 +149,7 @@ XP_12A_Tail 			EQU 12
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
 ;BESC EQU DP_3A_Main 						
-;BESC EQU DP_3A_Tail  				
+;BESC EQU DP_3A_Tail
 ;BESC EQU Supermicro_3p5A_Main
 ;BESC EQU Supermicro_3p5A_Tail
 ;BESC EQU Turnigy6A_Main 
@@ -223,8 +229,8 @@ TX_PGM		EQU	1			; Set to 0 to disable tx programming (reduces code size)
 
 ;**** **** **** **** ****
 ; TX programming defaults
-DEFAULT_PGM_MAIN_P_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 	8=1.50	9=2.00
-DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 	8=1.50	9=2.00
+DEFAULT_PGM_MAIN_P_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
+DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 ; 1=0.13		2=0.17		3=0.25	4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 ; 1=Tx 		2=Arm 		3=Setup	4=Off
 DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	EQU 3 ; 1=3.0V/c	2=3.1V/c		3=3.2V/c	4=3.3V/c		5=3.4V/c		
 DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 ; 1=0.50 	2=0.75 		3=1.00 	4=1.25 		5=1.50
@@ -265,7 +271,7 @@ RCP_MIN			EQU 	0	; This is minimum RC pulse length
 RCP_MAX			EQU 	250	; This is maximum RC pulse length
 RCP_VALIDATE		EQU 	2	; Require minimum this pulse length to validate RC pulse
 RCP_STOP			EQU 	1	; Stop motor at or below this pulse length
-RCP_STOP_LIMIT		EQU 	1	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+RCP_STOP_LIMIT		EQU 	3	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling mode
 PWM_STEPPER		EQU 	80 	; PWM used when in start stepper mode
@@ -277,6 +283,8 @@ COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
 
 AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
 DAMPED_RUN_ROTATIONS	EQU 	1	; Number of rotations to do in the damped run phase
+
+TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
 ; Constant definitions for tail
 ELSE
@@ -301,6 +309,8 @@ COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
 
 AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
 DAMPED_RUN_ROTATIONS	EQU 	1	; Number of rotations to do in the damped run phase
+
+TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
 ENDIF
 
@@ -404,6 +414,9 @@ Rcp_PrePrev_Edge_L:		DS	1		; RC pulse pre previous edge pca timestamp (lo byte)
 Rcp_PrePrev_Edge_H:		DS	1		; RC pulse pre previous edge pca timestamp (hi byte)
 Rcp_Edge_L:			DS	1		; RC pulse edge pca timestamp (lo byte)
 Rcp_Edge_H:			DS	1		; RC pulse edge pca timestamp (hi byte)
+Rcp_Prev_Period_L:		DS	1		; RC pulse previous period (lo byte)
+Rcp_Prev_Period_H:		DS	1		; RC pulse previous period (hi byte)
+Rcp_Period_Diff_Accepted:DS	1		; RC pulse period difference acceptable
 New_Rcp:				DS	1		; New RC pulse value in pca counts
 Prev_Rcp_Pwm_Freq:		DS	1		; Previous RC pulse pwm frequency (used during pwm frequency measurement)
 Curr_Rcp_Pwm_Freq:		DS	1		; Current RC pulse pwm frequency (used during pwm frequency measurement)
@@ -419,6 +432,7 @@ Lipo_Adc_Reference_H:	DS	1		; Voltage reference adc value (hi byte)
 Lipo_Adc_Limit_L:		DS	1		; Low voltage limit adc value (lo byte)
 Lipo_Adc_Limit_H:		DS	1		; Low voltage limit adc value (hi byte)
 Voltage_Comp_Factor:	DS	1		; Voltage compensation factor for pwm
+Adc_Conversion_Cnt:		DS	1		; Adc conversion counter
 
 Tx_Pgm_Func_No:		DS	1		; Function number when doing programming by tx
 Tx_Pgm_Paraval_No:		DS	1		; Parameter value number when doing programming by tx
@@ -445,8 +459,8 @@ Tag_Temporary_Storage:	DS	48		; Temporary storage for tags when updating "Eeprom
 
 ;**** **** **** **** ****
 CSEG AT 1A00h			; "Eeprom" segment
-EEPROM_FW_MAIN_REVISION	EQU 	3 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	4 	; Sub revision of the firmware
+EEPROM_FW_MAIN_REVISION	EQU 	4 	; Main revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	0 	; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -800,6 +814,22 @@ t2_int_pwm_update:
 
 	; Update current pwm
 	mov	Current_Pwm, Requested_Pwm
+IF TAIL == 1
+	; If tail and voltage compensation is not enabled, then set current_pwm_limited
+	clr	C
+	mov	A, Pgm_Volt_Comp
+	subb	A, #2
+	jnc	t2_int_pwm_exit
+
+	mov	Current_Pwm_Limited, Current_Pwm	; Default not limited
+	clr	C
+	mov	A, Current_Pwm					; Check against limit
+	subb	A, Pwm_Limit
+	jc	($+5)						; If current pwm below limit - branch
+
+	mov	Current_Pwm_Limited, Pwm_Limit	; Limit pwm
+
+ENDIF
 
 t2_int_pwm_exit:	
 	; Check if high byte flag is set
@@ -1048,6 +1078,40 @@ pca_int_check_1kHz:
 	mov	Temp4, A
 
 pca_int_restore_edge:
+	; Calculate difference between this period and previous period
+	clr	C
+	mov	A, Temp1
+	subb	A, Rcp_Prev_Period_L
+	mov	Temp5, A
+	mov	A, Temp2
+	subb	A, Rcp_Prev_Period_H
+	mov	Temp6, A
+	; Make positive
+	jnb	ACC.7, pca_int_check_diff
+	mov	A, Temp5
+	cpl	A
+	add	A, #1
+	mov	Temp5, A
+	mov	A, Temp6
+	cpl	A
+	mov	Temp6, A
+
+pca_int_check_diff:
+	; Check difference
+	mov	Rcp_Period_Diff_Accepted, #0		; Set not accepted as default
+	jnz	pca_int_store_data				; Check if high byte is zero
+
+	clr	C
+	mov	A, Temp5
+	subb	A, #3						; Check difference
+	jnc	pca_int_store_data
+
+	mov	Rcp_Period_Diff_Accepted, #1		; Set accepted
+
+pca_int_store_data:
+	; Store previous period
+	mov	Rcp_Prev_Period_L, Temp1
+	mov	Rcp_Prev_Period_H, Temp2
 	; Restore edge data from RAM
 	mov	Temp1, Rcp_Edge_L
 	mov	Temp2, Rcp_Edge_H
@@ -1274,16 +1338,16 @@ beep_onoff:
 	; Turn on nfet
 	AnFET_on			; AnFET on
 IF TAIL == 0
-	mov	A, 18		; 3탎 on
+	mov	A, #120		; 20탎 on
 ELSE
-	mov	A, 48		; 8탎 on
+	mov	A, #250		; 42탎 on
 ENDIF
 	djnz	ACC, $		
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	mov	A, 64		; 11탎 off
+	mov	A, #150		; 25탎 off
 	djnz	ACC, $		
-djnz	Temp2, beep_onoff
+	djnz	Temp2, beep_onoff
 	; Copy variable
 	mov	A, Temp3
 	mov	Temp1, A	
@@ -1532,8 +1596,8 @@ calc_governor_prop_corr:
 calc_governor_prop_corr_not1:
 	clr	C
 	mov	A, Pgm_Gov_P_Gain
-	subb	A, #9					; Is proportional gain 2?
-	jnz	calc_governor_prop_corr_lt1	; No - branch
+	subb	A, #9					; Is proportional gain 2 or higher?
+	jc	calc_governor_prop_corr_lt1e	; No - branch
 
 	clr	C
 	mov	A, Temp1					; Multiply by 2
@@ -1542,9 +1606,38 @@ calc_governor_prop_corr_not1:
 	mov	A, Temp2
 	rlc	A
 	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #11					; Is proportional gain 4 or higher?
+	jnc	($+5)					; Yes - proceed
+	ljmp	governor_limit_prop_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #13					; Is proportional gain 8 or higher?
+	jnc	($+5)					; Yes - proceed
+	ljmp	governor_limit_prop_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
 	ajmp	governor_limit_prop_corr
 
-calc_governor_prop_corr_lt1:
+calc_governor_prop_corr_lt1e:
 	mov	A, Temp2					; Divide by 2
 	mov	C, ACC.7
 	rrc	A
@@ -1596,11 +1689,41 @@ calc_governor_prop_corr_15:
 	mov	A, Temp2
 	addc	A, Temp4					
 	mov	Temp2, A
+
 	clr	C
 	mov	A, Pgm_Gov_P_Gain
-	subb	A, #8					; Is proportional gain 1.5?
-	jz	governor_limit_prop_corr		; Yes - branch
+	subb	A, #8					; Is proportional gain less than 1.5?
+	jc	calc_governor_prop_corr_lt1o	; Yes - branch
 
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #10					; Is proportional gain 3 or higher?
+	jc	governor_limit_prop_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_P_Gain
+	subb	A, #12					; Is proportional gain 6 or higher?
+	jc	governor_limit_prop_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	ajmp	governor_limit_prop_corr
+
+calc_governor_prop_corr_lt1o:
 	mov	A, Temp2					; No - divide by 2
 	mov	C, ACC.7
 	rrc	A
@@ -1732,8 +1855,8 @@ calc_governor_int_corr:
 calc_governor_int_corr_not1:
 	clr	C
 	mov	A, Pgm_Gov_I_Gain
-	subb	A, #9					; Is integral gain 2?
-	jnz	calc_governor_int_corr_lt1	; No - branch
+	subb	A, #9					; Is integral gain 2 or higher?
+	jc	calc_governor_int_corr_lt1e	; No - branch
 
 	clr	C
 	mov	A, Temp1					; Multiply by 2
@@ -1742,9 +1865,38 @@ calc_governor_int_corr_not1:
 	mov	A, Temp2
 	rlc	A
 	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #11					; Is integral gain 4 or higher?
+	jnc	($+5)					; Yes - proceed
+	ljmp	governor_limit_int_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #13					; Is integral gain 8 or higher?
+	jnc	($+5)					; Yes - proceed
+	ljmp	governor_limit_int_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
 	ajmp	governor_limit_int_corr
 
-calc_governor_int_corr_lt1:
+calc_governor_int_corr_lt1e:
 	mov	A, Temp2					; Divide by 2
 	mov	C, ACC.7
 	rrc	A
@@ -1796,11 +1948,41 @@ calc_governor_int_corr_15:
 	mov	A, Temp2
 	addc	A, Temp4					
 	mov	Temp2, A
-	mov	A, Pgm_Gov_I_Gain
-	clr	C
-	subb	A, #8					; Is integral gain 1.5?
-	jz	governor_limit_int_corr		; Yes - branch
 
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #8					; Is integral gain less than 1.5?
+	jc	calc_governor_int_corr_lt1o	; Yes - branch
+
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #10					; Is integral gain 3 or higher?
+	jc	governor_limit_int_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	clr	C
+	mov	A, Pgm_Gov_I_Gain
+	subb	A, #12					; Is integral gain 6 or higher?
+	jc	governor_limit_int_corr		; No - branch
+
+	clr	C
+	mov	A, Temp1					; Multiply by 2
+	rlc	A
+	mov	Temp1, A
+	mov	A, Temp2
+	rlc	A
+	mov	Temp2, A
+
+	ajmp	governor_limit_int_corr
+
+calc_governor_int_corr_lt1o:
 	mov	A, Temp2					; No - divide by 2
 	mov	C, ACC.7
 	rrc	A
@@ -1881,11 +2063,11 @@ governor_apply_int_corr:
 	mov	A, Temp1					; Is result below pwm min?
 	subb	A, #1
 	jc	governor_corr_int_min_pwm	; Yes
-	ajmp	governor_store_int_corr		; No - store correction
+	jmp	governor_store_int_corr		; No - store correction
 
 governor_corr_int_min_pwm:
 	mov	Temp1, #1					; Load minimum pwm
-	ajmp	governor_store_int_corr
+	jmp	governor_store_int_corr
 
 governor_corr_neg_int:
 	; Add negative integral
@@ -1898,7 +2080,7 @@ governor_corr_neg_int:
 	addc	A, #0
 	; Check result
 	jc	governor_corr_int_max_pwm	; Is result above max?
-	ajmp	governor_store_int_corr		; No - store correction
+	jmp	governor_store_int_corr		; No - store correction
 
 governor_corr_int_max_pwm:
 	mov	Temp1, #255				; Load maximum pwm
@@ -2093,22 +2275,14 @@ measure_lipo_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 start_adc_conversion:
-IF TAIL == 1
-	; If tail, then exit if voltage compensation is not enabled
-	clr	C
-	mov	A, Pgm_Volt_Comp
-	subb	A, #2
-	jc	start_adc_exit
-ENDIF
 	; Start adc
 	Start_Adc 
-start_adc_exit:
 	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Check power supply voltage, compensate current pwm and limit power
+; Check temperature, power supply voltage, compensate current pwm and limit power
 ;
 ; No assumptions
 ;
@@ -2116,21 +2290,59 @@ start_adc_exit:
 ; to limit main motor power in order to maintain the required voltage
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-check_voltage_compensate_and_limit_power:
-IF TAIL == 1
-	; If tail, then skip if voltage compensation is not enabled
-	clr	C
-	mov	A, Pgm_Volt_Comp
-	subb	A, #2
-	jc	check_voltage_comp_skip
-ENDIF
+check_temp_voltage_compensate_and_limit_power:
 	; Wait for ADC conversion to complete
 	Get_Adc_Status 
-	jb	AD0BUSY, check_voltage_compensate_and_limit_power
+	jb	AD0BUSY, check_temp_voltage_compensate_and_limit_power
 	; Read ADC result
 	Read_Adc_Result
 	; Stop ADC
 	Stop_Adc
+
+	inc	Adc_Conversion_Cnt			; Increment conversion counter
+	clr	C
+	mov	A, Adc_Conversion_Cnt		; Is conversion count equal to temp rate?
+	subb	A, #TEMP_CHECK_RATE
+	jnz	check_voltage_comp_start		; No - check voltage
+
+	mov	Adc_Conversion_Cnt, #0		; Yes - temperature check. Reset counter
+	clr	C
+	mov	A, Temp1					; Is temperature below first limit
+	subb	A, #TEMP_LIMIT_L
+	mov	Temp1, A
+	mov	A, Temp2
+	subb	A, #TEMP_LIMIT_H
+	jc	temp_check_exit			; Yes - exit
+
+	mov  Pwm_Limit, #192			; No - limit pwm
+
+	clr	C
+	mov	A, Temp1					; Is temperature below second limit
+	subb	A, #TEMP_LIMIT_STEP
+	mov	Temp1, A
+	jc	temp_check_exit			; Yes - exit
+
+	mov  Pwm_Limit, #128			; No - limit pwm
+
+	clr	C
+	mov	A, Temp1					; Is temperature below third limit
+	subb	A, #TEMP_LIMIT_STEP
+	mov	Temp1, A
+	jc	temp_check_exit			; Yes - exit
+
+	mov  Pwm_Limit, #64				; No - limit pwm
+
+	clr	C
+	mov	A, Temp1					; Is temperature below final limit
+	subb	A, #TEMP_LIMIT_STEP
+	mov	Temp1, A
+	jc	temp_check_exit			; Yes - exit
+
+	mov  Pwm_Limit, #0				; No - limit pwm
+
+temp_check_exit:
+	Set_Adc_Ip_Volt				; Select adc input for next conversion
+	ret
 
 check_voltage_comp_start:
 	; Skip compensation part if voltage compensation is not enabled
@@ -2227,15 +2439,19 @@ check_voltage_compensate_power:
 
 	mov	Current_Pwm_Comp, A
 IF TAIL == 1
-	mov	Current_Pwm_Limited, A	; Set this too here, for tail operation
+	mov	Current_Pwm_Limited, A			; Set this too here, for tail operation. Default not limited
+	clr	C
+	mov	A, Current_Pwm_Comp				; Check against limit
+	subb	A, Pwm_Limit
+	jc	($+5)						; If current pwm below limit - branch
+
+	mov	Current_Pwm_Limited, Pwm_Limit	; Limit pwm
+
 ENDIF
 	ajmp	check_voltage_limit_start
 
 check_voltage_comp_skip:
 	mov	Current_Pwm_Comp, Current_Pwm
-IF TAIL == 1
-	mov	Current_Pwm_Limited, Current_Pwm	; Set this too here, for tail operation
-ENDIF
 
 check_voltage_limit_start:
 IF TAIL == 0
@@ -2296,6 +2512,14 @@ check_voltage_spoolup_lim:
 
 check_voltage_exit:
 ENDIF
+	; Set adc mux for next conversion
+	clr	C
+	mov	A, Adc_Conversion_Cnt		; Is next conversion for temperature?
+	subb	A, #(TEMP_CHECK_RATE-1)
+	jnz	($+5)					; No - skip changing adc input mux
+
+	Set_Adc_Ip_Temp				; Select temp sensor for next conversion
+
 	ret
 
 
@@ -3125,7 +3349,6 @@ ENDIF
 	call wait30ms
 	call beep_f3
 	call wait30ms
-
 	; Enable interrupts
 	mov	IE, #22h			; Enable timer0 and timer2 interrupts
 	mov	IP, #02h			; High priority to timer0 interrupts
@@ -3149,8 +3372,14 @@ ENDIF
 	; Measure PWM frequency
 	setb	Flags0.RCP_MEAS_PWM_FREQ 		; Set measure pwm frequency flag
 measure_pwm_freq_start:	
-	mov	Temp3, #5						; Number of pulses to measure
+	mov	Temp3, #10					; Number of pulses to measure
 measure_pwm_freq_loop:	
+	; Check if period diff was accepted
+	mov	A, Rcp_Period_Diff_Accepted
+	jnz	($+4)
+
+	mov	Temp3, #10					; Reset number of pulses to measure
+
 	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	mov	A, New_Rcp					; Load value
 	clr	C
@@ -3180,6 +3409,7 @@ validate_rcp_start:
 	Rcp_Int_First 						; Enable interrupt and set to first edge
 	Rcp_Clear_Int_Flag 					; Clear interrupt flag
 	clr	Flags1.RCP_EDGE_NO				; Set first edge flag
+
 	; Beep arm sequence start signal
 	clr 	EA							; Disable all interrupts
 	call beep_f1						; Signal that RC pulse is ready
@@ -3241,7 +3471,7 @@ wait_for_power_on:
 	call wait3ms
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
-	subb	A, #RCP_STOP 			; Higher than stop?
+	subb	A, #(RCP_STOP+20) 		; Higher than stop (plus some hysteresis)?
 	jc	wait_for_power_on		; No - start over
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -3267,6 +3497,7 @@ init_start:
 	mov	Gov_Integral_H, A
 	mov	Gov_Integral_X, A
 	mov	Voltage_Comp_Factor, #80h; Set voltage compensation factor to "1"
+	mov	Adc_Conversion_Cnt, A
 	mov	Gov_Active, A
 	mov	Flags0, A				; Clear flags0
 	mov	Rcp_Stop_Cnt, A		; Set RC pulse stop count to zero
@@ -3341,9 +3572,15 @@ stepper_rot_beg:
 	mov	A, Wt_Stepper_Step_H
 	subb	A, Stepper_Step_End_H
 	jc	stepper_rot_exit			; Branch if lower than minimum
+
 	; Wait for step
 	call stepper_timer_wait
-	jmp	stepper_rot_beg			; Next rotation
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
+	subb	A, #(RCP_STOP_LIMIT+7)		; Is number of stop RC pulses above limit?
+	jc	stepper_rot_beg			; No, next rotation
+
+	jmp	run_to_wait_for_power_on
 
 stepper_rot_exit:
 	; Set aquisition mode
@@ -3403,7 +3640,12 @@ aquisition_rot_beg:
 	mov	Startup_Rot_Cnt, A
 	; Wait for step
 	call stepper_timer_wait
-	jmp	aquisition_rot_beg		; Next rotation
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
+	subb	A, #(RCP_STOP_LIMIT+3)		; Is number of stop RC pulses above limit?
+	jc	aquisition_rot_beg			; No, next rotation
+
+	jmp	run_to_wait_for_power_on
 
 aquisition_rot_exit:
 	clr	Flags0.AQUISITION_MODE	; Clear aquisition mode flag
@@ -3519,12 +3761,18 @@ damped_run6:
 	; Decrement startup rotaton count
 	mov	A, Startup_Rot_Cnt
 	dec	A
-	; Check number of aquisition rotations
+	; Check number of damped rotations
 	jz damped_transition			; Branch if counter is zero
 
 	mov	Startup_Rot_Cnt, A			; No - store counter
-	jmp damped_run1				; Continue to run damped
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
+	subb	A, #RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
+	jnc	($+5)					; Yes, branch
 
+	ljmp	damped_run1				; Continue to run damped
+
+	jmp	run_to_wait_for_power_on
 
 
 damped_transition:
@@ -3629,7 +3877,7 @@ run6:
 	ljmp	run_to_wait_for_power_on
 
 	call setup_comm_wait	
-	call check_voltage_compensate_and_limit_power
+	call check_temp_voltage_compensate_and_limit_power
 	call wait_for_comm
 	call comm6comm1
 	call calc_next_comm_timing
