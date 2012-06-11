@@ -47,9 +47,9 @@ NFETON_DELAY			EQU	22	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	12	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	136	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	1	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_L			EQU 	60	; Temperature measurement ADC value for which main motor power is limited (low byte)
+TEMP_LIMIT_L			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte)
 TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_STEP		EQU	14	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 
 ;*********************

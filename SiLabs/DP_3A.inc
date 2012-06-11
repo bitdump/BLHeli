@@ -46,10 +46,10 @@ DAMPED_TAIL_ENABLE		EQU	1	; Damped tail mode enabled
 NFETON_DELAY			EQU	2	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	128	; Power supply measurement ADC value for which main motor power is limited (low byte)
-ADC_LIMIT_H			EQU	2	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_L			EQU 	179	; Temperature measurement ADC value for which main motor power is limited (low byte)
-TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_STEP		EQU	18	; Temperature measurement ADC value increment for which main motor power is further limited
+ADC_LIMIT_H			EQU	2	; Power supply measurement ADC value for which main motor power is limited (2 msbs)
+TEMP_LIMIT_L			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte)
+TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
+TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
 
 
 ;*********************

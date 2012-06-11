@@ -40,7 +40,7 @@ $NOMOD51
 ; 
 ;**** **** **** **** ****
 ; Revision history:
-; - Rev1.0: Initial revision based upon BLHeil for AVR controllers
+; - Rev1.0: Initial revision based upon BLHeli for AVR controllers
 ; - Rev2.0: Changed "Eeprom" initialization, layout and defaults
 ;           Various changes and improvements to comparator reading. Now using timer1 for time from pwm on/off
 ;           Beeps are made louder
@@ -86,6 +86,7 @@ $NOMOD51
 ;           Startup sequence is aborted upon zero throttle
 ;           Avoided voltage compensation function induced latency for tail when voltage compensation is not enabled
 ;           Improved input signal frequency detection robustness
+; - Rev4.1: Increased thermal protection temperature limits
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -460,7 +461,7 @@ Tag_Temporary_Storage:	DS	48		; Temporary storage for tags when updating "Eeprom
 ;**** **** **** **** ****
 CSEG AT 1A00h			; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION	EQU 	4 	; Main revision of the firmware
-EEPROM_FW_SUB_REVISION	EQU 	0 	; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION	EQU 	1 	; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION	EQU 	10 	; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:	DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2574,10 +2575,18 @@ startup_pwm_corr:
 startup_pwm_gain_pos:
 	add	A, Temp1					; Apply positive correction
 	mov	Temp1, A
-	jnc	startup_pwm_set_pwm			; Above max?
+	jnc	startup_pwm_check_limit		; Above max?
 
 	mov	A, #0FFh					; Yes - limit
 	mov	Temp1, A
+
+startup_pwm_check_limit:
+	clr	C
+	mov	A, Temp1					; Check against limit
+	subb	A, Pwm_Limit
+	jc	startup_pwm_set_pwm			; If pwm below limit - branch
+
+	mov	Temp1, Pwm_Limit			; Limit pwm
 
 startup_pwm_set_pwm:
 	; Set pwm variables
