@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; XP 7A hardware definition file
+; XP 25A hardware definition file
 ;
 ;**** **** **** **** ****
 
@@ -41,9 +41,9 @@ $include (c8051f330.inc)
 ; Constant definitions
 ;**** **** **** **** ****
 CSEG AT 1A40h
-Eep_ESC_Layout:		DB	"#XP7A#          "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#XP25A#         "	; ESC layout tag
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
-NFETON_DELAY			EQU	50	; Wait delay from pfets off to nfets on
+NFETON_DELAY			EQU	1	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	116	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
@@ -102,18 +102,18 @@ ENDM
 ;*********************
 ; PORT 1 definitions *
 ;*********************
-;			EQU	7	;i
+DriverEn		EQU	7	;o	At least on some escs. Others are hardwired
 ;			EQU	6	;i
-ApFET		EQU	5	;o
-BpFET		EQU	4	;o
-CpFET		EQU	3	;o
-AnFET		EQU	2	;o
-BnFET		EQU	1	;o
-CnFET		EQU	0	;o
+AnFET		EQU	5	;o	"nFETs" are really the high side drivers
+BnFET		EQU	4	;o
+CnFET		EQU	3	;o
+ApFET		EQU	2	;o	"pFETs" are really the low side drivers
+BpFET		EQU	1	;o
+CpFET		EQU	0	;o
 
-P1_DIGITAL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_INIT		EQU 	0		
-P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
+P1_DIGITAL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)+(1 SHL DriverEn)
+P1_INIT		EQU 	087h	
+P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)+(1 SHL DriverEn)
 P1_SKIP		EQU	0
 
 MACRO AnFET_on
@@ -154,43 +154,43 @@ ENDM
 
 MACRO ApFET_on
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.ApFET
+	clr	P1.ApFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
+	clr	P1.CpFET
 ENDM
 MACRO ApFET_off
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.ApFET
+	setb	P1.ApFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.CpFET
+	setb	P1.CpFET
 ENDM
 MACRO BpFET_on
-	setb	P1.BpFET
+	clr	P1.BpFET
 ENDM
 MACRO BpFET_off
-	clr	P1.BpFET
+	setb	P1.BpFET
 ENDM
 MACRO CpFET_on
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
+	clr	P1.CpFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.ApFET
+	clr	P1.ApFET
 ENDM
 MACRO CpFET_off
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.CpFET
+	setb	P1.CpFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.ApFET
+	setb	P1.ApFET
 ENDM
 MACRO All_pFETs_Off
-	clr	P1.ApFET
-	clr	P1.BpFET
-	clr	P1.CpFET
-ENDM
-MACRO All_pFETs_On
 	setb	P1.ApFET
 	setb	P1.BpFET
 	setb	P1.CpFET
+ENDM
+MACRO All_pFETs_On
+	clr	P1.ApFET
+	clr	P1.BpFET
+	clr	P1.CpFET
 ENDM
 
 MACRO Set_Comp_Phase_A
@@ -210,7 +210,6 @@ MACRO Set_Comp_Phase_C
 ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
-	cpl	A			; Invert output
 ENDM
 
 

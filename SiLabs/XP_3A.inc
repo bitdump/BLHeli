@@ -42,8 +42,8 @@ $include (c8051f330.inc)
 ;**** **** **** **** ****
 CSEG AT 1A40h
 Eep_ESC_Layout:		DB	"#XP3A#          "	; ESC layout tag
-DAMPED_TAIL_ENABLE		EQU	1	; Damped tail mode enabled
-NFETON_DELAY			EQU	2	; Wait delay from pfets off to nfets on
+DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
+NFETON_DELAY			EQU	5	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	171	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	1	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
@@ -102,14 +102,14 @@ ENDM
 ;*********************
 ; PORT 1 definitions *
 ;*********************
-;			EQU	7	;o
-;			EQU	6	;o
+;			EQU	7	;i
+;			EQU	6	;i
 CpFET		EQU	5	;o
 BpFET		EQU	4	;o
 ApFET		EQU	3	;o
 CnFET		EQU	2	;o
-BnFET		EQU	1	;i
-AnFET		EQU	0	;i
+BnFET		EQU	1	;o
+AnFET		EQU	0	;o
 
 P1_DIGITAL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
 P1_INIT		EQU 	(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)		; Setting pFET outputs turn them off
@@ -117,15 +117,15 @@ P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL B
 P1_SKIP		EQU	0
 
 MACRO AnFET_on
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
 ENDM
 MACRO AnFET_off
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.CnFET
 ENDM
 MACRO BnFET_on
@@ -135,15 +135,15 @@ MACRO BnFET_off
 	clr	P1.BnFET
 ENDM
 MACRO CnFET_on
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
 ENDM
 MACRO CnFET_off
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.CnFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
 ENDM
 MACRO All_nFETs_Off
@@ -153,15 +153,15 @@ MACRO All_nFETs_Off
 ENDM
 
 MACRO ApFET_on
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
 ENDM
 MACRO ApFET_off
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CpFET
 ENDM
 MACRO BpFET_on
@@ -171,15 +171,15 @@ MACRO BpFET_off
 	setb	P1.BpFET
 ENDM
 MACRO CpFET_on
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
 ENDM
 MACRO CpFET_off
-	jb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CpFET
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
+	jnb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
 ENDM
 MACRO All_pFETs_Off
@@ -194,18 +194,18 @@ MACRO All_pFETs_On
 ENDM
 
 MACRO Set_Comp_Phase_A
-	jb	Flags2.PGM_DIRECTION_REV, ($+6)
+	jb	Flags2.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #21h	; Set comparator multiplexer to phase A
-	jnb	Flags2.PGM_DIRECTION_REV, ($+6)
+	jnb	Flags2.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #01h
 ENDM
 MACRO Set_Comp_Phase_B
 	mov	CPT0MX, #11h	; Set comparator multiplexer to phase B
 ENDM
 MACRO Set_Comp_Phase_C
-	jb	Flags2.PGM_DIRECTION_REV, ($+6)
+	jb	Flags2.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #01h	; Set comparator multiplexer to phase C
-	jnb	Flags2.PGM_DIRECTION_REV, ($+6)
+	jnb	Flags2.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #21h
 ENDM
 MACRO Read_Comp_Out
@@ -215,7 +215,7 @@ ENDM
 
 
 ;*********************
-; PORT B definitions *
+; PORT 2 definitions *
 ;*********************
 DebugPin		EQU	0	;o
 

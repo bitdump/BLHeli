@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; XP 7A hardware definition file
+; Turnigy Plush 6A hardware definition file
 ;
 ;**** **** **** **** ****
 
@@ -41,33 +41,33 @@ $include (c8051f330.inc)
 ; Constant definitions
 ;**** **** **** **** ****
 CSEG AT 1A40h
-Eep_ESC_Layout:		DB	"#XP7A#          "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#Turnigy6A#     "	; ESC layout tag
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
-NFETON_DELAY			EQU	50	; Wait delay from pfets off to nfets on
+NFETON_DELAY			EQU	1	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
-ADC_LIMIT_L			EQU 	116	; Power supply measurement ADC value for which main motor power is limited (low byte)
+ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_L			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte)
-TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
-TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT_L			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte)
+TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 MSBs)
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 
 ;*********************
 ; PORT 0 definitions *
 ;*********************  
-Rcp_In		EQU	7	;i
-Adc_Ip		EQU	6	;i
-Mux_A		EQU	5	;i
+;			EQU	7	;i
+Mux_B		EQU	6	;i
+Rcp_In		EQU	5	;i
 ;			EQU	4	;i
-Mux_B		EQU	3	;i
-Comp_Com		EQU	2	;i
-Mux_C		EQU	1	;i
-Vref			EQU	0	;i
+Comp_Com		EQU	3	;i
+Mux_A		EQU	2	;i
+;			EQU	1	;i
+Mux_C		EQU	0	;i
 
-P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip)+(1 SHL Vref))
+P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT		EQU	0FFh
 P0_PUSHPULL	EQU	0
-P0_SKIP		EQU	NOT(1 SHL Rcp_In) AND 0FFh
+P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 
 MACRO Read_Rcp_Int
 	mov	A, P0
@@ -102,54 +102,54 @@ ENDM
 ;*********************
 ; PORT 1 definitions *
 ;*********************
-;			EQU	7	;i
-;			EQU	6	;i
-ApFET		EQU	5	;o
-BpFET		EQU	4	;o
-CpFET		EQU	3	;o
-AnFET		EQU	2	;o
-BnFET		EQU	1	;o
-CnFET		EQU	0	;o
+AnFET		EQU	7	;o
+ApFET		EQU	6	;o
+CnFET		EQU	5	;o
+CpFET		EQU	4	;o
+BnFET		EQU	3	;o
+BpFET		EQU	2	;o
+;			EQU	1	;i
+Adc_Ip		EQU	0	;i
 
-P1_DIGITAL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_INIT		EQU 	0		
+P1_DIGITAL	EQU	NOT(1 SHL Adc_Ip)
+P1_INIT		EQU 	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL Adc_Ip)		; Setting nFET outputs turn them off. Setting ADC ip sets it tristate
 P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_SKIP		EQU	0
+P1_SKIP		EQU	(1 SHL Adc_Ip)
 
 MACRO AnFET_on
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.AnFET
+	clr	P1.AnFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	setb	P1.CnFET
+	clr	P1.CnFET
 ENDM
 MACRO AnFET_off
 	jb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.AnFET
+	setb	P1.AnFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.CnFET
-ENDM
-MACRO BnFET_on
-	setb	P1.BnFET
-ENDM
-MACRO BnFET_off
-	clr	P1.BnFET
+	setb	P1.CnFET
 ENDM
 MACRO CnFET_on
+	jb	Flags2.PGM_DIR_REV, ($+5)
+	clr	P1.CnFET
+	jnb	Flags2.PGM_DIR_REV, ($+5)
+	clr	P1.AnFET
+ENDM
+MACRO CnFET_off
 	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
 	jnb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
 ENDM
-MACRO CnFET_off
-	jb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.CnFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
-	clr	P1.AnFET
+MACRO BnFET_on
+	clr	P1.BnFET
+ENDM
+MACRO BnFET_off
+	setb	P1.BnFET
 ENDM
 MACRO All_nFETs_Off
-	clr	P1.AnFET
-	clr	P1.BnFET
-	clr	P1.CnFET
+	setb	P1.AnFET
+	setb	P1.CnFET
+	setb	P1.BnFET
 ENDM
 
 MACRO ApFET_on
@@ -164,12 +164,6 @@ MACRO ApFET_off
 	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
 ENDM
-MACRO BpFET_on
-	setb	P1.BpFET
-ENDM
-MACRO BpFET_off
-	clr	P1.BpFET
-ENDM
 MACRO CpFET_on
 	jb	Flags2.PGM_DIR_REV, ($+5)
 	setb	P1.CpFET
@@ -182,35 +176,40 @@ MACRO CpFET_off
 	jnb	Flags2.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
 ENDM
+MACRO BpFET_on
+	setb	P1.BpFET
+ENDM
+MACRO BpFET_off
+	clr	P1.BpFET
+ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
-	clr	P1.BpFET
 	clr	P1.CpFET
+	clr	P1.BpFET
 ENDM
 MACRO All_pFETs_On
 	setb	P1.ApFET
-	setb	P1.BpFET
 	setb	P1.CpFET
+	setb	P1.BpFET
 ENDM
 
 MACRO Set_Comp_Phase_A
 	jb	Flags2.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #21h	; Set comparator multiplexer to phase A
+	mov	CPT0MX, #11h	; Set comparator multiplexer to phase A
 	jnb	Flags2.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #01h
-ENDM
-MACRO Set_Comp_Phase_B
-	mov	CPT0MX, #11h	; Set comparator multiplexer to phase B
+	mov	CPT0MX, #10h
 ENDM
 MACRO Set_Comp_Phase_C
 	jb	Flags2.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #01h	; Set comparator multiplexer to phase C
+	mov	CPT0MX, #10h	; Set comparator multiplexer to phase C
 	jnb	Flags2.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #21h
+	mov	CPT0MX, #11h
+ENDM
+MACRO Set_Comp_Phase_B
+	mov	CPT0MX, #13h	; Set comparator multiplexer to phase B
 ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
-	cpl	A			; Invert output
 ENDM
 
 
@@ -239,20 +238,20 @@ CSEG AT 73h			; Timer3 interrupt
 ENDM
 
 MACRO Initialize_Adc
-	mov	REF0CN, #07h	; Enable temp sensor, bias and reference buffer
-	mov	ADC0CF, #0B8h	; ADC clock 1MHz
-	mov	AMX0P, #Adc_Ip	; Select positive input
-	mov	AMX0N, #11h	; Select negative input as ground
-	mov	ADC0CN, #80h	; ADC enabled
+	mov	REF0CN, #0Eh		; Set vdd (3.3V) as reference. Enable temp sensor and bias
+	mov	ADC0CF, #0B8h		; ADC clock 1MHz
+	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
+	mov	AMX0N, #11h		; Select negative input as ground
+	mov	ADC0CN, #80h		; ADC enabled
 ENDM
 MACRO Set_Adc_Ip_Volt
-	mov	AMX0P, #Adc_Ip	; Select positive input
+	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
 ENDM
 MACRO Set_Adc_Ip_Temp
-	mov	AMX0P, #10h	; Select temp sensor input
+	mov	AMX0P, #10h		; Select temp sensor input
 ENDM
 MACRO Start_Adc
-	mov	ADC0CN, #90h	; ADC start
+	mov	ADC0CN, #90h		; ADC start
 ENDM
 MACRO Get_Adc_Status
 	mov	A, ADC0CN		

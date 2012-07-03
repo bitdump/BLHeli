@@ -94,7 +94,7 @@ clear_eeprom_signature:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 write_eeprom_signature:	
-IF TAIL == 0
+IF MODE == 0
 	mov	DPTR, #Eep_Initialized_L
 	mov	Temp1, #0A5h
 	call write_eeprom_byte
@@ -102,13 +102,23 @@ IF TAIL == 0
 	mov	DPTR, #Eep_Initialized_H
 	mov	Temp1, #05Ah
 	call write_eeprom_byte
-ELSE
+ENDIF
+IF MODE == 1
 	mov	DPTR, #Eep_Initialized_L
 	mov	Temp1, #05Ah
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Initialized_H
 	mov	Temp1, #0A5h
+	call write_eeprom_byte
+ENDIF
+IF MODE == 2
+	mov	DPTR, #Eep_Initialized_L
+	mov	Temp1, #055h
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Initialized_H
+	mov	Temp1, #0AAh
 	call write_eeprom_byte
 ENDIF
 	ret
@@ -122,23 +132,23 @@ ENDIF
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 read_eeprom_parameters:	
-IF TAIL == 0
+IF MODE == 0
 	; Check initialized signature
 	mov	DPTR, #Eep_Initialized_L
 	call read_eeprom_byte
 	clr	C
 	mov	A, Temp1
 	subb	A, #0A5h
-	jz	($+4)
-	ajmp	read_eeprom_store_defaults
+	jz	($+5)
+	ljmp	read_eeprom_store_defaults
 
 	mov	DPTR, #Eep_Initialized_H
 	call read_eeprom_byte
 	clr	C
 	mov	A, Temp1
 	subb	A, #05Ah
-	jz	($+4)
-	ajmp	read_eeprom_store_defaults
+	jz	($+5)
+	ljmp	read_eeprom_store_defaults
 
 	; Read eeprom
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
@@ -169,12 +179,17 @@ IF TAIL == 0
 	call read_eeprom_byte
 	mov	Pgm_Startup_Accel, Temp1
 
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	call read_eeprom_byte
+	mov	Pgm_Comm_Timing, Temp1
+
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	call read_eeprom_byte
+	mov	Pgm_Damping_Force, Temp1
+
 	mov	DPTR, #Eep_Pgm_Pwm_Freq
 	call read_eeprom_byte
-	setb	Flags2.PGM_PWM_HIGH_FREQ
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	clr	Flags2.PGM_PWM_HIGH_FREQ
+	mov	Pgm_Pwm_Freq, Temp1
 
 	mov	DPTR, #Eep_Pgm_Volt_Comp
 	call read_eeprom_byte
@@ -182,43 +197,46 @@ IF TAIL == 0
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
 	call read_eeprom_byte
-	clr	Flags2.PGM_DIRECTION_REV
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_DIRECTION_REV
+	mov	Pgm_Direction_Rev, Temp1
 
 	mov	DPTR, #Eep_Pgm_Input_Pol
 	call read_eeprom_byte
-	clr	Flags2.PGM_RCP_PWM_POL
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_RCP_PWM_POL
-ELSE
+	mov	Pgm_Input_Pol, Temp1
+
+	mov	DPTR, #Eep_Main_Rearm_Start
+	call read_eeprom_byte
+	mov	Pgm_Main_Rearm_Start, Temp1
+
+	mov	DPTR, #Eep_Pgm_Gov_Setup_Target
+	call read_eeprom_byte
+	mov	Pgm_Gov_Setup_Target, Temp1
+ENDIF
+IF MODE == 1
 	; Check initialized signature
 	mov	DPTR, #Eep_Initialized_L
 	call read_eeprom_byte
 	clr	C
 	mov	A, Temp1
 	subb	A, #05Ah
-	jz	($+4)
-	ajmp	read_eeprom_store_defaults
+	jz	($+5)
+	ljmp	read_eeprom_store_defaults
 
 	mov	DPTR, #Eep_Initialized_H
 	call read_eeprom_byte
 	clr	C
 	mov	A, Temp1
 	subb	A, #0A5h
-	jz	($+4)
-	ajmp	read_eeprom_store_defaults
+	jz	($+5)
+	ljmp	read_eeprom_store_defaults
 
 	; Read eeprom
-	mov	DPTR, #Eep_Pgm_Tail_Gain
+	mov	DPTR, #Eep_Pgm_Motor_Gain
 	call read_eeprom_byte
-	mov	Pgm_Tail_Gain, Temp1
+	mov	Pgm_Motor_Gain, Temp1
 
-	mov	DPTR, #Eep_Pgm_Tail_Idle
+	mov	DPTR, #Eep_Pgm_Motor_Idle
 	call read_eeprom_byte
-	mov	Pgm_Tail_Idle, Temp1
+	mov	Pgm_Motor_Idle, Temp1
 
 	mov	DPTR, #Eep_Pgm_Startup_Pwr
 	call read_eeprom_byte
@@ -232,18 +250,17 @@ ELSE
 	call read_eeprom_byte
 	mov	Pgm_Startup_Accel, Temp1
 
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	call read_eeprom_byte
+	mov	Pgm_Comm_Timing, Temp1
+
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	call read_eeprom_byte
+	mov	Pgm_Damping_Force, Temp1
+
 	mov	DPTR, #Eep_Pgm_Pwm_Freq
 	call read_eeprom_byte
-	clr	Flags2.PGM_PWM_HIGH_FREQ
-	mov	A, Temp1
-	jnb	ACC.0, ($+5)
-	setb	Flags2.PGM_PWM_HIGH_FREQ
-	clr	Flags2.PGM_PWM_OFF_DAMPED
-	clr	C
-	mov	A, Temp1
-	subb	A, #3
-	jc	($+4)
-	setb	Flags2.PGM_PWM_OFF_DAMPED
+	mov	Pgm_Pwm_Freq, Temp1
 
 	mov	DPTR, #Eep_Pgm_Volt_Comp
 	call read_eeprom_byte
@@ -251,31 +268,82 @@ ELSE
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
 	call read_eeprom_byte
-	clr	Flags2.PGM_DIRECTION_REV
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_DIRECTION_REV
+	mov	Pgm_Direction_Rev, Temp1
 
 	mov	DPTR, #Eep_Pgm_Input_Pol
 	call read_eeprom_byte
-	clr	Flags2.PGM_RCP_PWM_POL
+	mov	Pgm_Input_Pol, Temp1
+
+	mov	Pgm_Gov_Mode, #4
+ENDIF
+IF MODE == 2
+	; Check initialized signature
+	mov	DPTR, #Eep_Initialized_L
+	call read_eeprom_byte
+	clr	C
 	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_RCP_PWM_POL
+	subb	A, #055h
+	jz	($+4)
+	ajmp	read_eeprom_store_defaults
+
+	mov	DPTR, #Eep_Initialized_H
+	call read_eeprom_byte
+	clr	C
+	mov	A, Temp1
+	subb	A, #0AAh
+	jz	($+4)
+	ajmp	read_eeprom_store_defaults
+
+	; Read eeprom
+	mov	DPTR, #Eep_Pgm_Motor_Gain
+	call read_eeprom_byte
+	mov	Pgm_Motor_Gain, Temp1
+
+	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
+	call read_eeprom_byte
+	mov	Pgm_Low_Voltage_Lim, Temp1
+
+	mov	DPTR, #Eep_Pgm_Startup_Pwr
+	call read_eeprom_byte
+	mov	Pgm_Startup_Pwr, Temp1
+
+	mov	DPTR, #Eep_Pgm_Startup_Rpm
+	call read_eeprom_byte
+	mov	Pgm_Startup_Rpm, Temp1
+
+	mov	DPTR, #Eep_Pgm_Startup_Accel
+	call read_eeprom_byte
+	mov	Pgm_Startup_Accel, Temp1
+
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	call read_eeprom_byte
+	mov	Pgm_Comm_Timing, Temp1
+
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	call read_eeprom_byte
+	mov	Pgm_Damping_Force, Temp1
+
+	mov	DPTR, #Eep_Pgm_Pwm_Freq
+	call read_eeprom_byte
+	mov	Pgm_Pwm_Freq, Temp1
+
+	mov	DPTR, #Eep_Pgm_Volt_Comp
+	call read_eeprom_byte
+	mov	Pgm_Volt_Comp, Temp1
+
+	mov	DPTR, #Eep_Pgm_Direction_Rev
+	call read_eeprom_byte
+	mov	Pgm_Direction_Rev, Temp1
+
+	mov	DPTR, #Eep_Pgm_Input_Pol
+	call read_eeprom_byte
+	mov	Pgm_Input_Pol, Temp1
 
 	mov	Pgm_Gov_Mode, #4
 ENDIF
 	mov	DPTR, #Eep_Enable_TX_Pgm
 	call read_eeprom_byte
 	mov	Pgm_Enable_TX_Pgm, Temp1
-
-	mov	DPTR, #Eep_Main_Rearm_Start
-	call read_eeprom_byte
-	mov	Pgm_Main_Rearm_Start, Temp1
-
-	mov	DPTR, #Eep_Pgm_Gov_Setup_Target
-	call read_eeprom_byte
-	mov	Pgm_Gov_Setup_Target, Temp1
 
 	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
 
@@ -354,7 +422,7 @@ store_all_in_eeprom:
 	mov	Temp1, #EEPROM_LAYOUT_REVISION
 	call write_eeprom_byte
 
-IF TAIL == 0
+IF MODE == 0
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
 	mov	Temp1, Pgm_Gov_P_Gain
 	call write_eeprom_byte
@@ -383,10 +451,16 @@ IF TAIL == 0
 	mov	Temp1, Pgm_Startup_Accel
 	call write_eeprom_byte
 
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	mov	Temp1, Pgm_Comm_Timing
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	mov	Temp1, Pgm_Damping_Force
+	call write_eeprom_byte
+
 	mov	DPTR, #Eep_Pgm_Pwm_Freq
-	mov	Temp1, #1
-	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
-	mov	Temp1, #2
+	mov	Temp1, Pgm_Pwm_Freq
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Volt_Comp
@@ -394,23 +468,28 @@ IF TAIL == 0
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
-	mov	Temp1, #1
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
-	mov	Temp1, #2
+	mov	Temp1, Pgm_Direction_Rev
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Input_Pol
-	mov	Temp1, #1
-	jnb	Flags2.PGM_RCP_PWM_POL, ($+5)
-	mov	Temp1, #2
-	call write_eeprom_byte
-ELSE
-	mov	DPTR, #Eep_Pgm_Tail_Gain
-	mov	Temp1, Pgm_Tail_Gain
+	mov	Temp1, Pgm_Input_Pol
 	call write_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Tail_Idle
-	mov	Temp1, Pgm_Tail_Idle
+	mov	DPTR, #Eep_Main_Rearm_Start
+	mov	Temp1, Pgm_Main_Rearm_Start
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Gov_Setup_Target
+	mov	Temp1, Pgm_Gov_Setup_Target
+	call write_eeprom_byte
+ENDIF
+IF MODE == 1
+	mov	DPTR, #Eep_Pgm_Motor_Gain
+	mov	Temp1, Pgm_Motor_Gain
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Motor_Idle
+	mov	Temp1, Pgm_Motor_Idle
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Startup_Pwr
@@ -425,12 +504,16 @@ ELSE
 	mov	Temp1, Pgm_Startup_Accel
 	call write_eeprom_byte
 
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	mov	Temp1, Pgm_Damping_Force
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	mov	Temp1, Pgm_Comm_Timing
+	call write_eeprom_byte
+
 	mov	DPTR, #Eep_Pgm_Pwm_Freq
-	mov	Temp1, #1
-	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
-	mov	Temp1, #2
-	jnb	Flags2.PGM_PWM_OFF_DAMPED, ($+5)
-	mov	Temp1, #3
+	mov	Temp1, Pgm_Pwm_Freq
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Volt_Comp
@@ -438,27 +521,60 @@ ELSE
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
-	mov	Temp1, #1
-	jnb	Flags2.PGM_DIRECTION_REV, ($+5)
-	mov	Temp1, #2
+	mov	Temp1, Pgm_Direction_Rev
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Input_Pol
-	mov	Temp1, #1
-	jnb	Flags2.PGM_RCP_PWM_POL, ($+5)
-	mov	Temp1, #2
+	mov	Temp1, Pgm_Input_Pol
+	call write_eeprom_byte
+ENDIF
+IF MODE == 2
+	mov	DPTR, #Eep_Pgm_Motor_Gain
+	mov	Temp1, Pgm_Motor_Gain
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
+	mov	Temp1, Pgm_Low_Voltage_Lim
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Startup_Pwr
+	mov	Temp1, Pgm_Startup_Pwr
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Startup_Rpm
+	mov	Temp1, Pgm_Startup_Rpm
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Startup_Accel
+	mov	Temp1, Pgm_Startup_Accel
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Comm_Timing
+	mov	Temp1, Pgm_Comm_Timing
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Damping_Force
+	mov	Temp1, Pgm_Damping_Force
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Pwm_Freq
+	mov	Temp1, Pgm_Pwm_Freq
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Volt_Comp
+	mov	Temp1, Pgm_Volt_Comp
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Direction_Rev
+	mov	Temp1, Pgm_Direction_Rev
+	call write_eeprom_byte
+
+	mov	DPTR, #Eep_Pgm_Input_Pol
+	mov	Temp1, Pgm_Input_Pol
 	call write_eeprom_byte
 ENDIF
 	mov	DPTR, #Eep_Enable_TX_Pgm
 	mov	Temp1, Pgm_Enable_TX_Pgm
-	call write_eeprom_byte
-
-	mov	DPTR, #Eep_Main_Rearm_Start
-	mov	Temp1, Pgm_Main_Rearm_Start
-	call write_eeprom_byte
-
-	mov	DPTR, #Eep_Pgm_Gov_Setup_Target
-	mov	Temp1, Pgm_Gov_Setup_Target
 	call write_eeprom_byte
 
 	call	write_tags
@@ -477,7 +593,7 @@ ENDIF
 store_in_ram:	
 	mov	Temp4, Tx_Pgm_Func_No	; Function no
 	mov	Temp1, Tx_Pgm_Paraval_No	; Parameter value no
-IF TAIL == 0
+IF MODE == 0
 	mov	A, Temp4
 	clr	C
 	subb	A, #1
@@ -522,6 +638,12 @@ IF TAIL == 0
 	clr	C
 	subb	A, #11
 	jz	store_main_func_11
+	clr	C
+	subb	A, #12
+	jz	store_main_func_12
+	clr	C
+	subb	A, #13
+	jz	store_main_func_13
 
 store_main_func_1:
 	mov	Pgm_Gov_P_Gain, Temp1
@@ -552,30 +674,30 @@ store_main_func_7:
 	jmp	store_in_ram_exit
 
 store_main_func_8:
-	setb	Flags2.PGM_PWM_HIGH_FREQ
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	clr	Flags2.PGM_PWM_HIGH_FREQ
+	mov	Pgm_Comm_Timing, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_9:
-	mov	Pgm_Volt_Comp, Temp1
+	mov	Pgm_Damping_Force, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_10:
-	clr	Flags2.PGM_DIRECTION_REV
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_DIRECTION_REV
+	mov	Pgm_Pwm_Freq, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_11:
-	clr	Flags2.PGM_RCP_PWM_POL
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_RCP_PWM_POL
+	mov	Pgm_Volt_Comp, Temp1
 	jmp	store_in_ram_exit
-ELSE
+
+store_main_func_12:
+	mov	Pgm_Direction_Rev, Temp1
+	jmp	store_in_ram_exit
+
+store_main_func_13:
+	mov	Pgm_Input_Pol, Temp1
+	jmp	store_in_ram_exit
+ENDIF
+IF MODE == 1
 	mov	A, Temp4
 	clr	C
 	subb	A, #1
@@ -612,13 +734,19 @@ ELSE
 	clr	C
 	subb	A, #9
 	jz	store_tail_func_9
+	clr	C
+	subb	A, #10
+	jz	store_tail_func_10
+	clr	C
+	subb	A, #11
+	jz	store_tail_func_11
 
 store_tail_func_1:
-	mov	Pgm_Tail_Gain, Temp1
+	mov	Pgm_Motor_Gain, Temp1
 	jmp	store_in_ram_exit
 
 store_tail_func_2:
-	mov	Pgm_Tail_Idle, Temp1
+	mov	Pgm_Motor_Idle, Temp1
 	jmp	store_in_ram_exit
 
 store_tail_func_3:
@@ -634,34 +762,115 @@ store_tail_func_5:
 	jmp	store_in_ram_exit
 
 store_tail_func_6:
-	clr	Flags2.PGM_PWM_HIGH_FREQ
-	mov	A, Temp1
-	jnb	ACC.0, ($+5)
-	setb	Flags2.PGM_PWM_HIGH_FREQ
-	clr	Flags2.PGM_PWM_OFF_DAMPED
-	clr	C
-	mov	A, Temp1
-	subb	A, #3
-	jc	($+4)
-	setb	Flags2.PGM_PWM_OFF_DAMPED
+	mov	Pgm_Comm_Timing, Temp1
 	jmp	store_in_ram_exit
 
 store_tail_func_7:
-	mov	Pgm_Volt_Comp, Temp1
+	mov	Pgm_Damping_Force, Temp1
 	jmp	store_in_ram_exit
 
 store_tail_func_8:
-	clr	Flags2.PGM_DIRECTION_REV
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_DIRECTION_REV
+	mov	Pgm_Pwm_Freq, Temp1
 	jmp	store_in_ram_exit
 
 store_tail_func_9:
-	clr	Flags2.PGM_RCP_PWM_POL
-	mov	A, Temp1
-	jnb	ACC.1, ($+5)
-	setb	Flags2.PGM_RCP_PWM_POL
+	mov	Pgm_Volt_Comp, Temp1
+	jmp	store_in_ram_exit
+
+store_tail_func_10:
+	mov	Pgm_Direction_Rev, Temp1
+	jmp	store_in_ram_exit
+
+store_tail_func_11:
+	mov	Pgm_Input_Pol, Temp1
+	jmp	store_in_ram_exit
+ENDIF
+IF MODE == 2
+	mov	A, Temp4
+	clr	C
+	subb	A, #1
+	jz	store_multi_func_1
+	mov	A, Temp4
+	clr	C
+	subb	A, #2
+	jz	store_multi_func_2
+	mov	A, Temp4
+	clr	C
+	subb	A, #3
+	jz	store_multi_func_3
+	mov	A, Temp4
+	clr	C
+	subb	A, #4
+	jz	store_multi_func_4
+	mov	A, Temp4
+	clr	C
+	subb	A, #5
+	jz	store_multi_func_5
+	mov	A, Temp4
+	clr	C
+	subb	A, #6
+	jz	store_multi_func_6
+	mov	A, Temp4
+	clr	C
+	subb	A, #7
+	jz	store_multi_func_7
+	mov	A, Temp4
+	clr	C
+	subb	A, #8
+	jz	store_multi_func_8
+	mov	A, Temp4
+	clr	C
+	subb	A, #9
+	jz	store_multi_func_9
+	clr	C
+	subb	A, #10
+	jz	store_multi_func_10
+	clr	C
+	subb	A, #11
+	jz	store_multi_func_11
+
+store_multi_func_1:
+	mov	Pgm_Motor_Gain, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_2:
+	mov	Pgm_Low_Voltage_Lim, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_3:
+	mov	Pgm_Startup_Pwr, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_4:
+	mov	Pgm_Startup_Rpm, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_5:
+	mov	Pgm_Startup_Accel, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_6:
+	mov	Pgm_Comm_Timing, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_7:
+	mov	Pgm_Damping_Force, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_8:
+	mov	Pgm_Pwm_Freq, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_9:
+	mov	Pgm_Volt_Comp, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_10:
+	mov	Pgm_Direction_Rev, Temp1
+	jmp	store_in_ram_exit
+
+store_multi_func_11:
+	mov	Pgm_Input_Pol, Temp1
 	jmp	store_in_ram_exit
 ENDIF
 
@@ -823,36 +1032,44 @@ paraval_next:
 	call wait1s
 	inc	Tx_Pgm_Paraval_No		; Parameter value no
 	mov	Temp1, #5				; Default 5 parameter values
-IF TAIL == 0
+IF MODE == 0
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
 	subb	A, #3				; Function 3?
 	jnz	paraval_end_a			; No - branch
 	mov	Temp1, #4				; Yes - set max parameter values
-	ajmp	paraval_end_c
+	ajmp	paraval_end_d
 paraval_end_a:
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #8				; Function below 8?
-	jc 	paraval_end_b			; Yes - branch
-	mov	Temp1, #2				; No - set max parameter values
+	subb	A, #10				; Function 10?
+	jnz	paraval_end_b			; No - branch
+	mov	Temp1, #3				; Yes - set max parameter values
+	ajmp	paraval_end_d
 paraval_end_b:
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #3				; Function below 3?
-	jnc 	paraval_end_c			; No - branch
-	mov	Temp1, #9				; Yes - set max parameter values
+	subb	A, #10				; Function below 10?
+	jc 	paraval_end_c			; Yes - branch
+	mov	Temp1, #2				; No - set max parameter values
 paraval_end_c:
-ELSE
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #6				; Function below 6?
+	subb	A, #3				; Function below 3?
+	jnc 	paraval_end_d			; No - branch
+	mov	Temp1, #13			; Yes - set max parameter values
+paraval_end_d:
+ENDIF
+IF MODE >= 1
+	clr	C
+	mov	A, Tx_Pgm_Func_No		
+	subb	A, #8				; Function below 8?
 	jc 	paraval_end_a			; Yes - branch
-	mov	Temp1, #3				; No - set max parameter values
-paraval_end_a:
+	mov	Temp1, #(3+DAMPED_MODE_ENABLE)	; No - set max parameter values
+paraval_end_a:	
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #(6+DAMPED_TAIL_ENABLE)	; Function below 7 (damped tail enabled)?
+	subb	A, #9				; Function below 9?
 	jc 	paraval_end_b			; Yes - branch
 	mov	Temp1, #2				; No - set max parameter values
 paraval_end_b:
@@ -868,14 +1085,15 @@ function_next:					; Yes - Next function value
 	call wait1s
 	call wait1s
 	inc	Tx_Pgm_Func_No			; Function value no
-IF TAIL == 0
+IF MODE == 0
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #12				; Main has 11 functions	
-ELSE
+	subb	A, #14				; Main has 13 functions	
+ENDIF
+IF MODE >= 1
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #10				; Tail has 9 functions	
+	subb	A, #12				; Tail and multi has 11 functions	
 ENDIF
 	jnc 	program_by_tx_exit		; Last function value?
 	jmp	paraval_no_entry		; No - go back
