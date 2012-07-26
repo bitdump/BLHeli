@@ -163,6 +163,10 @@ IF MODE == 0
 	call read_eeprom_byte
 	mov	Pgm_Gov_Mode, Temp1
 
+	mov	DPTR, #Eep_Pgm_Gov_Range
+	call read_eeprom_byte
+	mov	Pgm_Gov_Range, Temp1
+
 	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
 	call read_eeprom_byte
 	mov	Pgm_Low_Voltage_Lim, Temp1
@@ -435,6 +439,10 @@ IF MODE == 0
 	mov	Temp1, Pgm_Gov_Mode
 	call write_eeprom_byte
 
+	mov	DPTR, #Eep_Pgm_Gov_Range
+	mov	Temp1, Pgm_Gov_Range
+	call write_eeprom_byte
+
 	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
 	mov	Temp1, Pgm_Low_Voltage_Lim
 	call write_eeprom_byte
@@ -658,42 +666,46 @@ store_main_func_3:
 	jmp	store_in_ram_exit
 
 store_main_func_4:
-	mov	Pgm_Low_Voltage_Lim, Temp1
+	mov	Pgm_Gov_Range, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_5:
-	mov	Pgm_Startup_Pwr, Temp1
+	mov	Pgm_Low_Voltage_Lim, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_6:
-	mov	Pgm_Startup_Rpm, Temp1
+	mov	Pgm_Startup_Pwr, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_7:
-	mov	Pgm_Startup_Accel, Temp1
+	mov	Pgm_Startup_Rpm, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_8:
-	mov	Pgm_Comm_Timing, Temp1
+	mov	Pgm_Startup_Accel, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_9:
-	mov	Pgm_Damping_Force, Temp1
+	mov	Pgm_Comm_Timing, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_10:
-	mov	Pgm_Pwm_Freq, Temp1
+	mov	Pgm_Damping_Force, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_11:
-	mov	Pgm_Volt_Comp, Temp1
+	mov	Pgm_Pwm_Freq, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_12:
-	mov	Pgm_Direction_Rev, Temp1
+	mov	Pgm_Volt_Comp, Temp1
 	jmp	store_in_ram_exit
 
 store_main_func_13:
+	mov	Pgm_Direction_Rev, Temp1
+	jmp	store_in_ram_exit
+
+store_main_func_14:
 	mov	Pgm_Input_Pol, Temp1
 	jmp	store_in_ram_exit
 ENDIF
@@ -1038,27 +1050,34 @@ IF MODE == 0
 	subb	A, #3				; Function 3?
 	jnz	paraval_end_a			; No - branch
 	mov	Temp1, #4				; Yes - set max parameter values
-	ajmp	paraval_end_d
+	ajmp	paraval_end_e
 paraval_end_a:
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #10				; Function 10?
+	subb	A, #4				; Function 4?
 	jnz	paraval_end_b			; No - branch
-	mov	Temp1, #3				; Yes - set max parameter values
-	ajmp	paraval_end_d
+	mov	Temp1, #2				; Yes - set max parameter values
+	ajmp	paraval_end_e
 paraval_end_b:
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #10				; Function below 10?
-	jc 	paraval_end_c			; Yes - branch
-	mov	Temp1, #2				; No - set max parameter values
+	subb	A, #11				; Function 11?
+	jnz	paraval_end_c			; No - branch
+	mov	Temp1, #3				; Yes - set max parameter values
+	ajmp	paraval_end_e
 paraval_end_c:
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #3				; Function below 3?
-	jnc 	paraval_end_d			; No - branch
-	mov	Temp1, #13			; Yes - set max parameter values
+	subb	A, #11				; Function below 11?
+	jc 	paraval_end_d			; Yes - branch
+	mov	Temp1, #2				; No - set max parameter values
 paraval_end_d:
+	clr	C
+	mov	A, Tx_Pgm_Func_No		
+	subb	A, #3				; Function below 3?
+	jnc 	paraval_end_e			; No - branch
+	mov	Temp1, #13			; Yes - set max parameter values
+paraval_end_e:
 ENDIF
 IF MODE >= 1
 	clr	C
@@ -1088,7 +1107,7 @@ function_next:					; Yes - Next function value
 IF MODE == 0
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #14				; Main has 13 functions	
+	subb	A, #15				; Main has 14 functions	
 ENDIF
 IF MODE >= 1
 	clr	C

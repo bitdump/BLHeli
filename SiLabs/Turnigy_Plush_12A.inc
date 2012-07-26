@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; Turnigy Plush 6A hardware definition file
+; Turnigy Plush 12A hardware definition file
 ;
 ;**** **** **** **** ****
 
@@ -41,9 +41,9 @@ $include (c8051f330.inc)
 ; Constant definitions
 ;**** **** **** **** ****
 CSEG AT 1A40h
-Eep_ESC_Layout:		DB	"#Turnigy6A#     "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#Turnigy12A#    "	; ESC layout tag
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
-NFETON_DELAY			EQU	15	; Wait delay from pfets off to nfets on
+NFETON_DELAY			EQU	40	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
