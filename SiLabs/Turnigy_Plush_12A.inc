@@ -42,9 +42,14 @@ $include (c8051f330.inc)
 ;**** **** **** **** ****
 CSEG AT 1A40h
 Eep_ESC_Layout:		DB	"#Turnigy12A#    "	; ESC layout tag
+
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
 NFETON_DELAY			EQU	40	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
+COMP_PWM_HIGH_ON_DELAY	EQU	24	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
+COMP_PWM_HIGH_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
+COMP_PWM_LOW_ON_DELAY	EQU	8	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
+COMP_PWM_LOW_OFF_DELAY	EQU	7	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT_L			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte)
@@ -71,7 +76,7 @@ P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 
 MACRO Read_Rcp_Int
 	mov	A, P0
-	jnb	Flags2.PGM_RCP_PWM_POL, ($+4)	; Is pwm polarity negative?
+	jnb	Flags3.PGM_RCP_PWM_POL, ($+4)	; Is pwm polarity negative?
 	cpl	A						; Yes - invert
 ENDM
 MACRO Rcp_Int_Enable
@@ -82,16 +87,16 @@ MACRO Rcp_Int_Disable
 ENDM
 MACRO Rcp_Int_First
 	anl	PCA0CPM0, #0CFh			
-	jb	Flags2.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity positive?
+	jb	Flags3.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity positive?
 	orl	PCA0CPM0, #20h				; Capture rising edge
-	jnb	Flags2.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity negative?
+	jnb	Flags3.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity negative?
 	orl	PCA0CPM0, #10h				; Capture falling edge
 ENDM
 MACRO Rcp_Int_Second
 	anl	PCA0CPM0, #0CFh			
-	jb	Flags2.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity positive?
+	jb	Flags3.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity positive?
 	orl	PCA0CPM0, #10h				; Capture falling edge
-	jnb	Flags2.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity negative?
+	jnb	Flags3.PGM_RCP_PWM_POL, ($+6)	; Is pwm polarity negative?
 	orl	PCA0CPM0, #20h				; Capture rising edge
 ENDM
 MACRO Rcp_Clear_Int_Flag
@@ -117,30 +122,36 @@ P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL B
 P1_SKIP		EQU	(1 SHL Adc_Ip)
 
 MACRO AnFET_on
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	mov	A, Current_Pwm_Limited
+	jz	($+12)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CnFET
 ENDM
 MACRO AnFET_off
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
 ENDM
 MACRO CnFET_on
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	mov	A, Current_Pwm_Limited
+	jz	($+12)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CnFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
 ENDM
 MACRO CnFET_off
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
 ENDM
 MACRO BnFET_on
+	mov	A, Current_Pwm_Limited
+	jz	($+4)
 	clr	P1.BnFET
 ENDM
 MACRO BnFET_off
@@ -153,27 +164,27 @@ MACRO All_nFETs_Off
 ENDM
 
 MACRO ApFET_on
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.CpFET
 ENDM
 MACRO ApFET_off
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
 ENDM
 MACRO CpFET_on
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.CpFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
 ENDM
 MACRO CpFET_off
-	jb	Flags2.PGM_DIR_REV, ($+5)
+	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
-	jnb	Flags2.PGM_DIR_REV, ($+5)
+	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
 ENDM
 MACRO BpFET_on
@@ -194,15 +205,15 @@ MACRO All_pFETs_On
 ENDM
 
 MACRO Set_Comp_Phase_A
-	jb	Flags2.PGM_DIR_REV, ($+6)
+	jb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #11h	; Set comparator multiplexer to phase A
-	jnb	Flags2.PGM_DIR_REV, ($+6)
+	jnb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #10h
 ENDM
 MACRO Set_Comp_Phase_C
-	jb	Flags2.PGM_DIR_REV, ($+6)
+	jb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #10h	; Set comparator multiplexer to phase C
-	jnb	Flags2.PGM_DIR_REV, ($+6)
+	jnb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #11h
 ENDM
 MACRO Set_Comp_Phase_B
