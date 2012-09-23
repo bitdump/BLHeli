@@ -222,6 +222,12 @@ Skywalker_40A_Multi 	EQU 57
 HiModel_Cool_22A_Main 	EQU 58
 HiModel_Cool_22A_Tail 	EQU 59   
 HiModel_Cool_22A_Multi 	EQU 60   
+HiModel_Cool_33A_Main 	EQU 61
+HiModel_Cool_33A_Tail 	EQU 62   
+HiModel_Cool_33A_Multi 	EQU 63   
+HiModel_Cool_41A_Main 	EQU 64
+HiModel_Cool_41A_Tail 	EQU 65   
+HiModel_Cool_41A_Multi 	EQU 66   
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -285,6 +291,13 @@ HiModel_Cool_22A_Multi 	EQU 60
 ;BESC EQU HiModel_Cool_22A_Main
 ;BESC EQU HiModel_Cool_22A_Tail
 ;BESC EQU HiModel_Cool_22A_Multi
+;BESC EQU HiModel_Cool_33A_Main
+;BESC EQU HiModel_Cool_33A_Tail
+;BESC EQU HiModel_Cool_33A_Multi
+;BESC EQU HiModel_Cool_41A_Main
+;BESC EQU HiModel_Cool_41A_Tail
+;BESC EQU HiModel_Cool_41A_Multi
+
 
 ;**** **** **** **** ****
 ; ESC selection statements
@@ -586,6 +599,36 @@ ENDIF
 IF BESC == HiModel_Cool_22A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (HiModel_Cool_22A.inc)	; Select HiModel Cool 22A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_33A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_33A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_33A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_41A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_41A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
+ENDIF
+
+IF BESC == HiModel_Cool_41A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
 ENDIF
 
 
