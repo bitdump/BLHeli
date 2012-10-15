@@ -207,8 +207,8 @@ IF MODE == 0
 	mov	Temp1, #Pgm_Pwm_Freq	
 	call read_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp	
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp	
 	call read_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -292,8 +292,8 @@ IF MODE == 1
 	mov	Temp1, #Pgm_Pwm_Freq	
 	call read_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp	
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp	
 	call read_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -372,8 +372,8 @@ IF MODE == 2
 	mov	Temp1, #Pgm_Pwm_Freq	
 	call read_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp	
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp	
 	call read_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -546,8 +546,8 @@ IF MODE == 0
 	mov	Temp1, #Pgm_Pwm_Freq
 	call write_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -611,8 +611,8 @@ IF MODE == 1
 	mov	Temp1, #Pgm_Pwm_Freq
 	call write_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -668,8 +668,8 @@ IF MODE == 2
 	mov	Temp1, #Pgm_Pwm_Freq
 	call write_eeprom_byte
 
-	mov	DPTR, #Eep_Pgm_Volt_Comp
-	mov	Temp1, #Pgm_Volt_Comp
+	mov	DPTR, #Eep_Pgm_Demag_Comp
+	mov	Temp1, #Pgm_Demag_Comp
 	call write_eeprom_byte
 
 	mov	DPTR, #Eep_Pgm_Direction_Rev
@@ -821,7 +821,7 @@ store_main_func_13:
 
 store_main_func_14:
 	cjne	Temp4, #14, store_main_func_15
-	mov	Temp2, #Pgm_Volt_Comp
+	mov	Temp2, #Pgm_Demag_Comp
 	mov	A, Temp1
 	mov	@Temp2, A
 	jmp	store_in_ram_exit
@@ -912,7 +912,7 @@ store_tail_func_10:
 
 store_tail_func_11:
 	cjne	Temp4, #11, store_tail_func_12
-	mov	Temp2, #Pgm_Volt_Comp
+	mov	Temp2, #Pgm_Demag_Comp
 	mov	A, Temp1
 	mov	@Temp2, A
 	jmp	store_in_ram_exit
@@ -1003,7 +1003,7 @@ store_multi_func_10:
 
 store_multi_func_11:
 	cjne	Temp4, #11, store_multi_func_12
-	mov	Temp2, #Pgm_Volt_Comp
+	mov	Temp2, #Pgm_Demag_Comp
 	mov	A, Temp1
 	mov	@Temp2, A
 	jmp	store_in_ram_exit
@@ -1183,83 +1183,26 @@ func_paraval_cont_wait:
 paraval_next:					
 	call wait1s
 	inc	Tx_Pgm_Paraval_No		; Parameter value no
-	mov	Temp1, #5				; Default 5 parameter values
 IF MODE == 0
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #3				; Function 3?
-	jnz	paraval_end_a			; No - branch
-	mov	Temp1, #4				; Yes - set max parameter values
-	ajmp	paraval_end_e
-paraval_end_a:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #4				; Function 4?
-	jnz	paraval_end_b			; No - branch
-	mov	Temp1, #2				; Yes - set max parameter values
-	ajmp	paraval_end_f
-paraval_end_b:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #6				; Function 6?
-	jnz	paraval_end_c			; No - branch
-	mov	Temp1, #2				; Yes - set max parameter values
-	ajmp	paraval_end_f
-paraval_end_c:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #11				; Function 11?
-	jnz	paraval_end_d			; No - branch
-	mov	Temp1, #13			; Yes - set max parameter values
-	ajmp	paraval_end_g
-paraval_end_d:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #13				; Function 13?
-	jnz	paraval_end_e			; No - branch
-	mov	Temp1, #3				; Yes - set max parameter values
-	ajmp	paraval_end_g
-paraval_end_e:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #13				; Function below 13?
-	jc 	paraval_end_f			; Yes - branch
-	mov	Temp1, #2				; No - set max parameter values
-paraval_end_f:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #3				; Function below 3?
-	jnc 	paraval_end_g			; No - branch
-	mov	Temp1, #13			; Yes - set max parameter values
-paraval_end_g:
+	mov	A, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	A	
+	mov	DPTR, #TX_PGM_PARAMS_MAIN
+	movc A, @A+DPTR	
+	mov	Temp1, A
 ENDIF
-IF MODE >= 1
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #10				; Function below 10?
-	jc 	paraval_end_a			; Yes - branch
-	mov	Temp1, #(3+DAMPED_MODE_ENABLE)	; No - set max parameter values
-paraval_end_a:	
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #3				; Function 3?
-	jnz	paraval_end_b			; No - branch
-	mov	Temp1, #2				; Yes - set max parameter values
-	ajmp	paraval_end_c
-paraval_end_b:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #8				; Function 8?
-	jnz	paraval_end_c			; No - branch
-	mov	Temp1, #13			; Yes - set max parameter values
-	ajmp	paraval_end_d
-paraval_end_c:
-	clr	C
-	mov	A, Tx_Pgm_Func_No		
-	subb	A, #11				; Function below 11?
-	jc 	paraval_end_d			; Yes - branch
-	mov	Temp1, #2				; No - set max parameter values
-paraval_end_d:
+IF MODE == 1
+	mov	A, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	A	
+	mov	DPTR, #TX_PGM_PARAMS_TAIL
+	movc A, @A+DPTR	
+	mov	Temp1, A
+ENDIF
+IF MODE == 2
+	mov	A, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	A	
+	mov	DPTR, #TX_PGM_PARAMS_MULTI
+	movc A, @A+DPTR	
+	mov	Temp1, A
 ENDIF
 	inc	Temp1
 	clr	C

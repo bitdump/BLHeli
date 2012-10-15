@@ -8,7 +8,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=Rev7_0
+SET Revision=Rev8_0
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 rem**** no changes anymore *********************
@@ -54,30 +54,45 @@ rem Turnigy_Plush_25A_MULTI  	39
 rem Turnigy_Plush_30A_MAIN  	40
 rem Turnigy_Plush_30A_TAIL  	41  
 rem Turnigy_Plush_30A_MULTI  	42 
-rem Turnigy_AE_20A_MAIN  	43
-rem Turnigy_AE_20A_TAIL  	44  
-rem Turnigy_AE_20A_MULTI  	45 
-rem Turnigy_AE_25A_MAIN  	46
-rem Turnigy_AE_25A_TAIL  	47  
-rem Turnigy_AE_25A_MULTI  	48 
-rem Turnigy_AE_30A_MAIN  	49
-rem Turnigy_AE_30A_TAIL  	50  
-rem Turnigy_AE_30A_MULTI  	51 
-rem Skywalker_20A_MAIN  	52
-rem Skywalker_20A_TAIL  	53  
-rem Skywalker_20A_MULTI  	54 
-rem Skywalker_40A_MAIN  	55
-rem Skywalker_40A_TAIL  	56  
-rem Skywalker_40A_MULTI  	57 
-rem HiModel_Cool_22A_MAIN  	58
-rem HiModel_Cool_22A_TAIL  	59  
-rem HiModel_Cool_22A_MULTI  	60 
-rem HiModel_Cool_33A_MAIN  	61
-rem HiModel_Cool_33A_TAIL  	62  
-rem HiModel_Cool_33A_MULTI  	63 
-rem HiModel_Cool_41A_MAIN  	64
-rem HiModel_Cool_41A_TAIL  	65  
-rem HiModel_Cool_41A_MULTI  	66 
+rem Turnigy_Plush_40A_MAIN  	43
+rem Turnigy_Plush_40A_TAIL  	44  
+rem Turnigy_Plush_40A_MULTI  	45 
+rem Turnigy_Plush_60A_MAIN  	46
+rem Turnigy_Plush_60A_TAIL  	47  
+rem Turnigy_Plush_60A_MULTI  	48 
+rem Turnigy_Plush_80A_MAIN  	49
+rem Turnigy_Plush_80A_TAIL  	50  
+rem Turnigy_Plush_80A_MULTI  	51 
+rem Turnigy_AE_20A_MAIN  	52
+rem Turnigy_AE_20A_TAIL  	53  
+rem Turnigy_AE_20A_MULTI  	54 
+rem Turnigy_AE_25A_MAIN  	55
+rem Turnigy_AE_25A_TAIL  	56  
+rem Turnigy_AE_25A_MULTI  	57 
+rem Turnigy_AE_30A_MAIN  	58
+rem Turnigy_AE_30A_TAIL  	59  
+rem Turnigy_AE_30A_MULTI  	60 
+rem Turnigy_AE_45A_MAIN  	61
+rem Turnigy_AE_45A_TAIL  	62  
+rem Turnigy_AE_45A_MULTI  	63 
+rem Skywalker_20A_MAIN  	64
+rem Skywalker_20A_TAIL  	65  
+rem Skywalker_20A_MULTI  	66 
+rem Skywalker_40A_MAIN  	67
+rem Skywalker_40A_TAIL  	68  
+rem Skywalker_40A_MULTI  	69 
+rem HiModel_Cool_22A_MAIN  	70
+rem HiModel_Cool_22A_TAIL  	71  
+rem HiModel_Cool_22A_MULTI  	72 
+rem HiModel_Cool_33A_MAIN  	73
+rem HiModel_Cool_33A_TAIL  	74  
+rem HiModel_Cool_33A_MULTI  	75 
+rem HiModel_Cool_41A_MAIN  	76
+rem HiModel_Cool_41A_TAIL  	77  
+rem HiModel_Cool_41A_MULTI  	78 
+rem RCTimer_6A_MAIN  		79 
+rem RCTimer_6A_TAIL  		80 
+rem RCTimer_6A_MULTI  		81 
 
 SET BESCTYPE=XP_3A_MAIN
 SET BESC=1
@@ -415,7 +430,7 @@ SET BESC=42
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_20_MAIN
+SET BESCTYPE=Turnigy_Plush_40A_MAIN
 SET BESC=43
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -423,7 +438,7 @@ SET BESC=43
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_20_TAIL
+SET BESCTYPE=Turnigy_Plush_40A_TAIL
 SET BESC=44
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -431,7 +446,7 @@ SET BESC=44
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_20_MULTI
+SET BESCTYPE=Turnigy_Plush_40A_MULTI
 SET BESC=45
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -439,7 +454,7 @@ SET BESC=45
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_25_MAIN
+SET BESCTYPE=Turnigy_Plush_60A_MAIN
 SET BESC=46
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -447,7 +462,7 @@ SET BESC=46
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_25_TAIL
+SET BESCTYPE=Turnigy_Plush_60A_TAIL
 SET BESC=47
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -455,7 +470,7 @@ SET BESC=47
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_25_MULTI
+SET BESCTYPE=Turnigy_Plush_60A_MULTI
 SET BESC=48
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -463,7 +478,7 @@ SET BESC=48
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_30_MAIN
+SET BESCTYPE=Turnigy_Plush_80A_MAIN
 SET BESC=49
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -471,7 +486,7 @@ SET BESC=49
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_30_TAIL
+SET BESCTYPE=Turnigy_Plush_80A_TAIL
 SET BESC=50
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -479,7 +494,7 @@ SET BESC=50
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Turnigy_AE_30_MULTI
+SET BESCTYPE=Turnigy_Plush_80A_MULTI
 SET BESC=51
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -487,7 +502,7 @@ SET BESC=51
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_20_MAIN
+SET BESCTYPE=Turnigy_AE_20A_MAIN
 SET BESC=52
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -495,7 +510,7 @@ SET BESC=52
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_20_TAIL
+SET BESCTYPE=Turnigy_AE_20A_TAIL
 SET BESC=53
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -503,7 +518,7 @@ SET BESC=53
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_20_MULTI
+SET BESCTYPE=Turnigy_AE_20A_MULTI
 SET BESC=54
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -511,7 +526,7 @@ SET BESC=54
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_40_MAIN
+SET BESCTYPE=Turnigy_AE_25A_MAIN
 SET BESC=55
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -519,7 +534,7 @@ SET BESC=55
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_40_TAIL
+SET BESCTYPE=Turnigy_AE_25A_TAIL
 SET BESC=56
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -527,7 +542,7 @@ SET BESC=56
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=Skywalker_40_MULTI
+SET BESCTYPE=Turnigy_AE_25A_MULTI
 SET BESC=57
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -535,7 +550,7 @@ SET BESC=57
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_22_MAIN
+SET BESCTYPE=Turnigy_AE_30A_MAIN
 SET BESC=58
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -543,7 +558,7 @@ SET BESC=58
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_22_TAIL
+SET BESCTYPE=Turnigy_AE_30A_TAIL
 SET BESC=59
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -551,7 +566,7 @@ SET BESC=59
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_22_MULTI
+SET BESCTYPE=Turnigy_AE_30A_MULTI
 SET BESC=60
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -559,7 +574,7 @@ SET BESC=60
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_33_MAIN
+SET BESCTYPE=Turnigy_AE_45A_MAIN
 SET BESC=61
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -567,7 +582,7 @@ SET BESC=61
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_33_TAIL
+SET BESCTYPE=Turnigy_AE_45A_TAIL
 SET BESC=62
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -575,7 +590,7 @@ SET BESC=62
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_33_MULTI
+SET BESCTYPE=Turnigy_AE_45A_MULTI
 SET BESC=63
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -583,7 +598,7 @@ SET BESC=63
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_41_MAIN
+SET BESCTYPE=Skywalker_20A_MAIN
 SET BESC=64
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -591,7 +606,7 @@ SET BESC=64
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_41_TAIL
+SET BESCTYPE=Skywalker_20A_TAIL
 SET BESC=65
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
@@ -599,8 +614,128 @@ SET BESC=65
 copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
 del "Output\%BESCTYPE%_%Revision%.HEX"
 
-SET BESCTYPE=HiModel_Cool_41_MULTI
+SET BESCTYPE=Skywalker_20A_MULTI
 SET BESC=66
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=Skywalker_40A_MAIN
+SET BESC=67
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=Skywalker_40A_TAIL
+SET BESC=68
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=Skywalker_40A_MULTI
+SET BESC=69
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_22A_MAIN
+SET BESC=70
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_22A_TAIL
+SET BESC=71
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_22A_MULTI
+SET BESC=72
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_33A_MAIN
+SET BESC=73
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_33A_TAIL
+SET BESC=74
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_33A_MULTI
+SET BESC=75
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_41A_MAIN
+SET BESC=76
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_41A_TAIL
+SET BESC=77
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=HiModel_Cool_41A_MULTI
+SET BESC=78
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=RCTimer_6A_MAIN
+SET BESC=79
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=RCTimer_6A_TAIL
+SET BESC=80
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*"
+del "Output\%BESCTYPE%_%Revision%.HEX"
+
+SET BESCTYPE=RCTimer_6A_MULTI
+SET BESC=81
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) 
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) 
 %RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF"

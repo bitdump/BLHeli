@@ -42,7 +42,10 @@ $include (c8051f330.inc)
 ;**** **** **** **** ****
 CSEG AT 1A40h
 Eep_ESC_Layout:		DB	"#XP25A#         "	; ESC layout tag
+CSEG AT 1A50h
+Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
+PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
 NFETON_DELAY			EQU	1	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
@@ -221,6 +224,12 @@ MACRO Set_Comp_Phase_C
 ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
+ENDM
+MACRO Set_Comp_Hyst_Low
+	mov	CPT0CN, #83h 	; Set 20mV negative hysteresis
+ENDM
+MACRO Set_Comp_Hyst_High
+	mov	CPT0CN, #8Ch 	; Set 20mV positive hysteresis
 ENDM
 
 
