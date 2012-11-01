@@ -122,6 +122,11 @@ $NOMOD51
 ;           Refined direct startup
 ;           Removed voltage compensation
 ;           Miscellaneous other changes
+; - Rev9.0  Increased programming range for startup power, and made it's default ESC dependent
+;           Made default startup method ESC dependent
+;           Even more smooth and gentle spoolup for MAIN, to suit larger helis
+;           Improved transition from stepped startup to run
+;           Refined direct startup
 ;
 ;
 ;**** **** **** **** ****
@@ -161,12 +166,14 @@ $NOMOD51
 ; - Timer wait: Wt_Zc_Scan		7.5deg	; Time to wait before looking for zero cross
 ; - Scan for zero cross			22.5deg	, Nominal, with some motor variations
 ;
-; Motor startup:
+; Motor startup in stepper mode:
 ; Initial motor rotations are done with the motor controlled as a stepper motor.
 ; In this stepper motor mode comparator information is not used.
 ; Settle phase is the first, where there are a few commutations with increasing step length, in order to settle the motor in a predefined position.
 ; Stepper phase comes next, where there is a step length decrease sequence.
-; Aquisition phase is the final phase, for stabilisation before normal bemf commutation run begins.
+; Direct startup is the last phase, for synchronization before normal bemf commutation run begins.
+; Motor startup in direct mode:
+; Direct startup is the only phase, before normal bemf commutation run begins.
 ;
 ;**** **** **** **** ****
 ; List of enumerated supported ESCs and modes  (main, tail or multi)
@@ -760,10 +767,8 @@ DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0
 DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 	; 1=Tx 		2=Arm 		3=Setup		4=Off
 DEFAULT_PGM_MAIN_GOVERNOR_RANGE 	EQU 1 	; 1=High		2=Low
 DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	EQU 4 	; 1=Off		2=3.0V/c		3=3.1V/c		4=3.2V/c		5=3.3V/c	6=3.4V/c
-DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 	; 1=0.50 		2=0.75 		3=1.00 		4=1.25 		5=1.50
 DEFAULT_PGM_MAIN_STARTUP_RPM		EQU 3 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
 DEFAULT_PGM_MAIN_STARTUP_ACCEL	EQU 1 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
-DEFAULT_PGM_MAIN_STARTUP_METHOD	EQU 1 	; 1=Stepped	2=Direct
 DEFAULT_PGM_MAIN_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_MAIN_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_MAIN_DAMPING_FORCE	EQU 1 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High
@@ -779,10 +784,8 @@ DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 1 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 ; Tail
 DEFAULT_PGM_TAIL_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_TAIL_IDLE_SPEED 		EQU 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
-DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 3 	; 1=0.50 		2=0.75 		3=1.00 		4=1.25 		5=1.50
 DEFAULT_PGM_TAIL_STARTUP_RPM		EQU 3 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
 DEFAULT_PGM_TAIL_STARTUP_ACCEL	EQU 5 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
-DEFAULT_PGM_TAIL_STARTUP_METHOD	EQU 1 	; 1=Stepped	2=Direct
 DEFAULT_PGM_TAIL_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_TAIL_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_TAIL_DAMPING_FORCE	EQU 5 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High
@@ -800,10 +803,8 @@ DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 1 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 ; Multi
 DEFAULT_PGM_MULTI_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM	EQU 1 	; 1=Off		2=3.0V/c		3=3.1V/c		4=3.2V/c		5=3.3V/c	6=3.4V/c
-DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 3 	; 1=0.50 		2=0.75 		3=1.00 		4=1.25 		5=1.50
 DEFAULT_PGM_MULTI_STARTUP_RPM		EQU 1 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
 DEFAULT_PGM_MULTI_STARTUP_ACCEL	EQU 5 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
-DEFAULT_PGM_MULTI_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
 DEFAULT_PGM_MULTI_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_MULTI_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_MULTI_DAMPING_FORCE	EQU 2 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High
@@ -836,17 +837,13 @@ RCP_MIN			EQU 	0	; This is minimum RC pulse length
 RCP_MAX			EQU 	255	; This is maximum RC pulse length
 RCP_VALIDATE		EQU 	2	; Require minimum this pulse length to validate RC pulse
 RCP_STOP			EQU 	1	; Stop motor at or below this pulse length
-RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+RCP_STOP_LIMIT		EQU 	3	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	80 	; PWM used when in start stepper phase
-PWM_AQUISITION		EQU 	80 	; PWM used when in start aquisition phase
 
 COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
-
-AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
-NONDAMPED_RUN_ROTATIONS	EQU 	200	; Number of rotations to do in the nondamped run phase
 
 TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
@@ -866,13 +863,9 @@ RCP_STOP_LIMIT		EQU 	130	; Stop motor if this many timer2H overflows (~32ms) are
 
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
-PWM_AQUISITION		EQU 	80 	; PWM used when in start aquisition phase
 
 COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
-
-AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
-NONDAMPED_RUN_ROTATIONS	EQU 	10	; Number of rotations to do in the nondamped run phase
 
 TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
@@ -893,13 +886,9 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
-PWM_AQUISITION		EQU 	80 	; PWM used when in start aquisition phase
 
 COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
-
-AQUISITION_ROTATIONS	EQU 	2	; Number of rotations to do in the aquisition phase
-NONDAMPED_RUN_ROTATIONS	EQU 	10	; Number of rotations to do in the nondamped run phase
 
 TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
@@ -947,9 +936,9 @@ Flags1:					DS	1    	; State flags. Reset upon init_start
 MOTOR_SPINNING				EQU	0		; Set when in motor is spinning
 SETTLE_PHASE				EQU 	1		; Set when in motor start settling phase
 STEPPER_PHASE				EQU	2		; Set when in motor start stepper motor phase
-AQUISITION_PHASE			EQU	3		; Set when in motor start aquisition phase
+DIRECT_STARTUP_PHASE		EQU 	3		; Set when in direct startup phase
 INITIAL_RUN_PHASE			EQU	4		; Set when in initial run phase, before synchronized run is achieved
-DIRECT_STARTUP_PHASE		EQU 	5		; Set when in direct startup phase
+;						EQU 	5	
 ;						EQU 	6	
 ;						EQU 	7
 
@@ -988,7 +977,6 @@ Stepper_Step_End_L:			DS	1		; Stepper phase step time at the end (lo byte)
 Stepper_Step_End_H:			DS	1		; Stepper phase step time at the end (hi byte)
 Startup_Rot_Cnt:			DS	1		; Startup phase rotations counter
 Direct_Startup_Ok_Cnt:		DS	1		; Direct startup phase ok comparator waits counter (incrementing)
-Direct_Startup_Fail_Cnt:		DS	1		; Direct startup phase failing comparator waits counter (incrementing)
 
 Prev_Comm_L:				DS	1		; Previous commutation timer3 timestamp (lo byte)
 Prev_Comm_H:				DS	1		; Previous commutation timer3 timestamp (hi byte)
@@ -1036,6 +1024,9 @@ Pwm_Motor_Idle:			DS	1		; Motor idle speed pwm
 Pwm_On_Cnt:				DS	1		; Pwm on event counter (used to increase pwm off time for low pwm)
 Pwm_Off_Cnt:				DS	1		; Pwm off event counter (used to run some pwm cycles without damping)
 
+Spoolup_Limit_Cnt:			DS	1		; Interrupt count for spoolup limit
+Spoolup_Limit_Skip:			DS	1		; Interrupt skips for spoolup limit increment (0=no skips, 1=skip one etc)
+
 Damping_Period:			DS	1		; Damping on/off period
 Damping_On:				DS	1		; Damping on part of damping period
 
@@ -1043,7 +1034,6 @@ Lipo_Adc_Reference_L:		DS	1		; Voltage reference adc value (lo byte)
 Lipo_Adc_Reference_H:		DS	1		; Voltage reference adc value (hi byte)
 Lipo_Adc_Limit_L:			DS	1		; Low voltage limit adc value (lo byte)
 Lipo_Adc_Limit_H:			DS	1		; Low voltage limit adc value (hi byte)
-Voltage_Comp_Factor:		DS	1		; Voltage compensation factor for pwm
 Adc_Conversion_Cnt:			DS	1		; Adc conversion counter
 
 Ppm_Throttle_Gain:			DS	1		; Gain to be applied to RCP value for PPM input
@@ -1057,38 +1047,43 @@ Tx_Pgm_Beep_No:			DS	1		; Beep number when doing programming by tx
 ISEG AT 080h					
 Pgm_Gov_P_Gain:			DS	1		; Programmed governor P gain
 Pgm_Gov_I_Gain:			DS	1		; Programmed governor I gain
-Pgm_Gov_P_Gain_Decoded:		DS	1		; Programmed governor decoded P gain
-Pgm_Gov_I_Gain_Decoded:		DS	1		; Programmed governor decoded I gain
 Pgm_Gov_Mode:				DS	1		; Programmed governor mode
-Pgm_Gov_Range:				DS	1		; Programmed governor range
+
 Pgm_Low_Voltage_Lim:		DS	1		; Programmed low voltage limit
 Pgm_Motor_Gain:			DS	1		; Programmed motor gain
 Pgm_Motor_Idle:			DS	1		; Programmed motor idle speed
 Pgm_Startup_Pwr:			DS	1		; Programmed startup power
-
+Pgm_Pwm_Freq:				DS	1		; Programmed pwm frequency
+Pgm_Direction_Rev:			DS	1		; Programmed rotation direction
+Pgm_Input_Pol:				DS	1		; Programmed input pwm polarity
+Initialized_L_Dummy:		DS	1		; Place holder
+Initialized_H_Dummy:		DS	1		; Place holder
 Pgm_Enable_TX_Program:		DS 	1		; Programmed enable/disable value for TX programming
 Pgm_Main_Rearm_Start:		DS 	1		; Programmed enable/disable re-arming main every start 
 Pgm_Gov_Setup_Target:		DS 	1		; Programmed main governor setup target
 Pgm_Startup_Rpm:			DS	1		; Programmed startup rpm
 Pgm_Startup_Accel:			DS	1		; Programmed startup acceleration
-Pgm_Startup_Method:			DS	1		; Programmed startup method
+Pgm_Volt_Comp_Dummy:		DS	1		; Place holder
 Pgm_Comm_Timing:			DS	1		; Programmed commutation timing
-Pgm_Throttle_Rate:			DS	1		; Programmed throttle rate
-Pgm_Throttle_Rate_Decoded:	DS	1		; Programmed throttle rate decoded
 Pgm_Damping_Force:			DS	1		; Programmed damping force
-Pgm_Pwm_Freq:				DS	1		; Programmed pwm frequency
-Pgm_Demag_Comp:			DS	1		; Programmed demag compensation
-Pgm_Demag_Comp_Wait_Decoded:	DS	1		; Programmed demag compensation wait decoded
-Pgm_Demag_Comp_Power_Decoded:	DS	1		; Programmed demag compensation power cut decoded
-Pgm_Direction_Rev:			DS	1		; Programmed rotation direction
-Pgm_Input_Pol:				DS	1		; Programmed input pwm polarity
-
+Pgm_Gov_Range:				DS	1		; Programmed governor range
+Pgm_Startup_Method:			DS	1		; Programmed startup method
 Pgm_Ppm_Min_Throttle:		DS	1		; Programmed throttle minimum
 Pgm_Ppm_Max_Throttle:		DS	1		; Programmed throttle maximum
-
 Pgm_Beep_Strength:			DS	1		; Programmed beep strength
 Pgm_Beacon_Strength:		DS	1		; Programmed beacon strength
 Pgm_Beacon_Delay:			DS	1		; Programmed beacon delay
+Pgm_Throttle_Rate:			DS	1		; Programmed throttle rate
+Pgm_Demag_Comp:			DS	1		; Programmed demag compensation
+
+Pgm_Gov_P_Gain_Decoded:		DS	1		; Programmed governor decoded P gain
+Pgm_Gov_I_Gain_Decoded:		DS	1		; Programmed governor decoded I gain
+Pgm_Throttle_Rate_Decoded:	DS	1		; Programmed throttle rate decoded
+Pgm_Startup_Pwr_Decoded:		DS	1		; Programmed startup power decoded
+Pgm_Demag_Comp_Wait_Decoded:	DS	1		; Programmed demag compensation wait decoded
+Pgm_Demag_Comp_Power_Decoded:	DS	1		; Programmed demag compensation power cut decoded
+
+
 
 ; Indirect addressing data segment
 ISEG AT 0D0h					
@@ -1097,9 +1092,9 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
-EEPROM_FW_MAIN_REVISION		EQU	8		; Main revision of the firmware
+EEPROM_FW_MAIN_REVISION		EQU	9		; Main revision of the firmware
 EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION		EQU	14		; Revision of the EEPROM layout
+EEPROM_LAYOUT_REVISION		EQU	15		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -1219,25 +1214,26 @@ CSEG AT 80h			; Code segment after interrupt vectors
 ; Table definitions
 GOV_GAIN_TABLE:   		DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h
 THROTTLE_RATE_TABLE:  	DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 80h, 0FFh
+STARTUP_POWER_TABLE:  	DB 	20h, 30h, 40h, 60h, 80h, 0A0h, 0C0h
 DEMAG_WAIT_TABLE:  		DB 	0, 0, 0, 1, 1
 DEMAG_POWER_TABLE:  	DB 	0, 3, 2, 2, 1
 IF MODE == 0
-TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 2, 6, 2, 5, 5, 5, 5, 13, 5, 3, 5, 2, 2
+TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 2, 6, 2, 7, 5, 5, 5, 13, 5, 3, 5, 2, 2
 ENDIF
 IF MODE == 1
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 5, 5, 5, 5, 13, 5, 4, 5, 2, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 7, 5, 5, 5, 13, 5, 4, 5, 2, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 5, 5, 5, 5, 13, 5, 3, 5, 2, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 7, 5, 5, 5, 13, 5, 3, 5, 2, 2
   ENDIF
 ENDIF
 IF MODE == 2
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_MULTI:  	DB 	5, 6, 2, 5, 5, 5, 5, 13, 5, 4, 5, 2, 2
+TX_PGM_PARAMS_MULTI:  	DB 	5, 6, 2, 7, 5, 5, 5, 13, 5, 4, 5, 2, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_MULTI:  	DB 	5, 6, 2, 5, 5, 5, 5, 13, 5, 3, 5, 2, 2
+TX_PGM_PARAMS_MULTI:  	DB 	5, 6, 2, 7, 5, 5, 5, 13, 5, 3, 5, 2, 2
   ENDIF
 ENDIF
 
@@ -1293,6 +1289,9 @@ t0_int_pwm_on_stopped:
 
 
 t0_int_pwm_off:
+	jnb	Flags1.DIRECT_STARTUP_PHASE, t0_int_pwm_off_start_checked
+	All_nFETs_Off 					; Switch off all nfets early during direct start, for a smooth start
+t0_int_pwm_off_start_checked:
 	; Pwm off cycle
 	mov	TL0, Current_Pwm_Limited		; Load new timer setting
 	; Clear pwm on flag
@@ -1711,7 +1710,7 @@ t2_int_pwm_min_run:
 t2_int_pwm_update: 
 	; Check if any startup phase flags are set
 	mov	A, Flags1
-	anl	A, #((1 SHL SETTLE_PHASE)+(1 SHL STEPPER_PHASE)+(1 SHL AQUISITION_PHASE))
+	anl	A, #((1 SHL SETTLE_PHASE)+(1 SHL STEPPER_PHASE))
 	jnz	t2_int_pwm_exit			; Exit if any startup phase set (pwm controlled by set_startup_pwm)
 
 	; Update requested_pwm
@@ -1853,6 +1852,23 @@ t2h_int_rcp_gov_pwm_inc:
 
 t2h_int_rcp_gov_pwm_done:
 	djnz	Temp1, t2h_int_rcp_gov_pwm		; If not number of steps processed - go back
+
+	inc	Spoolup_Limit_Cnt				; Increment spoolup count
+	djnz	Spoolup_Limit_Skip, t2h_int_rcp_exit	; Jump if skip count is not reached
+
+	mov	Spoolup_Limit_Skip, #1			; Reset skip count. Default is fast spoolup
+
+	clr	C
+	mov	A, Spoolup_Limit_Cnt
+	subb	A, #30						; No spoolup until 30*32ms
+	jc	t2h_int_rcp_exit
+
+	clr	C
+	mov	A, Spoolup_Limit_Cnt
+	subb	A, #130						; Slow spoolup until 130*32ms
+	jnc	($+5)
+	mov	Spoolup_Limit_Skip, #3			; Reset skip count. For slow initial spoolup
+
 	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 8 seconds spoolup
 	inc	A
 	jnz	($+3)						; Limit to 255
@@ -3200,61 +3216,38 @@ set_startup_pwm:
 	mov	Temp1, #PWM_SETTLE				; Yes - set settle power
 	jnb	Flags1.STEPPER_PHASE, ($+5)		; Is it motor start stepper phase?
 	mov	Temp1, #PWM_STEPPER				; Yes - set stepper power
-	jnb	Flags1.AQUISITION_PHASE, ($+5)	; Is it motor start aquisition phase?
-	mov	Temp1, #PWM_AQUISITION			; Yes - set aquisition power
 
 	; Update pwm variables if any startup phase flag is set
 	mov	A, Flags1
-	anl	A, #((1 SHL SETTLE_PHASE)+(1 SHL STEPPER_PHASE)+(1 SHL AQUISITION_PHASE))
-	jz	startup_pwm_exit		; If no startup phase set - exit
+	anl	A, #((1 SHL SETTLE_PHASE)+(1 SHL STEPPER_PHASE))
+	jz	startup_pwm_exit				; If no startup phase set - exit
 
 	; Adjust startup power
-	mov	Temp2, #Pgm_Startup_Pwr	
-	cjne	@Temp2, #3, ($+6)			; Is gain 1?
-	ljmp	startup_pwm_set_pwm			; Yes - skip adjustment
-
+	mov	A, Temp1						; Multiply startup power by programmed value
+	mov	Temp2, #Pgm_Startup_Pwr_Decoded
+	mov	B, @Temp2
+	mul	AB
+	xch	A, B
+	mov	C, B.7						; Multiply result by 2 (unity gain is 128)
+	rlc	A
+	mov	Temp1, A						; Transfer to Temp1
 	clr	C
-	mov	A, Temp1
-	rrc	A			; After this "0.5"
-	mov	Bit_Access, @Temp2	
-	jb	Bit_Access.0, startup_pwm_corr	; Branch if bit 0 in gain is set
+	mov	A, Temp1						; Check against limit
+	subb	A, Pwm_Limit	
+	jc	startup_pwm_set_pwm				; If pwm below limit - branch
 
-	clr	C
-	rrc	A			; After this "0.25"
-
-startup_pwm_corr:
-	jb	Bit_Access.2, startup_pwm_gain_pos	; Branch if bit 2 in gain is set
-
-	xch	A, Temp1
-	clr	C
-	subb	A, Temp1					; Apply negative correction
-	mov	Temp1, A
-	jmp	startup_pwm_set_pwm
-
-startup_pwm_gain_pos:
-	add	A, Temp1					; Apply positive correction
-	mov	Temp1, A
-	jnc	startup_pwm_check_limit		; Above max?
-
-	mov	A, #0FFh					; Yes - limit
-	mov	Temp1, A
-
-startup_pwm_check_limit:
-	clr	C
-	mov	A, Temp1					; Check against limit
-	subb	A, Pwm_Limit
-	jc	startup_pwm_set_pwm			; If pwm below limit - branch
-
-	mov	Temp1, Pwm_Limit			; Limit pwm
+	mov	Temp1, Pwm_Limit				; Limit pwm
 
 startup_pwm_set_pwm:
 	; Set pwm variables
-	mov	Requested_Pwm, Temp1		; Update requested pwm
-	mov	Current_Pwm, Temp1			; Update current pwm
-	mov	Current_Pwm_Limited, Temp1	; Update limited version of current pwm
+	mov	Requested_Pwm, Temp1			; Update requested pwm
+	mov	Current_Pwm, Temp1				; Update current pwm
+	mov	Current_Pwm_Limited, Temp1		; Update limited version of current pwm
 	jnb	Flags1.SETTLE_PHASE, startup_pwm_exit	; Is it motor start settle phase?
 
-	mov	Pwm_Spoolup_Beg, Temp1				; Yes - update spoolup beginning pwm (will use PWM_SETTLE)
+	clr	C							; Yes - update spoolup beginning pwm (will use PWM_SETTLE or PWM_SETTLE/2)
+	mov	A, Temp1
+	mov	Pwm_Spoolup_Beg, A			
 
 startup_pwm_exit:
 	ret
@@ -3417,6 +3410,7 @@ read_timer:
 	mov	Comm_Period4x_L, Temp3	; Store Comm_Period4x_X
 	mov	Comm_Period4x_H, Temp4
 	jc	calc_next_comm_slow		; If period larger than 0xffff - go to slow case
+
 	ret
 
 calc_next_comm_slow:
@@ -3621,13 +3615,11 @@ wait_before_zc_scan:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_for_comp_out_low:
-	Set_Comp_Hyst_Low
 	mov	Comp_Wait_Reads, #0
 	mov	Bit_Access, #00h			; Desired comparator output
 	jmp	wait_for_comp_out_start
 
 wait_for_comp_out_high:
-	Set_Comp_Hyst_High
 	mov	Comp_Wait_Reads, #0
 	mov	Bit_Access, #40h			; Desired comparator output
 
@@ -3692,32 +3684,44 @@ comp_wait_on_comp_able:
 	setb	EA						; Enable interrupts
 	ret							; Yes - return
 
-	mov	Temp2, #COMP_PWM_HIGH_ON_DELAY; Wait time after pwm has been switched on (motor wire electrical settling)
+	mov	Temp2, #COMP_PWM_HIGH_ON_DELAY	; Wait time after pwm has been switched on (motor wire electrical settling)
 	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
 	mov	Temp2, #COMP_PWM_LOW_ON_DELAY
-	setb	EA						; Enable interrupts
-	nop							; Allocate only just enough time to capture interrupt
+	setb	EA							; Enable interrupts
+	nop								; Allocate only just enough time to capture interrupt
 	nop
-	clr	EA						; Disable interrupts
-	jb	Flags0.PWM_ON, pwm_wait		; If pwm on - proceed
+	clr	EA							; Disable interrupts
+	jb	Flags0.PWM_ON, pwm_wait_startup	; If pwm on - proceed
 
-	mov	Temp2, #COMP_PWM_HIGH_OFF_DELAY; Wait time after pwm has been switched off (motor wire electrical settling)
+	mov	Temp2, #COMP_PWM_HIGH_OFF_DELAY	; Wait time after pwm has been switched off (motor wire electrical settling)
 	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
 	mov	Temp2, #COMP_PWM_LOW_OFF_DELAY	
 	jnb	Flags2.CURR_PWMOFF_COMP_ABLE, comp_wait_on_comp_able	; If comparator is not usable in pwm off - go back
 
+pwm_wait_startup:						
+	jnb	Flags1.DIRECT_STARTUP_PHASE, pwm_wait	; Set a long delay from pwm on/off events during direct startup
+
+	mov	Temp2, #120
 pwm_wait:						
 	clr	C
 	mov	A, TL1
 	subb	A, Temp2
-	jc	pwm_wait	
+IF DAMPED_MODE_ENABLE==0				
+	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle for slower escs
+ENDIF
+IF DAMPED_MODE_ENABLE==1				; Assume same pwm cycle for fast escs
+	jb	Flags1.DIRECT_STARTUP_PHASE, ($+5)
+	jc	pwm_wait
+	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle during direct start
+ENDIF
 
 comp_read:
 	Read_Comp_Out 					; Read comparator output
 	anl	A, #40h
 	cjne	A, Bit_Access, wait_for_comp_out_start	; If comparator output is not correct - go back and restart
-	
+
 	djnz	Temp1, comp_wait_on_comp_able	; Decrement readings counter - repeat comparator reading if not zero
+
 	setb	EA						; Enable interrupts
 	ret							
 
@@ -3748,14 +3752,7 @@ evaluate_comparator_integrity:
 
 eval_comp_no_demag:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, eval_comp_check_timeout
-	mov	A, Comp_Wait_Reads				; Check if there were no waits (there shall be some). If none, motor may be spinning reverse
-	dec	A
-	jnz	eval_comp_startup_ok
 
-	inc	Direct_Startup_Fail_Cnt			; Increment fail counter
-	jmp	eval_comp_exit
-
-eval_comp_startup_ok:
 	inc	Direct_Startup_Ok_Cnt			; Increment ok counter
 	jb	Flags0.T3_PENDING, eval_comp_exit
 
@@ -4450,6 +4447,28 @@ decode_throttle_rate:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
+; Decode startup power
+;
+; No assumptions
+;
+; Decodes startup power
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+decode_startup_power:
+	; Decode startup power
+	mov	Temp1, #Pgm_Startup_Pwr		
+	mov	A, @Temp1				
+	dec	A	
+	mov	DPTR, #STARTUP_POWER_TABLE
+	movc A, @A+DPTR	
+	mov	Temp1, #Pgm_Startup_Pwr_Decoded
+	mov	@Temp1, A	
+	call	switch_power_off			; Reset DPTR
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
 ; Decode demag compensation
 ;
 ; No assumptions
@@ -4597,6 +4616,8 @@ clear_ram:
 	call	decode_governor_gains
 	; Decode throttle rate
 	call	decode_throttle_rate
+	; Decode startup power
+	call	decode_startup_power
 	; Decode demag compensation
 	call	decode_demag_comp
 	; Find throttle gain from stored min and max settings
@@ -4942,7 +4963,6 @@ init_start:
 	mov	Governor_Req_Pwm, A		; Set governor requested pwm to zero
 	mov	Current_Pwm, A			; Set current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
-	mov	Pwm_Spoolup_Beg, A		; Set spoolup beginning pwm to zero
 	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	mov	Temp1, #Pgm_Motor_Idle
 	mov	Pwm_Motor_Idle, @Temp1	; Set idle pwm to programmed value			
@@ -4951,7 +4971,6 @@ init_start:
 	mov	Gov_Integral_L, A		; Set integral to zero
 	mov	Gov_Integral_H, A
 	mov	Gov_Integral_X, A
-	mov	Voltage_Comp_Factor, #80h; Set voltage compensation factor to "1"
 	mov	Adc_Conversion_Cnt, A
 	mov	Gov_Active, A
 	mov	Flags0, A				; Clear flags0
@@ -4988,18 +5007,19 @@ direct_method_start:
 	mov	@Temp1, A				; Restore settings
 	; Set max allowed power
 	setb	Flags1.SETTLE_PHASE		; Set settle phase power as max
+	clr	EA					; Disable interrupts to avoid that Requested_Pwm is overwritten
 	call set_startup_pwm
 	mov	Pwm_Limit, Requested_Pwm
-	mov	Pwm_Spoolup_Beg, Requested_Pwm
+	mov	Pwm_Limit_Spoolup, Requested_Pwm
+	setb	EA
 	clr	Flags1.SETTLE_PHASE		
 	mov	Current_Pwm_Limited, #0		; Set low pwm again after calling set_startup_pwm
+	mov	Spoolup_Limit_Cnt, #0
+	mov	Spoolup_Limit_Skip, #1			
 	; Begin startup sequence
 	setb	Flags1.MOTOR_SPINNING		; Set motor spinning flag
 	setb	Flags1.DIRECT_STARTUP_PHASE	; Set direct startup phase flag
-	setb	Flags1.INITIAL_RUN_PHASE		; Set initial run phase flag
 	mov	Direct_Startup_Ok_Cnt, #0	; Reset ok counter
-	mov	Direct_Startup_Fail_Cnt, #0	; Reset fail counter
-	mov	Startup_Rot_Cnt, #10		; Set startup rotation count
 	call comm5comm6				; Initialize commutation
 	call comm6comm1				
 	call	calc_next_comm_timing		; Set virtual commutation point
@@ -5113,120 +5133,41 @@ stepper_rot_beg:
 	jmp	run_to_wait_for_power_on
 
 stepper_rot_exit:
-	; Set aquisition phase
+	; Wait for step
+	call stepper_timer_wait
+	; Clear stepper phase
 	clr	Flags1.STEPPER_PHASE		; Clear motor start stepper phase flag
-	setb	Flags1.AQUISITION_PHASE		; Set aquisition phase flag
-	; Set aquisition rotation count
-	mov	Startup_Rot_Cnt, #AQUISITION_ROTATIONS
-	; Wait for step
-	call stepper_timer_wait			; As the last part of stepper phase
-	
-	;**** **** **** **** ****
-	; Aquisition phase beginning
-	;**** **** **** **** **** 
-aquisition_rot_beg:
-	call start_adc_conversion
-	call check_temp_voltage_and_limit_power
-	call set_startup_pwm
-	mov	Adc_Conversion_Cnt, #TEMP_CHECK_RATE	; Make sure a temp reading is done next time
-	Set_Adc_Ip_Temp
-
-	call comm6comm1				; Commutate
-	call calc_next_comm_timing_start	; Update timing and set timer
-	call calc_new_wait_times
-	call decrement_stepper_step
-	call stepper_timer_wait
-
-	call comm1comm2
-	call calc_next_comm_timing_start	
-	call calc_new_wait_times
-	call decrement_stepper_step
-	call stepper_timer_wait
-
-	call comm2comm3
-	call calc_next_comm_timing_start	
-	call calc_new_wait_times
-	call decrement_stepper_step
-	call stepper_timer_wait
-
-	call comm3comm4
-	call calc_next_comm_timing_start	
-	call calc_new_wait_times
-	call decrement_stepper_step
-	call stepper_timer_wait
-
-	call comm4comm5
-	call calc_next_comm_timing_start	
-	call calc_new_wait_times
-	call decrement_stepper_step
-	call stepper_timer_wait
-
-	call comm5comm6
-	call calc_next_comm_timing_start	
-	call calc_new_wait_times
-	call decrement_stepper_step
-	; Decrement startup rotation count
-	mov	A, Startup_Rot_Cnt
-	dec	A
-	; Check number of aquisition rotations
-	jz aquisition_rot_exit		; Branch if counter is zero
-	
-	; Store counter
-	mov	Startup_Rot_Cnt, A
-	; Wait for step
-	call stepper_timer_wait
-	clr	C
-	mov	A, New_Rcp				; Load new pulse value
-	subb	A, #RCP_STOP				; Check if pulse is below stop value
-	jnc	aquisition_rot_beg
-
-	jmp	run_to_wait_for_power_on
-
-aquisition_rot_exit:
-	setb	Flags1.INITIAL_RUN_PHASE	; Set initial run phase flag
-	; Set spoolup power variables (power is now controlled from RCP)
-IF MODE == 0
-	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	; Set initial slow spoolup power
-	mov	Pwm_Limit, Pwm_Spoolup_Beg
-ENDIF
-IF MODE == 1
-	mov	Pwm_Limit_Spoolup, #0FFh			; Allow full power
-ENDIF
-IF MODE == 2
-	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	; Set initial slow spoolup power
-	mov	Pwm_Limit, Pwm_Spoolup_Beg
-ENDIF
-	call stepper_timer_wait		; As the last part of aquisition phase
-
-	call comm6comm1
-	call calc_next_comm_timing	
-	call wait_advance_timing		; Wait advance timing and start zero cross wait
-	call calc_new_wait_times
-	call wait_before_zc_scan		; Wait zero cross wait and start zero cross timeout
-
-	; Set nondamped run rotation count
-	mov	Startup_Rot_Cnt, #NONDAMPED_RUN_ROTATIONS
-	; Transition from damped to nondamped
+	; Set dondamped low pwm frequency
 	mov	Temp1, #Pgm_Pwm_Freq
 	mov	A, @Temp1	
-	mov	Temp7, A				; Store setting in Temp7
-	mov	@Temp1, #1			; Set nondamped mode high frequency
-	call	decode_parameters		; (Decode_parameters uses Temp1 and Temp8)
+	mov	Temp7, A					; Store setting in Temp7
+	mov	@Temp1, #2				; Set nondamped low frequency pwm mode
+	call	decode_parameters			; (Decode_parameters uses Temp1 and Temp8)
 	mov	Temp1, #Pgm_Pwm_Freq
 	mov	A, Temp7
-	mov	@Temp1, A				; Restore settings
-	clr	EA					; Disable all interrupts
-	All_pFETs_Off 				; Turn off all pfets
-	BpFET_on					; Bp on
-	mov	A, #45				; 8us delay for pfets to go off
+	mov	@Temp1, A					; Restore settings
+	; Set spoolup power variables (power is now controlled from RCP)
+	mov	Pwm_Limit, Requested_Pwm
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg
+	mov	Current_Pwm_Limited, Pwm_Spoolup_Beg
+	mov	Spoolup_Limit_Cnt, #0
+	mov	Spoolup_Limit_Skip, #1			
+	; Set direct startup phase to aquire sync quickly
+	setb	Flags1.DIRECT_STARTUP_PHASE	; Set direct startup phase flag
+	mov	Direct_Startup_Ok_Cnt, #0	; Reset ok counter
+	clr	EA						; Disable interrupts
+	ApFET_off						; Ap off. Turn off unused pfets (to turn off damping fets that might be on)
+	CpFET_off						; Cp off
+	mov	A, #45					; 8us delay for pfets to go off
 	djnz	ACC, $
-	mov	DPTR, #pwm_cfet_on		; Set DPTR register to desired pwm_nfet_on label		
-	setb	EA					; Enable interrupts
-	call start_adc_conversion
-	call check_temp_voltage_and_limit_power
-	call set_startup_pwm
-	mov	Adc_Conversion_Cnt, #0	; Make sure a voltage reading is done next time
-	Set_Adc_Ip_Volt			; Set adc measurement to voltage
+	setb	EA						; Enable interrupts
+	call comm6comm1				
+	call calc_next_comm_timing		; Calculate next timing and start advance timing wait
+	call wait_advance_timing			; Wait advance timing and start zero cross wait
+	call calc_new_wait_times
+	call wait_before_zc_scan			; Wait zero cross wait and start zero cross timeout
+	mov	Adc_Conversion_Cnt, #0		; Make sure a voltage reading is done next time
+	Set_Adc_Ip_Volt				; Set adc measurement to voltage
 	jmp	run1
 
 
@@ -5331,27 +5272,26 @@ run6:
 	; Check if it is direct startup
 	jnb	Flags1.DIRECT_STARTUP_PHASE, normal_run_checks
 
-	clr	C
-	mov	A, Direct_Startup_Fail_Cnt	; Load fail counter
-	subb	A, #20					; Is counter below requirement?
-	jnc	run_to_wait_for_power_on		
-
+	; Set spoolup power variables
+IF MODE == 0 OR MODE ==2
+	mov	Pwm_Limit, Pwm_Spoolup_Beg		; Set initial max power
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg		; Set initial slow spoolup power
+ENDIF
+IF MODE == 1
+	mov	Pwm_Limit, #0FFh			; Allow full power
+	mov	Pwm_Limit_Spoolup, #0FFh	
+ENDIF
+	mov	Spoolup_Limit_Cnt, #0
+	mov	Spoolup_Limit_Skip, #1			
+	; Check startup ok counter
 	clr	C
 	mov	A, Direct_Startup_Ok_Cnt		; Load ok counter
-	subb	A, #40					; Is counter above requirement?
+	subb	A, #100					; Is counter above requirement?
 	jc	direct_start_check_rcp		; No - proceed
 
 	clr	Flags1.DIRECT_STARTUP_PHASE	; Clear direct startup phase flag
-	; Set spoolup power variables
-IF MODE == 0
-	mov	Pwm_Limit_Spoolup, Pwm_Limit	; Set initial slow spoolup power
-ENDIF
-IF MODE == 1
-	mov	Pwm_Limit_Spoolup, #0FFh		; Allow full power
-ENDIF
-IF MODE == 2
-	mov	Pwm_Limit_Spoolup, Pwm_Limit	; Set initial slow spoolup power
-ENDIF
+	setb	Flags1.INITIAL_RUN_PHASE		; Set initial run phase flag
+	mov	Startup_Rot_Cnt, #20		; Set startup rotation count
 	jmp	normal_run_checks
 
 direct_start_check_rcp:
@@ -5376,7 +5316,6 @@ normal_run_checks:
 	jnz 	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
-	clr	Flags1.AQUISITION_PHASE		; Clear aquisition phase flag (has overlapped initial run phase for stepper mode)
 	ljmp damped_transition			; Do damped transition if counter is zero
 
 normal_run_check_startup_rot:
@@ -5399,6 +5338,7 @@ initial_run_phase_done:
 	subb	A, #RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
+run6_check_rcp_timeout:
 	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	run6_check_speed			; If a flag is set (PWM) - branch
@@ -5429,7 +5369,6 @@ run_to_wait_for_power_on:
 	mov	Governor_Req_Pwm, A		; Set governor requested pwm to zero
 	mov	Current_Pwm, A			; Set current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
-	mov	Pwm_Spoolup_Beg, A		; Set spoolup beginning pwm to zero
 	mov	Pwm_Motor_Idle, A		; Set motor idle to zero
 	clr	Flags1.MOTOR_SPINNING	; Clear motor spinning flag
 	call	wait1ms				; Wait for pwm to be stopped
@@ -5445,9 +5384,14 @@ IF MODE == 0	; Main
 	jmp	measure_pwm_freq_init	; If it is zero (pulses missing) - go back to measure pwm frequency
 
 run_to_next_state_main:
-	call	wait1s				; 3 second delay before new startup
+	mov	Temp1, #Pgm_Startup_Method	; Check if it is stepped startup
+	mov	A, @Temp1
+	jnb	ACC.0, run_to_next_state_main_wait_done	; If direct startup - jump
+
+	call	wait1s					; 3 second delay before new startup (in stepped mode)
 	call	wait1s
 	call	wait1s
+run_to_next_state_main_wait_done:
 	mov	Temp1, #Pgm_Main_Rearm_Start
 	mov	A, @Temp1	
 	clr	C
@@ -5478,6 +5422,7 @@ ENDIF
 $include (BLHeliTxPgm.inc)		; Include source code for programming the ESC with the TX
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
+
 
 
 

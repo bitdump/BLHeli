@@ -59,6 +59,16 @@ TEMP_LIMIT_L			EQU 	246	; Temperature measurement ADC value for which main motor
 TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
 TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
 
+;**** **** **** **** ****
+; ESC specific defaults
+;**** **** **** **** ****
+DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
+DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
+DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
+DEFAULT_PGM_MAIN_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
+DEFAULT_PGM_TAIL_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
+DEFAULT_PGM_MULTI_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
+
 
 ;*********************
 ; PORT 0 definitions *
@@ -225,12 +235,6 @@ ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
 	cpl	A			; Invert output
-ENDM
-MACRO Set_Comp_Hyst_Low
-	mov	CPT0CN, #8Ch 	; Set 20mV positive hysteresis
-ENDM
-MACRO Set_Comp_Hyst_High
-	mov	CPT0CN, #83h 	; Set 20mV negative hysteresis
 ENDM
 
 
