@@ -127,6 +127,10 @@ $NOMOD51
 ;           Even more smooth and gentle spoolup for MAIN, to suit larger helis
 ;           Improved transition from stepped startup to run
 ;           Refined direct startup
+; - Rev9.1  Fixed bug that changed FW revision after throttle calibration or TX programming
+; - Rev9.2  Altered timing of throttle calibration in order to work with MultiWii calibration firmware
+;           Reduced main spoolup time too around 5 seconds
+;           Changed default beacon delay to 3 minutes
 ;
 ;
 ;**** **** **** **** ****
@@ -780,7 +784,7 @@ DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Target for governor in setup mode. C
 DEFAULT_PGM_MAIN_REARM_START		EQU 0 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_MAIN_BEEP_STRENGTH	EQU 120	; Beep strength
 DEFAULT_PGM_MAIN_BEACON_STRENGTH	EQU 200	; Beacon strength
-DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 1 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 ; Tail
 DEFAULT_PGM_TAIL_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_TAIL_IDLE_SPEED 		EQU 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
@@ -799,7 +803,7 @@ DEFAULT_PGM_TAIL_DIRECTION_REV	EQU 1 	; 1=Normal 	2=Reversed
 DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
-DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 1 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 ; Multi
 DEFAULT_PGM_MULTI_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM	EQU 1 	; 1=Off		2=3.0V/c		3=3.1V/c		4=3.2V/c		5=3.3V/c	6=3.4V/c
@@ -818,7 +822,7 @@ DEFAULT_PGM_MULTI_DIRECTION_REV	EQU 1 	; 1=Normal 	2=Reversed
 DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
-DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 1 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 ; Common
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_PPM_MIN_THROTTLE		EQU 37	; 4*37+1000=1148
@@ -1093,7 +1097,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	9		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	15		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1869,12 +1873,15 @@ t2h_int_rcp_gov_pwm_done:
 	jnc	($+5)
 	mov	Spoolup_Limit_Skip, #3			; Reset skip count. For slow initial spoolup
 
-	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 8 seconds spoolup
-	inc	A
-	jnz	($+3)						; Limit to 255
+	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 5 seconds spoolup
+	clr	C
+	add	A, #3
+	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
 
-	dec	A
+	mov	Pwm_Limit_Spoolup, #0FFh
+	ajmp	t2h_int_rcp_exit
 
+t2h_int_rcp_no_limit:
 	mov	Pwm_Limit_Spoolup, A
 ENDIF
 IF MODE == 2	; Multi
@@ -4648,7 +4655,9 @@ clear_ram:
 
 	; Wait for receiver to initialize
 	call	wait1s
-	call	wait1s
+	call	wait200ms
+	call	wait200ms
+	call	wait100ms
 
 	; Enable interrupts
 	mov	IE, #22h			; Enable timer0 and timer2 interrupts
@@ -4788,7 +4797,7 @@ program_by_tx_entry_wait_pwm:
 
 	; PPM throttle calibration and tx program entry
 throttle_high_cal_start:
-	mov	Temp8, #30			; Set 3 seconds wait time
+	mov	Temp8, #5				; Set 3 seconds wait time
 throttle_high_cal:			
 	setb	Flags3.FULL_THROTTLE_RANGE	; Set range to 1000-2020us
 	call	Find_Throttle_Gain		; Set throttle gain
@@ -4817,7 +4826,7 @@ throttle_high_cal:
 	call	success_beep
 
 throttle_low_cal_start:
-	mov	Temp8, #30			; Set 3 seconds wait time
+	mov	Temp8, #10			; Set 3 seconds wait time
 throttle_low_cal:			
 	setb	Flags3.FULL_THROTTLE_RANGE	; Set range to 1000-2020us
 	call	Find_Throttle_Gain		; Set throttle gain
