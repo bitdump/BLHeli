@@ -252,11 +252,11 @@ erase_and_store_all_in_eeprom:
 	call write_eeprom_byte_from_acc
 
 	inc	DPTR						; Now firmware sub revision
-	inc	A
+	mov	A, #EEPROM_FW_SUB_REVISION
 	call write_eeprom_byte_from_acc
 
 	inc	DPTR						; Now layout revision
-	inc	A
+	mov	A, #EEPROM_LAYOUT_REVISION
 	call write_eeprom_byte_from_acc
 
 IF MODE == 0
