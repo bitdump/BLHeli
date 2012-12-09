@@ -55,9 +55,9 @@ COMP_PWM_LOW_ON_DELAY	EQU	10	; Wait delay from pwm on until comparator can be re
 COMP_PWM_LOW_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT_L			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte)
+TEMP_LIMIT_L			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte)
 TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
-TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; ESC specific defaults
@@ -272,7 +272,7 @@ MACRO Set_Adc_Ip_Volt
 	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
 ENDM
 MACRO Set_Adc_Ip_Temp
-	mov	AMX0P, #1Eh		; Select temp sensor input
+	mov	AMX0P, #10h		; Select temp sensor input
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h		; ADC start

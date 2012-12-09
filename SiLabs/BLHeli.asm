@@ -129,8 +129,10 @@ $NOMOD51
 ;           Refined direct startup
 ; - Rev9.1  Fixed bug that changed FW revision after throttle calibration or TX programming
 ; - Rev9.2  Altered timing of throttle calibration in order to work with MultiWii calibration firmware
-;           Reduced main spoolup time too around 5 seconds
+;           Reduced main spoolup time to around 5 seconds
 ;           Changed default beacon delay to 3 minutes
+; - Rev9.3  Fixed bug in Plush 60/80A temperature reading, that caused failure in operation above 4S
+;           Corrected temperature limit for HiModel cool 22/33/41A, RCTimer 6A, Skywalker 20/40A, Turnigy AE45A, Plush 40/60/80A. Limit was previously set too high
 ;
 ;
 ;**** **** **** **** ****
@@ -1097,7 +1099,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	9		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	15		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2179,7 +2181,7 @@ pca_int_ppm_calculate:
 	ajmp	pca_int_pwm_divide_done
 
 pca_int_ppm_neg_checked:
-	clr	C							; Check that RC pulse is within legal range (1000+4*250=2000)
+	clr	C							; Check that RC pulse is within legal range (1000+4*255=2020)
 	mov	A, Temp5
 	subb	A, #RCP_MAX				
 	mov	A, Temp6
