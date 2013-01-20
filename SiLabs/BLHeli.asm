@@ -133,6 +133,7 @@ $NOMOD51
 ;           Changed default beacon delay to 3 minutes
 ; - Rev9.3  Fixed bug in Plush 60/80A temperature reading, that caused failure in operation above 4S
 ;           Corrected temperature limit for HiModel cool 22/33/41A, RCTimer 6A, Skywalker 20/40A, Turnigy AE45A, Plush 40/60/80A. Limit was previously set too high
+; - Rev9.4  Improved code timing for increased maximum rpm limit
 ;
 ;
 ;**** **** **** **** ****
@@ -848,10 +849,10 @@ RCP_STOP_LIMIT		EQU 	3	; Stop motor if this many timer2H overflows (~32ms) are b
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	80 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
-COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
+COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
-TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
+TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
 ENDIF
 ; Constant definitions for tail
@@ -870,10 +871,10 @@ RCP_STOP_LIMIT		EQU 	130	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
-COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
+COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
-TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
+TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
 ENDIF
 ; Constant definitions for multi
@@ -893,10 +894,10 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
-COMM_TIME_MIN		EQU 	5	; Minimum time (in us) for commutation wait
+COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
-TEMP_CHECK_RATE		EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
+TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
 
 ENDIF
 
@@ -1099,7 +1100,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	9		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	4		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	15		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -3142,7 +3143,6 @@ IF MODE == 0 OR MODE == 2	; Main or multi
 	clr	C
 	subb	A, #1					; Is low voltage limit disabled?
 	jz	check_voltage_good			; Yes - voltage declared good
-
 	; Check if ADC is saturated
 	clr	C
 	mov	A, Temp1
@@ -3638,6 +3638,8 @@ wait_for_comp_out_start:
 	jb	Flags0.T3_PENDING, ($+4)		; Has zero cross scan timeout elapsed?
 	ret							; Yes - return
 
+	; Set default comparator response times
+	mov	CPT0MD, #0				; Set fast response (100ns) as default		
 	; Select number of comparator readings based upon current rotation speed
 	mov 	A, Comm_Period4x_H			; Load rotation period
 	clr	C
@@ -3646,6 +3648,8 @@ wait_for_comp_out_start:
 	rrc	A
 	mov	Temp1, A
 	inc	Temp1					; Add one to be sure it is always larger than zero
+	jz	comp_wait_on_comp_able		; If minimum number of readings - jump directly to reading
+
 	; For damped mode, do fewer comparator readings (since comparator info is primarily only available in the pwm on period)
 	jnb	Flags2.PGM_PWMOFF_DAMPED, comp_wait_set_max_readings
 
@@ -3674,7 +3678,6 @@ comp_wait_set_max_readings:
 	mov	Temp1, #4
 
 comp_wait_set_response_time:
-	mov	CPT0MD, #0				; Set fast response (100ns) as default		
 	clr	C
 	mov	A, Comm_Period4x_H			; Is Comm_Period4x_H less than 1ms?
 	subb	A, #8

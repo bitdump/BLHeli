@@ -263,7 +263,7 @@ ENDM
 
 MACRO Initialize_Adc
 	mov	REF0CN, #0Eh		; Set vdd (3.3V) as reference. Enable temp sensor and bias
-	mov	ADC0CF, #0B8h		; ADC clock 1MHz
+	mov	ADC0CF, #58h		; ADC clock 2MHz
 	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
 	mov	AMX0N, #11h		; Select negative input as ground
 	mov	ADC0CN, #80h		; ADC enabled
