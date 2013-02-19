@@ -46,6 +46,8 @@ CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
+COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
+DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	5	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
@@ -55,16 +57,16 @@ COMP_PWM_LOW_ON_DELAY	EQU	4	; Wait delay from pwm on until comparator can be rea
 COMP_PWM_LOW_OFF_DELAY	EQU	5	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 ADC_LIMIT_L			EQU 	128	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	2	; Power supply measurement ADC value for which main motor power is limited (2 msbs)
-TEMP_LIMIT_L			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte)
-TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
+TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+MAIN_SPOOLUP_TIME		EQU	7	; Main motor spoolup time
 
 ;**** **** **** **** ****
 ; ESC specific defaults
 ;**** **** **** **** ****
-DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 5 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
-DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 5 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
-DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 5 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
+DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_MAIN_STARTUP_METHOD	EQU 1 	; 1=Stepped	2=Direct
 DEFAULT_PGM_TAIL_STARTUP_METHOD	EQU 1 	; 1=Stepped	2=Direct
 DEFAULT_PGM_MULTI_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
@@ -264,7 +266,7 @@ ENDM
 
 MACRO Initialize_Adc
 	mov	REF0CN, #07h		; Enable temp sensor, bias and reference buffer
-	mov	ADC0CF, #58h		; ADC clock 2MHz
+	mov	ADC0CF, #58h		; ADC clock 2MHz 
 	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
 	mov	AMX0N, #11h		; Select negative input as ground
 	mov	ADC0CN, #80h		; ADC enabled

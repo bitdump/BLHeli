@@ -46,25 +46,27 @@ CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
-DAMPED_MODE_ENABLE		EQU	0	; Damped mode enabled
-NFETON_DELAY			EQU	25	; Wait delay from pfets off to nfets on
-PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
+COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
+DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
+DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
+NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
+PFETON_DELAY			EQU	6	; Wait delay from nfets off to pfets on
 COMP_PWM_HIGH_ON_DELAY	EQU	24	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
 COMP_PWM_HIGH_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 COMP_PWM_LOW_ON_DELAY	EQU	8	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
 COMP_PWM_LOW_OFF_DELAY	EQU	7	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 msbs)
-TEMP_LIMIT_L			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte)
-TEMP_LIMIT_H			EQU	1	; Temperature measurement ADC value for which main motor power is limited (2 msbs)
+TEMP_LIMIT			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
+MAIN_SPOOLUP_TIME		EQU	10	; Main motor spoolup time
 
 ;**** **** **** **** ****
 ; ESC specific defaults
 ;**** **** **** **** ****
-DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
-DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
-DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 3 	; 1=0.25  2=0.38  3=0.50  4=0.75  5=1.00  6=1.25  7=1.50
+DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_MAIN_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
 DEFAULT_PGM_TAIL_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
 DEFAULT_PGM_MULTI_STARTUP_METHOD	EQU 2 	; 1=Stepped	2=Direct
