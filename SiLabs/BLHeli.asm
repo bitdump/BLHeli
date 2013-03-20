@@ -145,6 +145,10 @@ $NOMOD51
 ;           Implemented temperature reading average in order to avoid problems with ADC noise on Skywalkers
 ;           Increased switching delays for XP 7A fast, in order to avoid cross conduction of N and P fets
 ;           Miscellaneous other changes
+; - Rev10.1 Relaxed RC signal jitter requirement during frequency measurement
+;           Corrected bug that prevented using governor low
+;           Enabled vdd monitor always, in order to reduce likelihood of accidental overwriting of adjustments
+;           Fixed bug that caused stop for PPM input above 2048us, and moved upper accepted limit to 2160us
 ;
 ;
 ;**** **** **** **** ****
@@ -285,7 +289,7 @@ RCTimer_6A_Multi 			EQU 87
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
-;BESC EQU XP_3A_Main 
+;BESC EQU XP_3A_Main
 ;BESC EQU XP_3A_Tail
 ;BESC EQU XP_3A_Multi
 ;BESC EQU XP_7A_Main 
@@ -1159,7 +1163,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	10		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	16		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2122,6 +2126,7 @@ pca_int_second_meas_pwm_freq:
 	clr	A
 	mov	Temp4, A
 	; Check if pwm frequency is 8kHz
+	mov	Temp3, #250				; Set default period tolerance requirement
 	clr	C
 	mov	A, Temp1
 	subb	A, #low(360)				; If below 180us, 8kHz pwm is assumed
@@ -2132,6 +2137,7 @@ pca_int_second_meas_pwm_freq:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_8KHZ
 	mov	Temp4, A
+	mov	Temp3, #15				; Set period tolerance requirement
 	ajmp	pca_int_restore_edge
 
 pca_int_check_4kHz:
@@ -2146,6 +2152,7 @@ pca_int_check_4kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_4KHZ
 	mov	Temp4, A
+	mov	Temp3, #30				; Set period tolerance requirement
 	ajmp	pca_int_restore_edge
 
 pca_int_check_2kHz:
@@ -2160,6 +2167,7 @@ pca_int_check_2kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_2KHZ
 	mov	Temp4, A
+	mov	Temp3, #60				; Set period tolerance requirement
 	ajmp	pca_int_restore_edge
 
 pca_int_check_1kHz:
@@ -2174,6 +2182,7 @@ pca_int_check_1kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_1KHZ
 	mov	Temp4, A
+	mov	Temp3, #120				; Set period tolerance requirement
 
 pca_int_restore_edge:
 	; Calculate difference between this period and previous period
@@ -2201,7 +2210,7 @@ pca_int_check_diff:
 
 	clr	C
 	mov	A, Temp5
-	subb	A, #10						; Check difference
+	subb	A, Temp3						; Check difference
 	jnc	pca_int_store_data
 
 	mov	Rcp_Period_Diff_Accepted, #1		; Set accepted
@@ -2264,13 +2273,15 @@ pca_int_fall:
 	; Skip range limitation if pwm frequency measurement
 	jb	Flags0.RCP_MEAS_PWM_FREQ, pca_int_ppm_check_full_range 		
 
-	; Check if 2048us or above (in order to ignore false pulses)
+	; Check if 2160us or above (in order to ignore false pulses)
 	clr	C
-	mov	A, Temp6						; Is pulse 2048us or higher?
-	rrc	A
-	jz	($+5)						; No - proceed
+	mov	A, Temp5						; Is pulse 2160us or higher?
+	subb	A, #28
+	mov	A, Temp6
+	subb A, #2
+	jc	($+5)						; No - proceed
 
-	ljmp	pca_int_exit					; Yes - ignore pulse
+	ljmp	pca_int_set_timeout				; Yes - ignore pulse
 
 	; Check if below 800us (in order to ignore false pulses)
 	mov	A, Temp6
@@ -2714,6 +2725,7 @@ governor_activate:
 governor_target_calc:
 	; Governor calculations
 	clr	C
+	mov	Temp2, #Pgm_Gov_Range
 	mov	A, @Temp2				; Check high or low range (Temp2 has #Pgm_Gov_Range)
 	subb	A, #2
 	jz	calc_governor_target_low
@@ -4927,6 +4939,7 @@ reset:
 	; Initialize VDD monitor
 	orl	VDM0CN, #080h    	; Enable the VDD monitor
 	call	wait1ms			; Wait at least 100us
+	mov 	RSTSRC, #02h   	; Set VDD monitor as a reset source (PORSF)                                
 	; Set clock frequency
 	orl	OSCICN, #03h		; Set clock divider to 1
 	mov	A, OSCICL				
@@ -5043,13 +5056,13 @@ ENDIF
 measure_pwm_freq_init:	
 	setb	Flags0.RCP_MEAS_PWM_FREQ 		; Set measure pwm frequency flag
 measure_pwm_freq_start:	
-	mov	Temp3, #10					; Number of pulses to measure
+	mov	Temp3, #5						; Number of pulses to measure
 measure_pwm_freq_loop:	
 	; Check if period diff was accepted
 	mov	A, Rcp_Period_Diff_Accepted
 	jnz	($+4)
 
-	mov	Temp3, #10					; Reset number of pulses to measure
+	mov	Temp3, #5						; Reset number of pulses to measure
 
 	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	mov	A, New_Rcp					; Load value

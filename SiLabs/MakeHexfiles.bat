@@ -12,7 +12,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=Rev10_0
+SET Revision=Rev10_1
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 rem SET SilabsPath=C:\Dev\SiLabs
