@@ -1028,7 +1028,7 @@ RCP_PWM_FREQ_8KHZ			EQU 	3		; RC pulse pwm frequency is 8kHz
 PGM_DIR_REV				EQU 	4		; Programmed direction. 0=normal, 1=reversed
 PGM_RCP_PWM_POL			EQU	5		; Programmed RC pulse pwm polarity. 0=positive, 1=negative
 FULL_THROTTLE_RANGE			EQU 	6		; When set full throttle range is used (1000-2000us) and stored calibration values are ignored
-;						EQU 	7
+RCP_PWM_FREQ_500HZ						EQU 	7;  RC pulse pwm frequency is 500Hz
 
 ;**** **** **** **** ****
 ; RAM definitions
@@ -1666,7 +1666,7 @@ t2_int:	; Happens every 128us for low byte and every 32ms for high byte
 	jz	t2_int_pulses_absent		; Yes - pulses are absent
 
 	; Decrement timeout counter (if PWM)
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_skip_start			; If no flag is set (PPM) - branch
 
@@ -1695,7 +1695,7 @@ t2_int_pulses_absent:
 
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Yes - set timeout count to start value
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_ppm_timeout_set		; If no flag is set (PPM) - branch
 
@@ -1716,7 +1716,7 @@ t2_int_skip_start:
 	ajmp	t2_int_rcp_update_start
 
 t2_int_skip_end:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_rcp_update_start		; If no flag is set (PPM) - branch
 
@@ -1733,7 +1733,7 @@ t2_int_rcp_update_start:
 	mov	Temp1, A
 	clr	Flags2.RCP_UPDATED		 	; Flag that pulse has been evaluated
 	; Use a gain of 1.0625x for pwm input if not governor mode
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_pwm_min_run			; If no flag is set (PPM) - branch
 
@@ -1892,7 +1892,7 @@ t2h_int:
 	jz	t2h_int_rcp_stop_check		; Yes - do not decrement
 
 	; Decrement timeout counter (if PPM)
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	t2h_int_rcp_stop_check		; If a flag is set (PWM) - branch
 
@@ -2086,7 +2086,7 @@ pca_int_fail_minimum:
 	Rcp_Int_First					; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags2.RCP_EDGE_NO			; Set first edge flag
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	($+4)					; If a flag is set (PWM) - proceed
 
@@ -2177,12 +2177,28 @@ pca_int_check_1kHz:
 	subb	A, #low(2200)				; If below 1100us, 1kHz pwm is assumed
 	mov	A, Temp2
 	subb	A, #high(2200)
-	jnc	pca_int_restore_edge
+	jnc	pca_int_check_500Hz
 
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_1KHZ
 	mov	Temp4, A
 	mov	Temp3, #120				; Set period tolerance requirement
+	ajmp	pca_int_restore_edge
+
+pca_int_check_500Hz:
+	; Check if pwm frequency is 500Hz
+	clr	C
+	mov	A, Temp1
+	subb	A, #low(4800)				; If below 2400us, 500Hz pwm is assumed
+	mov	A, Temp2
+	subb	A, #high(4800)
+	jnc	pca_int_restore_edge
+
+	clr	A
+	setb	ACC.RCP_PWM_FREQ_500HZ
+	mov	Temp4, A
+	mov	Temp3, #240				; Set period tolerance requirement
+
 
 pca_int_restore_edge:
 	; Calculate difference between this period and previous period
@@ -2235,12 +2251,12 @@ pca_int_fall:
 	mov	A, Temp2
 	subb	A, Rcp_Prev_Edge_H
 	mov	Temp2, A
-	jnb	Flags3.RCP_PWM_FREQ_8KHZ, ($+5)	; Is RC input pwm frequency 8kHz?
+	jnb	Flags3.RCP_PWM_FREQ_8KHZ, (L1)	; Is RC input pwm frequency 8kHz?
 	ajmp	pca_int_pwm_divide_done			; Yes - branch forward
-
-	jnb	Flags3.RCP_PWM_FREQ_4KHZ, ($+5)	; Is RC input pwm frequency 4kHz?
+L1:
+	jnb	Flags3.RCP_PWM_FREQ_4KHZ, (L2)	; Is RC input pwm frequency 4kHz?
 	ajmp	pca_int_pwm_divide				; Yes - branch forward
-
+L2:
 	mov	A, Temp2						; No - 2kHz. Divide by 2 again
 	clr	C
 	rrc	A
@@ -2249,9 +2265,9 @@ pca_int_fall:
 	rrc	A
 	mov	Temp1, A
 
-	jnb	Flags3.RCP_PWM_FREQ_2KHZ, ($+5)	; Is RC input pwm frequency 2kHz?
+	jnb	Flags3.RCP_PWM_FREQ_2KHZ, (L3)	; Is RC input pwm frequency 2kHz?
 	ajmp	pca_int_pwm_divide				; Yes - branch forward
-
+L3:
 	mov	A, Temp2						; No - 1kHz. Divide by 2 again
 	clr	C
 	rrc	A
@@ -2260,15 +2276,31 @@ pca_int_fall:
 	rrc	A
 	mov	Temp1, A
 
-	jnb	Flags3.RCP_PWM_FREQ_1KHZ, ($+5)	; Is RC input pwm frequency 1kHz?
+	jnb	Flags3.RCP_PWM_FREQ_1KHZ, (L4)	; Is RC input pwm frequency 1kHz?
 	ajmp	pca_int_pwm_divide				; Yes - branch forward
-
-	mov	A, Temp2						; No - PPM. Divide by 2 (to bring range to 256) and move to Temp5/6
+L4:
+	mov	A, Temp2						; No - 500Hz. Divide by 2 again
 	clr	C
 	rrc	A
-	mov	Temp6, A
+	mov	Temp2, A
 	mov	A, Temp1					
 	rrc	A
+	mov	Temp1, A
+
+	jnb	Flags3.RCP_PWM_FREQ_500HZ, (L5)	; Is RC input pwm frequency 500Hz?
+	ajmp	pca_int_pwm_divide				; Yes - branch forward
+L5:
+
+
+
+
+
+	mov	A, Temp2						; No - PPM. move to Temp5/6
+;	clr	C
+;	rrc	A
+	mov	Temp6, A
+	mov	A, Temp1					
+;	rrc	A
 	mov	Temp5, A
 	; Skip range limitation if pwm frequency measurement
 	jb	Flags0.RCP_MEAS_PWM_FREQ, pca_int_ppm_check_full_range 		
@@ -2379,7 +2411,7 @@ pca_int_limited:
 	jb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
 	ajmp	pca_int_set_timeout			; No - skip measurements
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	cpl	A
 	anl	A, Flags3					; Clear all pwm frequency flags
 	orl	A, Temp4					; Store pwm frequency value in flags
@@ -2387,7 +2419,7 @@ pca_int_limited:
 
 pca_int_set_timeout:
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Set timeout count to start value
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	pca_int_ppm_timeout_set		; If a flag is set - branch
 
@@ -2397,7 +2429,7 @@ pca_int_ppm_timeout_set:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
 	ajmp pca_int_exit				; Yes - exit
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	pca_int_exit				; If no flag is set (PPM) - branch
 
@@ -2405,7 +2437,7 @@ pca_int_ppm_timeout_set:
 
 pca_int_exit:	; Exit interrupt routine	
 	mov	Rcp_Skip_Cnt, #RCP_SKIP_RATE	; Load number of skips
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	($+5)					; If a flag is set (PWM) - branch
 
@@ -5071,7 +5103,7 @@ measure_pwm_freq_loop:
 	jc	measure_pwm_freq_start			; No - start over
 
 	mov	A, Flags3						; Check pwm frequency flags
-	anl	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	mov	Prev_Rcp_Pwm_Freq, Curr_Rcp_Pwm_Freq		; Store as previous flags for next pulse 
 	mov	Curr_Rcp_Pwm_Freq, A					; Store current flags for next pulse 
 	cjne	A, Prev_Rcp_Pwm_Freq, measure_pwm_freq_start	; Go back if new flags not same as previous
@@ -5090,7 +5122,7 @@ measure_pwm_freq_loop:
 validate_rcp_start:	
 	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	mov	Temp1, #RCP_VALIDATE			; Set validate level as default
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3						; Check pwm frequency flags
 	jnz	($+4)						; If a flag is set (PWM) - branch
 
@@ -5130,7 +5162,7 @@ arming_initial_arm_check:
 	jmp 	program_by_tx_checked	; No - branch
 
 arming_ppm_check:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jz	throttle_high_cal_start	; If no flag is set (PPM) - branch
 
@@ -5317,7 +5349,7 @@ wait_for_power_on_no_beep:
 	mov	A, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
 	jnz	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3						; Check pwm frequency flags
 	jnz	wait_for_power_on_ppm_not_missing	; If a flag is set (PWM) - branch
 
@@ -5731,7 +5763,7 @@ initial_run_phase_done:
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
 run6_check_rcp_timeout:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	run6_check_speed			; If a flag is set (PWM) - branch
 
@@ -5766,7 +5798,7 @@ run_to_wait_for_power_on:
 	call	wait1ms				; Wait for pwm to be stopped
 	call switch_power_off
 IF MODE == 0	; Main
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jnz	run_to_next_state_main	; If a flag is set (PWM) - branch
 
@@ -5796,7 +5828,7 @@ jmp_wait_for_power_on:
 	jmp	wait_for_power_on		; Go back to wait for power on
 ENDIF
 IF MODE >= 1	; Tail or multi
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_500HZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jnz	jmp_wait_for_power_on	; If a flag is set (PWM) - branch
 
