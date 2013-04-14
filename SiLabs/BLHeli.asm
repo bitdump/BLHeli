@@ -149,6 +149,9 @@ $NOMOD51
 ;           Corrected bug that prevented using governor low
 ;           Enabled vdd monitor always, in order to reduce likelihood of accidental overwriting of adjustments
 ;           Fixed bug that caused stop for PPM input above 2048us, and moved upper accepted limit to 2160us
+; - Rev10.2 Corrected temperature limit for AE20-30/XP7-25, where limit was too high
+;           Corrected temperature limit for 120HV, where limit was too low
+;           Fixed bug that caused AE20/25/30A not to run in reverse
 ;
 ;
 ;**** **** **** **** ****
@@ -286,6 +289,12 @@ HiModel_Cool_41A_Multi 		EQU 84
 RCTimer_6A_Main 			EQU 85   
 RCTimer_6A_Tail 			EQU 86   
 RCTimer_6A_Multi 			EQU 87   
+Align_RCE_BL35P_Main		EQU 88   
+Align_RCE_BL35P_Tail 		EQU 89   
+Align_RCE_BL35P_Multi 		EQU 90   
+H_King_10A_Main			EQU 91   
+H_King_10A_Tail 			EQU 92   
+H_King_10A_Multi 			EQU 93   
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -376,6 +385,12 @@ RCTimer_6A_Multi 			EQU 87
 ;BESC EQU RCTimer_6A_Main
 ;BESC EQU RCTimer_6A_Tail
 ;BESC EQU RCTimer_6A_Multi
+;BESC EQU Align_RCE_BL35P_Main
+;BESC EQU Align_RCE_BL35P_Tail
+;BESC EQU Align_RCE_BL35P_Multi
+;BESC EQU H_King_10A_Main
+;BESC EQU H_King_10A_Tail
+;BESC EQU H_King_10A_Multi
 
 
 ;**** **** **** **** ****
@@ -815,6 +830,35 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (RCTimer_6A.inc)		; Select RC Timer 6A pinout
 ENDIF
 
+IF BESC == Align_RCE_BL35P_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
+ENDIF
+
+IF BESC == Align_RCE_BL35P_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
+ENDIF
+
+IF BESC == Align_RCE_BL35P_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
+ENDIF
+
+IF BESC == H_King_10A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (H_King_10A.inc)		; Select H-King 10A pinout
+ENDIF
+
+IF BESC == H_King_10A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (H_King_10A.inc)		; Select H-King 10A pinout
+ENDIF
+
+IF BESC == H_King_10A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (H_King_10A.inc)		; Select H-King 10A pinout
+ENDIF
 
 ;**** **** **** **** ****
 ; TX programming defaults
@@ -1163,7 +1207,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	10		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	16		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
