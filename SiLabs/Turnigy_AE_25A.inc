@@ -49,8 +49,8 @@ PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
-NFETON_DELAY			EQU	1	; Wait delay from pfets off to nfets on
-PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
+NFETON_DELAY			EQU	14	; Wait delay from pfets off to nfets on
+PFETON_DELAY			EQU	26	; Wait delay from nfets off to pfets on
 COMP_PWM_HIGH_ON_DELAY	EQU	15	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
 COMP_PWM_HIGH_OFF_DELAY	EQU	50	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 COMP_PWM_LOW_ON_DELAY	EQU	5	; Wait delay from pwm on until comparator can be read (for low pwm frequency)

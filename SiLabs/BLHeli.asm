@@ -289,12 +289,18 @@ HiModel_Cool_41A_Multi 		EQU 84
 RCTimer_6A_Main 			EQU 85   
 RCTimer_6A_Tail 			EQU 86   
 RCTimer_6A_Multi 			EQU 87   
-Align_RCE_BL35P_Main		EQU 88   
-Align_RCE_BL35P_Tail 		EQU 89   
-Align_RCE_BL35P_Multi 		EQU 90   
-H_King_10A_Main			EQU 91   
-H_King_10A_Tail 			EQU 92   
-H_King_10A_Multi 			EQU 93   
+Align_RCE_BL15X_Main		EQU 88   
+Align_RCE_BL15X_Tail 		EQU 89   
+Align_RCE_BL15X_Multi 		EQU 90   
+Align_RCE_BL35X_Main		EQU 91   
+Align_RCE_BL35X_Tail 		EQU 92   
+Align_RCE_BL35X_Multi 		EQU 93   
+Align_RCE_BL35P_Main		EQU 94   
+Align_RCE_BL35P_Tail 		EQU 95   
+Align_RCE_BL35P_Multi 		EQU 96   
+H_King_10A_Main			EQU 97   
+H_King_10A_Tail 			EQU 98   
+H_King_10A_Multi 			EQU 99   
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -385,6 +391,12 @@ H_King_10A_Multi 			EQU 93
 ;BESC EQU RCTimer_6A_Main
 ;BESC EQU RCTimer_6A_Tail
 ;BESC EQU RCTimer_6A_Multi
+;BESC EQU Align_RCE_BL15X_Main 
+;BESC EQU Align_RCE_BL15X_Tail
+;BESC EQU Align_RCE_BL15X_Multi
+;BESC EQU Align_RCE_BL35X_Main 
+;BESC EQU Align_RCE_BL35X_Tail
+;BESC EQU Align_RCE_BL35X_Multi
 ;BESC EQU Align_RCE_BL35P_Main
 ;BESC EQU Align_RCE_BL35P_Tail
 ;BESC EQU Align_RCE_BL35P_Multi
@@ -828,6 +840,36 @@ ENDIF
 IF BESC == RCTimer_6A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (RCTimer_6A.inc)		; Select RC Timer 6A pinout
+ENDIF
+
+IF BESC == Align_RCE_BL15X_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
+ENDIF
+
+IF BESC == Align_RCE_BL15X_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
+ENDIF
+
+IF BESC == Align_RCE_BL15X_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
+ENDIF
+
+IF BESC == Align_RCE_BL35X_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
+ENDIF
+
+IF BESC == Align_RCE_BL35X_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
+ENDIF
+
+IF BESC == Align_RCE_BL35X_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
 ENDIF
 
 IF BESC == Align_RCE_BL35P_Main
