@@ -23,7 +23,7 @@ $NOMOD51
 ;
 ;**** **** **** **** ****
 ;
-; The software was initially designed for use with Eflite mCP X, but is now adapted to a copters/planes in general
+; The software was initially designed for use with Eflite mCP X, but is now adapted to copters/planes in general
 ;
 ; The software was inspired by and started from from Bernard Konze's BLMC: http://home.versanet.de/~bkonze/blc_6a/blc_6a.htm
 ; And also Simon Kirby's TGY: https://github.com/sim-/tgy
@@ -152,6 +152,8 @@ $NOMOD51
 ; - Rev10.2 Corrected temperature limit for AE20-30/XP7-25, where limit was too high
 ;           Corrected temperature limit for 120HV, where limit was too low
 ;           Fixed bug that caused AE20/25/30A not to run in reverse
+; - Rev10.3 Removed vdd monitor for 1S capable ESCs, in order to avoid brownouts/resets
+;           Made auto bailout spoolup for main more smooth
 ;
 ;
 ;**** **** **** **** ****
@@ -292,22 +294,34 @@ RCTimer_6A_Multi 			EQU 87
 Align_RCE_BL15X_Main		EQU 88   
 Align_RCE_BL15X_Tail 		EQU 89   
 Align_RCE_BL15X_Multi 		EQU 90   
-Align_RCE_BL35X_Main		EQU 91   
-Align_RCE_BL35X_Tail 		EQU 92   
-Align_RCE_BL35X_Multi 		EQU 93   
-Align_RCE_BL35P_Main		EQU 94   
-Align_RCE_BL35P_Tail 		EQU 95   
-Align_RCE_BL35P_Multi 		EQU 96   
-H_King_10A_Main			EQU 97   
-H_King_10A_Tail 			EQU 98   
-H_King_10A_Multi 			EQU 99   
+Align_RCE_BL15P_Main		EQU 91   
+Align_RCE_BL15P_Tail 		EQU 92   
+Align_RCE_BL15P_Multi 		EQU 93   
+Align_RCE_BL35X_Main		EQU 94   
+Align_RCE_BL35X_Tail 		EQU 95   
+Align_RCE_BL35X_Multi 		EQU 96   
+Align_RCE_BL35P_Main		EQU 97   
+Align_RCE_BL35P_Tail 		EQU 98   
+Align_RCE_BL35P_Multi 		EQU 99   
+H_King_10A_Main			EQU 100   
+H_King_10A_Tail 			EQU 101  
+H_King_10A_Multi 			EQU 102  
+H_King_20A_Main			EQU 103   
+H_King_20A_Tail 			EQU 104  
+H_King_20A_Multi 			EQU 105  
+H_King_35A_Main			EQU 106   
+H_King_35A_Tail 			EQU 107  
+H_King_35A_Multi 			EQU 108  
+H_King_50A_Main			EQU 109   
+H_King_50A_Tail 			EQU 110  
+H_King_50A_Multi 			EQU 111  
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
 ;BESC EQU XP_3A_Main
 ;BESC EQU XP_3A_Tail
 ;BESC EQU XP_3A_Multi
-;BESC EQU XP_7A_Main 
+;BESC EQU XP_7A_Main
 ;BESC EQU XP_7A_Tail
 ;BESC EQU XP_7A_Multi 
 ;BESC EQU XP_7A_Fast_Main
@@ -394,6 +408,9 @@ H_King_10A_Multi 			EQU 99
 ;BESC EQU Align_RCE_BL15X_Main 
 ;BESC EQU Align_RCE_BL15X_Tail
 ;BESC EQU Align_RCE_BL15X_Multi
+;BESC EQU Align_RCE_BL15P_Main
+;BESC EQU Align_RCE_BL15P_Tail
+;BESC EQU Align_RCE_BL15P_Multi
 ;BESC EQU Align_RCE_BL35X_Main 
 ;BESC EQU Align_RCE_BL35X_Tail
 ;BESC EQU Align_RCE_BL35X_Multi
@@ -403,6 +420,15 @@ H_King_10A_Multi 			EQU 99
 ;BESC EQU H_King_10A_Main
 ;BESC EQU H_King_10A_Tail
 ;BESC EQU H_King_10A_Multi
+;BESC EQU H_King_20A_Main
+;BESC EQU H_King_20A_Tail
+;BESC EQU H_King_20A_Multi
+;BESC EQU H_King_35A_Main
+;BESC EQU H_King_35A_Tail
+;BESC EQU H_King_35A_Multi
+;BESC EQU H_King_50A_Main
+;BESC EQU H_King_50A_Tail
+;BESC EQU H_King_50A_Multi
 
 
 ;**** **** **** **** ****
@@ -857,6 +883,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
 ENDIF
 
+IF BESC == Align_RCE_BL15P_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
+ENDIF
+
+IF BESC == Align_RCE_BL15P_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
+ENDIF
+
+IF BESC == Align_RCE_BL15P_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
+ENDIF
+
 IF BESC == Align_RCE_BL35X_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
@@ -900,6 +941,51 @@ ENDIF
 IF BESC == H_King_10A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_10A.inc)		; Select H-King 10A pinout
+ENDIF
+
+IF BESC == H_King_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (H_King_20A.inc)		; Select H-King 20A pinout
+ENDIF
+
+IF BESC == H_King_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (H_King_20A.inc)		; Select H-King 20A pinout
+ENDIF
+
+IF BESC == H_King_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (H_King_20A.inc)		; Select H-King 20A pinout
+ENDIF
+
+IF BESC == H_King_35A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (H_King_35A.inc)		; Select H-King 35A pinout
+ENDIF
+
+IF BESC == H_King_35A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (H_King_35A.inc)		; Select H-King 35A pinout
+ENDIF
+
+IF BESC == H_King_35A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (H_King_35A.inc)		; Select H-King 35A pinout
+ENDIF
+
+IF BESC == H_King_50A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (H_King_50A.inc)		; Select H-King 50A pinout
+ENDIF
+
+IF BESC == H_King_50A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (H_King_50A.inc)		; Select H-King 50A pinout
+ENDIF
+
+IF BESC == H_King_50A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (H_King_50A.inc)		; Select H-King 50A pinout
 ENDIF
 
 ;**** **** **** **** ****
@@ -991,7 +1077,7 @@ RCP_MIN			EQU 	0	; This is minimum RC pulse length
 RCP_MAX			EQU 	255	; This is maximum RC pulse length
 RCP_VALIDATE		EQU 	2	; Require minimum this pulse length to validate RC pulse
 RCP_STOP			EQU 	1	; Stop motor at or below this pulse length
-RCP_STOP_LIMIT		EQU 	3	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	80 	; PWM used when in start stepper phase
@@ -1179,7 +1265,7 @@ Pwm_On_Cnt:				DS	1		; Pwm on event counter (used to increase pwm off time for l
 Pwm_Off_Cnt:				DS	1		; Pwm off event counter (used to run some pwm cycles without damping)
 
 Spoolup_Limit_Cnt:			DS	1		; Interrupt count for spoolup limit
-Spoolup_Limit_Skip:			DS	1		; Interrupt skips for spoolup limit increment (0=no skips, 1=skip one etc)
+Spoolup_Limit_Skip:			DS	1		; Interrupt skips for spoolup limit increment (1=no skips, 2=skip one etc)
 
 Damping_Period:			DS	1		; Damping on/off period
 Damping_On:				DS	1		; Damping on part of damping period
@@ -1249,7 +1335,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	10		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	16		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2051,6 +2137,7 @@ t2h_int_rcp_gov_pwm_done:
 	djnz	Temp1, t2h_int_rcp_gov_pwm		; If not number of steps processed - go back
 
 	inc	Spoolup_Limit_Cnt				; Increment spoolup count
+	mov	A, Spoolup_Limit_Cnt
 	
 	jnz	($+4)						; Wrapped?
 
@@ -2145,9 +2232,8 @@ pca_int:	; Used for RC pulse timing
 	push	ACC
 	push	B
 	setb	PSW.3		; Select register bank 1 for interrupt routines
-	; Get PCA0 capture values
-	mov	Temp1, PCA0CPL0
-	mov	Temp2, PCA0CPH0
+	; Get the PCA counter values
+	Get_Rcp_Capture_Values
 	; Clear interrupt flag
 	Rcp_Clear_Int_Flag 				
 	; Check which edge it is
@@ -5025,7 +5111,11 @@ reset:
 	; Initialize VDD monitor
 	orl	VDM0CN, #080h    	; Enable the VDD monitor
 	call	wait1ms			; Wait at least 100us
-	mov 	RSTSRC, #02h   	; Set VDD monitor as a reset source (PORSF)                                
+IF ONE_S_CAPABLE == 0		
+	mov 	RSTSRC, #02h   	; Set VDD monitor as a reset source (PORSF) if not 1S capable                                
+ELSE
+	mov 	RSTSRC, #00h   	; Do not set VDD monitor as a reset source for 1S ESCSs, in order to avoid resets due to it                              
+ENDIF
 	; Set clock frequency
 	orl	OSCICN, #03h		; Set clock divider to 1
 	mov	A, OSCICL				
@@ -5055,7 +5145,9 @@ IF PORT3_EXIST == 1
 	mov	P3MDOUT, #P3_PUSHPULL				
 	mov	P3MDIN, #P3_DIGITAL				
 ENDIF
-	mov	XBR1, #41h		; Xbar enabled, CEX0 routed to pin Rcp_In			
+
+	; Initialize the XBAR and related functionality
+	Initialize_Xbar		
 	; Switch power off
 	call	switch_power_off
 	; Clear RAM
@@ -5449,7 +5541,7 @@ init_start:
 	mov	Rcp_Stop_Cnt, A		; Set RC pulse stop count to zero
 	call initialize_all_timings	; Initialize timing
 	;**** **** **** **** ****
-	; Settle phase beginning
+	; Motor start beginning
 	;**** **** **** **** **** 
 	mov	Adc_Conversion_Cnt, #TEMP_CHECK_RATE	; Make sure a temp reading is done
 	Set_Adc_Ip_Temp
@@ -5753,7 +5845,7 @@ run6:
 	; Set spoolup power variables
 IF MODE == 0 OR MODE == 2
 	mov	Pwm_Limit, Pwm_Spoolup_Beg		; Set initial max power
-	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg		; Set initial slow spoolup power
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	; Set initial slow spoolup power
 ENDIF
 IF MODE == 1
 	mov	Pwm_Limit, #0FFh			; Allow full power
@@ -5810,6 +5902,20 @@ normal_run_check_startup_rot:
 
 
 initial_run_phase_done:
+IF MODE == 0	; Main
+	; Check if throttle is zeroed
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
+	subb	A, #1					; Is number of stop RC pulses above limit?
+	jc	run6_check_rcp_stop_count	; If no - branch
+
+	mov	Pwm_Limit, Pwm_Spoolup_Beg		; If yes - set initial max powers
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	
+	mov	Spoolup_Limit_Cnt, #255			; And set spoolup parameters
+	mov	Spoolup_Limit_Skip, #1			
+
+run6_check_rcp_stop_count:
+ENDIF
 	; Exit run loop after a given time
 	clr	C
 	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value

@@ -45,6 +45,7 @@ Eep_ESC_Layout:		DB	"#AlignBL15X#    "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
+ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
@@ -84,11 +85,15 @@ Rcp_In		EQU	5	;i
 ;			EQU	1	;i
 ;			EQU	0	;i
 
-P0_DIGITAL	EQU	NOT(1 SHL Mux_A)
-P0_INIT		EQU	NOT(1 SHL AnFET)
+P0_DIGITAL	EQU	NOT(1 SHL Mux_A) AND 0FFh
+P0_INIT		EQU	NOT(1 SHL AnFET) AND 0FFh
 P0_PUSHPULL	EQU	(1 SHL AnFET)
-P0_SKIP		EQU	NOT(1 SHL Rcp_In)
+P0_SKIP		EQU	NOT(1 SHL Rcp_In) AND 0FFh
 
+MACRO Get_Rcp_Capture_Values
+	mov	Temp1, PCA0CPL0			; Get PCA capture values
+	mov	Temp2, PCA0CPH0
+ENDM
 MACRO Read_Rcp_Int
 	mov	A, P0
 	jnb	Flags3.PGM_RCP_PWM_POL, ($+4)	; Is pwm polarity negative?
@@ -262,6 +267,10 @@ CSEG AT 5Bh			; PCA interrupt
 	jmp	pca_int	
 CSEG AT 73h			; Timer3 interrupt	
 	jmp	t3_int	
+ENDM
+
+MACRO Initialize_Xbar
+	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
 ENDM
 
 MACRO Initialize_Adc

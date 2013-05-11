@@ -981,7 +981,11 @@ func_paraval_store:
 	call	erase_and_store_all_in_eeprom	; Store all values in EEPROM
 	call success_beep			; Beep success
 	clr	EA					; Disable all interrupts
-	mov	RSTSRC, #12h			; Generate hardware reset
+IF ONE_S_CAPABLE == 0		
+	mov	RSTSRC, #12h			; Generate hardware reset and set VDD monitor
+ELSE
+	mov	RSTSRC, #10h			; Generate hardware reset and disable VDD monitor
+ENDIF
 	call wait1s
 
 func_paraval_cont_wait:
@@ -1051,5 +1055,9 @@ program_by_tx_exit:
 	call set_default_parameters		; Load all defaults
 	call erase_and_store_all_in_eeprom	; Erase flash and program
 	clr	EA					; Disable all interrupts
-	mov	RSTSRC, #12h			; Generate hardware reset
+IF ONE_S_CAPABLE == 0		
+	mov	RSTSRC, #12h			; Generate hardware reset and set VDD monitor
+ELSE
+	mov	RSTSRC, #10h			; Generate hardware reset and disable VDD monitor
+ENDIF
 	call wait1s

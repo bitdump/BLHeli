@@ -12,7 +12,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=Rev10_2
+SET Revision=Rev10_3
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 rem SET SilabsPath=C:\Dev\SiLabs
@@ -120,15 +120,27 @@ rem RCTimer_6A_MULTI  		87
 rem Align_RCE_BL15X_Main	88   
 rem Align_RCE_BL15X_Tail 	89   
 rem Align_RCE_BL15X_Multi 	90   
-rem Align_RCE_BL35X_Main	91   
-rem Align_RCE_BL35X_Tail 	92   
-rem Align_RCE_BL35X_Multi 	93   
-rem Align_RCE_BL35P_Main	94   
-rem Align_RCE_BL35P_Tail 	95   
-rem Align_RCE_BL35P_Multi 	96   
-rem H_King_10A_MAIN  		97 
-rem H_King_10A_TAIL  		98 
-rem H_King_10A_MULTI  		99 
+rem Align_RCE_BL15P_Main	91   
+rem Align_RCE_BL15P_Tail 	92   
+rem Align_RCE_BL15P_Multi 	93   
+rem Align_RCE_BL35X_Main	94   
+rem Align_RCE_BL35X_Tail 	95   
+rem Align_RCE_BL35X_Multi 	96   
+rem Align_RCE_BL35P_Main	97   
+rem Align_RCE_BL35P_Tail 	98   
+rem Align_RCE_BL35P_Multi 	99   
+rem H_King_10A_MAIN  		100 
+rem H_King_10A_TAIL  		101
+rem H_King_10A_MULTI  		102
+rem H_King_20A_MAIN  		103
+rem H_King_20A_TAIL  		104
+rem H_King_20A_MULTI  		105
+rem H_King_35A_MAIN  		106
+rem H_King_35A_TAIL  		107
+rem H_King_35A_MULTI  		108
+rem H_King_50A_MAIN  		109
+rem H_King_50A_TAIL  		110
+rem H_King_50A_MULTI  		111
 
 SET BESCTYPE=XP_3A_MAIN
 SET BESC=1
@@ -1390,7 +1402,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35X_MAIN
+SET BESCTYPE=Align_RCE_BL15P_MAIN
 SET BESC=91
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1404,7 +1416,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35X_TAIL
+SET BESCTYPE=Align_RCE_BL15P_TAIL
 SET BESC=92
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1418,7 +1430,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35X_MULTI
+SET BESCTYPE=Align_RCE_BL15P_MULTI
 SET BESC=93
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1432,7 +1444,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35P_MAIN
+SET BESCTYPE=Align_RCE_BL35X_MAIN
 SET BESC=94
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1446,7 +1458,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35P_TAIL
+SET BESCTYPE=Align_RCE_BL35X_TAIL
 SET BESC=95
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1460,7 +1472,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=Align_RCE_BL35P_MULTI
+SET BESCTYPE=Align_RCE_BL35X_MULTI
 SET BESC=96
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1474,7 +1486,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=H_King_10A_MAIN
+SET BESCTYPE=Align_RCE_BL35P_MAIN
 SET BESC=97
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1488,7 +1500,7 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=H_King_10A_TAIL
+SET BESCTYPE=Align_RCE_BL35P_TAIL
 SET BESC=98
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
@@ -1502,8 +1514,176 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET BESCTYPE=H_King_10A_MULTI
+SET BESCTYPE=Align_RCE_BL35P_MULTI
 SET BESC=99
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_10A_MAIN
+SET BESC=100
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_10A_TAIL
+SET BESC=101
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_10A_MULTI
+SET BESC=102
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_20A_MAIN
+SET BESC=103
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_20A_TAIL
+SET BESC=104
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_20A_MULTI
+SET BESC=105
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_35A_MAIN
+SET BESC=106
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_35A_TAIL
+SET BESC=107
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_35A_MULTI
+SET BESC=108
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_50A_MAIN
+SET BESC=109
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_50A_TAIL
+SET BESC=110
+@ECHO. >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%  >> MakeHex_Result.txt
+@ECHO *****************************************************  >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESC=%BESC%) OBJECT(Output\%BESCTYPE%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCTYPE%_%Revision%.OBJ"  TO(Output\%BESCTYPE%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt 
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCTYPE%_%Revision%.OMF" >> MakeHex_Result.txt
+copy "Output\%BESCTYPE%_%Revision%.HEX" "Output\Hex\*.*" > nul
+del "Output\%BESCTYPE%_%Revision%.HEX" > nul
+@ECHO *****************************************************  >> MakeHex_Result.txt
+@ECHO %BESCTYPE%
+
+SET BESCTYPE=H_King_50A_MULTI
+SET BESC=111
 @ECHO. >> MakeHex_Result.txt
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%  >> MakeHex_Result.txt

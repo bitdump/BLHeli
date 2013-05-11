@@ -45,6 +45,7 @@ Eep_ESC_Layout:		DB	"#AlignBL35P#    "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
+ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 DUAL_BEC_VOLTAGE		EQU	1	; Set to 1 if dual BEC voltage is supported
@@ -81,14 +82,18 @@ Rcp_In		EQU	5	;i
 ;			EQU	4	;i
 AnFET		EQU	3	;o
 BpFET		EQU	2	;o
-Bec_4p5V		EQU	1	;o 
+Bec_5V		EQU	1	;o 
 ApFET		EQU	0	;o
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Comp_Com)) AND 0FFh
-P0_INIT		EQU	NOT((1 SHL AnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL Bec_4p5V)) AND 0FFh
-P0_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL Bec_4p5V)
+P0_INIT		EQU	NOT((1 SHL AnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL Bec_5V)) AND 0FFh
+P0_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL Bec_5V)
 P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 
+MACRO Get_Rcp_Capture_Values
+	mov	Temp1, PCA0CPL0			; Get PCA capture values
+	mov	Temp2, PCA0CPH0
+ENDM
 MACRO Read_Rcp_Int
 	mov	A, P0
 	jnb	Flags3.PGM_RCP_PWM_POL, ($+4)	; Is pwm polarity negative?
@@ -264,6 +269,10 @@ CSEG AT 73h			; Timer3 interrupt
 	jmp	t3_int	
 ENDM
 
+MACRO Initialize_Xbar
+	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
+ENDM
+
 MACRO Initialize_Adc
 	mov	REF0CN, #0Eh	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 	mov	ADC0CF, #58h	; ADC clock 2MHz
@@ -290,8 +299,8 @@ ENDM
 MACRO Stop_Adc
 ENDM
 MACRO Set_BEC_Hi
-	clr	P0.Bec_4p5V
+	clr	P0.Bec_5V
 ENDM
 MACRO Set_BEC_Lo
-	setb	P0.Bec_4p5V
+	setb	P0.Bec_5V
 ENDM

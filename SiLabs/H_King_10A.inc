@@ -45,19 +45,20 @@ Eep_ESC_Layout:		DB	"#HKing10A#      "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
+ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
-DAMPED_MODE_ENABLE		EQU	1	; Damped mode disabled
+DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	6	; Wait delay from nfets off to pfets on
 COMP_PWM_HIGH_ON_DELAY	EQU	30	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
 COMP_PWM_HIGH_OFF_DELAY	EQU	60	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 COMP_PWM_LOW_ON_DELAY	EQU	10	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
 COMP_PWM_LOW_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
-ADC_LIMIT_L			EQU 	117	; Power supply measurement ADC value for which main motor power is limited (low byte)
+ADC_LIMIT_L			EQU 	175	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT			EQU 	88	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 MAIN_SPOOLUP_TIME		EQU	7	; Main motor spoolup time
 
@@ -89,6 +90,10 @@ P0_INIT		EQU	0FFh
 P0_PUSHPULL	EQU	00h
 P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 
+MACRO Get_Rcp_Capture_Values
+	mov	Temp1, PCA0CPL0			; Get PCA capture values
+	mov	Temp2, PCA0CPH0
+ENDM
 MACRO Read_Rcp_Int
 	mov	A, P0
 	jnb	Flags3.PGM_RCP_PWM_POL, ($+4)	; Is pwm polarity negative?
@@ -262,6 +267,10 @@ CSEG AT 5Bh			; PCA interrupt
 	jmp	pca_int	
 CSEG AT 73h			; Timer3 interrupt	
 	jmp	t3_int	
+ENDM
+
+MACRO Initialize_Xbar
+	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
 ENDM
 
 MACRO Initialize_Adc
