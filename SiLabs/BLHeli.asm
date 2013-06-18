@@ -1,7 +1,7 @@
 $NOMOD51
 ;**** **** **** **** ****
 ;
-; BLHeli program for controlling brushless motors in helicopters
+; BLHeli program for controlling brushless motors in helicopters and multirotors
 ;
 ; Copyright 2011, 2012 Steffen Skaug
 ; This program is distributed under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ $NOMOD51
 ;
 ; This file is best viewed with tab width set to 5
 ;
-; The input signal can be positive 1kHz, 2kHz, 4kHz or 8kHz PWM (taken from the "resistor tap" on mCPx)
+; The input signal can be positive 1kHz, 2kHz, 4kHz, 8kHz or 12kHz PWM (e.g. taken from the "resistor tap" on mCPx)
 ; And the input signal can be PPM (1-2ms) at rates up to several hundred Hz.
 ; The code adapts itself to the various input modes/frequencies
 ; The code ESC can also be programmed to accept inverted input signal.
@@ -154,6 +154,8 @@ $NOMOD51
 ;           Fixed bug that caused AE20/25/30A not to run in reverse
 ; - Rev10.3 Removed vdd monitor for 1S capable ESCs, in order to avoid brownouts/resets
 ;           Made auto bailout spoolup for main more smooth
+; - Rev10.4 Ensured that main spoolup and governor activation will always be smooth, regardless of throttle input
+;           Added capability to operate on 12kHz input signal too
 ;
 ;
 ;**** **** **** **** ****
@@ -303,18 +305,45 @@ Align_RCE_BL35X_Multi 		EQU 96
 Align_RCE_BL35P_Main		EQU 97   
 Align_RCE_BL35P_Tail 		EQU 98   
 Align_RCE_BL35P_Multi 		EQU 99   
-H_King_10A_Main			EQU 100   
-H_King_10A_Tail 			EQU 101  
-H_King_10A_Multi 			EQU 102  
-H_King_20A_Main			EQU 103   
-H_King_20A_Tail 			EQU 104  
-H_King_20A_Multi 			EQU 105  
-H_King_35A_Main			EQU 106   
-H_King_35A_Tail 			EQU 107  
-H_King_35A_Multi 			EQU 108  
-H_King_50A_Main			EQU 109   
-H_King_50A_Tail 			EQU 110  
-H_King_50A_Multi 			EQU 111  
+Gaui_GE_183_18A_Main		EQU 100   
+Gaui_GE_183_18A_Tail 		EQU 101  
+Gaui_GE_183_18A_Multi 		EQU 102  
+H_King_10A_Main			EQU 103   
+H_King_10A_Tail 			EQU 104  
+H_King_10A_Multi 			EQU 105  
+H_King_20A_Main			EQU 106   
+H_King_20A_Tail 			EQU 107  
+H_King_20A_Multi 			EQU 108  
+H_King_35A_Main			EQU 109   
+H_King_35A_Tail 			EQU 110 
+H_King_35A_Multi 			EQU 111  
+H_King_50A_Main			EQU 112   
+H_King_50A_Tail 			EQU 113  
+H_King_50A_Multi 			EQU 114  
+Polaris_Thunder_12A_Main		EQU 115   
+Polaris_Thunder_12A_Tail 	EQU 116  
+Polaris_Thunder_12A_Multi 	EQU 117  
+Polaris_Thunder_20A_Main		EQU 118   
+Polaris_Thunder_20A_Tail 	EQU 119  
+Polaris_Thunder_20A_Multi 	EQU 120  
+Polaris_Thunder_30A_Main		EQU 121   
+Polaris_Thunder_30A_Tail 	EQU 122  
+Polaris_Thunder_30A_Multi 	EQU 123  
+Polaris_Thunder_40A_Main		EQU 124   
+Polaris_Thunder_40A_Tail 	EQU 125  
+Polaris_Thunder_40A_Multi 	EQU 126  
+Polaris_Thunder_60A_Main		EQU 127   
+Polaris_Thunder_60A_Tail 	EQU 128  
+Polaris_Thunder_60A_Multi 	EQU 129  
+Polaris_Thunder_80A_Main		EQU 130   
+Polaris_Thunder_80A_Tail 	EQU 131  
+Polaris_Thunder_80A_Multi 	EQU 132  
+Polaris_Thunder_100A_Main	EQU 133   
+Polaris_Thunder_100A_Tail 	EQU 134  
+Polaris_Thunder_100A_Multi 	EQU 135  
+Platinum_Pro_30A_Main		EQU 136   
+Platinum_Pro_30A_Tail 		EQU 137  
+Platinum_Pro_30A_Multi 		EQU 138  
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -380,7 +409,7 @@ H_King_50A_Multi 			EQU 111
 ;BESC EQU Turnigy_AE_30A_Multi
 ;BESC EQU Turnigy_AE_45A_Main
 ;BESC EQU Turnigy_AE_45A_Tail 
-;BESC EQU Turnigy_AE_45A_Multi 
+;BESC EQU Turnigy_AE_45A_Multi
 ;BESC EQU Turnigy_KForce_40A_Main
 ;BESC EQU Turnigy_KForce_40A_Tail 
 ;BESC EQU Turnigy_KForce_40A_Multi
@@ -417,6 +446,9 @@ H_King_50A_Multi 			EQU 111
 ;BESC EQU Align_RCE_BL35P_Main
 ;BESC EQU Align_RCE_BL35P_Tail
 ;BESC EQU Align_RCE_BL35P_Multi
+;BESC EQU Gaui_GE_183_18A_Main
+;BESC EQU Gaui_GE_183_18A_Tail
+;BESC EQU Gaui_GE_183_18A_Multi
 ;BESC EQU H_King_10A_Main
 ;BESC EQU H_King_10A_Tail
 ;BESC EQU H_King_10A_Multi
@@ -429,6 +461,30 @@ H_King_50A_Multi 			EQU 111
 ;BESC EQU H_King_50A_Main
 ;BESC EQU H_King_50A_Tail
 ;BESC EQU H_King_50A_Multi
+;BESC EQU Polaris_Thunder_12A_Main
+;BESC EQU Polaris_Thunder_12A_Tail
+;BESC EQU Polaris_Thunder_12A_Multi
+;BESC EQU Polaris_Thunder_20A_Main
+;BESC EQU Polaris_Thunder_20A_Tail
+;BESC EQU Polaris_Thunder_20A_Multi
+;BESC EQU Polaris_Thunder_30A_Main
+;BESC EQU Polaris_Thunder_30A_Tail
+;BESC EQU Polaris_Thunder_30A_Multi
+;BESC EQU Polaris_Thunder_40A_Main
+;BESC EQU Polaris_Thunder_40A_Tail
+;BESC EQU Polaris_Thunder_40A_Multi
+;BESC EQU Polaris_Thunder_60A_Main
+;BESC EQU Polaris_Thunder_60A_Tail
+;BESC EQU Polaris_Thunder_60A_Multi
+;BESC EQU Polaris_Thunder_80A_Main
+;BESC EQU Polaris_Thunder_80A_Tail
+;BESC EQU Polaris_Thunder_80A_Multi
+;BESC EQU Polaris_Thunder_100A_Main
+;BESC EQU Polaris_Thunder_100A_Tail
+;BESC EQU Polaris_Thunder_100A_Multi
+;BESC EQU Platinum_Pro_30A_Main
+;BESC EQU Platinum_Pro_30A_Tail
+;BESC EQU Platinum_Pro_30A_Multi
 
 
 ;**** **** **** **** ****
@@ -928,6 +984,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
 ENDIF
 
+IF BESC == Gaui_GE_183_18A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
+ENDIF
+
+IF BESC == Gaui_GE_183_18A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
+ENDIF
+
+IF BESC == Gaui_GE_183_18A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
+ENDIF
+
 IF BESC == H_King_10A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (H_King_10A.inc)		; Select H-King 10A pinout
@@ -986,6 +1057,126 @@ ENDIF
 IF BESC == H_King_50A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_50A.inc)		; Select H-King 50A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_12A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_12A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_12A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_40A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_40A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_40A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_60A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_60A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_60A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_80A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_80A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_80A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_100A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_100A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
+ENDIF
+
+IF BESC == Polaris_Thunder_100A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
+ENDIF
+
+IF BESC == Platinum_Pro_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
+ENDIF
+
+IF BESC == Platinum_Pro_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
+ENDIF
+
+IF BESC == Platinum_Pro_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
 
 ;**** **** **** **** ****
@@ -1197,10 +1388,10 @@ RCP_PWM_FREQ_1KHZ			EQU 	0		; RC pulse pwm frequency is 1kHz
 RCP_PWM_FREQ_2KHZ			EQU 	1		; RC pulse pwm frequency is 2kHz
 RCP_PWM_FREQ_4KHZ			EQU 	2		; RC pulse pwm frequency is 4kHz
 RCP_PWM_FREQ_8KHZ			EQU 	3		; RC pulse pwm frequency is 8kHz
-PGM_DIR_REV				EQU 	4		; Programmed direction. 0=normal, 1=reversed
-PGM_RCP_PWM_POL			EQU	5		; Programmed RC pulse pwm polarity. 0=positive, 1=negative
-FULL_THROTTLE_RANGE			EQU 	6		; When set full throttle range is used (1000-2000us) and stored calibration values are ignored
-;						EQU 	7
+RCP_PWM_FREQ_12KHZ			EQU 	4		; RC pulse pwm frequency is 12kHz
+PGM_DIR_REV				EQU 	5		; Programmed direction. 0=normal, 1=reversed
+PGM_RCP_PWM_POL			EQU	6		; Programmed RC pulse pwm polarity. 0=positive, 1=negative
+FULL_THROTTLE_RANGE			EQU 	7		; When set full throttle range is used (1000-2000us) and stored calibration values are ignored
 
 ;**** **** **** **** ****
 ; RAM definitions
@@ -1335,7 +1526,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	10		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	4		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	16		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1838,7 +2029,7 @@ t2_int:	; Happens every 128us for low byte and every 32ms for high byte
 	jz	t2_int_pulses_absent		; Yes - pulses are absent
 
 	; Decrement timeout counter (if PWM)
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_skip_start			; If no flag is set (PPM) - branch
 
@@ -1867,7 +2058,7 @@ t2_int_pulses_absent:
 
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Yes - set timeout count to start value
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_ppm_timeout_set		; If no flag is set (PPM) - branch
 
@@ -1888,7 +2079,7 @@ t2_int_skip_start:
 	ajmp	t2_int_rcp_update_start
 
 t2_int_skip_end:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_rcp_update_start		; If no flag is set (PPM) - branch
 
@@ -1905,7 +2096,7 @@ t2_int_rcp_update_start:
 	mov	Temp1, A
 	clr	Flags2.RCP_UPDATED		 	; Flag that pulse has been evaluated
 	; Use a gain of 1.0625x for pwm input if not governor mode
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_pwm_min_run			; If no flag is set (PPM) - branch
 
@@ -2064,7 +2255,7 @@ t2h_int:
 	jz	t2h_int_rcp_stop_check		; Yes - do not decrement
 
 	; Decrement timeout counter (if PPM)
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	t2h_int_rcp_stop_check		; If a flag is set (PWM) - branch
 
@@ -2138,7 +2329,6 @@ t2h_int_rcp_gov_pwm_done:
 
 	inc	Spoolup_Limit_Cnt				; Increment spoolup count
 	mov	A, Spoolup_Limit_Cnt
-	
 	jnz	($+4)						; Wrapped?
 
 	dec	Spoolup_Limit_Cnt				; Yes - decrement
@@ -2172,8 +2362,33 @@ t2h_int_rcp_limit_middle_ramp:
 	mov	Spoolup_Limit_Skip, #1			
 
 t2h_int_rcp_set_limit:
-	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm
+	; Do not increment spoolup limit if higher pwm is not requested, unless governor is active
 	clr	C
+	mov	A, Pwm_Limit_Spoolup
+	subb	A, Current_Pwm
+	jc	t2h_int_rcp_inc_limit			; If Current_Pwm is larger than Pwm_Limit_Spoolup - branch
+
+	mov	A, Gov_Active					; Is governor active?
+	jnz	t2h_int_rcp_inc_limit			; Yes - branch
+
+	mov	Pwm_Limit_Spoolup, Current_Pwm	; Set limit to what current pwm is
+	mov	A, Spoolup_Limit_Cnt			; Check if spoolup limit count is 255. If it is, ten this is a "bailout" ramp
+	inc	A
+	jz	($+5)
+
+	mov	Spoolup_Limit_Cnt, #(3*MAIN_SPOOLUP_TIME)	; Stay in an early part of the spoolup sequence (unless "bailout" ramp)
+
+	mov	Spoolup_Limit_Skip, #1			; Set skip count
+	mov	Governor_Req_Pwm, #60			; Set governor requested speed to ensure that it requests higher speed
+									; 20=Fail on jerk when governor activates
+									; 30=Ok
+									; 100=Fail on small governor settling overshoot on low headspeeds
+									; 200=Fail on governor settling overshoot
+	jmp	t2h_int_rcp_exit				; Exit
+
+t2h_int_rcp_inc_limit:
+	clr	C
+	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm
 	add	A, Temp1
 	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
 
@@ -2258,7 +2473,7 @@ pca_int_fail_minimum:
 	Rcp_Int_First					; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags2.RCP_EDGE_NO			; Set first edge flag
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	($+4)					; If a flag is set (PWM) - proceed
 
@@ -2297,8 +2512,23 @@ pca_int_second_meas_pwm_freq:
 	mov	Temp2, A
 	clr	A
 	mov	Temp4, A
-	; Check if pwm frequency is 8kHz
 	mov	Temp3, #250				; Set default period tolerance requirement
+	; Check if pwm frequency is 12kHz
+	clr	C
+	mov	A, Temp1
+	subb	A, #low(200)				; If below 100us, 12kHz pwm is assumed
+	mov	A, Temp2
+	subb	A, #high(200)
+	jnc	pca_int_check_8kHz
+
+	clr	A
+	setb	ACC.RCP_PWM_FREQ_12KHZ
+	mov	Temp4, A
+	mov	Temp3, #10				; Set period tolerance requirement
+	ajmp	pca_int_restore_edge
+
+pca_int_check_8kHz:
+	; Check if pwm frequency is 8kHz
 	clr	C
 	mov	A, Temp1
 	subb	A, #low(360)				; If below 180us, 8kHz pwm is assumed
@@ -2407,6 +2637,8 @@ pca_int_fall:
 	mov	A, Temp2
 	subb	A, Rcp_Prev_Edge_H
 	mov	Temp2, A
+	jnb	Flags3.RCP_PWM_FREQ_12KHZ, ($+5)	; Is RC input pwm frequency 12kHz?
+	ajmp	pca_int_pwm_divide_done			; Yes - branch forward
 	jnb	Flags3.RCP_PWM_FREQ_8KHZ, ($+5)	; Is RC input pwm frequency 8kHz?
 	ajmp	pca_int_pwm_divide_done			; Yes - branch forward
 
@@ -2534,6 +2766,22 @@ pca_int_pwm_divide:
 	mov	Temp1, A
 
 pca_int_pwm_divide_done:
+	jnb	Flags3.RCP_PWM_FREQ_12KHZ, pca_int_check_legal_range	; Is RC input pwm frequency 12kHz?
+	mov	A, Temp2						; Yes - check that value is not more than 255
+	jz	($+4)
+
+	mov	Temp1, #RCP_MAX
+
+	clr	C
+	mov	A, Temp1						; Multiply by 1.5				
+	rrc	A
+	addc	A, Temp1
+	mov	Temp1, A
+	clr	A
+	addc	A, #0
+	mov	Temp2, A
+
+pca_int_check_legal_range:
 	; Check that RC pulse is within legal range
 	clr	C
 	mov	A, Temp1
@@ -2551,7 +2799,7 @@ pca_int_limited:
 	jb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
 	ajmp	pca_int_set_timeout			; No - skip measurements
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	cpl	A
 	anl	A, Flags3					; Clear all pwm frequency flags
 	orl	A, Temp4					; Store pwm frequency value in flags
@@ -2559,7 +2807,7 @@ pca_int_limited:
 
 pca_int_set_timeout:
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Set timeout count to start value
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	pca_int_ppm_timeout_set		; If a flag is set - branch
 
@@ -2569,7 +2817,7 @@ pca_int_ppm_timeout_set:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
 	ajmp pca_int_exit				; Yes - exit
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	pca_int_exit				; If no flag is set (PPM) - branch
 
@@ -2577,7 +2825,7 @@ pca_int_ppm_timeout_set:
 
 pca_int_exit:	; Exit interrupt routine	
 	mov	Rcp_Skip_Cnt, #RCP_SKIP_RATE	; Load number of skips
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	($+5)					; If a flag is set (PWM) - branch
 
@@ -2644,22 +2892,22 @@ waitxms_m:	; Middle loop
 beep_f1:	; Entry point 1, load beeper frequency 1 settings
 	mov	Temp3, #20	; Off wait loop length
 	mov	Temp4, #120	; Number of beep pulses
-	ajmp	beep
+	jmp	beep
 
 beep_f2:	; Entry point 2, load beeper frequency 2 settings
 	mov	Temp3, #16
 	mov	Temp4, #140
-	ajmp	beep
+	jmp	beep
 
 beep_f3:	; Entry point 3, load beeper frequency 3 settings
 	mov	Temp3, #13
 	mov	Temp4, #180
-	ajmp	beep
+	jmp	beep
 
 beep_f4:	; Entry point 4, load beeper frequency 4 settings
 	mov	Temp3, #11
 	mov	Temp4, #200
-	ajmp	beep
+	jmp	beep
 
 beep:	; Beep loop start
 	mov	Temp5, Current_Pwm_Limited	; Store value
@@ -2882,6 +3130,14 @@ governor_speed_check:
 	jc	governor_activate			; If speed above min limit  - run governor
 
 governor_deactivate:
+	mov	A, Gov_Active
+	jz	governor_first_deactivate_done; This code is executed continuously. Only execute the code below the first time
+
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg
+	mov	Spoolup_Limit_Cnt, #255
+	mov	Spoolup_Limit_Skip, #1			
+
+governor_first_deactivate_done:
 	mov	Current_Pwm, Requested_Pwm	; Set current pwm to requested
 	clr	A
 	mov	Gov_Target_L, A			; Set target to zero
@@ -2894,6 +3150,7 @@ governor_deactivate:
 
 governor_activate:
 	mov	Gov_Active, #1
+
 governor_target_calc:
 	; Governor calculations
 	clr	C
@@ -3739,9 +3996,7 @@ startup_pwm_set_pwm:
 	mov	Current_Pwm_Limited, Temp1		; Update limited version of current pwm
 	jnb	Flags1.SETTLE_PHASE, startup_pwm_exit	; Is it motor start settle phase?
 
-	clr	C							; Yes - update spoolup beginning pwm (will use PWM_SETTLE or PWM_SETTLE/2)
-	mov	A, Temp1
-	mov	Pwm_Spoolup_Beg, A			
+	mov	Pwm_Spoolup_Beg, Temp1			; Yes - update spoolup beginning pwm (will use PWM_SETTLE or PWM_SETTLE/2)			
 
 startup_pwm_exit:
 	ret
@@ -5249,7 +5504,7 @@ measure_pwm_freq_loop:
 	jc	measure_pwm_freq_start			; No - start over
 
 	mov	A, Flags3						; Check pwm frequency flags
-	anl	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	anl	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	mov	Prev_Rcp_Pwm_Freq, Curr_Rcp_Pwm_Freq		; Store as previous flags for next pulse 
 	mov	Curr_Rcp_Pwm_Freq, A					; Store current flags for next pulse 
 	cjne	A, Prev_Rcp_Pwm_Freq, measure_pwm_freq_start	; Go back if new flags not same as previous
@@ -5268,7 +5523,7 @@ measure_pwm_freq_loop:
 validate_rcp_start:	
 	call wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	mov	Temp1, #RCP_VALIDATE			; Set validate level as default
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3						; Check pwm frequency flags
 	jnz	($+4)						; If a flag is set (PWM) - branch
 
@@ -5308,7 +5563,7 @@ arming_initial_arm_check:
 	jmp 	program_by_tx_checked	; No - branch
 
 arming_ppm_check:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jz	throttle_high_cal_start	; If no flag is set (PPM) - branch
 
@@ -5495,7 +5750,7 @@ wait_for_power_on_no_beep:
 	mov	A, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
 	jnz	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
 
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3						; Check pwm frequency flags
 	jnz	wait_for_power_on_ppm_not_missing	; If a flag is set (PWM) - branch
 
@@ -5909,8 +6164,7 @@ IF MODE == 0	; Main
 	subb	A, #1					; Is number of stop RC pulses above limit?
 	jc	run6_check_rcp_stop_count	; If no - branch
 
-	mov	Pwm_Limit, Pwm_Spoolup_Beg		; If yes - set initial max powers
-	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	
+	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	; If yes - set initial max powers
 	mov	Spoolup_Limit_Cnt, #255			; And set spoolup parameters
 	mov	Spoolup_Limit_Skip, #1			
 
@@ -5923,7 +6177,7 @@ ENDIF
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
 run6_check_rcp_timeout:
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3					; Check pwm frequency flags
 	jnz	run6_check_speed			; If a flag is set (PWM) - branch
 
@@ -5958,7 +6212,7 @@ run_to_wait_for_power_on:
 	call	wait1ms				; Wait for pwm to be stopped
 	call switch_power_off
 IF MODE == 0	; Main
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jnz	run_to_next_state_main	; If a flag is set (PWM) - branch
 
@@ -5988,7 +6242,7 @@ jmp_wait_for_power_on:
 	jmp	wait_for_power_on		; Go back to wait for power on
 ENDIF
 IF MODE >= 1	; Tail or multi
-	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ))
+	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
 	anl	A, Flags3				; Check pwm frequency flags
 	jnz	jmp_wait_for_power_on	; If a flag is set (PWM) - branch
 

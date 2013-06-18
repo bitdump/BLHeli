@@ -1,6 +1,6 @@
 ;**** **** **** **** ****
 ;
-; BLHeli program for controlling brushless motors in helicopters
+; BLHeli program for controlling brushless motors in helicopters and multirotors
 ;
 ; Copyright 2011, 2012 Steffen Skaug
 ; This program is distributed under the terms of the GNU General Public License
