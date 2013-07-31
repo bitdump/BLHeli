@@ -122,7 +122,7 @@ $NOMOD51
 ;           Refined direct startup
 ;           Removed voltage compensation
 ;           Miscellaneous other changes
-; - Rev9.0  Increased programming range for startup power, and made it's default ESC dependent
+; - Rev9.0  Increased programming range for startup power, and made its default ESC dependent
 ;           Made default startup method ESC dependent
 ;           Even more smooth and gentle spoolup for MAIN, to suit larger helis
 ;           Improved transition from stepped startup to run
@@ -206,144 +206,147 @@ $NOMOD51
 ;
 ;**** **** **** **** ****
 ; List of enumerated supported ESCs and modes  (main, tail or multi)
-XP_3A_Main 				EQU 1
-XP_3A_Tail 				EQU 2
-XP_3A_Multi 				EQU 3
-XP_7A_Main 				EQU 4
-XP_7A_Tail 				EQU 5
-XP_7A_Multi 				EQU 6
-XP_7A_Fast_Main 			EQU 7
-XP_7A_Fast_Tail 			EQU 8
-XP_7A_Fast_Multi 			EQU 9
-XP_12A_Main 				EQU 10
-XP_12A_Tail 				EQU 11
-XP_12A_Multi 				EQU 12
-XP_18A_Main 				EQU 13
-XP_18A_Tail 				EQU 14
-XP_18A_Multi 				EQU 15
-XP_25A_Main 				EQU 16
-XP_25A_Tail 				EQU 17
-XP_25A_Multi 				EQU 18
-DP_3A_Main 				EQU 19
-DP_3A_Tail  				EQU 20
-DP_3A_Multi  				EQU 21
-Supermicro_3p5A_Main 		EQU 22
-Supermicro_3p5A_Tail 		EQU 23   
-Supermicro_3p5A_Multi 		EQU 24   
-Turnigy_Plush_6A_Main 		EQU 25
-Turnigy_Plush_6A_Tail 		EQU 26   
-Turnigy_Plush_6A_Multi 		EQU 27   
-Turnigy_Plush_10A_Main 		EQU 28
-Turnigy_Plush_10A_Tail 		EQU 29   
-Turnigy_Plush_10A_Multi 		EQU 30   
-Turnigy_Plush_12A_Main 		EQU 31
-Turnigy_Plush_12A_Tail 		EQU 32   
-Turnigy_Plush_12A_Multi 		EQU 33   
-Turnigy_Plush_18A_Main 		EQU 34
-Turnigy_Plush_18A_Tail 		EQU 35   
-Turnigy_Plush_18A_Multi 		EQU 36   
-Turnigy_Plush_25A_Main 		EQU 37
-Turnigy_Plush_25A_Tail 		EQU 38   
-Turnigy_Plush_25A_Multi 		EQU 39   
-Turnigy_Plush_30A_Main 		EQU 40
-Turnigy_Plush_30A_Tail 		EQU 41   
-Turnigy_Plush_30A_Multi 		EQU 42   
-Turnigy_Plush_40A_Main 		EQU 43
-Turnigy_Plush_40A_Tail 		EQU 44   
-Turnigy_Plush_40A_Multi 		EQU 45   
-Turnigy_Plush_60A_Main 		EQU 46
-Turnigy_Plush_60A_Tail 		EQU 47   
-Turnigy_Plush_60A_Multi 		EQU 48   
-Turnigy_Plush_80A_Main 		EQU 49
-Turnigy_Plush_80A_Tail 		EQU 50   
-Turnigy_Plush_80A_Multi 		EQU 51   
-Turnigy_AE_20A_Main 		EQU 52
-Turnigy_AE_20A_Tail 		EQU 53   
-Turnigy_AE_20A_Multi 		EQU 54   
-Turnigy_AE_25A_Main 		EQU 55
-Turnigy_AE_25A_Tail 		EQU 56   
-Turnigy_AE_25A_Multi 		EQU 57   
-Turnigy_AE_30A_Main 		EQU 58
-Turnigy_AE_30A_Tail 		EQU 59   
-Turnigy_AE_30A_Multi 		EQU 60   
-Turnigy_AE_45A_Main 		EQU 61
-Turnigy_AE_45A_Tail 		EQU 62   
-Turnigy_AE_45A_Multi 		EQU 63   
-Turnigy_KForce_40A_Main 		EQU 64   
-Turnigy_KForce_40A_Tail 		EQU 65   
-Turnigy_KForce_40A_Multi 	EQU 66   
-Turnigy_KForce_120A_HV_Main 	EQU 67   
-Turnigy_KForce_120A_HV_Tail 	EQU 68   
-Turnigy_KForce_120A_HV_Multi 	EQU 69   
-Skywalker_20A_Main 			EQU 70
-Skywalker_20A_Tail 			EQU 71   
-Skywalker_20A_Multi 		EQU 72   
-Skywalker_40A_Main 			EQU 73
-Skywalker_40A_Tail 			EQU 74   
-Skywalker_40A_Multi 		EQU 75   
-HiModel_Cool_22A_Main 		EQU 76
-HiModel_Cool_22A_Tail 		EQU 77   
-HiModel_Cool_22A_Multi 		EQU 78   
-HiModel_Cool_33A_Main 		EQU 79
-HiModel_Cool_33A_Tail 		EQU 80   
-HiModel_Cool_33A_Multi 		EQU 81   
-HiModel_Cool_41A_Main 		EQU 82
-HiModel_Cool_41A_Tail 		EQU 83   
-HiModel_Cool_41A_Multi 		EQU 84   
-RCTimer_6A_Main 			EQU 85   
-RCTimer_6A_Tail 			EQU 86   
-RCTimer_6A_Multi 			EQU 87   
-Align_RCE_BL15X_Main		EQU 88   
-Align_RCE_BL15X_Tail 		EQU 89   
-Align_RCE_BL15X_Multi 		EQU 90   
-Align_RCE_BL15P_Main		EQU 91   
-Align_RCE_BL15P_Tail 		EQU 92   
-Align_RCE_BL15P_Multi 		EQU 93   
-Align_RCE_BL35X_Main		EQU 94   
-Align_RCE_BL35X_Tail 		EQU 95   
-Align_RCE_BL35X_Multi 		EQU 96   
-Align_RCE_BL35P_Main		EQU 97   
-Align_RCE_BL35P_Tail 		EQU 98   
-Align_RCE_BL35P_Multi 		EQU 99   
-Gaui_GE_183_18A_Main		EQU 100   
-Gaui_GE_183_18A_Tail 		EQU 101  
-Gaui_GE_183_18A_Multi 		EQU 102  
-H_King_10A_Main			EQU 103   
-H_King_10A_Tail 			EQU 104  
-H_King_10A_Multi 			EQU 105  
-H_King_20A_Main			EQU 106   
-H_King_20A_Tail 			EQU 107  
-H_King_20A_Multi 			EQU 108  
-H_King_35A_Main			EQU 109   
-H_King_35A_Tail 			EQU 110 
-H_King_35A_Multi 			EQU 111  
-H_King_50A_Main			EQU 112   
-H_King_50A_Tail 			EQU 113  
-H_King_50A_Multi 			EQU 114  
-Polaris_Thunder_12A_Main		EQU 115   
-Polaris_Thunder_12A_Tail 	EQU 116  
-Polaris_Thunder_12A_Multi 	EQU 117  
-Polaris_Thunder_20A_Main		EQU 118   
-Polaris_Thunder_20A_Tail 	EQU 119  
-Polaris_Thunder_20A_Multi 	EQU 120  
-Polaris_Thunder_30A_Main		EQU 121   
-Polaris_Thunder_30A_Tail 	EQU 122  
-Polaris_Thunder_30A_Multi 	EQU 123  
-Polaris_Thunder_40A_Main		EQU 124   
-Polaris_Thunder_40A_Tail 	EQU 125  
-Polaris_Thunder_40A_Multi 	EQU 126  
-Polaris_Thunder_60A_Main		EQU 127   
-Polaris_Thunder_60A_Tail 	EQU 128  
-Polaris_Thunder_60A_Multi 	EQU 129  
-Polaris_Thunder_80A_Main		EQU 130   
-Polaris_Thunder_80A_Tail 	EQU 131  
-Polaris_Thunder_80A_Multi 	EQU 132  
-Polaris_Thunder_100A_Main	EQU 133   
-Polaris_Thunder_100A_Tail 	EQU 134  
-Polaris_Thunder_100A_Multi 	EQU 135  
-Platinum_Pro_30A_Main		EQU 136   
-Platinum_Pro_30A_Tail 		EQU 137  
-Platinum_Pro_30A_Multi 		EQU 138  
+XP_3A_Main 					EQU 1
+XP_3A_Tail 					EQU 2
+XP_3A_Multi 					EQU 3
+XP_7A_Main 					EQU 4
+XP_7A_Tail 					EQU 5
+XP_7A_Multi 					EQU 6
+XP_7A_Fast_Main 				EQU 7
+XP_7A_Fast_Tail 				EQU 8
+XP_7A_Fast_Multi 				EQU 9
+XP_12A_Main 					EQU 10
+XP_12A_Tail 					EQU 11
+XP_12A_Multi 					EQU 12
+XP_18A_Main 					EQU 13
+XP_18A_Tail 					EQU 14
+XP_18A_Multi 					EQU 15
+XP_25A_Main 					EQU 16
+XP_25A_Tail 					EQU 17
+XP_25A_Multi 					EQU 18
+DP_3A_Main 					EQU 19
+DP_3A_Tail  					EQU 20
+DP_3A_Multi  					EQU 21
+Supermicro_3p5A_Main 			EQU 22
+Supermicro_3p5A_Tail 			EQU 23   
+Supermicro_3p5A_Multi 			EQU 24   
+Turnigy_Plush_6A_Main 			EQU 25
+Turnigy_Plush_6A_Tail 			EQU 26   
+Turnigy_Plush_6A_Multi 			EQU 27   
+Turnigy_Plush_10A_Main 			EQU 28
+Turnigy_Plush_10A_Tail 			EQU 29   
+Turnigy_Plush_10A_Multi 			EQU 30   
+Turnigy_Plush_12A_Main 			EQU 31
+Turnigy_Plush_12A_Tail 			EQU 32   
+Turnigy_Plush_12A_Multi 			EQU 33   
+Turnigy_Plush_18A_Main 			EQU 34
+Turnigy_Plush_18A_Tail 			EQU 35   
+Turnigy_Plush_18A_Multi 			EQU 36   
+Turnigy_Plush_25A_Main 			EQU 37
+Turnigy_Plush_25A_Tail 			EQU 38   
+Turnigy_Plush_25A_Multi 			EQU 39   
+Turnigy_Plush_30A_Main 			EQU 40
+Turnigy_Plush_30A_Tail 			EQU 41   
+Turnigy_Plush_30A_Multi 			EQU 42   
+Turnigy_Plush_40A_Main 			EQU 43
+Turnigy_Plush_40A_Tail 			EQU 44   
+Turnigy_Plush_40A_Multi 			EQU 45   
+Turnigy_Plush_60A_Main 			EQU 46
+Turnigy_Plush_60A_Tail 			EQU 47   
+Turnigy_Plush_60A_Multi 			EQU 48   
+Turnigy_Plush_80A_Main 			EQU 49
+Turnigy_Plush_80A_Tail 			EQU 50   
+Turnigy_Plush_80A_Multi 			EQU 51   
+Turnigy_AE_20A_Main 			EQU 52
+Turnigy_AE_20A_Tail 			EQU 53   
+Turnigy_AE_20A_Multi 			EQU 54   
+Turnigy_AE_25A_Main 			EQU 55
+Turnigy_AE_25A_Tail 			EQU 56   
+Turnigy_AE_25A_Multi 			EQU 57   
+Turnigy_AE_30A_Main 			EQU 58
+Turnigy_AE_30A_Tail 			EQU 59   
+Turnigy_AE_30A_Multi 			EQU 60   
+Turnigy_AE_45A_Main 			EQU 61
+Turnigy_AE_45A_Tail 			EQU 62   
+Turnigy_AE_45A_Multi 			EQU 63   
+Turnigy_KForce_40A_Main 			EQU 64   
+Turnigy_KForce_40A_Tail 			EQU 65   
+Turnigy_KForce_40A_Multi 		EQU 66   
+Turnigy_KForce_120A_HV_Main 		EQU 67   
+Turnigy_KForce_120A_HV_Tail 		EQU 68   
+Turnigy_KForce_120A_HV_Multi 		EQU 69   
+Turnigy_KForce_120A_HV_v2_Main	EQU 70   
+Turnigy_KForce_120A_HV_v2_Tail 	EQU 71   
+Turnigy_KForce_120A_HV_v2_Multi 	EQU 72   
+Skywalker_20A_Main 				EQU 73
+Skywalker_20A_Tail 				EQU 74   
+Skywalker_20A_Multi 			EQU 75   
+Skywalker_40A_Main 				EQU 76
+Skywalker_40A_Tail 				EQU 77   
+Skywalker_40A_Multi 			EQU 78   
+HiModel_Cool_22A_Main 			EQU 79
+HiModel_Cool_22A_Tail 			EQU 80   
+HiModel_Cool_22A_Multi 			EQU 81   
+HiModel_Cool_33A_Main 			EQU 82
+HiModel_Cool_33A_Tail 			EQU 83   
+HiModel_Cool_33A_Multi 			EQU 84   
+HiModel_Cool_41A_Main 			EQU 85
+HiModel_Cool_41A_Tail 			EQU 86   
+HiModel_Cool_41A_Multi 			EQU 87   
+RCTimer_6A_Main 				EQU 88   
+RCTimer_6A_Tail 				EQU 89   
+RCTimer_6A_Multi 				EQU 90   
+Align_RCE_BL15X_Main			EQU 91   
+Align_RCE_BL15X_Tail 			EQU 92   
+Align_RCE_BL15X_Multi 			EQU 93   
+Align_RCE_BL15P_Main			EQU 94   
+Align_RCE_BL15P_Tail 			EQU 95   
+Align_RCE_BL15P_Multi 			EQU 96   
+Align_RCE_BL35X_Main			EQU 97   
+Align_RCE_BL35X_Tail 			EQU 98   
+Align_RCE_BL35X_Multi 			EQU 99   
+Align_RCE_BL35P_Main			EQU 100   
+Align_RCE_BL35P_Tail 			EQU 101  
+Align_RCE_BL35P_Multi 			EQU 102  
+Gaui_GE_183_18A_Main			EQU 103   
+Gaui_GE_183_18A_Tail 			EQU 104  
+Gaui_GE_183_18A_Multi 			EQU 105  
+H_King_10A_Main				EQU 106   
+H_King_10A_Tail 				EQU 107  
+H_King_10A_Multi 				EQU 108  
+H_King_20A_Main				EQU 109   
+H_King_20A_Tail 				EQU 110  
+H_King_20A_Multi 				EQU 111  
+H_King_35A_Main				EQU 112   
+H_King_35A_Tail 				EQU 113 
+H_King_35A_Multi 				EQU 114  
+H_King_50A_Main				EQU 115   
+H_King_50A_Tail 				EQU 116  
+H_King_50A_Multi 				EQU 117  
+Polaris_Thunder_12A_Main			EQU 118   
+Polaris_Thunder_12A_Tail 		EQU 119  
+Polaris_Thunder_12A_Multi 		EQU 120  
+Polaris_Thunder_20A_Main			EQU 121   
+Polaris_Thunder_20A_Tail 		EQU 122  
+Polaris_Thunder_20A_Multi 		EQU 123  
+Polaris_Thunder_30A_Main			EQU 124   
+Polaris_Thunder_30A_Tail 		EQU 125  
+Polaris_Thunder_30A_Multi 		EQU 126  
+Polaris_Thunder_40A_Main			EQU 127   
+Polaris_Thunder_40A_Tail 		EQU 128  
+Polaris_Thunder_40A_Multi 		EQU 129  
+Polaris_Thunder_60A_Main			EQU 130   
+Polaris_Thunder_60A_Tail 		EQU 131  
+Polaris_Thunder_60A_Multi 		EQU 132  
+Polaris_Thunder_80A_Main			EQU 133   
+Polaris_Thunder_80A_Tail 		EQU 134  
+Polaris_Thunder_80A_Multi 		EQU 135  
+Polaris_Thunder_100A_Main		EQU 136   
+Polaris_Thunder_100A_Tail 		EQU 137  
+Polaris_Thunder_100A_Multi 		EQU 138  
+Platinum_Pro_30A_Main			EQU 139   
+Platinum_Pro_30A_Tail 			EQU 140  
+Platinum_Pro_30A_Multi 			EQU 141  
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -416,6 +419,9 @@ Platinum_Pro_30A_Multi 		EQU 138
 ;BESC EQU Turnigy_KForce_120A_HV_Main
 ;BESC EQU Turnigy_KForce_120A_HV_Tail 
 ;BESC EQU Turnigy_KForce_120A_HV_Multi
+;BESC EQU Turnigy_KForce_120A_HV_v2_Main
+;BESC EQU Turnigy_KForce_120A_HV_v2_Tail 
+;BESC EQU Turnigy_KForce_120A_HV_v2_Multi
 ;BESC EQU Skywalker_20A_Main
 ;BESC EQU Skywalker_20A_Tail 
 ;BESC EQU Skywalker_20A_Multi
@@ -832,6 +838,21 @@ ENDIF
 IF BESC == Turnigy_KForce_120A_HV_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_KForce_120A_HV.inc)	; Select Turnigy KForce 120A HV pinout
+ENDIF
+
+IF BESC == Turnigy_KForce_120A_HV_v2_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
+ENDIF
+
+IF BESC == Turnigy_KForce_120A_HV_v2_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
+ENDIF
+
+IF BESC == Turnigy_KForce_120A_HV_v2_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
 ENDIF
 
 IF BESC == Skywalker_20A_Main
