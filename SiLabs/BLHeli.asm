@@ -347,6 +347,9 @@ Polaris_Thunder_100A_Multi 		EQU 138
 Platinum_Pro_30A_Main			EQU 139   
 Platinum_Pro_30A_Tail 			EQU 140  
 Platinum_Pro_30A_Multi 			EQU 141  
+EAZY_3Av2_Main			EQU 142   
+EAZY_3Av2_Tail 			EQU 143  
+EAZY_3Av2_Multi 			EQU 144  
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -491,6 +494,9 @@ Platinum_Pro_30A_Multi 			EQU 141
 ;BESC EQU Platinum_Pro_30A_Main
 ;BESC EQU Platinum_Pro_30A_Tail
 ;BESC EQU Platinum_Pro_30A_Multi
+;BESC EQU EAZY_3Av2_Main
+;BESC EQU EAZY_3Av2_Tail
+;BESC EQU EAZY_3Av2_Multi
 
 
 ;**** **** **** **** ****
@@ -1199,6 +1205,22 @@ IF BESC == Platinum_Pro_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
+
+IF BESC == EAZY_3Av2_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+ENDIF
+
+IF BESC == EAZY_3Av2_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+ENDIF
+
+IF BESC == EAZY_3Av2_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+ENDIF
+
 
 ;**** **** **** **** ****
 ; TX programming defaults
@@ -2951,7 +2973,7 @@ beep_onoff:
 	djnz	ACC, $		
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	mov	A, #150		; 25µs off
+	mov	A, #150		; 25Âµs off
 	djnz	ACC, $		
 	djnz	Temp2, beep_onoff
 	; Copy variable
@@ -4299,20 +4321,20 @@ adjust_timing:
 	mov	A, Temp8				
 	jb	ACC.0, adjust_timing_two_steps	; If an odd number - branch
 
-	mov	A, Temp1				; Add 7.5° and store in Temp1/2
+	mov	A, Temp1				; Add 7.5Â° and store in Temp1/2
 	add	A, Temp5
 	mov	Temp1, A
 	mov	A, Temp2
 	addc	A, Temp6
 	mov	Temp2, A
-	mov	A, Temp5				; Store 7.5° in Temp3/4
+	mov	A, Temp5				; Store 7.5Â° in Temp3/4
 	mov	Temp3, A
 	mov	A, Temp6			
 	mov	Temp4, A
 	jmp	store_times_up_or_down
 
 adjust_timing_two_steps:
-	mov	A, Temp1				; Add 15° and store in Temp1/2
+	mov	A, Temp1				; Add 15Â° and store in Temp1/2
 	add	A, Temp1
 	mov	Temp1, A
 	mov	A, Temp2
@@ -4329,20 +4351,20 @@ store_times_up_or_down:
 	jc	store_times_decrease	; No - branch
 
 store_times_increase:
-	mov	Wt_Comm_L, Temp3		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	mov	Wt_Comm_L, Temp3		; Now commutation time (~60Â°) divided by 4 (~15Â° nominal)
 	mov	Wt_Comm_H, Temp4
-	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15° nominal)
+	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15Â° nominal)
 	mov	Wt_Advance_H, Temp2
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5Â°)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
 store_times_decrease:
-	mov	Wt_Comm_L, Temp1		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	mov	Wt_Comm_L, Temp1		; Now commutation time (~60Â°) divided by 4 (~15Â° nominal)
 	mov	Wt_Comm_H, Temp2
-	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15° nominal)
+	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15Â° nominal)
 	mov	Wt_Advance_H, Temp4
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5Â°)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
