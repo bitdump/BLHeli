@@ -156,6 +156,13 @@ $NOMOD51
 ;           Made auto bailout spoolup for main more smooth
 ; - Rev10.4 Ensured that main spoolup and governor activation will always be smooth, regardless of throttle input
 ;           Added capability to operate on 12kHz input signal too
+; - Rev11.0 Fixed bug of programming default values for governor in MULTI mode
+;           Disabled interrupts explicitly some places, to avoid possibilities for unintentional fet switching
+;           Changed interrupt disable strategy, to always allow pwm interrupts, to avoid noise when running at low rpms
+;           Added governor middle range for MAIN mode
+;           Added bidirectional mode for TAIL and MULTI mode with PPM input
+;           Changed and improved demag compensation
+;           Miscellaneous other changes
 ;
 ;
 ;**** **** **** **** ****
@@ -347,22 +354,25 @@ Polaris_Thunder_100A_Multi 		EQU 138
 Platinum_Pro_30A_Main			EQU 139   
 Platinum_Pro_30A_Tail 			EQU 140  
 Platinum_Pro_30A_Multi 			EQU 141  
-EAZY_3Av2_Main			EQU 142   
-EAZY_3Av2_Tail 			EQU 143  
-EAZY_3Av2_Multi 			EQU 144  
+EAZY_3Av2_Main					EQU 142   
+EAZY_3Av2_Tail 				EQU 143  
+EAZY_3Av2_Multi 				EQU 144  
+Tarot_30A_Main					EQU 145   
+Tarot_30A_Tail 				EQU 146  
+Tarot_30A_Multi 				EQU 147  
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
 ;BESC EQU XP_3A_Main
-;BESC EQU XP_3A_Tail
+;BESC EQU XP_3A_Tail 
 ;BESC EQU XP_3A_Multi
 ;BESC EQU XP_7A_Main
 ;BESC EQU XP_7A_Tail
-;BESC EQU XP_7A_Multi 
+;BESC EQU XP_7A_Multi
 ;BESC EQU XP_7A_Fast_Main
 ;BESC EQU XP_7A_Fast_Tail
 ;BESC EQU XP_7A_Fast_Multi
-;BESC EQU XP_12A_Main 
+;BESC EQU XP_12A_Main
 ;BESC EQU XP_12A_Tail 
 ;BESC EQU XP_12A_Multi
 ;BESC EQU XP_18A_Main 
@@ -390,12 +400,12 @@ EAZY_3Av2_Multi 			EQU 144
 ;BESC EQU Turnigy_Plush_18A_Tail 
 ;BESC EQU Turnigy_Plush_18A_Multi
 ;BESC EQU Turnigy_Plush_25A_Main 
-;BESC EQU Turnigy_Plush_25A_Tail 
+;BESC EQU Turnigy_Plush_25A_Tail
 ;BESC EQU Turnigy_Plush_25A_Multi
 ;BESC EQU Turnigy_Plush_30A_Main 
 ;BESC EQU Turnigy_Plush_30A_Tail 
 ;BESC EQU Turnigy_Plush_30A_Multi
-;BESC EQU Turnigy_Plush_40A_Main
+;BESC EQU Turnigy_Plush_40A_Main  
 ;BESC EQU Turnigy_Plush_40A_Tail 
 ;BESC EQU Turnigy_Plush_40A_Multi
 ;BESC EQU Turnigy_Plush_60A_Main
@@ -443,7 +453,7 @@ EAZY_3Av2_Multi 			EQU 144
 ;BESC EQU RCTimer_6A_Main
 ;BESC EQU RCTimer_6A_Tail
 ;BESC EQU RCTimer_6A_Multi
-;BESC EQU Align_RCE_BL15X_Main 
+;BESC EQU Align_RCE_BL15X_Main
 ;BESC EQU Align_RCE_BL15X_Tail
 ;BESC EQU Align_RCE_BL15X_Multi
 ;BESC EQU Align_RCE_BL15P_Main
@@ -497,7 +507,9 @@ EAZY_3Av2_Multi 			EQU 144
 ;BESC EQU EAZY_3Av2_Main
 ;BESC EQU EAZY_3Av2_Tail
 ;BESC EQU EAZY_3Av2_Multi
-
+;BESC EQU Tarot_30A_Main
+;BESC EQU Tarot_30A_Tail
+;BESC EQU Tarot_30A_Multi
 
 ;**** **** **** **** ****
 ; ESC selection statements
@@ -1208,19 +1220,33 @@ ENDIF
 
 IF BESC == EAZY_3Av2_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
-$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
 IF BESC == EAZY_3Av2_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
-$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
 IF BESC == EAZY_3Av2_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
-$include (EAZY_3Av2.inc)	; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
+IF BESC == Tarot_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Tarot_30A.inc)			; Select Tarot 30A pinout
+ENDIF
+
+IF BESC == Tarot_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Tarot_30A.inc)			; Select Tarot 30A pinout
+ENDIF
+
+IF BESC == Tarot_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Tarot_30A.inc)			; Select Tarot 30A pinout
+ENDIF
 
 ;**** **** **** **** ****
 ; TX programming defaults
@@ -1235,7 +1261,7 @@ ENDIF
 DEFAULT_PGM_MAIN_P_GAIN 			EQU 7 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 	; 1=Tx 		2=Arm 		3=Setup		4=Off
-DEFAULT_PGM_MAIN_GOVERNOR_RANGE 	EQU 1 	; 1=High		2=Low
+DEFAULT_PGM_MAIN_GOVERNOR_RANGE 	EQU 1 	; 1=High		2=Middle		3=Low
 DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	EQU 4 	; 1=Off		2=3.0V/c		3=3.1V/c		4=3.2V/c		5=3.3V/c	6=3.4V/c
 DEFAULT_PGM_MAIN_STARTUP_RPM		EQU 3 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
 DEFAULT_PGM_MAIN_STARTUP_ACCEL	EQU 1 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
@@ -1243,8 +1269,8 @@ DEFAULT_PGM_MAIN_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumH
 DEFAULT_PGM_MAIN_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_MAIN_DAMPING_FORCE	EQU 1 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
 DEFAULT_PGM_MAIN_PWM_FREQ 		EQU 2 	; 1=High 		2=Low		3=DampedLight
-DEFAULT_PGM_MAIN_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=15/0		3=15/7.5		4=7.5/7.5  	5=7.5/15  (degrees blind advance / power off)
-DEFAULT_PGM_MAIN_DIRECTION_REV	EQU 1 	; 1=Normal 	2=Reversed
+DEFAULT_PGM_MAIN_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=Low		3=High
+DEFAULT_PGM_MAIN_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed
 DEFAULT_PGM_MAIN_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Target for governor in setup mode. Corresponds to 70% throttle
 DEFAULT_PGM_MAIN_REARM_START		EQU 0 	; 1=Enabled 	0=Disabled
@@ -1264,8 +1290,8 @@ DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 4 	; 1=High 		2=Low 		3=DampedLight  4=Damped
 ELSE
 DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 3 	; 1=High 		2=Low		3=DampedLight
 ENDIF
-DEFAULT_PGM_TAIL_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=15/0		3=15/7.5		4=7.5/7.5  	5=7.5/15  (degrees blind advance / power off)
-DEFAULT_PGM_TAIL_DIRECTION_REV	EQU 1 	; 1=Normal 	2=Reversed
+DEFAULT_PGM_TAIL_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=Low		3=High
+DEFAULT_PGM_TAIL_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
 DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
@@ -1286,8 +1312,8 @@ DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low 		3=DampedLight  4=Damped
 ELSE
 DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low		3=DampedLight
 ENDIF
-DEFAULT_PGM_MULTI_DEMAG_COMP 		EQU 2 	; 1=Disabled	2=15/0		3=15/7.5		4=7.5/7.5  	5=7.5/15  (degrees blind advance / power off)
-DEFAULT_PGM_MULTI_DIRECTION_REV	EQU 1 	; 1=Normal 	2=Reversed
+DEFAULT_PGM_MULTI_DEMAG_COMP 		EQU 2 	; 1=Disabled	2=Low		3=High
+DEFAULT_PGM_MULTI_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
 DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
@@ -1296,6 +1322,7 @@ DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_PPM_MIN_THROTTLE		EQU 37	; 4*37+1000=1148
 DEFAULT_PGM_PPM_MAX_THROTTLE		EQU 208	; 4*208+1000=1832
+DEFAULT_PGM_PPM_CENTER_THROTTLE	EQU 122	; 4*122+1000=1488 (used in bidirectional mode)
 DEFAULT_PGM_BEC_VOLTAGE_HIGH		EQU 0	; 0=Low		1= High
 
 ;**** **** **** **** ****
@@ -1361,7 +1388,7 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_RED		EQU 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1451,6 +1478,7 @@ Stepper_Step_End_L:			DS	1		; Stepper phase step time at the end (lo byte)
 Stepper_Step_End_H:			DS	1		; Stepper phase step time at the end (hi byte)
 Startup_Rot_Cnt:			DS	1		; Startup phase rotations counter
 Direct_Startup_Ok_Cnt:		DS	1		; Direct startup phase ok comparator waits counter (incrementing)
+Demag_Consecutive_Cnt:		DS	1		; Counter used to count consecutive demag events
 
 Prev_Comm_L:				DS	1		; Previous commutation timer3 timestamp (lo byte)
 Prev_Comm_H:				DS	1		; Previous commutation timer3 timestamp (hi byte)
@@ -1519,18 +1547,17 @@ Tx_Pgm_Func_No:			DS	1		; Function number when doing programming by tx
 Tx_Pgm_Paraval_No:			DS	1		; Parameter value number when doing programming by tx
 Tx_Pgm_Beep_No:			DS	1		; Beep number when doing programming by tx
 
-; Indirect addressing data segment
+; Indirect addressing data segment. The variables below must be in this sequence
 ISEG AT 080h					
 Pgm_Gov_P_Gain:			DS	1		; Programmed governor P gain
 Pgm_Gov_I_Gain:			DS	1		; Programmed governor I gain
 Pgm_Gov_Mode:				DS	1		; Programmed governor mode
-
 Pgm_Low_Voltage_Lim:		DS	1		; Programmed low voltage limit
 Pgm_Motor_Gain:			DS	1		; Programmed motor gain
 Pgm_Motor_Idle:			DS	1		; Programmed motor idle speed
 Pgm_Startup_Pwr:			DS	1		; Programmed startup power
 Pgm_Pwm_Freq:				DS	1		; Programmed pwm frequency
-Pgm_Direction_Rev:			DS	1		; Programmed rotation direction
+Pgm_Direction:				DS	1		; Programmed rotation direction
 Pgm_Input_Pol:				DS	1		; Programmed input pwm polarity
 Initialized_L_Dummy:		DS	1		; Place holder
 Initialized_H_Dummy:		DS	1		; Place holder
@@ -1552,12 +1579,13 @@ Pgm_Beacon_Delay:			DS	1		; Programmed beacon delay
 Pgm_Throttle_Rate:			DS	1		; Programmed throttle rate
 Pgm_Demag_Comp:			DS	1		; Programmed demag compensation
 Pgm_BEC_Voltage_High:		DS	1		; Programmed BEC voltage
+Pgm_Ppm_Center_Throttle:		DS	1		; Programmed throttle center (in bidirectional mode)
 
+; The sequence of the variables below is no longer of importance
 Pgm_Gov_P_Gain_Decoded:		DS	1		; Programmed governor decoded P gain
 Pgm_Gov_I_Gain_Decoded:		DS	1		; Programmed governor decoded I gain
 Pgm_Throttle_Rate_Decoded:	DS	1		; Programmed throttle rate decoded
 Pgm_Startup_Pwr_Decoded:		DS	1		; Programmed startup power decoded
-Pgm_Demag_Comp_Wait_Decoded:	DS	1		; Programmed demag compensation wait decoded
 Pgm_Demag_Comp_Power_Decoded:	DS	1		; Programmed demag compensation power cut decoded
 
 
@@ -1568,9 +1596,9 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
-EEPROM_FW_MAIN_REVISION		EQU	10		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	4		; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION		EQU	16		; Revision of the EEPROM layout
+EEPROM_FW_MAIN_REVISION		EQU	11		; Main revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_LAYOUT_REVISION		EQU	17		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -1580,13 +1608,12 @@ IF MODE == 0
 Eep_Pgm_Gov_P_Gain:			DB	DEFAULT_PGM_MAIN_P_GAIN			; EEPROM copy of programmed governor P gain
 Eep_Pgm_Gov_I_Gain:			DB	DEFAULT_PGM_MAIN_I_GAIN			; EEPROM copy of programmed governor I gain
 Eep_Pgm_Gov_Mode:			DB	DEFAULT_PGM_MAIN_GOVERNOR_MODE	; EEPROM copy of programmed governor mode
-
 Eep_Pgm_Low_Voltage_Lim:		DB	DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM	; EEPROM copy of programmed low voltage limit
 _Eep_Pgm_Motor_Gain:		DB	0FFh							
 _Eep_Pgm_Motor_Idle:		DB	0FFh							
 Eep_Pgm_Startup_Pwr:		DB	DEFAULT_PGM_MAIN_STARTUP_PWR		; EEPROM copy of programmed startup power
 Eep_Pgm_Pwm_Freq:			DB	DEFAULT_PGM_MAIN_PWM_FREQ		; EEPROM copy of programmed pwm frequency
-Eep_Pgm_Direction_Rev:		DB	DEFAULT_PGM_MAIN_DIRECTION_REV	; EEPROM copy of programmed rotation direction
+Eep_Pgm_Direction:			DB	DEFAULT_PGM_MAIN_DIRECTION		; EEPROM copy of programmed rotation direction
 Eep_Pgm_Input_Pol:			DB	DEFAULT_PGM_MAIN_RCP_PWM_POL		; EEPROM copy of programmed input polarity
 Eep_Initialized_L:			DB	0A5h							; EEPROM initialized signature low byte
 Eep_Initialized_H:			DB	05Ah							; EEPROM initialized signature high byte
@@ -1608,19 +1635,19 @@ Eep_Pgm_Beacon_Delay:		DB	DEFAULT_PGM_MAIN_BEACON_DELAY		; EEPROM copy of progra
 Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_MAIN_THROTTLE_RATE	; EEPROM copy of programmed throttle rate
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_MAIN_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
+_Eep_Pgm_Ppm_Center_Throttle:	DB	0FFh							; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
 ENDIF
 
 IF MODE == 1
 _Eep_Pgm_Gov_P_Gain:		DB	0FFh							
 _Eep_Pgm_Gov_I_Gain:		DB	0FFh							
 _Eep_Pgm_Gov_Mode:			DB 	0FFh							
-
 _Eep_Pgm_Low_Voltage_Lim:	DB	0FFh							
 Eep_Pgm_Motor_Gain:			DB	DEFAULT_PGM_TAIL_GAIN			; EEPROM copy of programmed tail gain
 Eep_Pgm_Motor_Idle:			DB	DEFAULT_PGM_TAIL_IDLE_SPEED		; EEPROM copy of programmed tail idle speed
 Eep_Pgm_Startup_Pwr:		DB	DEFAULT_PGM_TAIL_STARTUP_PWR		; EEPROM copy of programmed startup power
 Eep_Pgm_Pwm_Freq:			DB	DEFAULT_PGM_TAIL_PWM_FREQ		; EEPROM copy of programmed pwm frequency
-Eep_Pgm_Direction_Rev:		DB	DEFAULT_PGM_TAIL_DIRECTION_REV	; EEPROM copy of programmed rotation direction
+Eep_Pgm_Direction:			DB	DEFAULT_PGM_TAIL_DIRECTION		; EEPROM copy of programmed rotation direction
 Eep_Pgm_Input_Pol:			DB	DEFAULT_PGM_TAIL_RCP_PWM_POL		; EEPROM copy of programmed input polarity
 Eep_Initialized_L:			DB	05Ah							; EEPROM initialized signature low byte
 Eep_Initialized_H:			DB	0A5h							; EEPROM initialized signature high byte
@@ -1642,19 +1669,19 @@ Eep_Pgm_Beacon_Delay:		DB	DEFAULT_PGM_TAIL_BEACON_DELAY		; EEPROM copy of progra
 Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_TAIL_THROTTLE_RATE	; EEPROM copy of programmed throttle rate
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_TAIL_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
+Eep_Pgm_Ppm_Center_Throttle:	DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
 ENDIF
 
 IF MODE == 2
 Eep_Pgm_Gov_P_Gain:			DB	DEFAULT_PGM_MULTI_P_GAIN			; EEPROM copy of programmed closed loop P gain
 Eep_Pgm_Gov_I_Gain:			DB	DEFAULT_PGM_MULTI_I_GAIN			; EEPROM copy of programmed closed loop I gain
 Eep_Pgm_Gov_Mode:			DB	DEFAULT_PGM_MULTI_GOVERNOR_MODE	; EEPROM copy of programmed closed loop mode
-
 Eep_Pgm_Low_Voltage_Lim:		DB	DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM	; EEPROM copy of programmed low voltage limit
 Eep_Pgm_Motor_Gain:			DB	DEFAULT_PGM_MULTI_GAIN			; EEPROM copy of programmed tail gain
 _Eep_Pgm_Motor_Idle:		DB	0FFh							; EEPROM copy of programmed tail idle speed
 Eep_Pgm_Startup_Pwr:		DB	DEFAULT_PGM_MULTI_STARTUP_PWR		; EEPROM copy of programmed startup power
 Eep_Pgm_Pwm_Freq:			DB	DEFAULT_PGM_MULTI_PWM_FREQ		; EEPROM copy of programmed pwm frequency
-Eep_Pgm_Direction_Rev:		DB	DEFAULT_PGM_MULTI_DIRECTION_REV	; EEPROM copy of programmed rotation direction
+Eep_Pgm_Direction:			DB	DEFAULT_PGM_MULTI_DIRECTION		; EEPROM copy of programmed rotation direction
 Eep_Pgm_Input_Pol:			DB	DEFAULT_PGM_MULTI_RCP_PWM_POL		; EEPROM copy of programmed input polarity
 Eep_Initialized_L:			DB	055h							; EEPROM initialized signature low byte
 Eep_Initialized_H:			DB	0AAh							; EEPROM initialized signature high byte
@@ -1676,6 +1703,7 @@ Eep_Pgm_Beacon_Delay:		DB	DEFAULT_PGM_MULTI_BEACON_DELAY	; EEPROM copy of progra
 Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_MULTI_THROTTLE_RATE	; EEPROM copy of programmed throttle rate
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_MULTI_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
+Eep_Pgm_Ppm_Center_Throttle:	DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
 ENDIF
 
 
@@ -1685,7 +1713,7 @@ CSEG AT 1A60h
 Eep_Name:					DB	"                "				; Name tag (16 Bytes)
 
 ;**** **** **** **** ****
-       		Interrupt_Table_Definition		; SiLabs interrupts
+        		Interrupt_Table_Definition		; SiLabs interrupts
 CSEG AT 80h			; Code segment after interrupt vectors 
 
 ;**** **** **** **** ****
@@ -1694,25 +1722,24 @@ CSEG AT 80h			; Code segment after interrupt vectors
 GOV_GAIN_TABLE:   		DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h
 THROTTLE_RATE_TABLE:  	DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 80h, 0FFh
 STARTUP_POWER_TABLE:  	DB 	04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h, 0A0h, 0C0h
-DEMAG_WAIT_TABLE:  		DB 	0, 0, 0, 1, 1
-DEMAG_POWER_TABLE:  	DB 	0, 3, 2, 2, 1
+DEMAG_POWER_TABLE:  	DB 	0, 2, 1
 IF MODE == 0
-TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 2, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 2, 2
+TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 3, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 2, 2
 ENDIF
 IF MODE == 1
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 4, 5, 2, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 4, 5, 3, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 3, 5, 2, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 3, 5, 3, 2
   ENDIF
 ENDIF
 IF MODE == 2
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 4, 5, 2, 2
+TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 4, 5, 3, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 2, 2
+TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 3, 2
   ENDIF
 ENDIF
 
@@ -1721,7 +1748,7 @@ ENDIF
 ; Timer0 interrupt routine
 ;
 ; Assumptions: DPTR register must be set to desired pwm_nfet_on label
-; Requirements: Temp variables can NOT be used since PWSW.3 is not set
+; Requirements: Temp variables can NOT be used since PSW.3 is not set
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 t0_int:	; Used for pwm control
@@ -1731,6 +1758,8 @@ t0_int:	; Used for pwm control
 	; Check if pwm is on
 	jb	Flags0.PWM_ON, t0_int_pwm_off	; Is pwm on?
 
+	; Do not execute pwm on during demag recovery
+	jb	Flags0.DEMAG_CUT_POWER, t0_int_pwm_on_stopped
 	; Pwm on cycle. 
 	jnb	Current_Pwm_Limited.7, t0_int_pwm_on_low_pwm	; Jump for low pwm (<50%)
 
@@ -2061,7 +2090,7 @@ t0_int_pwm_on_exit_no_timer_update:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 t2_int:	; Happens every 128us for low byte and every 32ms for high byte
-	clr 	EA			; Disable all interrupts
+	anl	EIE1, #0EFh	; Disable PCA0 interrupts
 	push	PSW			; Preserve registers through interrupt
 	push	ACC
 	setb	PSW.3		; Select register bank 1 for interrupt routines
@@ -2111,7 +2140,6 @@ t2_int_ppm_timeout_set:
 	mov	New_Rcp, Temp1				; Store new pulse length
 	setb	Flags2.RCP_UPDATED		 	; Set updated flag
 
-
 t2_int_skip_start:
 	; Check RC pulse skip counter
 	mov	A, Rcp_Skip_Cnt			
@@ -2143,14 +2171,8 @@ t2_int_rcp_update_start:
 	anl	A, Flags3					; Check pwm frequency flags
 	jz	t2_int_pwm_min_run			; If no flag is set (PPM) - branch
 
-IF MODE <= 1	; Main or tail
 	mov	Temp2, #Pgm_Gov_Mode		; Governor mode?
 	cjne	@Temp2, #4, t2_int_pwm_min_run; Yes - branch
-ENDIF
-IF MODE == 2	; Multi
-	mov	Temp2, #Pgm_Gov_Mode		; Closed loop mode?
-	cjne	@Temp2, #4, t2_int_pwm_min_run; Yes - branch
-ENDIF
 
 	; Limit the maximum value to avoid wrap when scaled to pwm range
 	clr	C
@@ -2229,14 +2251,8 @@ t2_int_pwm_update:
 	mov	Requested_Pwm, Pwm_Limit
 
 t2_int_current_pwm_update: 
-IF MODE <= 1	; Main or tail
 	mov	Temp1, #Pgm_Gov_Mode		; Governor mode?
 	cjne	@Temp1, #4, t2_int_pwm_exit	; Yes - branch
-ENDIF
-IF MODE == 2	; Multi
-	mov	Temp1, #Pgm_Gov_Mode		; Closed loop mode?
-	cjne	@Temp1, #4, t2_int_pwm_exit	; Yes - branch
-ENDIF
 
 	; Update current pwm, with limited throttle change rate
 	clr	C
@@ -2259,8 +2275,10 @@ ENDIF
 t2_int_set_current_pwm:
 	mov	Current_Pwm, Requested_Pwm	; Set equal as default
 t2_int_current_pwm_done:
-IF MODE == 1	; Tail
-	; If tail, then set current_pwm_limited
+IF MODE >= 1	; Tail or multi
+	; Disable interrupts while changing current pwm limited
+	clr	EA
+	; Set current_pwm_limited
 	mov	Current_Pwm_Limited, Current_Pwm	; Default not limited
 	clr	C
 	mov	A, Current_Pwm					; Check against limit
@@ -2268,25 +2286,16 @@ IF MODE == 1	; Tail
 	jc	($+5)						; If current pwm below limit - branch
 
 	mov	Current_Pwm_Limited, Pwm_Limit	; Limit pwm
-ENDIF
-IF MODE == 2	; Multi
-	; If multi, then set current_pwm_limited
-	mov	Current_Pwm_Limited, Current_Pwm	; Default not limited
-	clr	C
-	mov	A, Current_Pwm					; Check against limit
-	subb	A, Pwm_Limit
-	jc	($+5)						; If current pwm below limit - branch
 
-	mov	Current_Pwm_Limited, Pwm_Limit	; Limit pwm
+	setb	EA
 ENDIF
-
 t2_int_pwm_exit:	
 	; Check if high byte flag is set
 	jb	TF2H, t2h_int		
 	pop	ACC			; Restore preserved registers
 	pop	PSW
 	clr	PSW.3		; Select register bank 0 for main program routines	
-	setb	EA			; Enable all interrupts
+	orl	EIE1, #10h	; Enable PCA0 interrupts
 	reti
 
 t2h_int:
@@ -2430,7 +2439,6 @@ t2h_int_rcp_set_limit:
 	jmp	t2h_int_rcp_exit				; Exit
 
 t2h_int_rcp_inc_limit:
-	clr	C
 	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm
 	add	A, Temp1
 	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
@@ -2443,7 +2451,6 @@ t2h_int_rcp_no_limit:
 ENDIF
 IF MODE == 2	; Multi
 	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 0.8 seconds spoolup
-	clr	C
 	add	A, #10
 	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
 
@@ -2458,7 +2465,7 @@ t2h_int_rcp_exit:
 	pop	ACC			; Restore preserved registers
 	pop	PSW
 	clr	PSW.3		; Select register bank 0 for main program routines	
-	setb	EA			; Enable all interrupts
+	orl	EIE1, #10h	; Enable PCA0 interrupts
 	reti
 
 
@@ -2485,7 +2492,7 @@ t3_int:	; Used for commutation timing
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 pca_int:	; Used for RC pulse timing
-	clr 	EA			; Disable all interrupts
+	clr	ET2			; Disable timer2 interrupts
 	push	PSW			; Preserve registers through interrupt
 	push	ACC
 	push	B
@@ -2746,11 +2753,20 @@ pca_int_ppm_check_full_range:
 	mov	A, #0						; Set 1000us as default minimum
 	jb	Flags3.FULL_THROTTLE_RANGE, pca_int_ppm_calculate	; Check if full range is chosen
 
+IF MODE >= 1	; Tail or multi
+	mov	Temp1, #Pgm_Direction			; Check if bidirectional operation
+	mov	A, @Temp1				
+ENDIF
 	mov	Temp1, #Pgm_Ppm_Min_Throttle		; Min throttle value is in 4us units
+IF MODE >= 1	; Tail or multi
+	cjne	A, #3, ($+5)
+
+	mov	Temp1, #Pgm_Ppm_Center_Throttle	; Center throttle value is in 4us units
+ENDIF
 	mov	A, @Temp1				
 
 pca_int_ppm_calculate:
-	add	A, #250
+	add	A, #250						; Add 1000us to minimum
 	mov	Temp7, A
 	clr	A
 	addc	A, #0
@@ -2763,14 +2779,74 @@ pca_int_ppm_calculate:
 	mov	A, Temp6					
 	subb	A, Temp8
 	mov	Temp6, A
-	jnc	pca_int_ppm_neg_checked			; Is result negative?
+IF MODE >= 1	; Tail or multi
+	mov	Bit_Access_Int.0, C
+	mov	Temp1, #Pgm_Direction			; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, pca_int_ppm_bidir_dir_set	; No - branch
 
+	mov	C, Bit_Access_Int.0
+	jnc	($+4)						; If result is positive - branch				
+
+	setb	Flags3.PGM_DIR_REV
+
+	jc	($+4)						; If result is negative - branch				
+
+	clr	Flags3.PGM_DIR_REV
+	
+pca_int_ppm_bidir_dir_set:
+	mov	C, Bit_Access_Int.0
+ENDIF
+	jnc	pca_int_ppm_neg_checked			; If result is positive - branch
+
+IF MODE >= 1	; Tail or multi
+	mov	A, @Temp1						; Check if bidirectional operation (Temp1 has Pgm_Direction)
+	cjne	A, #3, pca_int_ppm_unidir_neg 	; No - branch
+
+	mov	A, Temp5						; Change sign		
+	cpl	A
+	add	A, #1
+	mov	Temp5, A
+	mov	A, Temp6							
+	cpl	A
+	addc	A, #0
+	mov	Temp6, A
+	setb	Flags3.PGM_DIR_REV
+	jmp	pca_int_ppm_neg_checked
+
+pca_int_ppm_unidir_neg:
+ENDIF
 	mov	Temp1, #RCP_MIN				; Yes - set to minimum
 	mov	Temp2, #0
 	ajmp	pca_int_pwm_divide_done
 
 pca_int_ppm_neg_checked:
-	clr	C							; Check that RC pulse is within legal range (1000+4*255=2020)
+IF MODE >= 1	; Tail or multi
+	mov	Temp1, #Pgm_Direction			; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, pca_int_ppm_bidir_set		; No - branch
+
+	mov	A, Temp5						; Multiply value by 2
+	rlc	A
+	mov	Temp5 A
+	mov	A, Temp6
+	rlc	A
+	mov	Temp6 A
+	clr	C							; Subtract deadband
+	mov	A, Temp5
+	subb	A, #5		
+	mov	Temp5, A
+	mov	A, Temp6
+	subb	A, #0
+	mov	Temp6, A
+	jnc	pca_int_ppm_bidir_set
+
+	mov	Temp5, #RCP_MIN
+	mov	Temp6, #0
+
+pca_int_ppm_bidir_set:
+ENDIF
+	clr	C							; Check that RC pulse is within legal range (max 255)
 	mov	A, Temp5
 	subb	A, #RCP_MAX				
 	mov	A, Temp6
@@ -2878,7 +2954,7 @@ pca_int_exit:	; Exit interrupt routine
 	pop	ACC			
 	pop	PSW
 	clr	PSW.3		; Select register bank 0 for main program routines	
-	setb	EA			; Enable all interrupts
+	setb	ET2			; Enable timer2 interrupts
 	reti
 
 
@@ -2893,27 +2969,27 @@ pca_int_exit:	; Exit interrupt routine
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait1ms:	
 	mov	Temp2, #1
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 wait3ms:	
 	mov	Temp2, #3
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 wait10ms:	
 	mov	Temp2, #10
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 wait30ms:	
 	mov	Temp2, #30
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 wait100ms:	
 	mov	Temp2, #100
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 wait200ms:	
 	mov	Temp2, #200
-	ajmp	waitxms_o
+	jmp	waitxms_o
 
 waitxms_o:	; Outer loop
 	mov	Temp1, #23
@@ -2973,7 +3049,7 @@ beep_onoff:
 	djnz	ACC, $		
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	mov	A, #150		; 25쨉s off
+	mov	A, #150		; 25탎 off
 	djnz	ACC, $		
 	djnz	Temp2, beep_onoff
 	; Copy variable
@@ -2982,8 +3058,6 @@ beep_onoff:
 beep_off:		; Fets off loop
 	djnz	ACC, $
 	djnz	Temp1,	beep_off
-
-beep_recharge_done:
 	djnz	Temp4,	beep
 	BpFET_off			; BpFET off
 	mov	Current_Pwm_Limited, Temp5	; Restore value
@@ -3159,12 +3233,19 @@ governor_speed_check:
 
 	; Check speed (do not run governor for low speeds)
 	mov	Temp1, #05h				; Default high range activation limit value (~62500 eRPM)
-	clr	C
 	mov	Temp2, #Pgm_Gov_Range
-	cjne	@Temp2, #2, ($+5)
+	mov	A, @Temp2					; Check if high range (Temp2 has #Pgm_Gov_Range)
+	dec	A
+	jz	governor_act_lim_set		; If high range - branch
 
+	mov	Temp1, #0Ah				; Middle range activation limit value (~31250 eRPM)
+
+	dec	A
+	jz	governor_act_lim_set		; If middle range - branch
+	
 	mov	Temp1, #12h				; Low range activation limit value (~17400 eRPM)
 
+governor_act_lim_set:
 	clr	C
 	mov	A, Comm_Period4x_L
 	subb	A, #00h
@@ -3196,11 +3277,10 @@ governor_activate:
 
 governor_target_calc:
 	; Governor calculations
-	clr	C
 	mov	Temp2, #Pgm_Gov_Range
-	mov	A, @Temp2				; Check high or low range (Temp2 has #Pgm_Gov_Range)
-	subb	A, #2
-	jz	calc_governor_target_low
+	mov	A, @Temp2				; Check high, middle or low range (Temp2 has #Pgm_Gov_Range)
+	dec	A
+	jnz	calc_governor_target_middle
 
 	mov	A, Governor_Req_Pwm		; Load governor requested pwm
 	cpl	A					; Calculate 255-pwm (invert pwm) 
@@ -3216,12 +3296,30 @@ governor_target_calc:
 	mov	Temp2, A
 	mov	A, Temp1
 	anl	A, #0FEh				; Calculate L byte
-	clr	C
-	subb	A, #40h				; Subtract 0.25
-	mov	Temp1, A
+	jmp	calc_governor_subtract_025
+
+calc_governor_target_middle:
+	mov	Temp2, #Pgm_Gov_Range
+	mov	A, @Temp2				; Check middle or low range (Temp2 has #Pgm_Gov_Range)
+	dec	A
+	dec	A
+	jnz	calc_governor_target_low
+
+	mov	A, Governor_Req_Pwm		; Load governor requested pwm
+	cpl	A					; Calculate 255-pwm (invert pwm) 
+	; Calculate comm period target (1 + 4*((255-Requested_Pwm)/256))
+	rlc	A					; Msb to carry
+	rlc	A					; To bit0
+	rlc	A					; To bit1
+	mov	Temp2, A				; Now 2 lsbs are valid for H
+	rrc	A					
+	mov	Temp1, A				; Now 6 msbs are valid for L
 	mov	A, Temp2
-	subb	A, #0
+	anl	A, #03h				; Calculate H byte
+	inc	A					; Add 1
 	mov	Temp2, A
+	mov	A, Temp1
+	anl	A, #0FCh				; Calculate L byte
 	jmp	calc_governor_store_target
 
 calc_governor_target_low:
@@ -3234,7 +3332,7 @@ calc_governor_target_low:
 	rlc	A					; To bit2
 	mov	Temp2, A				; Now 3 lsbs are valid for H
 	rrc	A					
-	mov	Temp1, A				; Now 4 msbs are valid for L
+	mov	Temp1, A				; Now 5 msbs are valid for L
 	mov	A, Temp2
 	anl	A, #07h				; Calculate H byte
 	inc	A					; Add 1
@@ -3242,13 +3340,13 @@ calc_governor_target_low:
 	mov	Temp2, A
 	mov	A, Temp1
 	anl	A, #0F8h				; Calculate L byte
+calc_governor_subtract_025:
 	clr	C
 	subb	A, #40h				; Subtract 0.25
 	mov	Temp1, A
 	mov	A, Temp2
 	subb	A, #0
 	mov	Temp2, A
-
 calc_governor_store_target:
 	; Store governor target
 	mov	Gov_Target_L, Temp1
@@ -3562,7 +3660,7 @@ governor_corr_neg_prop:
 	mov	A, Temp1
 	cpl	A
 	add	A, #1
-	add	A, Governor_Req_Pwm
+	addc	A, Governor_Req_Pwm
 	mov	Temp1, A
 	; Check result
 	jc	governor_corr_prop_max_pwm	; Is result above max?
@@ -3652,7 +3750,7 @@ governor_corr_neg_int:
 	mov	A, Temp1
 	cpl	A
 	add	A, #1
-	add	A, Gov_Prop_Pwm
+	addc	A, Gov_Prop_Pwm
 	mov	Temp1, A
 	; Check result
 	jc	governor_corr_int_max_pwm	; Is result above max?
@@ -4213,19 +4311,13 @@ calc_next_comm_slow:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Wait advance timing routine
+; Setup zero cross scan wait
 ;
 ; No assumptions
 ;
-; Waits for the advance timing to elapse
-; Also sets up timer 1 to wait the zero cross scan wait time
-; And has a separate entry point for just setting up zero cross scan wait
+; Sets up timer 1 to wait the zero cross scan wait time
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-wait_advance_timing:	
-	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_advance_timing
-
 setup_zc_scan_wait:
 	mov	TMR3CN, #00h		; Timer3 disabled
 	clr	C
@@ -4237,6 +4329,35 @@ setup_zc_scan_wait:
 	mov	TMR3H, A
 	mov	TMR3CN, #04h		; Timer3 enabled
 	setb	Flags0.T3_PENDING
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Wait advance timing routine
+;
+; No assumptions
+;
+; Waits for the advance timing to elapse, waits one zero cross
+; wait and sets up the next zero cross wait
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+wait_advance_timing:	
+	mov	Temp8, #1				; Default one zero cross scan wait	(prevents squealing that can happen if two are used when demag comp is off)				
+	mov	Temp1, #Pgm_Demag_Comp	; Load programmed demag compensation
+	mov	A, @Temp1				
+	dec	A
+	jz	wait_advance_timing_wait
+
+	mov	Temp8, #2				; Do two zero cross scan waits when demag comp is on (gives more correct blind advance)						
+
+wait_advance_timing_wait:
+	jnb	Flags0.T3_PENDING, ($+5)
+	ajmp	wait_advance_timing_wait
+
+	call	setup_zc_scan_wait					; Setup wait time
+	djnz	Temp8, wait_advance_timing_wait
+
 	ret
 
 
@@ -4255,11 +4376,6 @@ calc_new_wait_times:
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
 	mov	Temp7, #(COMM_TIME_RED SHL 1)	
-	jnb	Flags0.DEMAG_DETECTED, calc_new_wait_check_startup	; Demag detected?
-
-	mov	Temp8, #5				; Yes - set high timing
-
-calc_new_wait_check_startup:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, calc_new_wait_dir_start_set	; Set timing for direct start
 
 	mov	Temp8, #3				; Set medium timing
@@ -4321,20 +4437,20 @@ adjust_timing:
 	mov	A, Temp8				
 	jb	ACC.0, adjust_timing_two_steps	; If an odd number - branch
 
-	mov	A, Temp1				; Add 7.5째 and store in Temp1/2
+	mov	A, Temp1				; Add 7.5� and store in Temp1/2
 	add	A, Temp5
 	mov	Temp1, A
 	mov	A, Temp2
 	addc	A, Temp6
 	mov	Temp2, A
-	mov	A, Temp5				; Store 7.5째 in Temp3/4
+	mov	A, Temp5				; Store 7.5� in Temp3/4
 	mov	Temp3, A
 	mov	A, Temp6			
 	mov	Temp4, A
 	jmp	store_times_up_or_down
 
 adjust_timing_two_steps:
-	mov	A, Temp1				; Add 15째 and store in Temp1/2
+	mov	A, Temp1				; Add 15� and store in Temp1/2
 	add	A, Temp1
 	mov	Temp1, A
 	mov	A, Temp2
@@ -4351,20 +4467,20 @@ store_times_up_or_down:
 	jc	store_times_decrease	; No - branch
 
 store_times_increase:
-	mov	Wt_Comm_L, Temp3		; Now commutation time (~60째) divided by 4 (~15째 nominal)
+	mov	Wt_Comm_L, Temp3		; Now commutation time (~60�) divided by 4 (~15� nominal)
 	mov	Wt_Comm_H, Temp4
-	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15째 nominal)
+	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15� nominal)
 	mov	Wt_Advance_H, Temp2
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5째)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5�)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
 store_times_decrease:
-	mov	Wt_Comm_L, Temp1		; Now commutation time (~60째) divided by 4 (~15째 nominal)
+	mov	Wt_Comm_L, Temp1		; Now commutation time (~60�) divided by 4 (~15� nominal)
 	mov	Wt_Comm_H, Temp2
-	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15째 nominal)
+	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15� nominal)
 	mov	Wt_Advance_H, Temp4
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5째)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5�)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
@@ -4376,7 +4492,7 @@ store_times_decrease:
 ; No assumptions
 ;
 ; Waits for the zero cross scan wait time to elapse
-; Also sets up timer 1 to wait the zero cross scan timeout time
+; Also sets up timer 3 to wait the zero cross scan timeout time
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_before_zc_scan:	
@@ -4509,13 +4625,12 @@ pwm_wait:
 	clr	C
 	mov	A, TL1
 	subb	A, Temp2
-IF DAMPED_MODE_ENABLE==0				
-	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle for slower escs
-ENDIF
-IF DAMPED_MODE_ENABLE==1				; Assume same pwm cycle for fast escs
+IF MODE == 1 AND DAMPED_MODE_ENABLE == 1; Assume same pwm cycle for fast tail escs
 	jb	Flags1.DIRECT_STARTUP_PHASE, ($+5)
 	jc	pwm_wait
 	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle during direct start
+ELSE
+	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle for slower escs
 ENDIF
 
 comp_read:
@@ -4553,6 +4668,8 @@ evaluate_comparator_integrity:
 	mov	A, Comp_Wait_Reads				; Check if there were no waits (there shall be some). If none a demag situation has occurred
 	dec	A
 	jnz	eval_comp_no_demag
+
+	jb	Flags1.DIRECT_STARTUP_PHASE, eval_comp_no_demag	; Do not set demag flag during direct start
 
 	setb	Flags0.DEMAG_DETECTED			; Set demag detected flag
 
@@ -4608,8 +4725,12 @@ setup_comm_wait:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_for_comm: 
-	; Store motor power
-	mov	Temp7, Current_Pwm_Limited			
+	; Increment or reset consecutive count
+	inc	Demag_Consecutive_Cnt
+	jb	Flags0.DEMAG_DETECTED, ($+6)
+
+	mov	Demag_Consecutive_Cnt, #0
+
 	; Check if a demag situation has occurred
 	jnb	Flags0.DEMAG_DETECTED, wait_for_comm_wait; Demag detected?
 
@@ -4618,63 +4739,31 @@ wait_for_comm:
 	mov	A, @Temp1				
 	mov	Temp8, A							; Store in Temp8
 
-	; Check for first power off
+	; Check for power off
 	cjne	Temp8, #1, wait_for_comm_blind
 
 	setb	Flags0.DEMAG_CUT_POWER				; Turn off motor power
-	mov	Current_Pwm_Limited, #0				
 	All_nFETs_off
 
 	; Wait a blind wait
 wait_for_comm_blind:
 	call	setup_zc_scan_wait					; Setup a zero cross scan wait (7.5 deg)
-wait_demag_default_zc1:	
-	jnb	Flags0.DEMAG_CUT_POWER, ($+6)			; Cut motor power if set
-	mov	Current_Pwm_Limited, #0			
+wait_demag_default_zc:	
 	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_demag_default_zc1
+	ajmp	wait_demag_default_zc
 
-	; Check for second power off
-	cjne	Temp8, #2, wait_for_comm_second_blind_wait
+	; Check for power off
+	cjne	Temp8, #2, wait_for_comm_setup
 
 	setb	Flags0.DEMAG_CUT_POWER				; Turn off motor power
-	mov	Current_Pwm_Limited, #0				
-	All_nFETs_off
-
-	; Check for another blind wait
-wait_for_comm_second_blind_wait:
-	mov	Temp1, #Pgm_Demag_Comp_Wait_Decoded	; Yes - load programmed demag compensation wait decoded
-	cjne	@Temp1, #1, wait_for_comm_power3
-
-	call	setup_zc_scan_wait					; Setup a zero cross scan wait (7.5 deg)
-wait_demag_default_zc2:	
-	jnb	Flags0.DEMAG_CUT_POWER, ($+6)			; Cut motor power if set
-	mov	Current_Pwm_Limited, #0			
-	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_demag_default_zc2
-
-wait_for_comm_power3:
-	; Check for third power off
-	cjne	Temp8, #3, wait_for_comm_setup
-
-	setb	Flags0.DEMAG_CUT_POWER				; Turn off motor power
-	mov	Current_Pwm_Limited, #0				
 	All_nFETs_off
 
 wait_for_comm_setup:
 	call	setup_comm_wait					; Setup commutation wait
 wait_for_comm_wait:
-	jnb	Flags0.DEMAG_CUT_POWER, ($+6)			; Cut motor power if set
-	mov	Current_Pwm_Limited, #0			
-	jnb Flags0.T3_PENDING, ($+5)				
+	jnb Flags0.T3_PENDING, ($+5)			
 	ajmp	wait_for_comm_wait					
 
-	jnb	Flags0.DEMAG_DETECTED, wait_for_comm_exit	; Was there a demag situation?
-
-	clr	Flags0.DEMAG_CUT_POWER				; Restore motor power again
-	mov	Current_Pwm_Limited, Temp7			
-
-wait_for_comm_exit:
 	ret
 
 
@@ -4709,8 +4798,7 @@ comm12_nondamp:
 	ApFET_on					; Ap on
 	Set_Comp_Phase_B 			; Set comparator to phase B
 	mov	Comm_Phase, #2
-	setb	EA					; Enable all interrupts
-	ret
+	jmp	comm_exit
 
 comm2comm3:	
 	clr 	EA					; Disable all interrupts
@@ -4738,8 +4826,7 @@ comm23_nfet:
 comm23_cp:
 	Set_Comp_Phase_C 			; Set comparator to phase C
 	mov	Comm_Phase, #3
-	setb	EA					; Enable all interrupts
-	ret
+	jmp	comm_exit
 
 comm3comm4:	
 	clr 	EA					; Disable all interrupts
@@ -4762,8 +4849,7 @@ comm34_nondamp:
 	CpFET_on					; Cp on
 	Set_Comp_Phase_A 			; Set comparator to phase A
 	mov	Comm_Phase, #4
-	setb	EA					; Enable all interrupts
-	ret
+	jmp	comm_exit
 
 comm4comm5:	
 	clr 	EA					; Disable all interrupts
@@ -4791,8 +4877,7 @@ comm45_nfet:
 comm45_cp:
 	Set_Comp_Phase_B 			; Set comparator to phase B
 	mov	Comm_Phase, #5
-	setb	EA					; Enable all interrupts
-	ret
+	jmp	comm_exit
 
 comm5comm6:	
 	clr 	EA					; Disable all interrupts
@@ -4815,8 +4900,7 @@ comm56_nondamp:
 	BpFET_on					; Bp on
 	Set_Comp_Phase_C 			; Set comparator to phase C
 	mov	Comm_Phase, #6
-	setb	EA					; Enable all interrupts
-	ret
+	jmp	comm_exit
 
 comm6comm1:	
 	clr 	EA					; Disable all interrupts
@@ -4844,7 +4928,24 @@ comm61_nfet:
 comm61_cp:
 	Set_Comp_Phase_A 			; Set comparator to phase A
 	mov	Comm_Phase, #1
+
+comm_exit:
 	setb	EA					; Enable all interrupts
+	mov	Temp1, #Pgm_Demag_Comp	; Check demag comp setting
+	mov	A, @Temp1	
+	clr	C
+	subb	A, #2				; Check whether power shall be kept off upon consecutive demgs			
+	jc	comm_restore_power		; Less than value - branch
+
+	clr	C
+	mov	A, Demag_Consecutive_Cnt	; Check consecutive demags
+	subb	A, #3
+	jnc	comm_return			; Do not reapply power if many consecutive demags. This will help retain sync during hard accelerations
+
+comm_restore_power:
+	clr	Flags0.DEMAG_CUT_POWER	; Clear demag power cut flag
+
+comm_return:
 	ret
 
 
@@ -4861,6 +4962,7 @@ switch_power_off:
 	mov	DPTR, #pwm_nofet_on	; Set DPTR register to pwm_nofet_on label		
 	All_nFETs_Off			; Turn off all nfets
 	All_pFETs_Off			; Turn off all pfets
+	clr	Flags0.PWM_ON		; Set pwm cycle to pwm off
 	ret			
 
 
@@ -4977,123 +5079,146 @@ set_default_parameters:
 IF MODE == 0	; Main
 	mov	Temp1, #Pgm_Gov_P_Gain
 	mov	@Temp1, #DEFAULT_PGM_MAIN_P_GAIN
-	mov	Temp1, #Pgm_Gov_I_Gain
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_I_GAIN
-	mov	Temp1, #Pgm_Gov_Mode
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_GOVERNOR_MODE
-	mov	Temp1, #Pgm_Gov_Range
-	mov	@Temp1, #DEFAULT_PGM_MAIN_GOVERNOR_RANGE
-	mov	Temp1, #Pgm_Low_Voltage_Lim
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM
+
 	mov	Temp1, #Pgm_Startup_Pwr
 	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_PWR
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_PWM_FREQ
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_DIRECTION
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_RCP_PWM_POL
+
 	mov	Temp1, #Pgm_Startup_Rpm
 	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_RPM
-	mov	Temp1, #Pgm_Startup_Accel
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_ACCEL
-	mov	Temp1, #Pgm_Startup_Method
-	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Comm_Timing
 	mov	@Temp1, #DEFAULT_PGM_MAIN_COMM_TIMING
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_DAMPING_FORCE
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_GOVERNOR_RANGE
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Throttle_Rate
 	mov	@Temp1, #DEFAULT_PGM_MAIN_THROTTLE_RATE
-	mov	Temp1, #Pgm_Damping_Force
-	mov	@Temp1, #DEFAULT_PGM_MAIN_DAMPING_FORCE
-	mov	Temp1, #Pgm_Pwm_Freq
-	mov	@Temp1, #DEFAULT_PGM_MAIN_PWM_FREQ
-	mov	Temp1, #Pgm_Demag_Comp
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_DEMAG_COMP
-	mov	Temp1, #Pgm_Direction_Rev
-	mov	@Temp1, #DEFAULT_PGM_MAIN_DIRECTION_REV
-	mov	Temp1, #Pgm_Input_Pol
-	mov	@Temp1, #DEFAULT_PGM_MAIN_RCP_PWM_POL
-	mov	Temp1, #Pgm_Motor_Idle
+
+	mov	Temp1, #Pgm_Motor_Gain
+	mov	@Temp1, #0
+	inc	Temp1
 	mov	@Temp1, #0
 ENDIF
 IF MODE == 1	; Tail
 	mov	Temp1, #Pgm_Motor_Gain
 	mov	@Temp1, #DEFAULT_PGM_TAIL_GAIN
-	mov	Temp1, #Pgm_Motor_Idle
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_IDLE_SPEED
+
 	mov	Temp1, #Pgm_Startup_Pwr
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_PWR
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_TAIL_PWM_FREQ
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_TAIL_DIRECTION
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_TAIL_RCP_PWM_POL
+
 	mov	Temp1, #Pgm_Startup_Rpm
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_RPM
-	mov	Temp1, #Pgm_Startup_Accel
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_ACCEL
-	mov	Temp1, #Pgm_Startup_Method
-	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Comm_Timing
 	mov	@Temp1, #DEFAULT_PGM_TAIL_COMM_TIMING
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_TAIL_DAMPING_FORCE
+
+	mov	Temp1, #Pgm_Startup_Method
+	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Throttle_Rate
 	mov	@Temp1, #DEFAULT_PGM_TAIL_THROTTLE_RATE
-	mov	Temp1, #Pgm_Damping_Force
-	mov	@Temp1, #DEFAULT_PGM_TAIL_DAMPING_FORCE
-	mov	Temp1, #Pgm_Pwm_Freq
-	mov	@Temp1, #DEFAULT_PGM_TAIL_PWM_FREQ
-	mov	Temp1, #Pgm_Demag_Comp
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_DEMAG_COMP
-	mov	Temp1, #Pgm_Direction_Rev
-	mov	@Temp1, #DEFAULT_PGM_TAIL_DIRECTION_REV
-	mov	Temp1, #Pgm_Input_Pol
-	mov	@Temp1, #DEFAULT_PGM_TAIL_RCP_PWM_POL
+
 	mov	Temp1, #Pgm_Gov_Mode
 	mov	@Temp1, #4
 ENDIF
 IF MODE == 2	; Multi
 	mov	Temp1, #Pgm_Gov_P_Gain
-	mov	@Temp1, #DEFAULT_PGM_MAIN_P_GAIN
-	mov	Temp1, #Pgm_Gov_I_Gain
-	mov	@Temp1, #DEFAULT_PGM_MAIN_I_GAIN
-	mov	Temp1, #Pgm_Gov_Mode
-	mov	@Temp1, #DEFAULT_PGM_MAIN_GOVERNOR_MODE
-	mov	Temp1, #Pgm_Motor_Gain
-	mov	@Temp1, #DEFAULT_PGM_MULTI_GAIN
-	mov	Temp1, #Pgm_Low_Voltage_Lim
+	mov	@Temp1, #DEFAULT_PGM_MULTI_P_GAIN
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_I_GAIN
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_GOVERNOR_MODE
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_GAIN
+
 	mov	Temp1, #Pgm_Startup_Pwr
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_PWR
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_PWM_FREQ
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_DIRECTION
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_RCP_PWM_POL
+
 	mov	Temp1, #Pgm_Startup_Rpm
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_RPM
-	mov	Temp1, #Pgm_Startup_Accel
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_ACCEL
-	mov	Temp1, #Pgm_Startup_Method
-	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Comm_Timing
 	mov	@Temp1, #DEFAULT_PGM_MULTI_COMM_TIMING
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MULTI_DAMPING_FORCE
+
+	mov	Temp1, #Pgm_Startup_Method
+	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_METHOD
+
 	mov	Temp1, #Pgm_Throttle_Rate
 	mov	@Temp1, #DEFAULT_PGM_MULTI_THROTTLE_RATE
-	mov	Temp1, #Pgm_Damping_Force
-	mov	@Temp1, #DEFAULT_PGM_MULTI_DAMPING_FORCE
-	mov	Temp1, #Pgm_Pwm_Freq
-	mov	@Temp1, #DEFAULT_PGM_MULTI_PWM_FREQ
-	mov	Temp1, #Pgm_Demag_Comp
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_DEMAG_COMP
-	mov	Temp1, #Pgm_Direction_Rev
-	mov	@Temp1, #DEFAULT_PGM_MULTI_DIRECTION_REV
-	mov	Temp1, #Pgm_Input_Pol
-	mov	@Temp1, #DEFAULT_PGM_MULTI_RCP_PWM_POL
+
 	mov	Temp1, #Pgm_Motor_Idle
 	mov	@Temp1, #0
 ENDIF
 	mov	Temp1, #Pgm_Enable_TX_Program
 	mov	@Temp1, #DEFAULT_PGM_ENABLE_TX_PROGRAM
-	mov	Temp1, #Pgm_Main_Rearm_Start
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_REARM_START
-	mov	Temp1, #Pgm_Gov_Setup_Target
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_GOV_SETUP_TARGET
+
 	mov	Temp1, #Pgm_Ppm_Min_Throttle
 	mov	@Temp1, #DEFAULT_PGM_PPM_MIN_THROTTLE
-	mov	Temp1, #Pgm_Ppm_Max_Throttle
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_PPM_MAX_THROTTLE
-	mov	Temp1, #Pgm_Beep_Strength
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_BEEP_STRENGTH
-	mov	Temp1, #Pgm_Beacon_Strength
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_BEACON_STRENGTH
-	mov	Temp1, #Pgm_Beacon_Delay
+	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_BEACON_DELAY
+
 	mov	Temp1, #Pgm_BEC_Voltage_High
 	mov	@Temp1, #DEFAULT_PGM_BEC_VOLTAGE_HIGH
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_PPM_CENTER_THROTTLE
 	ret
 
 
@@ -5184,11 +5309,19 @@ ENDIF
 	setb	Flags2.CURR_PWMOFF_COMP_ABLE	; Set comparator usable status
 	jz	($+4)
 	clr	Flags2.CURR_PWMOFF_COMP_ABLE	; Set comparator not usable status if damped
+	mov	Temp1, #Pgm_Direction	
+IF MODE >= 1	; Tail or multi
+	mov	A, @Temp1				
+	clr	C
+	subb	A, #3
+	jz	decode_params_dir_set
+ENDIF
+
 	clr	Flags3.PGM_DIR_REV
-	mov	Temp1, #Pgm_Direction_Rev	
 	mov	A, @Temp1				
 	jnb	ACC.1, ($+5)
 	setb	Flags3.PGM_DIR_REV
+decode_params_dir_set:
 	clr	Flags3.PGM_RCP_PWM_POL
 	mov	Temp1, #Pgm_Input_Pol	
 	mov	A, @Temp1				
@@ -5298,13 +5431,6 @@ decode_demag_comp:
 	mov	Temp1, #Pgm_Demag_Comp		
 	mov	A, @Temp1				
 	dec	A	
-	mov	DPTR, #DEMAG_WAIT_TABLE
-	movc A, @A+DPTR	
-	mov	Temp1, #Pgm_Demag_Comp_Wait_Decoded
-	mov	@Temp1, A	
-	mov	Temp1, #Pgm_Demag_Comp		
-	mov	A, @Temp1				
-	dec	A	
 	mov	DPTR, #DEMAG_POWER_TABLE
 	movc A, @A+DPTR	
 	mov	Temp1, #Pgm_Demag_Comp_Power_Decoded
@@ -5400,6 +5526,34 @@ test_gain:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
 reset:
+	; Check flash lock byte
+	mov	A, RSTSRC			
+	jb	ACC.6, ($+6)		; Check if flash access error was reset source 
+
+	mov	Bit_Access, #0		; No - then this is the first try
+
+	inc	Bit_Access
+	mov	DPTR, #LOCK_BYTE_ADDRESS_16K	; First try is for 16k flash size
+	mov	A, Bit_Access
+	dec	A
+	jz	lock_byte_test
+
+	mov	DPTR, #LOCK_BYTE_ADDRESS_8K	; Second try is for 8k flash size
+	dec	A
+	jz	lock_byte_test
+
+lock_byte_test:
+	movc A, @A+DPTR		; Read lock byte
+	inc	A				
+	jz	lock_byte_ok		; If lock byte is 0xFF, then start code execution
+
+IF ONE_S_CAPABLE == 0		
+	mov	RSTSRC, #12h		; Generate hardware reset and set VDD monitor
+ELSE
+	mov	RSTSRC, #10h		; Generate hardware reset and disable VDD monitor
+ENDIF
+
+lock_byte_ok:
 	; Select register bank 0 for main program routines
 	clr	PSW.3			; Select register bank 0 for main program routines	
 	; Disable the WDT.
@@ -5443,7 +5597,6 @@ IF PORT3_EXIST == 1
 	mov	P3MDOUT, #P3_PUSHPULL				
 	mov	P3MDIN, #P3_DIGITAL				
 ENDIF
-
 	; Initialize the XBAR and related functionality
 	Initialize_Xbar		
 	; Switch power off
@@ -5488,6 +5641,9 @@ clear_ram:
 	; PCA
 	mov	PCA0CN, #40h		; PCA enabled
 	; Initializing beep
+
+	; Disable EA explicitly
+	clr	EA
 	call wait200ms	
 	call beep_f1
 	call wait30ms
@@ -5506,11 +5662,10 @@ clear_ram:
 	mov	IE, #22h			; Enable timer0 and timer2 interrupts
 	mov	IP, #02h			; High priority to timer0 interrupts
 	mov	EIE1, #90h		; Enable timer3 and PCA0 interrupts
-	mov	EIP1, #10h		; High priority to PCA interrupts
 	; Initialize comparator
 	mov	CPT0CN, #80h		; Comparator enabled, no hysteresis
 	mov	CPT0MD, #03h		; Comparator response time 1us
-IF COMP1_USED==1			
+IF COMP1_USED == 1			
 	mov	CPT1CN, #80h		; Comparator enabled, no hysteresis
 	mov	CPT1MD, #03h		; Comparator response time 1us
 ENDIF
@@ -5588,6 +5743,14 @@ validate_rcp_start:
 	; Arming sequence start
 	mov	Gov_Arm_Target, #0		; Clear governor arm target
 arming_start:
+IF MODE >= 1	; Tail or multi
+	mov	Temp1, #Pgm_Direction	; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, ($+5)
+
+	ajmp	program_by_tx_checked	; Disable tx programming if bidirectional operation
+ENDIF
+
 	call wait3ms
 	mov	Temp1, #Pgm_Enable_TX_Program; Yes - start programming mode entry if enabled
 	mov	A, @Temp1				
@@ -5704,6 +5867,7 @@ throttle_low_cal:
 
 program_by_tx_entry_wait_ppm:	
 	call wait100ms
+	call	Find_Throttle_Gain		; Set throttle gain
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #RCP_MAX			; At or above max?
@@ -5805,7 +5969,16 @@ wait_for_power_on_ppm_not_missing:
 	subb	A, #(RCP_STOP+5) 		; Higher than stop (plus some hysteresis)?
 	jc	wait_for_power_on_loop	; No - start over
 
-	call	wait100ms				; Wait to see if start pulse was only a glitch
+IF MODE >= 1	; Tail or multi
+	mov	Temp1, #Pgm_Direction	; Check if bidirectional operation
+	mov	A, @Temp1				
+	clr	C
+	subb	A, #3
+	jz 	($+5)				; Do not wait if bidirectional operation
+ENDIF
+
+	lcall	wait100ms			; Wait to see if start pulse was only a glitch
+
 	mov	A, Rcp_Timeout_Cnt		; Load RC pulse timeout counter value
 	jnz	($+5)				; If it is not zero - proceed
 
@@ -5818,12 +5991,14 @@ wait_for_power_on_ppm_not_missing:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 init_start:
+	clr	EA
 	call switch_power_off
 	clr	A
 	mov	Requested_Pwm, A		; Set requested pwm to zero
 	mov	Governor_Req_Pwm, A		; Set governor requested pwm to zero
 	mov	Current_Pwm, A			; Set current pwm to zero
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
+	setb	EA
 	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	mov	Temp1, #Pgm_Motor_Idle
 	mov	Pwm_Motor_Idle, @Temp1	; Set idle pwm to programmed value			
@@ -5837,6 +6012,7 @@ init_start:
 	mov	Flags0, A				; Clear flags0
 	mov	Flags1, A				; Clear flags1
 	mov	Rcp_Stop_Cnt, A		; Set RC pulse stop count to zero
+	mov	Demag_Consecutive_Cnt, A
 	call initialize_all_timings	; Initialize timing
 	;**** **** **** **** ****
 	; Motor start beginning
@@ -5884,7 +6060,7 @@ direct_method_start:
 	mov	Pwm_Limit_Spoolup, Requested_Pwm
 	setb	EA
 	clr	Flags1.SETTLE_PHASE		
-	mov	Current_Pwm_Limited, #0		; Set low pwm again after calling set_startup_pwm
+	mov	Current_Pwm_Limited, #1		; Set low pwm again after calling set_startup_pwm
 	mov	Spoolup_Limit_Cnt, #0
 	mov	Spoolup_Limit_Skip, #1			
 	; Begin startup sequence
@@ -6141,25 +6317,46 @@ run6:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, normal_run_checks
 
 	; Set spoolup power variables
-IF MODE == 0 OR MODE == 2
 	mov	Pwm_Limit, Pwm_Spoolup_Beg		; Set initial max power
 	mov	Pwm_Limit_Spoolup, Pwm_Spoolup_Beg	; Set initial slow spoolup power
-ENDIF
-IF MODE == 1
-	mov	Pwm_Limit, #0FFh			; Allow full power
-	mov	Pwm_Limit_Spoolup, #0FFh	
-ENDIF
 	mov	Spoolup_Limit_Cnt, #0
 	mov	Spoolup_Limit_Skip, #1			
 	; Check startup ok counter
+	mov	Temp2, #100				; Set nominal startup parameters
+	mov	Temp3, #20
+IF MODE >= 1	; Tail or multi
+	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, direct_start_params_set; No - branch
+
+	mov	Temp2, #30				; Set faster startup parameters for bidirectional operation
+	mov	Temp3, #5
+
+direct_start_params_set:
+ENDIF
 	clr	C
 	mov	A, Direct_Startup_Ok_Cnt		; Load ok counter
-	subb	A, #100					; Is counter above requirement?
+
+	subb	A, Temp2					; Is counter above requirement?
 	jc	direct_start_check_rcp		; No - proceed
 
 	clr	Flags1.DIRECT_STARTUP_PHASE	; Clear direct startup phase flag
 	setb	Flags1.INITIAL_RUN_PHASE		; Set initial run phase flag
-	mov	Startup_Rot_Cnt, #20		; Set startup rotation count
+	mov	Startup_Rot_Cnt, Temp3		; Set startup rotation count
+IF MODE == 1	; Tail
+	mov	Pwm_Limit, #0FFh			; Allow full power
+	mov	Pwm_Limit_Spoolup, #0FFh	
+ENDIF
+IF MODE == 2	; Multi
+	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, direct_start_pwm_lim_set
+
+	mov	Pwm_Limit, #0FFh			; Allow full power in bidirectional operation
+	mov	Pwm_Limit_Spoolup, #0FFh	
+
+direct_start_pwm_lim_set:
+ENDIF
 	jmp	normal_run_checks
 
 direct_start_check_rcp:
@@ -6229,13 +6426,14 @@ run6_check_rcp_timeout:
 
 run6_check_speed:
 	clr	C
-	mov	A, Comm_Period4x_H			; Is Comm_Period4x more than 32ms (~1220 eRPM)?
-	subb	A, #0F0h
+	mov	A, Comm_Period4x_H			; Is Comm_Period4x more than 8.2ms (~4880 eRPM)?
+	subb	A, #40h
 	jnc	run_to_wait_for_power_on		; Yes - go back to motor start
 	jmp	run1						; Go back to run 1
 
 
 run_to_wait_for_power_on:	
+	clr	EA
 	call switch_power_off
 	mov	Temp1, #Pgm_Pwm_Freq
 	mov	A, @Temp1	
@@ -6252,6 +6450,7 @@ run_to_wait_for_power_on:
 	mov	Current_Pwm_Limited, A	; Set limited current pwm to zero
 	mov	Pwm_Motor_Idle, A		; Set motor idle to zero
 	clr	Flags1.MOTOR_SPINNING	; Clear motor spinning flag
+	setb	EA
 	call	wait1ms				; Wait for pwm to be stopped
 	call switch_power_off
 IF MODE == 0	; Main

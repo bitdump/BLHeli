@@ -48,6 +48,8 @@ Eep_ESC_MCU:			DB	"#BLHELI#F310#   "	; Project and MCU tag (16 Bytes)
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	1	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
+LOCK_BYTE_ADDRESS_16K	EQU	3DFFh	; Address of lock byte if 16k flash size
+LOCK_BYTE_ADDRESS_8K	EQU	1FFFh	; Address of lock byte if 8k flash size
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode disabled
 NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on

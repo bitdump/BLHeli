@@ -23,8 +23,9 @@
 ;**** **** **** **** ****
 ;
 ; EAZY 3A v2 hardware definition file
-; Layout is similar to XP 3A but different volatge divider at Adc_Ip
+; Layout is similar to XP 3A but different voltage divider at Adc_Ip
 ; XP3A.inc file mod by 4712
+;
 ;**** **** **** **** ****
 
 
@@ -49,6 +50,8 @@ Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 ONE_S_CAPABLE			EQU	1	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
+LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
+LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	5	; Wait delay from pfets off to nfets on

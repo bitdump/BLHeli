@@ -142,8 +142,8 @@ ENDIF
 	inc	Temp1			; Now Pgm_Pwm_Freq
 	call read_eeprom_byte
 
-	inc	DPTR				; Now Eep_Pgm_Direction_Rev
-	inc	Temp1			; Now Pgm_Direction_Rev
+	inc	DPTR				; Now Eep_Pgm_Direction
+	inc	Temp1			; Now Pgm_Direction
 	call read_eeprom_byte
 
 	inc	DPTR				; Now Eep_Pgm_Input_Pol
@@ -250,6 +250,10 @@ ENDIF
 	inc	Temp1			; Now Pgm_BEC_Voltage_High
 	call read_eeprom_byte
 
+	inc	DPTR				; Now Eep_Pgm_Ppm_Center_Throttle
+	inc	Temp1			; Now Pgm_Ppm_Center_Throttle
+	call read_eeprom_byte
+
 	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
 
 read_eeprom_exit:
@@ -345,8 +349,8 @@ ENDIF
 	inc	Temp1					; Now Pgm_Pwm_Freq
 	call write_eeprom_byte
 
-	inc	DPTR						; Now Eep_Pgm_Direction_Rev
-	inc	Temp1					; Now Pgm_Direction_Rev
+	inc	DPTR						; Now Eep_Pgm_Direction
+	inc	Temp1					; Now Pgm_Direction
 	call write_eeprom_byte
 
 	inc	DPTR						; Now Eep_Pgm_Input_Pol
@@ -451,6 +455,10 @@ ENDIF
 
 	inc	DPTR						; Now Eep_Pgm_BEC_Voltage_High
 	inc	Temp1					; Now Pgm_BEC_Voltage_High
+	call write_eeprom_byte
+
+	inc	DPTR						; Now Eep_Pgm_Ppm_Center_Throttle
+	inc	Temp1					; Now Pgm_Ppm_Center_Throttle
 	call write_eeprom_byte
 
 	call	write_tags
@@ -682,7 +690,7 @@ store_main_func_14:
 
 store_main_func_15:
 	cjne	Temp4, #15, store_main_func_16
-	mov	Temp2, #Pgm_Direction_Rev
+	mov	Temp2, #Pgm_Direction
 	jmp	store_in_ram_exit
 
 store_main_func_16:
@@ -747,7 +755,7 @@ store_tail_func_11:
 
 store_tail_func_12:
 	cjne	Temp4, #12, store_tail_func_13
-	mov	Temp2, #Pgm_Direction_Rev
+	mov	Temp2, #Pgm_Direction
 	jmp	store_in_ram_exit
 
 store_tail_func_13:
@@ -827,7 +835,7 @@ store_multi_func_14:
 
 store_multi_func_15:
 	cjne	Temp4, #15, store_multi_func_16
-	mov	Temp2, #Pgm_Direction_Rev
+	mov	Temp2, #Pgm_Direction
 	jmp	store_in_ram_exit
 
 store_multi_func_16:
