@@ -32,7 +32,7 @@
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Read all eeprom perameters routine
+; Read all eeprom parameters routine
 ;
 ; No assumptions
 ;
@@ -74,185 +74,28 @@ read_eeprom_store_defaults:
 
 read_eeprom_read:
 	; Read eeprom
-IF MODE == 0
+IF MODE == 0 OR MODE == 2	
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
+ENDIF
+IF MODE == 1				; Tail
+	mov	DPTR, #_Eep_Pgm_Gov_P_Gain
+ENDIF
 	mov	Temp1, #Pgm_Gov_P_Gain	
+	mov	Temp4, #10
+read_eeprom_block1:
 	call read_eeprom_byte
+	inc	DPTR				
+	inc	Temp1			
+djnz	Temp4, read_eeprom_block1
 
-	inc	DPTR				; Now Eep_Pgm_Gov_I_Gain
-	inc	Temp1			; Now Pgm_Gov_I_Gain
+	mov	DPTR, #Eep_Enable_TX_Program
+	mov	Temp1, #Pgm_Enable_TX_Program	
+	mov	Temp4, #19
+read_eeprom_block2:
 	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Gov_Mode
-	inc	Temp1			; Now Pgm_Gov_Mode
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Low_Voltage_Lim
-	inc	Temp1			; Now Pgm_Low_Voltage_Lim
-	call read_eeprom_byte
-
-	inc	DPTR				; Motor_Gain
-	inc	Temp1
-
-	inc	DPTR				; Motor_Idle
-	inc	Temp1
-ENDIF
-IF MODE == 1
-	mov	Temp1, #Pgm_Gov_Mode	
-	mov	@Temp1, #4
-
-	mov	DPTR, #Eep_Pgm_Motor_Gain
-	mov	Temp1, #Pgm_Motor_Gain	
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Motor_Idle
-	inc	Temp1			; Now Pgm_Motor_Idle
-	call read_eeprom_byte
-ENDIF
-IF MODE == 2
-	mov	DPTR, #Eep_Pgm_Gov_P_Gain
-	mov	Temp1, #Pgm_Gov_P_Gain	
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Gov_I_Gain
-	inc	Temp1			; Now Pgm_Gov_I_Gain
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Gov_Mode
-	inc	Temp1			; Now Pgm_Gov_Mode
-	call read_eeprom_byte
-
-	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
-	mov	Temp1, #Pgm_Low_Voltage_Lim	
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Motor_Gain
-	inc	Temp1			; Now Pgm_Motor_Gain
-	call read_eeprom_byte
-
-	inc	DPTR				; Motor_Idle
-	inc	Temp1
-ENDIF
-
-	inc	DPTR				; Now Eep_Pgm_Startup_Pwr
-	inc	Temp1			; Now Pgm_Startup_Pwr	
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Pwm_Freq
-	inc	Temp1			; Now Pgm_Pwm_Freq
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Direction
-	inc	Temp1			; Now Pgm_Direction
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Input_Pol
-	inc	Temp1			; Now Pgm_Input_Pol
-	call read_eeprom_byte
-
-	inc	DPTR				; Initialized_L
-	inc	Temp1
-
-	inc	DPTR				; Initialized_H
-	inc	Temp1
-
-	inc	DPTR				; Now Eep_Enable_TX_Program
-	inc	Temp1			; Now Pgm_Enable_TX_Program	
-	call read_eeprom_byte
-
-IF MODE == 0
-	inc	DPTR				; Now Eep_Main_Rearm_Start
-	inc	Temp1			; Now Pgm_Main_Rearm_Start
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Gov_Setup_Target
-	inc	Temp1			; Now Pgm_Gov_Setup_Target
-	call read_eeprom_byte
-ENDIF
-IF MODE == 1
-	inc	DPTR				; Main_Rearm_Start
-	inc	Temp1
-
-	inc	DPTR				; Gov_Setup_Target
-	inc	Temp1
-ENDIF
-IF MODE == 2
-	inc	DPTR				; Main_Rearm_Start
-	inc	Temp1
-
-	inc	DPTR				; Gov_Setup_Target
-	inc	Temp1
-	call read_eeprom_byte
-ENDIF
-
-	inc	DPTR				; Now Eep_Pgm_Startup_Rpm
-	inc	Temp1			; Now Pgm_Startup_Rpm
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Startup_Accel
-	inc	Temp1			; Now Pgm_Startup_Accel
-	call read_eeprom_byte
-
-	inc	DPTR				; Volt_Comp
-	inc	Temp1
-
-	inc	DPTR				; Now Eep_Pgm_Comm_Timing
-	inc	Temp1			; Now Pgm_Comm_Timing
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Damping_Force
-	inc	Temp1			; Now Pgm_Damping_Force
-	call read_eeprom_byte
-
-IF MODE == 0
-	inc	DPTR				; Now Eep_Pgm_Gov_Range
-	inc	Temp1			; Now Pgm_Gov_Range
-	call read_eeprom_byte
-ENDIF
-IF MODE >= 1
-	inc	DPTR				; Gov_Range
-	inc	Temp1
-ENDIF
-
-	inc	DPTR				; Now Eep_Pgm_Startup_Method
-	inc	Temp1			; Now Pgm_Startup_Method
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Ppm_Min_Throttle
-	inc	Temp1			; Now Pgm_Ppm_Min_Throttle
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Ppm_Max_Throttle
-	inc	Temp1			; Now Pgm_Ppm_Max_Throttle
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Beep_Strength
-	inc	Temp1			; Now Pgm_Beep_Strength
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Beacon_Strength
-	inc	Temp1			; Now Pgm_Beacon_Strength
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Beacon_Delay
-	inc	Temp1			; Now Pgm_Beacon_Delay
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Throttle_Rate
-	inc	Temp1			; Now Pgm_Throttle_Rate
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Demag_Comp
-	inc	Temp1			; Now Pgm_Demag_Comp
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_BEC_Voltage_High
-	inc	Temp1			; Now Pgm_BEC_Voltage_High
-	call read_eeprom_byte
-
-	inc	DPTR				; Now Eep_Pgm_Ppm_Center_Throttle
-	inc	Temp1			; Now Pgm_Ppm_Center_Throttle
-	call read_eeprom_byte
+	inc	DPTR				
+	inc	Temp1		
+djnz	Temp4, read_eeprom_block2
 
 	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
 
@@ -284,182 +127,29 @@ erase_and_store_all_in_eeprom:
 	mov	A, #EEPROM_LAYOUT_REVISION
 	call write_eeprom_byte_from_acc
 
-IF MODE == 0
+	; Write eeprom
+IF MODE == 0 OR MODE == 2	
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
+ENDIF
+IF MODE == 1				; Tail
+	mov	DPTR, #_Eep_Pgm_Gov_P_Gain
+ENDIF
 	mov	Temp1, #Pgm_Gov_P_Gain
+	mov	Temp4, #10
+write_eeprom_block1:
 	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Gov_I_Gain
-	inc	Temp1					; Now Pgm_Gov_I_Gain
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Gov_Mode
-	inc	Temp1					; Now Pgm_Gov_Mode
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Low_Voltage_Lim
-	inc	Temp1					; Now Pgm_Low_Voltage_Lim
-	call write_eeprom_byte
-
-	inc	DPTR						; Motor_Gain
+	inc	DPTR						
 	inc	Temp1					
+djnz	Temp4, write_eeprom_block1
 
-	inc	DPTR						; Motor_Idle
+	mov	DPTR, #Eep_Enable_TX_Program
+	mov	Temp1, #Pgm_Enable_TX_Program	
+	mov	Temp4, #19
+write_eeprom_block2:
+	call write_eeprom_byte
+	inc	DPTR						
 	inc	Temp1					
-ENDIF
-IF MODE == 1
-	mov	DPTR, #Eep_Pgm_Motor_Gain
-	mov	Temp1, #Pgm_Motor_Gain
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Motor_Idle
-	inc	Temp1					; Now Pgm_Motor_Idle
-	call write_eeprom_byte
-ENDIF
-IF MODE == 2
-	mov	DPTR, #Eep_Pgm_Gov_P_Gain
-	mov	Temp1, #Pgm_Gov_P_Gain
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Gov_I_Gain
-	inc	Temp1					; Now Pgm_Gov_I_Gain
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Gov_Mode
-	inc	Temp1					; Now Pgm_Gov_Mode
-	call write_eeprom_byte
-
-	mov	DPTR, #Eep_Pgm_Low_Voltage_Lim
-	mov	Temp1, #Pgm_Low_Voltage_Lim
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Motor_Gain
-	inc	Temp1					; Now Pgm_Motor_Gain
-	call write_eeprom_byte
-
-	inc	DPTR						; Motor_Idle
-	inc	Temp1					
-ENDIF
-
-	inc	DPTR						; Now Eep_Pgm_Startup_Pwr
-	inc	Temp1					; Now Pgm_Startup_Pwr
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Pwm_Freq
-	inc	Temp1					; Now Pgm_Pwm_Freq
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Direction
-	inc	Temp1					; Now Pgm_Direction
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Input_Pol
-	inc	Temp1					; Now Pgm_Input_Pol
-	call write_eeprom_byte
-
-	inc	DPTR						; Initialized_L
-	inc	Temp1					
-
-	inc	DPTR						; Initialized_H
-	inc	Temp1					
-
-	inc	DPTR						; Now Eep_Enable_TX_Program
-	inc	Temp1					; Now Pgm_Enable_TX_Program
-	call write_eeprom_byte
-
-IF MODE == 0
-	inc	DPTR						; Now Eep_Main_Rearm_Start
-	inc	Temp1					; Now Pgm_Main_Rearm_Start
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Gov_Setup_Target
-	inc	Temp1					; Now Pgm_Gov_Setup_Target
-	call write_eeprom_byte
-ENDIF
-IF MODE == 1
-	inc	DPTR						; Main_Rearm_Start
-	inc	Temp1					
-
-	inc	DPTR						; Gov_Setup_Target
-	inc	Temp1					
-ENDIF
-IF MODE == 2
-	inc	DPTR						; Main_Rearm_Start
-	inc	Temp1					
-
-	inc	DPTR						; Gov_Setup_Target
-	inc	Temp1					
-	call write_eeprom_byte
-ENDIF
-
-	inc	DPTR						; Now Eep_Pgm_Startup_Rpm
-	inc	Temp1					; Now Pgm_Startup_Rpm
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Startup_Accel
-	inc	Temp1					; Now Pgm_Startup_Accel
-	call write_eeprom_byte
-
-	inc	DPTR						; Volt_Comp
-	inc	Temp1
-
-	inc	DPTR						; Now Eep_Pgm_Comm_Timing
-	inc	Temp1					; Now Pgm_Comm_Timing
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Damping_Force
-	inc	Temp1					; Now Pgm_Damping_Force
-	call write_eeprom_byte
-
-IF MODE == 0
-	inc	DPTR						; Now Eep_Pgm_Gov_Range
-	inc	Temp1					; Now Pgm_Gov_Range
-	call write_eeprom_byte
-ENDIF
-IF MODE >= 1
-	inc	DPTR						; Gov_Range
-	inc	Temp1
-ENDIF
-
-	inc	DPTR						; Now Eep_Pgm_Startup_Method
-	inc	Temp1					; Now Pgm_Startup_Method
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Ppm_Min_Throttle
-	inc	Temp1					; Now Pgm_Ppm_Min_Throttle
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Ppm_Max_Throttle
-	inc	Temp1					; Now Pgm_Ppm_Max_Throttle
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Beep_Strength
-	inc	Temp1					; Now Pgm_Beep_Strength
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Beacon_Strength
-	inc	Temp1					; Now Pgm_Beacon_Strength
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Beacon_Delay
-	inc	Temp1					; Now Pgm_Beacon_Delay
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Throttle_Rate
-	inc	Temp1					; Now Pgm_Throttle_Rate
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Demag_Comp
-	inc	Temp1					; Now Pgm_Demag_Comp
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_BEC_Voltage_High
-	inc	Temp1					; Now Pgm_BEC_Voltage_High
-	call write_eeprom_byte
-
-	inc	DPTR						; Now Eep_Pgm_Ppm_Center_Throttle
-	inc	Temp1					; Now Pgm_Ppm_Center_Throttle
-	call write_eeprom_byte
+djnz	Temp4, write_eeprom_block2
 
 	call	write_tags
 	call write_eeprom_signature
@@ -621,226 +311,184 @@ IF MODE == 0
 store_main_func_1:
 	cjne	Temp4, #1, store_main_func_2
 	mov	Temp2, #Pgm_Gov_P_Gain
-	jmp	store_in_ram_exit
 
 store_main_func_2:
 	cjne	Temp4, #2, store_main_func_3
 	mov	Temp2, #Pgm_Gov_I_Gain
-	jmp	store_in_ram_exit
 
 store_main_func_3:
 	cjne	Temp4, #3, store_main_func_4
 	mov	Temp2, #Pgm_Gov_Mode
-	jmp	store_in_ram_exit
 
 store_main_func_4:
 	cjne	Temp4, #4, store_main_func_5
 	mov	Temp2, #Pgm_Gov_Range
-	jmp	store_in_ram_exit
 
 store_main_func_5:
 	cjne	Temp4, #5, store_main_func_6
 	mov	Temp2, #Pgm_Low_Voltage_Lim
-	jmp	store_in_ram_exit
 
 store_main_func_6:
 	cjne	Temp4, #6, store_main_func_7
 	mov	Temp2, #Pgm_Startup_Method
-	jmp	store_in_ram_exit
 
 store_main_func_7:
 	cjne	Temp4, #7, store_main_func_8
 	mov	Temp2, #Pgm_Startup_Pwr
-	jmp	store_in_ram_exit
 
 store_main_func_8:
 	cjne	Temp4, #8, store_main_func_9
 	mov	Temp2, #Pgm_Startup_Rpm
-	jmp	store_in_ram_exit
 
 store_main_func_9:
 	cjne	Temp4, #9, store_main_func_10
 	mov	Temp2, #Pgm_Startup_Accel
-	jmp	store_in_ram_exit
 
 store_main_func_10:
 	cjne	Temp4, #10, store_main_func_11
 	mov	Temp2, #Pgm_Comm_Timing
-	jmp	store_in_ram_exit
 
 store_main_func_11:
 	cjne	Temp4, #11, store_main_func_12
 	mov	Temp2, #Pgm_Throttle_Rate
-	jmp	store_in_ram_exit
 
 store_main_func_12:
 	cjne	Temp4, #12, store_main_func_13
 	mov	Temp2, #Pgm_Damping_Force
-	jmp	store_in_ram_exit
 
 store_main_func_13:
 	cjne	Temp4, #13, store_main_func_14
 	mov	Temp2, #Pgm_Pwm_Freq
-	jmp	store_in_ram_exit
 
 store_main_func_14:
 	cjne	Temp4, #14, store_main_func_15
 	mov	Temp2, #Pgm_Demag_Comp
-	jmp	store_in_ram_exit
 
 store_main_func_15:
 	cjne	Temp4, #15, store_main_func_16
 	mov	Temp2, #Pgm_Direction
-	jmp	store_in_ram_exit
 
 store_main_func_16:
+	cjne	Temp4, #16, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
-	jmp	store_in_ram_exit
 ENDIF
 IF MODE == 1
 store_tail_func_1:
 	cjne	Temp4, #1, store_tail_func_2
 	mov	Temp2, #Pgm_Motor_Gain
-	jmp	store_in_ram_exit
 
 store_tail_func_2:
 	cjne	Temp4, #2, store_tail_func_3
 	mov	Temp2, #Pgm_Motor_Idle
-	jmp	store_in_ram_exit
 
 store_tail_func_3:
 	cjne	Temp4, #3, store_tail_func_4
 	mov	Temp2, #Pgm_Startup_Method
-	jmp	store_in_ram_exit
 
 store_tail_func_4:
 	cjne	Temp4, #4, store_tail_func_5
 	mov	Temp2, #Pgm_Startup_Pwr
-	jmp	store_in_ram_exit
 
 store_tail_func_5:
 	cjne	Temp4, #5, store_tail_func_6
 	mov	Temp2, #Pgm_Startup_Rpm
-	jmp	store_in_ram_exit
 
 store_tail_func_6:
 	cjne	Temp4, #6, store_tail_func_7
 	mov	Temp2, #Pgm_Startup_Accel
-	jmp	store_in_ram_exit
 
 store_tail_func_7:
 	cjne	Temp4, #7, store_tail_func_8
 	mov	Temp2, #Pgm_Comm_Timing
-	jmp	store_in_ram_exit
 
 store_tail_func_8:
 	cjne	Temp4, #8, store_tail_func_9
 	mov	Temp2, #Pgm_Throttle_Rate
-	jmp	store_in_ram_exit
 
 store_tail_func_9:
 	cjne	Temp4, #9, store_tail_func_10
 	mov	Temp2, #Pgm_Damping_Force
-	jmp	store_in_ram_exit
 
 store_tail_func_10:
 	cjne	Temp4, #10, store_tail_func_11
 	mov	Temp2, #Pgm_Pwm_Freq
-	jmp	store_in_ram_exit
 
 store_tail_func_11:
 	cjne	Temp4, #11, store_tail_func_12
 	mov	Temp2, #Pgm_Demag_Comp
-	jmp	store_in_ram_exit
 
 store_tail_func_12:
 	cjne	Temp4, #12, store_tail_func_13
 	mov	Temp2, #Pgm_Direction
-	jmp	store_in_ram_exit
 
 store_tail_func_13:
+	cjne	Temp4, #13, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
-	jmp	store_in_ram_exit
 ENDIF
 IF MODE == 2
 store_multi_func_1:
 	cjne	Temp4, #1, store_multi_func_2
 	mov	Temp2, #Pgm_Gov_P_Gain
-	jmp	store_in_ram_exit
 
 store_multi_func_2:
 	cjne	Temp4, #2, store_multi_func_3
 	mov	Temp2, #Pgm_Gov_I_Gain
-	jmp	store_in_ram_exit
 
 store_multi_func_3:
 	cjne	Temp4, #3, store_multi_func_4
 	mov	Temp2, #Pgm_Gov_Mode
-	jmp	store_in_ram_exit
 
 store_multi_func_4:
 	cjne	Temp4, #4, store_multi_func_5
 	mov	Temp2, #Pgm_Motor_Gain
-	jmp	store_in_ram_exit
 
 store_multi_func_5:
 	cjne	Temp4, #5, store_multi_func_6
 	mov	Temp2, #Pgm_Low_Voltage_Lim
-	jmp	store_in_ram_exit
 
 store_multi_func_6:
 	cjne	Temp4, #6, store_multi_func_7
 	mov	Temp2, #Pgm_Startup_Method
-	jmp	store_in_ram_exit
 
 store_multi_func_7:
 	cjne	Temp4, #7, store_multi_func_8
 	mov	Temp2, #Pgm_Startup_Pwr
-	jmp	store_in_ram_exit
 
 store_multi_func_8:
 	cjne	Temp4, #8, store_multi_func_9
 	mov	Temp2, #Pgm_Startup_Rpm
-	jmp	store_in_ram_exit
 
 store_multi_func_9:
 	cjne	Temp4, #9, store_multi_func_10
 	mov	Temp2, #Pgm_Startup_Accel
-	jmp	store_in_ram_exit
 
 store_multi_func_10:
 	cjne	Temp4, #10, store_multi_func_11
 	mov	Temp2, #Pgm_Comm_Timing
-	jmp	store_in_ram_exit
 
 store_multi_func_11:
 	cjne	Temp4, #11, store_multi_func_12
 	mov	Temp2, #Pgm_Throttle_Rate
-	jmp	store_in_ram_exit
 
 store_multi_func_12:
 	cjne	Temp4, #12, store_multi_func_13
 	mov	Temp2, #Pgm_Damping_Force
-	jmp	store_in_ram_exit
 
 store_multi_func_13:
 	cjne	Temp4, #13, store_multi_func_14
 	mov	Temp2, #Pgm_Pwm_Freq
-	jmp	store_in_ram_exit
 
 store_multi_func_14:
 	cjne	Temp4, #14, store_multi_func_15
 	mov	Temp2, #Pgm_Demag_Comp
-	jmp	store_in_ram_exit
 
 store_multi_func_15:
 	cjne	Temp4, #15, store_multi_func_16
 	mov	Temp2, #Pgm_Direction
-	jmp	store_in_ram_exit
 
 store_multi_func_16:
+	cjne	Temp4, #16, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
-	jmp	store_in_ram_exit
 ENDIF
 
 store_in_ram_exit:
@@ -966,7 +614,7 @@ func_paraval:
 	call function_paraval_beep
 	mov	Temp5, #5				; Wait is 5x 200ms
 func_paraval_wait:
-	mov	Temp6, New_Rcp			; Store RC pulse
+	mov	Temp6, New_Rcp			; Load RC pulse
 	call wait200ms
 	clr	C
 	mov	A, Temp6

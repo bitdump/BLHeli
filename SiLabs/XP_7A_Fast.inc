@@ -52,7 +52,7 @@ LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
 DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
-NFETON_DELAY			EQU	9	; Wait delay from pfets off to nfets on
+NFETON_DELAY			EQU	12	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 COMP_PWM_HIGH_ON_DELAY	EQU	10	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
 COMP_PWM_HIGH_OFF_DELAY	EQU	15	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
