@@ -1,6 +1,6 @@
 @ECHO off
 @ECHO ***** Batch file for BlHeli (from 4712)  v.1.1          *****
-@ECHO ***** all Messages will be saved to MakeHex_Result.txt *****
+@ECHO ***** All Messages will be saved to MakeHex_Result.txt *****
 @ECHO ***** Start compile with any key  - CTRL-C to abort    *****
 Break ON
 @pause
@@ -12,11 +12,9 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=Rev11_1
+SET Revision=Rev11_2
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
-rem SET SilabsPath=C:\Dev\SiLabs
-rem SET RaisonancePath=C:\Dev\Raisonance
 
 @ECHO ***** Result of Batch file for BlHeli (from 4712) v.1.1       ***** > MakeHex_Result.txt
 @ECHO Revision: %Revision% >> MakeHex_Result.txt
@@ -2551,7 +2549,3 @@ del "Output\%BESCTYPE%_%Revision%.HEX" > nul
 @ECHO *****************************************************  >> MakeHex_Result.txt
 @ECHO %BESCTYPE%
 
-SET SilabsPath=
-SET RaisonancePath=
-SET BESCTYPE=
-SET BES

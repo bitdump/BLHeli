@@ -58,6 +58,7 @@ COMP_PWM_HIGH_ON_DELAY	EQU	15	; Wait delay from pwm on until comparator can be r
 COMP_PWM_HIGH_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 COMP_PWM_LOW_ON_DELAY	EQU	5	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
 COMP_PWM_LOW_OFF_DELAY	EQU	7	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
+HIGH_DRIVER_PRECHG_TIME	EQU	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)

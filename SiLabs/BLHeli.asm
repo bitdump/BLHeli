@@ -169,6 +169,12 @@ $NOMOD51
 ;           Improved autorotation bailout for MAIN
 ;           Reduced min speed back to 1220 erpm
 ;           Misc code cleanups
+; - Rev11.2 Fixed throttle calibration bug
+;           Added high side driver precharge for all-nfet ESCs
+;           Optimized timing in general and for demag compensation in particular
+;           Auto bailout functionality modified
+;           Governor is deactivated for throttle inputs below 10%
+;           Increased beacon delay times
 ;
 ;
 ;**** **** **** **** ****
@@ -1429,7 +1435,7 @@ DEFAULT_PGM_MAIN_GOV_SETUP_TARGET	EQU 180	; Target for governor in setup mode. C
 DEFAULT_PGM_MAIN_REARM_START		EQU 0 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_MAIN_BEEP_STRENGTH	EQU 120	; Beep strength
 DEFAULT_PGM_MAIN_BEACON_STRENGTH	EQU 200	; Beacon strength
-DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
 ; Tail
 DEFAULT_PGM_TAIL_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_TAIL_IDLE_SPEED 		EQU 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
@@ -1448,7 +1454,7 @@ DEFAULT_PGM_TAIL_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
 DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
-DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
 ; Multi
 DEFAULT_PGM_MULTI_P_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MULTI_I_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
@@ -1470,7 +1476,7 @@ DEFAULT_PGM_MULTI_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
 DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
-DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=30s		2=1m			3=2m			4=3m			5=Infinite
+DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
 ; Common
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_PPM_MIN_THROTTLE		EQU 37	; 4*37+1000=1148
@@ -1541,7 +1547,7 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_RED		EQU 	10	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1670,8 +1676,7 @@ Rcp_Period_Diff_Accepted:	DS	1		; RC pulse period difference acceptable
 New_Rcp:					DS	1		; New RC pulse value in pca counts
 Prev_Rcp_Pwm_Freq:			DS	1		; Previous RC pulse pwm frequency (used during pwm frequency measurement)
 Curr_Rcp_Pwm_Freq:			DS	1		; Current RC pulse pwm frequency (used during pwm frequency measurement)
-Rcp_Stop_Cnt_L:			DS	1		; Counter for RC pulses below stop value (lo byte) 
-Rcp_Stop_Cnt_H:			DS	1		; Counter for RC pulses below stop value (hi byte) 
+Rcp_Stop_Cnt:				DS	1		; Counter for RC pulses below stop value
 Auto_Bailout_Armed:			DS	1		; Set when auto rotation bailout is armed 
 
 Pwm_Limit:				DS	1		; Maximum allowed pwm 
@@ -1752,7 +1757,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	11		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	17		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2488,35 +2493,22 @@ t2h_int_rcp_stop_check:
 	jc	t2h_int_rcp_stop
 
 	; RC pulse higher than stop value, reset stop counter
-	mov	Rcp_Stop_Cnt_L, #0			; Reset rcp stop counter
-	mov	Rcp_Stop_Cnt_H, #0
+	mov	Rcp_Stop_Cnt, #0			; Reset rcp stop counter
 	ajmp	t2h_int_rcp_gov_pwm
 
 t2h_int_rcp_stop:	
-	; RC pulse less than stop value, increment stop counter
-	mov	A, Rcp_Stop_Cnt_L			; Increment stop counter
+	; RC pulse less than stop value
+	mov	Auto_Bailout_Armed, #0		; Disarm bailout		
+	mov	Spoolup_Limit_Cnt, #0
+	mov	A, Rcp_Stop_Cnt			; Increment stop counter
 	add	A, #1
-	mov	Rcp_Stop_Cnt_L, A
-	mov	A, Rcp_Stop_Cnt_H	
-	addc	A, #0
-	mov	Rcp_Stop_Cnt_H, A
+	mov	Rcp_Stop_Cnt, A
 	jnc	t2h_int_rcp_gov_pwm			; Branch if counter has not wrapped
 
-	mov	Rcp_Stop_Cnt_L, #0FFh		; Set stop counter to max
-	mov	Rcp_Stop_Cnt_H, #0FFh	
+	mov	Rcp_Stop_Cnt, #0FFh			; Set stop counter to max
 
 t2h_int_rcp_gov_pwm:
 IF MODE == 0	; Main
-	; Update auto bailout arm
-	clr	C
-	mov	A, Rcp_Stop_Cnt_H			; Load stop count high byte
-	subb	A, #5
-	jc	t2h_int_rcp_bailout_done		; Has throttle been low for more than 5*8sec?
-
-	mov	Auto_Bailout_Armed, #0		; Yes - disarm bailout
-	mov	Spoolup_Limit_Cnt, #0
-
-t2h_int_rcp_bailout_done:
 	; Update governor variables
 	mov	Temp2, #Pgm_Gov_Mode			; Governor target by arm mode?
 	cjne	@Temp2, #2, t2h_int_rcp_gov_by_setup	; No - branch
@@ -2637,11 +2629,12 @@ t2h_int_rcp_inc_limit:
 t2h_int_rcp_no_limit:
 	mov	Pwm_Limit_Spoolup, A
 t2h_int_rcp_bailout_arm:
-	mov	A, Spoolup_Limit_Cnt
+	mov	A, Pwm_Limit_Spoolup
 	inc	A
 	jnz	t2h_int_rcp_exit
 
 	mov	Auto_Bailout_Armed, #255			; Arm bailout
+	mov	Spoolup_Limit_Cnt, #255			
 
 ENDIF
 IF MODE == 2	; Multi
@@ -3435,7 +3428,7 @@ governor_speed_check:
 	; Stop governor for stop RC pulse	
 	clr	C
 	mov	A, New_Rcp				; Check RC pulse against stop value
-	subb	A, #RCP_STOP				; Is pulse below stop value?
+	subb	A, #(RCP_MAX/10)			; Is pulse below stop value?
 	jc	governor_deactivate			; Yes - deactivate
 
 	mov	A, Flags1
@@ -4001,9 +3994,13 @@ measure_lipo_start:
 	call	comm5comm6			
 	; Start adc
 	Start_Adc 
+	; Wait for ADC reference to settle, and then start again
+	call	wait1ms
+	Start_Adc
 	; Wait for ADC conversion to complete
+measure_lipo_wait_adc:
 	Get_Adc_Status 
-	jb	AD0BUSY, measure_lipo_cells
+	jb	AD0BUSY, measure_lipo_wait_adc
 	; Read ADC result
 	Read_Adc_Result
 	; Stop ADC
@@ -4582,6 +4579,25 @@ calc_new_wait_times:
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
 	mov	Temp7, #(COMM_TIME_RED SHL 1)	
+IF MODE == 2
+	mov	Temp1, Comm_Period4x_H	; Higher reduction for higher speed in MULTI mode
+	clr	C					; A COMM_TIME_RED of 6 gives good acceleration performance on pancake motor at high voltage
+	mov	A, Temp1				; A COMM_TIME_RED of 10 gives good high speed performance for a small motor
+	subb	A, #4
+	jc	calc_new_wait_red_set
+
+	mov	Temp1, #4
+
+calc_new_wait_red_set:
+	clr	C
+	mov	A, Temp1
+	rlc	A
+	mov	Temp1, A
+	clr	C
+	mov	A, Temp7
+	subb	A, Temp1
+	mov	Temp7, A
+ENDIF
 	jnb	Flags1.DIRECT_STARTUP_PHASE, calc_new_wait_dir_start_set	; Set timing for direct start
 
 	mov	Temp8, #3				; Set medium timing
@@ -5001,6 +5017,14 @@ ENDIF
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm12_nondamp:
+IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	AnFET_on				
+	mov	A, #HIGH_DRIVER_PRECHG_TIME
+	djnz ACC,	$
+	AnFET_off				
+	mov	A, #PFETON_DELAY
+	djnz ACC,	$
+ENDIF
 	ApFET_on					; Ap on
 	Set_Comp_Phase_B 			; Set comparator to phase B
 	mov	Comm_Phase, #2
@@ -5052,6 +5076,14 @@ ENDIF
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm34_nondamp:
+IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	CnFET_on				
+	mov	A, #HIGH_DRIVER_PRECHG_TIME
+	djnz ACC,	$
+	CnFET_off				
+	mov	A, #PFETON_DELAY
+	djnz ACC,	$
+ENDIF
 	CpFET_on					; Cp on
 	Set_Comp_Phase_A 			; Set comparator to phase A
 	mov	Comm_Phase, #4
@@ -5103,6 +5135,14 @@ ENDIF
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm56_nondamp:
+IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	BnFET_on				
+	mov	A, #HIGH_DRIVER_PRECHG_TIME
+	djnz ACC,	$
+	BnFET_off				
+	mov	A, #PFETON_DELAY
+	djnz ACC,	$
+ENDIF
 	BpFET_on					; Bp on
 	Set_Comp_Phase_C 			; Set comparator to phase C
 	mov	Comm_Phase, #6
@@ -6057,6 +6097,7 @@ throttle_high_cal:
 	clr	EA					; Disable interrupts (freeze New_Rcp value)
 	clr	Flags3.FULL_THROTTLE_RANGE	; Set programmed range
 	call	find_throttle_gain		; Set throttle gain
+	mov	Temp7, New_Rcp			; Store new RC pulse value
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #(RCP_MAX/2)		; Is RC pulse above midstick?
@@ -6069,9 +6110,8 @@ throttle_high_cal:
 	setb	EA					; Enable all interrupts
 	djnz	Temp8, throttle_high_cal	; Continue to wait
 
-	call wait100ms				; Wait for new throttle value
 	clr	C
-	mov	A, New_Rcp			; Limit to max 250
+	mov	A, Temp7				; Limit to max 250
 	subb	A, #5				; Subtract about 2% and ensure that it is 250 or lower
 	mov	Temp1, #Pgm_Ppm_Max_Throttle	; Store
 	mov	@Temp1, A			
@@ -6088,6 +6128,7 @@ throttle_low_cal:
 	clr	EA					; Disable interrupts (freeze New_Rcp value)
 	clr	Flags3.FULL_THROTTLE_RANGE	; Set programmed range
 	call	find_throttle_gain		; Set throttle gain
+	mov	Temp7, New_Rcp			; Store new RC pulse value
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #(RCP_MAX/2)		; Below midstick?
@@ -6102,8 +6143,7 @@ throttle_low_cal:
 	setb	EA					; Enable all interrupts
 	djnz	Temp8, throttle_low_cal	; Continue to wait
 
-	call wait100ms				; Wait for new throttle value
-	mov	A, New_Rcp			
+	mov	A, Temp7				
 	add	A, #5				; Add about 2%
 	mov	Temp1, #Pgm_Ppm_Min_Throttle	; Store
 	mov	@Temp1, A			
@@ -6164,19 +6204,19 @@ wait_for_power_on_loop:
 	inc	Power_On_Wait_Cnt_H		; Increment high wait counter
 	mov	Temp1, #Pgm_Beacon_Delay
 	mov	A, @Temp1
-	mov	Temp1, #40		; Approximately 30 sec
+	mov	Temp1, #25		; Approximately 1 min
 	dec	A
 	jz	beep_delay_set
 
-	mov	Temp1, #80		; Approximately 1 min
+	mov	Temp1, #50		; Approximately 2 min
 	dec	A
 	jz	beep_delay_set
 
-	mov	Temp1, #160		; Approximately 2 min
+	mov	Temp1, #125		; Approximately 5 min
 	dec	A
 	jz	beep_delay_set
 
-	mov	Temp1, #240		; Approximately 3 min
+	mov	Temp1, #250		; Approximately 10 min
 	dec	A
 	jz	beep_delay_set
 
@@ -6189,6 +6229,7 @@ beep_delay_set:
 	jc	wait_for_power_on_no_beep; Has delay elapsed?
 
 	dec	Power_On_Wait_Cnt_H		; Decrement high wait counter
+	mov	Power_On_Wait_Cnt_L, #180; Set low wait counter
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
 	clr 	EA					; Disable all interrupts
@@ -6199,7 +6240,7 @@ beep_delay_set:
 	call wait100ms				; Wait for new RC pulse to be measured
 
 wait_for_power_on_no_beep:
-	call wait3ms
+	call wait10ms
 	mov	A, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
 	jnz	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
 
@@ -6646,7 +6687,7 @@ initial_run_phase_done:
 IF MODE == 0	; Main
 	; Check if throttle is zeroed
 	clr	C
-	mov	A, Rcp_Stop_Cnt_L			; Load stop RC pulse counter value
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter value
 	subb	A, #1					; Is number of stop RC pulses above limit?
 	jc	run6_check_rcp_stop_count	; If no - branch
 
@@ -6658,7 +6699,7 @@ run6_check_rcp_stop_count:
 ENDIF
 	; Exit run loop after a given time
 	clr	C
-	mov	A, Rcp_Stop_Cnt_L			; Load stop RC pulse counter low byte value
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
 	subb	A, #RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
