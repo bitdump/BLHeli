@@ -1,6 +1,6 @@
 ;**** **** **** **** ****
 ;
-; BLHeli program for controlling brushless motors in helicopters
+; BLHeli program for controlling brushless motors in helicopters and multirotors
 ;
 ; Copyright 2011, 2012 Steffen Skaug
 ; This program is distributed under the terms of the GNU General Public License
@@ -22,18 +22,117 @@
 ;
 ;**** **** **** **** ****
 ;
-; BLHeliTxPgm Atmel
+; BLHeliTxPgm Atmel                                      
 ;                                                         
 ;**** **** **** **** ****
 
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Read all eeprom parameters routine
+;
+; No assumptions
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+read_all_eeprom_parameters:	
+.IF MODE == 0	; Main
+	; Check initialized signature
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0xA5
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0x5A
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+.ENDIF
+.IF MODE == 1	; Tail
+	; Check initialized signature
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0x5A
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0xA5
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+.ENDIF
+.IF MODE == 2	; Multi
+	; Check initialized signature
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0x55
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
+	rcall read_eeprom_byte
+	cpi	Temp1, 0xAA
+	breq	PC+2
+	rjmp	read_eeprom_store_defaults
+
+.ENDIF
+	; Read eeprom
+	ldi	Temp4, 10	; 10 parameters
+	ldi	XL, low(Pgm_Gov_P_Gain)
+	ldi	XH, high(Pgm_Gov_P_Gain)
+.IF MODE == 0 || MODE ==2
+	ldi	ZL, low(Eep_Pgm_Gov_P_Gain)
+	ldi	ZH, high(Eep_Pgm_Gov_P_Gain)
+.ENDIF
+.IF MODE == 1
+	ldi	ZL, low(_Eep_Pgm_Gov_P_Gain)
+	ldi	ZH, high(_Eep_Pgm_Gov_P_Gain)
+.ENDIF
+read_eeprom_block1:
+	rcall read_eeprom_byte
+	st	X+, Temp1
+	adiw	Z, 1
+	dec	Temp4
+	brne	read_eeprom_block1
+
+	ldi	Temp4, 19	; 19 parameters
+	ldi	XL, low(Pgm_Enable_TX_Program)
+	ldi	XH, high(Pgm_Enable_TX_Program)
+	ldi	ZL, low(Eep_Enable_TX_Program)
+	ldi	ZH, high(Eep_Enable_TX_Program)
+read_eeprom_block2:
+	rcall read_eeprom_byte
+	st	X+, Temp1
+	adiw	Z, 1
+	dec	Temp4
+	brne	read_eeprom_block2
+
+	rjmp	read_eeprom_exit
+
+read_eeprom_store_defaults:
+	rcall set_default_parameters	
+	rcall store_all_in_eeprom	
+read_eeprom_exit:
+	ldi	ZL, low(Eep_Dummy)			; Set pointer to uncritical area
+	ldi	ZH, high(Eep_Dummy)
+	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
 ; Read eeprom byte routine
 ;
-; Assumes data in Temp1 and address in X 
-; Also assumes address high byte to be zero
+; Assumes data in Temp1 and address in Z 
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 read_eeprom_byte:
@@ -42,7 +141,7 @@ read_eeprom_byte:
 	rjmp read_eeprom_byte
 
 	; Set up address in address register
-	Set_Eeprom_Address Temp2, Temp3
+	Set_Eeprom_Address ZL, ZH
 	; Start eeprom read
 	sbi  EECR, EERE
 	in 	Temp1, EEDR			
@@ -51,10 +150,55 @@ read_eeprom_byte:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
+; Store all parameter values in EEPROM routine
+;
+; Assumes interrupts to be off
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+store_all_in_eeprom:
+	; Clear initialized signature
+	rcall clear_eeprom_signature
+	; Write eeprom
+	ldi	Temp4, 10	; 10 parameters
+	ldi	XL, low(Pgm_Gov_P_Gain)
+	ldi	XH, high(Pgm_Gov_P_Gain)
+.IF MODE == 0 || MODE ==2
+	ldi	ZL, low(Eep_Pgm_Gov_P_Gain)
+	ldi	ZH, high(Eep_Pgm_Gov_P_Gain)
+.ENDIF
+.IF MODE == 1
+	ldi	ZL, low(_Eep_Pgm_Gov_P_Gain)
+	ldi	ZH, high(_Eep_Pgm_Gov_P_Gain)
+.ENDIF
+write_eeprom_block1:
+	ld	Temp1, X+
+	rcall write_eeprom_byte
+	adiw	Z, 1
+	dec	Temp4
+	brne	write_eeprom_block1
+
+	ldi	Temp4, 19	; 19 parameters
+	ldi	XL, low(Pgm_Enable_TX_Program)
+	ldi	XH, high(Pgm_Enable_TX_Program)
+	ldi	ZL, low(Eep_Enable_TX_Program)
+	ldi	ZH, high(Eep_Enable_TX_Program)
+write_eeprom_block2:
+	ld	Temp1, X+
+	rcall write_eeprom_byte
+	adiw	Z, 1
+	dec	Temp4
+	brne	write_eeprom_block2
+
+	; Write initialized signature
+	rcall write_eeprom_signature
+	ret	
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
 ; Write eeprom byte routine
 ;
-; Assumes data in Temp1 and address in Temp2/Temp3 
-; Also assumes address high byte to be zero
+; Assumes data in Temp1 and address in Z 
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 write_eeprom_byte:
@@ -64,11 +208,9 @@ write_eeprom_byte:
 
 	; Set up address in address register
 	out 	EEDR, Temp1		
-	Set_Eeprom_Address Temp2, Temp3
+	Set_Eeprom_Address ZL, ZH
 	; Set write enables and start writing
-	cli				; Disable interrupts	
 	Start_Eeprom_Write
-	sei				; Enable interrupts
 	ret
 
 
@@ -80,13 +222,13 @@ write_eeprom_byte:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 clear_eeprom_signature:	
-	ldi	Temp2, low(Eep_Initialized_L)
-	ldi	Temp3, high(Eep_Initialized_L)
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0xFF
 	rcall write_eeprom_byte
 
-	ldi	Temp2, low(Eep_Initialized_H)
-	ldi	Temp3, high(Eep_Initialized_H)
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0xFF
 	rcall write_eeprom_byte
 	ret
@@ -100,336 +242,199 @@ clear_eeprom_signature:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 write_eeprom_signature:	
-.if TAIL == 0
-	ldi	Temp2, low(Eep_Initialized_L)
-	ldi	Temp3, high(Eep_Initialized_L)
+.IF MODE == 0	; Main
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0xA5
 	rcall write_eeprom_byte
 
-	ldi	Temp2, low(Eep_Initialized_H)
-	ldi	Temp3, high(Eep_Initialized_H)
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0x5A
 	rcall write_eeprom_byte
-.else
-	ldi	Temp2, low(Eep_Initialized_L)
-	ldi	Temp3, high(Eep_Initialized_L)
+.ENDIF
+.IF MODE == 1	; Tail
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0x5A
 	rcall write_eeprom_byte
 
-	ldi	Temp2, low(Eep_Initialized_H)
-	ldi	Temp3, high(Eep_Initialized_H)
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0xA5
 	rcall write_eeprom_byte
-.endif
+.ENDIF
+.IF MODE == 2	; Multi
+	ldi	ZL, low(Eep_Initialized_L)
+	ldi	ZH, high(Eep_Initialized_L)
+	ldi	Temp1, 0x55
+	rcall write_eeprom_byte
+
+	ldi	ZL, low(Eep_Initialized_H)
+	ldi	ZH, high(Eep_Initialized_H)
+	ldi	Temp1, 0xAA
+	rcall write_eeprom_byte
+.ENDIF
 	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Read eeprom perameters routine
+; Store new parameter value in ram routine
 ;
 ; No assumptions
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-read_eeprom_parameters:	
-.if TAIL == 0
-	; Check initialized signature
-	ldi	Temp2, low(Eep_Initialized_L)
-	ldi	Temp3, high(Eep_Initialized_L)
-	rcall read_eeprom_byte
-	cpi	Temp1, 0xA5
-	brne	read_eeprom_store_defaults
-
-	ldi	Temp2, low(Eep_Initialized_H)
-	ldi	Temp3, high(Eep_Initialized_H)
-	rcall read_eeprom_byte
-	cpi	Temp1, 0x5A
-	brne	read_eeprom_store_defaults
-
-	; Read eeprom
-	ldi	Temp2, low(Eep_Pgm_Gov_P_Gain)
-	ldi	Temp3, high(Eep_Pgm_Gov_P_Gain)
-	rcall read_eeprom_byte
-	sts	Pgm_Gov_P_Gain, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Gov_I_Gain)
-	ldi	Temp3, high(Eep_Pgm_Gov_I_Gain)
-	rcall read_eeprom_byte
-	sts	Pgm_Gov_I_Gain, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Gov_Mode)
-	ldi	Temp3, high(Eep_Pgm_Gov_Mode)
-	rcall read_eeprom_byte
-	sts	Pgm_Gov_Mode, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Startup_Pwr)
-	ldi	Temp3, high(Eep_Pgm_Startup_Pwr)
-	rcall read_eeprom_byte
-	sts	Pgm_Startup_Pwr, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Pwm_Freq)
-	ldi	Temp3, high(Eep_Pgm_Pwm_Freq)
-	rcall read_eeprom_byte
-	sbr	Flags2, (1<<PGM_PWM_HIGH_FREQ)
-	sbrc	Temp1, 1
-	cbr	Flags2, (1<<PGM_PWM_HIGH_FREQ)
-
-	ldi	Temp2, low(Eep_Pgm_Input_Pol)
-	ldi	Temp3, high(Eep_Pgm_Input_Pol)
-	rcall read_eeprom_byte
-	cbr	Flags2, (1<<PGM_RCP_PWM_POL)
-	sbrc	Temp1, 1
-	sbr	Flags2, (1<<PGM_RCP_PWM_POL)
-.else
-	; Check initialized signature
-	ldi	Temp2, low(Eep_Initialized_L)
-	ldi	Temp3, high(Eep_Initialized_L)
-	rcall read_eeprom_byte
-	cpi	Temp1, 0x5A
-	brne	read_eeprom_store_defaults
-
-	ldi	Temp2, low(Eep_Initialized_H)
-	ldi	Temp3, high(Eep_Initialized_H)
-	rcall read_eeprom_byte
-	cpi	Temp1, 0xA5
-	brne	read_eeprom_store_defaults
-
-	; Read eeprom
-	ldi	Temp2, low(Eep_Pgm_Tail_Gain)
-	ldi	Temp3, high(Eep_Pgm_Tail_Gain)
-	rcall read_eeprom_byte
-	sts	Pgm_Tail_Gain, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Tail_Idle)
-	ldi	Temp3, high(Eep_Pgm_Tail_Idle)
-	rcall read_eeprom_byte
-	sts	Pgm_Tail_Idle, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Startup_Pwr)
-	ldi	Temp3, high(Eep_Pgm_Startup_Pwr)
-	rcall read_eeprom_byte
-	sts	Pgm_Startup_Pwr, Temp1
-
-	ldi	Temp2, low(Eep_Pgm_Pwm_Freq)
-	ldi	Temp3, high(Eep_Pgm_Pwm_Freq)
-	rcall read_eeprom_byte
-	sbr	Flags2, (1<<PGM_PWM_HIGH_FREQ)
-	sbrc	Temp1, 1
-	cbr	Flags2, (1<<PGM_PWM_HIGH_FREQ)
-
-	ldi	Temp2, low(Eep_Pgm_Input_Pol)
-	ldi	Temp3, high(Eep_Pgm_Input_Pol)
-	rcall read_eeprom_byte
-	cbr	Flags2, (1<<PGM_RCP_PWM_POL)
-	sbrc	Temp1, 1
-	sbr	Flags2, (1<<PGM_RCP_PWM_POL)
-
-	ldi	Temp1, 3
-	sts	Pgm_Gov_Mode, Temp1
-.endif
-	rjmp	read_eeprom_exit
-
-read_eeprom_store_defaults:
-	rcall set_default_parameters	
-	rcall store_eeprom_defaults	
-read_eeprom_exit:
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Store default parameter value in EEPROM routine
-;
-; No assumptions
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-store_eeprom_defaults:
-	rcall clear_eeprom_signature
-.if TAIL == 0
-	ldi	Temp1, 1
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Gov_P_Gain
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Gov_I_Gain
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 3
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Gov_Mode
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 4
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Startup_Pwr
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 5
-	sts	Tx_Pgm_Func_No, Temp1
-	ldi	Temp1, 1
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 6
-	sts	Tx_Pgm_Func_No, Temp1
-	ldi	Temp1, 1
-	sbrc	Flags2, PGM_RCP_PWM_POL
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	rcall write_eeprom_signature
-.else
-	ldi	Temp1, 1
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Tail_Gain
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Tail_Idle
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 3
-	sts	Tx_Pgm_Func_No, Temp1
-	lds	Temp1, Pgm_Startup_Pwr
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 4
-	sts	Tx_Pgm_Func_No, Temp1
-	ldi	Temp1, 1
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	ldi	Temp1, 5
-	sts	Tx_Pgm_Func_No, Temp1
-	ldi	Temp1, 1
-	sbrc	Flags2, PGM_RCP_PWM_POL
-	ldi	Temp1, 2
-	sts	Tx_Pgm_Paraval_No, Temp1
-	rcall store_in_eeprom
-
-	rcall write_eeprom_signature
-.endif
-	ret	
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Store new parameter value in EEPROM routine
-;
-; No assumptions
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-store_in_eeprom:	
+store_new_value_in_ram:	
 	lds	Temp4, Tx_Pgm_Func_No	; Function no
 	lds	Temp1, Tx_Pgm_Paraval_No	; Parameter value no
-.if TAIL == 0
+.IF MODE == 0
 	cpi	Temp4, 1
-	breq	store_main_func_1
+	brne	PC+3
+	sts	Pgm_Gov_P_Gain, Temp1
+
 	cpi	Temp4, 2
-	breq	store_main_func_2
+	brne	PC+3
+	sts	Pgm_Gov_I_Gain, Temp1
+
 	cpi	Temp4, 3
-	breq	store_main_func_3
+	brne	PC+3
+	sts	Pgm_Gov_Mode, Temp1
+
 	cpi	Temp4, 4
-	breq	store_main_func_4
+	brne	PC+3
+	sts	Pgm_Gov_Range, Temp1
+
 	cpi	Temp4, 5
-	breq	store_main_func_5
+	brne	PC+3
+	sts	Pgm_Low_Voltage_Lim, Temp1
+
 	cpi	Temp4, 6
-	breq	store_main_func_6
+	brne	PC+3
+	sts	Pgm_Startup_Pwr, Temp1
 
-store_main_func_1:
-	ldi	Temp2, low(Eep_Pgm_Gov_P_Gain)
-	ldi	Temp3, high(Eep_Pgm_Gov_P_Gain)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 7
+	brne	PC+3
+	sts	Pgm_Comm_Timing, Temp1
 
-store_main_func_2:
-	ldi	Temp2, low(Eep_Pgm_Gov_I_Gain)
-	ldi	Temp3, high(Eep_Pgm_Gov_I_Gain)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 8
+	brne	PC+3
+	sts	Pgm_Throttle_Rate, Temp1
 
-store_main_func_3:
-	ldi	Temp2, low(Eep_Pgm_Gov_Mode)
-	ldi	Temp3, high(Eep_Pgm_Gov_Mode)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 9
+	brne	PC+3
+	sts	Pgm_Damping_Force, Temp1
 
-store_main_func_4:
-	ldi	Temp2, low(Eep_Pgm_Startup_Pwr)
-	ldi	Temp3, high(Eep_Pgm_Startup_Pwr)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 10
+	brne	PC+3
+	sts	Pgm_Pwm_Freq, Temp1
 
-store_main_func_5:
-	ldi	Temp2, low(Eep_Pgm_Pwm_Freq)
-	ldi	Temp3, high(Eep_Pgm_Pwm_Freq)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 11
+	brne	PC+3
+	sts	Pgm_Demag_Comp, Temp1
 
-store_main_func_6:
-	ldi	Temp2, low(Eep_Pgm_Input_Pol)
-	ldi	Temp3, high(Eep_Pgm_Input_Pol)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
-.else
+	cpi	Temp4, 12
+	brne	PC+3
+	sts	Pgm_Direction, Temp1
+
+	cpi	Temp4, 13
+	brne	PC+3
+	sts	Pgm_Input_Pol, Temp1
+.ENDIF
+.IF MODE == 1
 	cpi	Temp4, 1
-	breq	store_tail_func_1
+	brne	PC+3
+	sts	Pgm_Motor_Gain, Temp1
+
 	cpi	Temp4, 2
-	breq	store_tail_func_2
+	brne	PC+3
+	sts	Pgm_Motor_Idle, Temp1
+
 	cpi	Temp4, 3
-	breq	store_tail_func_3
+	brne	PC+3
+	sts	Pgm_Startup_Pwr, Temp1
+
 	cpi	Temp4, 4
-	breq	store_tail_func_4
+	brne	PC+3
+	sts	Pgm_Comm_Timing, Temp1
+
 	cpi	Temp4, 5
-	breq	store_tail_func_5
+	brne	PC+3
+	sts	Pgm_Throttle_Rate, Temp1
 
-store_tail_func_1:
-	ldi	Temp2, low(Eep_Pgm_Tail_Gain)
-	ldi	Temp3, high(Eep_Pgm_Tail_Gain)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 6
+	brne	PC+3
+	sts	Pgm_Damping_Force, Temp1
 
-store_tail_func_2:
-	ldi	Temp2, low(Eep_Pgm_Tail_Idle)
-	ldi	Temp3, high(Eep_Pgm_Tail_Idle)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 7
+	brne	PC+3
+	sts	Pgm_Pwm_Freq, Temp1
 
-store_tail_func_3:
-	ldi	Temp2, low(Eep_Pgm_Startup_Pwr)
-	ldi	Temp3, high(Eep_Pgm_Startup_Pwr)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 8
+	brne	PC+3
+	sts	Pgm_Demag_Comp, Temp1
 
-store_tail_func_4:
-	ldi	Temp2, low(Eep_Pgm_Pwm_Freq)
-	ldi	Temp3, high(Eep_Pgm_Pwm_Freq)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
+	cpi	Temp4, 9
+	brne	PC+3
+	sts	Pgm_Direction, Temp1
 
-store_tail_func_5:
-	ldi	Temp2, low(Eep_Pgm_Input_Pol)
-	ldi	Temp3, high(Eep_Pgm_Input_Pol)
-	rcall write_eeprom_byte
-	rjmp	store_in_eeprom_exit
-.endif
+	cpi	Temp4, 10
+	brne	PC+3
+	sts	Pgm_Input_Pol, Temp1
+.ENDIF
+.IF MODE == 2
+	cpi	Temp4, 1
+	brne	PC+3
+	sts	Pgm_Gov_P_Gain, Temp1
 
-store_in_eeprom_exit:
+	cpi	Temp4, 2
+	brne	PC+3
+	sts	Pgm_Gov_I_Gain, Temp1
+
+	cpi	Temp4, 3
+	brne	PC+3
+	sts	Pgm_Gov_Mode, Temp1
+
+	cpi	Temp4, 4
+	brne	PC+3
+	sts	Pgm_Motor_Gain, Temp1
+
+	cpi	Temp4, 5
+	brne	PC+3
+	sts	Pgm_Low_Voltage_Lim, Temp1
+
+	cpi	Temp4, 6
+	brne	PC+3
+	sts	Pgm_Startup_Pwr, Temp1
+
+	cpi	Temp4, 7
+	brne	PC+3
+	sts	Pgm_Comm_Timing, Temp1
+
+	cpi	Temp4, 8
+	brne	PC+3
+	sts	Pgm_Throttle_Rate, Temp1
+
+	cpi	Temp4, 9
+	brne	PC+3
+	sts	Pgm_Damping_Force, Temp1
+
+	cpi	Temp4, 10
+	brne	PC+3
+	sts	Pgm_Pwm_Freq, Temp1
+
+	cpi	Temp4, 11
+	brne	PC+3
+	sts	Pgm_Demag_Comp, Temp1
+
+	cpi	Temp4, 12
+	brne	PC+3
+	sts	Pgm_Direction, Temp1
+
+	cpi	Temp4, 13
+	brne	PC+3
+	sts	Pgm_Input_Pol, Temp1
+.ENDIF
 	ret
 
 
@@ -441,11 +446,10 @@ store_in_eeprom_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait1s:
-	ldi	Temp1, 5
-	mov	Temp5, Temp1
+	ldi	Temp3, 5
 wait1s_loop:
 	rcall wait200ms
-	dec	Temp5
+	dec	Temp3
 	brne	wait1s_loop
 	ret
 
@@ -454,11 +458,10 @@ wait1s_loop:
 ;
 ; Success beep routine
 ;
-; No assumptions
+; Assumes interrupts to be off
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 success_beep:
-	cli						; Disable all interrupts
 	rcall beep_f1
 	rcall beep_f2
 	rcall beep_f3
@@ -473,7 +476,31 @@ success_beep:
 	rcall beep_f2
 	rcall beep_f3
 	rcall beep_f4
-	sei						; Enable all interrupts
+	ret
+
+
+;**;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Success beep inverted routine
+;
+; Assumes interrupts to be off
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+success_beep_inverted:
+	rcall beep_f4
+	rcall beep_f3
+	rcall beep_f2
+	rcall beep_f1
+	rcall wait10ms
+	rcall beep_f4
+	rcall beep_f3
+	rcall beep_f2
+	rcall beep_f1
+	rcall wait10ms
+	rcall beep_f4
+	rcall beep_f3
+	rcall beep_f2
+	rcall beep_f1
 	ret
 
 
@@ -485,22 +512,20 @@ success_beep:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 function_paraval_beep:
-	lds	Temp5, Tx_Pgm_Func_No	; Function no
-	lds	Temp6, Tx_Pgm_Paraval_No	; Parameter value no
-	cli						; Disable all interrupts
+	lds	Temp7, Tx_Pgm_Func_No	; Function no
+	lds	Temp8, Tx_Pgm_Paraval_No	; Parameter value no
 function_beep:
 	rcall beep_f1				
 	rcall beep_f1
 	rcall beep_f1
 	rcall wait10ms
-	dec	Temp5
+	dec	Temp7
 	brne	function_beep
 paraval_beep:
 	rcall beep_f4
 	rcall wait10ms
-	dec	Temp6
+	dec	Temp8
 	brne	paraval_beep
-	sei						; Enable all interrupts
 	ret
 
 
@@ -512,114 +537,124 @@ paraval_beep:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 program_by_tx:	
-	; Start programming mode entry sequence by waiting for low RC pulse
-	cli						; Disable all interrupts
-	rcall beep_f4
-	sei						; Enable all interrupts
-	rcall wait100ms
-	lds	Temp1, New_Rcp			; Load new RC pulse value
-	cpi	Temp1, RCP_STOP		; Below stop?
-	brsh	program_by_tx			; No - start over
-
-	; Continue programming mode entry sequence by waiting for high RC pulse
-wait_for_rc_pulse_max:
-	cli						; Disable all interrupts
-	rcall beep_f1
-	rcall wait10ms
-	rcall beep_f1
-	sei						; Enable all interrupts
-	rcall wait100ms
-	lds	Temp1, New_Rcp			; Load new RC pulse value
-	cpi	Temp1, RCP_MAX			; Above max?
-	brlo	wait_for_rc_pulse_max	; No - start over
-
 	; Programming mode entry beeps
+	cli					
 	rcall success_beep
+	sei					
 	rcall wait1s
 	rcall wait1s
-
 	; Start at function 1, parameter value 1
-	ldi	Temp1, 1
-	sts	Tx_Pgm_Func_No, Temp1
+	ldi	XH, 1
+	sts	Tx_Pgm_Func_No, XH
 paraval_no_entry:
-	ldi	Temp1, 1
-	sts	Tx_Pgm_Paraval_No, Temp1
+	ldi	XH, 1
+	sts	Tx_Pgm_Paraval_No, XH
 beep_no_entry:
-	ldi	Temp1, 0
-	sts	Tx_Pgm_Beep_No, Temp1
+	sts	Tx_Pgm_Beep_No, Zero
 func_paraval:
+	cli
 	rcall function_paraval_beep
-	ldi	Temp1, 5				; Wait is 5x 200ms
-	mov	Temp5, Temp1
+	sei
+	ldi	XH, 5				; Wait is 5x 200ms
+	mov	Temp5, XH			
 func_paraval_wait:
+	lds	Temp6, New_Rcp			; Load RC pulse
 	rcall wait200ms
-	lds	Temp1, New_Rcp			; Load new rc pulse value
-	cpi	Temp1, RCP_STOP		; Below stop?
-	brsh	func_paraval_cont_wait	; No - branch
+	lds	XH, New_Rcp			
+	cp	Temp6, XH				; Is RC pulse stable? (Avoid issues from 3in1 interference)
+	brne	func_paraval_wait		; No - branch
+	cpi	XH, RCP_STOP			; Below stop?
+	brcs	func_paraval_store		; Yes - branch
 
-	rcall clear_eeprom_signature	; Clear signature
-	rcall store_in_eeprom		; Yes - store new value in EEPROM
-	rcall write_eeprom_signature	; Write signature
+	cpi	XH, RCP_MAX			; Below max?
+	brcs	function_next			; Yes - branch
+
+	rjmp	func_paraval_cont_wait	; No - branch
+
+func_paraval_store:
+	rcall store_new_value_in_ram	; Yes - store new value in RAM
+	cli						; Disable all interrupts
+	rcall store_all_in_eeprom	; Store all values in EEPROM
 	rcall success_beep			; Beep success
-	Enable_Watchdog Temp1		; Generate hardware reset from watchdog
+	Enable_Watchdog XH			; Generate hardware reset from watchdog
 	rcall wait1s
 
 func_paraval_cont_wait:
 	dec	Temp5
 	brne	func_paraval_wait
-	lds	Temp1, Tx_Pgm_Beep_No	; Load and check number of beeps
-	inc	Temp1
-	sts	Tx_Pgm_Beep_No, Temp1
-	cpi	Temp1, 3				; Three beeps done?
-	brsh	paraval_next			; Yes - Next parameter value
+	lds	XH, Tx_Pgm_Beep_No		; Check number of beeps
+	inc	XH
+	sts	Tx_Pgm_Beep_No, XH
+	cpi	XH, 3				; Three beeps done?
+	brcc	paraval_next			; Yes - Next parameter value
 
 	rjmp	func_paraval			; No - go back
 
 paraval_next:					
 	rcall wait1s
-	lds	Temp1, Tx_Pgm_Paraval_No	; Parameter value no
+	lds	XH, Tx_Pgm_Paraval_No	; Parameter value no
+	inc	XH
+	sts	Tx_Pgm_Paraval_No, XH
+	cli					
+.IF MODE == 0
+	lds	XH, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	XH	
+	ldi	ZL, low(TX_PGM_PARAMS_MAIN<<1)
+	ldi	ZH, high(TX_PGM_PARAMS_MAIN<<1)
+	add	ZL, XH
+	adc	ZH, Zero
+	lpm	Temp1, Z
+.ENDIF
+.IF MODE == 1
+	lds	XH, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	XH	
+	ldi	ZL, low(TX_PGM_PARAMS_TAIL<<1)
+	ldi	ZH, high(TX_PGM_PARAMS_TAIL<<1)
+	add	ZL, XH
+	adc	ZH, Zero
+	lpm	Temp1, Z
+.ENDIF
+.IF MODE == 2
+	lds	XH, Tx_Pgm_Func_No		; Decode number of parameters
+	dec	XH	
+	ldi	ZL, low(TX_PGM_PARAMS_MULTI<<1)
+	ldi	ZH, high(TX_PGM_PARAMS_MULTI<<1)
+	add	ZL, XH
+	adc	ZH, Zero
+	lpm	Temp1, Z
+.ENDIF
+	sei					
 	inc	Temp1
-	sts	Tx_Pgm_Paraval_No, Temp1
-	ldi	Temp2, 5				; Default 5 parameter values
-.if TAIL == 0
-	lds	Temp1, Tx_Pgm_Func_No
-	cpi	Temp1, 3				; Function 3?
-	brne paraval_end_a			; No - branch
-	ldi	Temp2, 3				; Yes - set max parameter values
-paraval_end_a:
-	lds	Temp1, Tx_Pgm_Func_No
-	cpi	Temp1, 5				; Function below 5?
-	brlo paraval_end_b			; Yes - branch
-	ldi	Temp2, 2				; No - set max parameter values
-paraval_end_b:
-.else
-	lds	Temp1, Tx_Pgm_Func_No
-	cpi	Temp1, 4				; Function below 4?
-	brlo paraval_end_a			; Yes - branch
-	ldi	Temp2, 2				; No - set max parameter values
-paraval_end_a:
-.endif
-	inc	Temp2
-	lds	Temp1, Tx_Pgm_Paraval_No	
-	cp	Temp1, Temp2
-	brsh function_next			; Last parameter value?
+	lds	XH, Tx_Pgm_Paraval_No		
+	cp	XH, Temp1				
+	brcc	function_next			; Last parameter value?
 	rjmp	beep_no_entry			; No - go back
 
 function_next:					; Yes - Next function value
 	rcall wait1s
 	rcall wait1s
-	lds	Temp1, Tx_Pgm_Func_No	; Function value no
-	inc	Temp1
-	sts	Tx_Pgm_Func_No, Temp1
-.if TAIL == 0
-	cpi	Temp1, 7				; Main has 6 functions
-.else
-	cpi	Temp1, 6				; Tail has 5 functions
-.endif
-	brsh program_by_tx_exit		; Last function value?
+	lds	XH, Tx_Pgm_Func_No		; Function value no
+	inc	XH
+	sts	Tx_Pgm_Func_No, XH
+.IF MODE == 0
+	lds	XH, Tx_Pgm_Func_No		
+	cpi	XH, 14				; Main has 13 functions	
+.ENDIF
+.IF MODE == 1
+	lds	XH, Tx_Pgm_Func_No		
+	cpi	XH, 11				; Tail has 10 functions	
+.ENDIF
+.IF MODE == 2
+	lds	XH, Tx_Pgm_Func_No		
+	cpi	XH, 14				; Multi has 13 functions	
+.ENDIF
+	brcc	program_by_tx_exit		; Last function value?
 	rjmp	paraval_no_entry		; No - go back
 
 program_by_tx_exit:
-	Enable_Watchdog Temp1		; Generate hardware reset from watchdog
+	rcall set_default_parameters	; Load all defaults
+	cli						; Disable all interrupts
+	rcall store_all_in_eeprom	; Erase flash and program
+	Enable_Watchdog XH			; Generate hardware reset from watchdog
 	rcall wait1s
 

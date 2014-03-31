@@ -1,13 +1,13 @@
 ;***** THIS IS A MACHINE GENERATED FILE - DO NOT EDIT ********************
-;***** Created: 2005-01-11 10:31 ******* Source: ATmega8.xml *************
+;***** Created: 2009-11-03 14:40 ******* Source: ATmega8.xml *************
 ;*************************************************************************
 ;* A P P L I C A T I O N   N O T E   F O R   T H E   A V R   F A M I L Y
 ;* 
 ;* Number            : AVR000
 ;* File Name         : "m8def.inc"
 ;* Title             : Register/Bit Definitions for the ATmega8
-;* Date              : 2005-01-11
-;* Version           : 2.14
+;* Date              : 2009-11-03
+;* Version           : 2.35
 ;* Support E-mail    : avr@atmel.com
 ;* Target MCU        : ATmega8
 ;* 
@@ -37,20 +37,20 @@
 ;* ...                         ;otherwise do something else
 ;*************************************************************************
 
-;.ifndef _M8DEF_INC_
-;.define _M8DEF_INC_
+#ifndef _M8DEF_INC_
+#define _M8DEF_INC_
 
 
-;.pragma partinc 0
+#pragma partinc 0
 
 ; ***** SPECIFY DEVICE ***************************************************
 .device ATmega8
-;.pragma AVRPART ADMIN PART_NAME ATmega8
+#pragma AVRPART ADMIN PART_NAME ATmega8
 .equ	SIGNATURE_000	= 0x1e
 .equ	SIGNATURE_001	= 0x93
 .equ	SIGNATURE_002	= 0x07
 
-;.pragma AVRPART CORE CORE_VERSION V2E
+#pragma AVRPART CORE CORE_VERSION V2E
 
 
 ; ***** I/O REGISTER DEFINITIONS *****************************************
@@ -58,8 +58,8 @@
 ; Definitions marked "MEMORY MAPPED"are extended I/O ports
 ; and cannot be used with IN/OUT instructions
 .equ	SREG	= 0x3f
-.equ	SPH	= 0x3e
 .equ	SPL	= 0x3d
+.equ	SPH	= 0x3e
 .equ	GICR	= 0x3b
 .equ	GIFR	= 0x3a
 .equ	TIMSK	= 0x39
@@ -74,14 +74,14 @@
 .equ	SFIOR	= 0x30
 .equ	TCCR1A	= 0x2f
 .equ	TCCR1B	= 0x2e
-.equ	TCNT1H	= 0x2d
 .equ	TCNT1L	= 0x2c
-.equ	OCR1AH	= 0x2b
+.equ	TCNT1H	= 0x2d
 .equ	OCR1AL	= 0x2a
-.equ	OCR1BH	= 0x29
+.equ	OCR1AH	= 0x2b
 .equ	OCR1BL	= 0x28
-.equ	ICR1H	= 0x27
+.equ	OCR1BH	= 0x29
 .equ	ICR1L	= 0x26
+.equ	ICR1H	= 0x27
 .equ	TCCR2	= 0x25
 .equ	TCNT2	= 0x24
 .equ	OCR2	= 0x23
@@ -89,8 +89,8 @@
 .equ	WDTCR	= 0x21
 .equ	UBRRH	= 0x20
 .equ	UCSRC	= 0x20
-.equ	EEARH	= 0x1f
 .equ	EEARL	= 0x1e
+.equ	EEARH	= 0x1f
 .equ	EEDR	= 0x1d
 .equ	EECR	= 0x1c
 .equ	PORTB	= 0x18
@@ -112,8 +112,8 @@
 .equ	ACSR	= 0x08
 .equ	ADMUX	= 0x07
 .equ	ADCSRA	= 0x06
-.equ	ADCH	= 0x05
 .equ	ADCL	= 0x04
+.equ	ADCH	= 0x05
 .equ	TWDR	= 0x03
 .equ	TWAR	= 0x02
 .equ	TWSR	= 0x01
@@ -228,7 +228,7 @@
 .equ	FOC1A	= 3	; Force Output Compare 1A
 .equ	COM1B0	= 4	; Compare Output Mode 1B, bit 0
 .equ	COM1B1	= 5	; Compare Output Mode 1B, bit 1
-.equ	COM1A0	= 6	; Comparet Ouput Mode 1A, bit 0
+.equ	COM1A0	= 6	; Compare Ouput Mode 1A, bit 0
 .equ	COM1A1	= 7	; Compare Output Mode 1A, bit 1
 
 ; TCCR1B - Timer/Counter1 Control Register B
@@ -687,10 +687,10 @@
 .equ	E2END	= 0x01ff
 .equ	EEPROMEND	= 0x01ff
 .equ	EEADRBITS	= 9
-;.pragma AVRPART MEMORY PROG_FLASH 8192
-;.pragma AVRPART MEMORY EEPROM 512
-;.pragma AVRPART MEMORY INT_SRAM SIZE 1024
-;.pragma AVRPART MEMORY INT_SRAM START_ADDR 0x60
+#pragma AVRPART MEMORY PROG_FLASH 8192
+#pragma AVRPART MEMORY EEPROM 512
+#pragma AVRPART MEMORY INT_SRAM SIZE 1024
+#pragma AVRPART MEMORY INT_SRAM START_ADDR 0x60
 
 
 
@@ -731,8 +731,8 @@
 
 .equ	INT_VECTORS_SIZE	= 19	; size in words
 
-;.pragma AVRPART CORE INSTRUCTIONS_NOT_SUPPORTED break
+#pragma AVRPART CORE INSTRUCTIONS_NOT_SUPPORTED break
 
-;.endif  /* _M8DEF_INC_ */
+#endif  /* _M8DEF_INC_ */
 
 ; ***** END OF FILE ******************************************************
