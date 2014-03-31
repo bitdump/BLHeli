@@ -1,26 +1,30 @@
 This tree contains the BLHeli assembly code for sensorless brushless motor electronic speed control (ESC) boards.
-It is designed specifically for use with Eflite mCP X, but may also be used on other copters/planes.
+It is designed specifically for use with Eflite mCP X, but may also be used on other helicopters, multicopters or planes.
 
 This tree contains AVR assembly code for Atmel MCU based ESCs. 
 
-Features and Changes
+Features
 --------------------
-- Can be configured for main motor or tail motor operation
-- Main motor operation has governor functionality
-- Many parmeters can be programmed from the TX
-- Supports 1kHz, 2kHz, 4kHz or 8kHz positive or negative pwm as input signal
+- Can be configured for helicopter MAIN motor or TAIL motor operation. Or as MULTIcopter motor operation.
+- Main motor operation has governor functionality and multicopter motor operation has closed loop functionality.
+- Motor operation can be damped for fast motor retardation.
+- Many parameters can be programmed, either from PC applications for setup and configuration, or from the TX.
+- Supports 1kHz, 2kHz, 4kHz, 8kHz or 12kHz positive or negative pwm as input signal, as well as regular 1-2ms PPM signal.
 
 Supported Hardware
-------------------
-- HC 5A
-- Walkera WK-WST-10A-LT
-- Feigao 6A
+--------------------
+- Lots of different ESCs. See the doc "BLHeli supported Atmel ESCs.pdf" for details.
 
-Installation and use
+Operation and use
+--------------------
+- See the doc "BLHeli manual Atmel RevN.x.pdf".
+
+Coding tools
 --------------------
 The software is written, compiled and debugged in the AVR Studio 4 IDE.
 
 For more information, check out this thread:
 
 http://www.helifreak.com/showthread.php?t=357151
+
 
