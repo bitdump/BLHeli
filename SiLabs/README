@@ -3,7 +3,7 @@ It is designed specifically for use with Eflite mCP X, but may also be used on o
 
 This tree contains SiLabs assembly code for SiLabs MCU based ESCs. 
 
-Features and Changes
+Features
 --------------------
 - Can be configured for helicopter MAIN motor or TAIL motor operation. Or as MULTIcopter motor operation.
 - Main motor operation has governor functionality and multicopter motor operation has closed loop functionality.
