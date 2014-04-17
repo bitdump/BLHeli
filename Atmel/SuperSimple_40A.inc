@@ -56,7 +56,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8L#   "	; Project and MCU tag (16 Bytes)
 .EQU	COMP_PWM_HIGH_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 .EQU	COMP_PWM_LOW_ON_DELAY	=	10	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
 .EQU	COMP_PWM_LOW_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
-.EQU	HIGH_DRIVER_PRECHG_TIME	=	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
+.EQU	HIGH_DRIVER_PRECHG_TIME	=	0	; Time between commutations used to precharge the high side driver (for all nfet ESCs)
 .EQU	ADC_LIMIT_L			= 	101	; 4.3k/47k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 4.3k/47k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
 .EQU	TEMP_LIMIT			= 	0	; No sensor. Temperature measurement ADC value for which main motor power is limited
@@ -425,4 +425,8 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8L#   "	; Project and MCU tag (16 Bytes)
 .MACRO Prepare_Lock_Or_Fuse_Read
 	ldi	@0, ((1<<BLBSET)+(1<<SPMEN))
 	out	SPMCR, @0
+.ENDMACRO
+
+.MACRO xcall
+	rcall @0
 .ENDMACRO

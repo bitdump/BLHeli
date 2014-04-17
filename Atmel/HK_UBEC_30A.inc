@@ -420,3 +420,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	ldi	@0, ((1<<BLBSET)+(1<<SPMEN))
 	out	SPMCR, @0
 .ENDMACRO
+
+.MACRO xcall
+	rcall @0
+.ENDMACRO

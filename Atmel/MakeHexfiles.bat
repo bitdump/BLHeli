@@ -24,6 +24,8 @@ rem SET AtmelPath="C:\Dev\Atmel\AVR Tools\AvrAssembler2"
 @ECHO Path for Atmel assembler: %AtmelPath% >> MakeHex_Result.txt
 @ECHO Start compile ..... >> MakeHex_Result.txt
 
+SET NAME=BLUESERIES_12A
+call:compile
 SET NAME=BLUESERIES_20A
 call:compile
 SET NAME=BLUESERIES_30A
@@ -63,6 +65,18 @@ call :compile
 SET NAME=SUNRISE_HIMULTI_30A
 call :compile
 SET NAME=SUNRISE_HIMULTI_40A
+call :compile
+SET NAME=RCTIMER_40A
+call :compile
+SET NAME=RCTIMER_NFS_30A
+call :compile
+SET NAME=YEP_7A
+call :compile
+SET NAME=AFRO_12A
+call :compile
+SET NAME=AFRO_20A
+call :compile
+SET NAME=AFRO_30A
 call :compile
 
 goto :end

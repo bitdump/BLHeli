@@ -39,14 +39,14 @@ read_all_eeprom_parameters:
 	; Check initialized signature
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0xA5
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0x5A
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
@@ -56,14 +56,14 @@ read_all_eeprom_parameters:
 	; Check initialized signature
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0x5A
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0xA5
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
@@ -73,14 +73,14 @@ read_all_eeprom_parameters:
 	; Check initialized signature
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0x55
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	cpi	Temp1, 0xAA
 	breq	PC+2
 	rjmp	read_eeprom_store_defaults
@@ -99,7 +99,7 @@ read_all_eeprom_parameters:
 	ldi	ZH, high(_Eep_Pgm_Gov_P_Gain)
 .ENDIF
 read_eeprom_block1:
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	st	X+, Temp1
 	adiw	Z, 1
 	dec	Temp4
@@ -111,7 +111,7 @@ read_eeprom_block1:
 	ldi	ZL, low(Eep_Enable_TX_Program)
 	ldi	ZH, high(Eep_Enable_TX_Program)
 read_eeprom_block2:
-	rcall read_eeprom_byte
+	xcall read_eeprom_byte
 	st	X+, Temp1
 	adiw	Z, 1
 	dec	Temp4
@@ -120,8 +120,8 @@ read_eeprom_block2:
 	rjmp	read_eeprom_exit
 
 read_eeprom_store_defaults:
-	rcall set_default_parameters	
-	rcall store_all_in_eeprom	
+	xcall set_default_parameters	
+	xcall store_all_in_eeprom	
 read_eeprom_exit:
 	ldi	ZL, low(Eep_Dummy)			; Set pointer to uncritical area
 	ldi	ZH, high(Eep_Dummy)
@@ -157,7 +157,7 @@ read_eeprom_byte:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 store_all_in_eeprom:
 	; Clear initialized signature
-	rcall clear_eeprom_signature
+	xcall clear_eeprom_signature
 	; Write eeprom
 	ldi	Temp4, 10	; 10 parameters
 	ldi	XL, low(Pgm_Gov_P_Gain)
@@ -172,7 +172,7 @@ store_all_in_eeprom:
 .ENDIF
 write_eeprom_block1:
 	ld	Temp1, X+
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 	adiw	Z, 1
 	dec	Temp4
 	brne	write_eeprom_block1
@@ -184,13 +184,13 @@ write_eeprom_block1:
 	ldi	ZH, high(Eep_Enable_TX_Program)
 write_eeprom_block2:
 	ld	Temp1, X+
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 	adiw	Z, 1
 	dec	Temp4
 	brne	write_eeprom_block2
 
 	; Write initialized signature
-	rcall write_eeprom_signature
+	xcall write_eeprom_signature
 	ret	
 
 
@@ -225,12 +225,12 @@ clear_eeprom_signature:
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0xFF
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0xFF
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 	ret
 
 
@@ -246,34 +246,34 @@ write_eeprom_signature:
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0xA5
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0x5A
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 .ENDIF
 .IF MODE == 1	; Tail
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0x5A
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0xA5
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 .ENDIF
 .IF MODE == 2	; Multi
 	ldi	ZL, low(Eep_Initialized_L)
 	ldi	ZH, high(Eep_Initialized_L)
 	ldi	Temp1, 0x55
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 
 	ldi	ZL, low(Eep_Initialized_H)
 	ldi	ZH, high(Eep_Initialized_H)
 	ldi	Temp1, 0xAA
-	rcall write_eeprom_byte
+	xcall write_eeprom_byte
 .ENDIF
 	ret
 
@@ -448,7 +448,7 @@ store_new_value_in_ram:
 wait1s:
 	ldi	Temp3, 5
 wait1s_loop:
-	rcall wait200ms
+	xcall wait200ms
 	dec	Temp3
 	brne	wait1s_loop
 	ret
@@ -462,20 +462,20 @@ wait1s_loop:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 success_beep:
-	rcall beep_f1
-	rcall beep_f2
-	rcall beep_f3
-	rcall beep_f4
-	rcall wait10ms
-	rcall beep_f1
-	rcall beep_f2
-	rcall beep_f3
-	rcall beep_f4
-	rcall wait10ms
-	rcall beep_f1
-	rcall beep_f2
-	rcall beep_f3
-	rcall beep_f4
+	xcall beep_f1
+	xcall beep_f2
+	xcall beep_f3
+	xcall beep_f4
+	xcall wait10ms
+	xcall beep_f1
+	xcall beep_f2
+	xcall beep_f3
+	xcall beep_f4
+	xcall wait10ms
+	xcall beep_f1
+	xcall beep_f2
+	xcall beep_f3
+	xcall beep_f4
 	ret
 
 
@@ -487,20 +487,20 @@ success_beep:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 success_beep_inverted:
-	rcall beep_f4
-	rcall beep_f3
-	rcall beep_f2
-	rcall beep_f1
-	rcall wait10ms
-	rcall beep_f4
-	rcall beep_f3
-	rcall beep_f2
-	rcall beep_f1
-	rcall wait10ms
-	rcall beep_f4
-	rcall beep_f3
-	rcall beep_f2
-	rcall beep_f1
+	xcall beep_f4
+	xcall beep_f3
+	xcall beep_f2
+	xcall beep_f1
+	xcall wait10ms
+	xcall beep_f4
+	xcall beep_f3
+	xcall beep_f2
+	xcall beep_f1
+	xcall wait10ms
+	xcall beep_f4
+	xcall beep_f3
+	xcall beep_f2
+	xcall beep_f1
 	ret
 
 
@@ -515,15 +515,15 @@ function_paraval_beep:
 	lds	Temp7, Tx_Pgm_Func_No	; Function no
 	lds	Temp8, Tx_Pgm_Paraval_No	; Parameter value no
 function_beep:
-	rcall beep_f1				
-	rcall beep_f1
-	rcall beep_f1
-	rcall wait10ms
+	xcall beep_f1				
+	xcall beep_f1
+	xcall beep_f1
+	xcall wait10ms
 	dec	Temp7
 	brne	function_beep
 paraval_beep:
-	rcall beep_f4
-	rcall wait10ms
+	xcall beep_f4
+	xcall wait10ms
 	dec	Temp8
 	brne	paraval_beep
 	ret
@@ -539,10 +539,10 @@ paraval_beep:
 program_by_tx:	
 	; Programming mode entry beeps
 	cli					
-	rcall success_beep
+	xcall success_beep
 	sei					
-	rcall wait1s
-	rcall wait1s
+	xcall wait1s
+	xcall wait1s
 	; Start at function 1, parameter value 1
 	ldi	XH, 1
 	sts	Tx_Pgm_Func_No, XH
@@ -553,13 +553,13 @@ beep_no_entry:
 	sts	Tx_Pgm_Beep_No, Zero
 func_paraval:
 	cli
-	rcall function_paraval_beep
+	xcall function_paraval_beep
 	sei
 	ldi	XH, 5				; Wait is 5x 200ms
 	mov	Temp5, XH			
 func_paraval_wait:
 	lds	Temp6, New_Rcp			; Load RC pulse
-	rcall wait200ms
+	xcall wait200ms
 	lds	XH, New_Rcp			
 	cp	Temp6, XH				; Is RC pulse stable? (Avoid issues from 3in1 interference)
 	brne	func_paraval_wait		; No - branch
@@ -572,12 +572,12 @@ func_paraval_wait:
 	rjmp	func_paraval_cont_wait	; No - branch
 
 func_paraval_store:
-	rcall store_new_value_in_ram	; Yes - store new value in RAM
+	xcall store_new_value_in_ram	; Yes - store new value in RAM
 	cli						; Disable all interrupts
-	rcall store_all_in_eeprom	; Store all values in EEPROM
-	rcall success_beep			; Beep success
+	xcall store_all_in_eeprom	; Store all values in EEPROM
+	xcall success_beep			; Beep success
 	Enable_Watchdog XH			; Generate hardware reset from watchdog
-	rcall wait1s
+	xcall wait1s
 
 func_paraval_cont_wait:
 	dec	Temp5
@@ -591,7 +591,7 @@ func_paraval_cont_wait:
 	rjmp	func_paraval			; No - go back
 
 paraval_next:					
-	rcall wait1s
+	xcall wait1s
 	lds	XH, Tx_Pgm_Paraval_No	; Parameter value no
 	inc	XH
 	sts	Tx_Pgm_Paraval_No, XH
@@ -631,8 +631,8 @@ paraval_next:
 	rjmp	beep_no_entry			; No - go back
 
 function_next:					; Yes - Next function value
-	rcall wait1s
-	rcall wait1s
+	xcall wait1s
+	xcall wait1s
 	lds	XH, Tx_Pgm_Func_No		; Function value no
 	inc	XH
 	sts	Tx_Pgm_Func_No, XH
@@ -652,9 +652,9 @@ function_next:					; Yes - Next function value
 	rjmp	paraval_no_entry		; No - go back
 
 program_by_tx_exit:
-	rcall set_default_parameters	; Load all defaults
+	xcall set_default_parameters	; Load all defaults
 	cli						; Disable all interrupts
-	rcall store_all_in_eeprom	; Erase flash and program
+	xcall store_all_in_eeprom	; Erase flash and program
 	Enable_Watchdog XH			; Generate hardware reset from watchdog
-	rcall wait1s
+	xcall wait1s
 

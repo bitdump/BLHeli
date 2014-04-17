@@ -110,6 +110,9 @@
 ;
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file);
+;#define BLUESERIES_12A_MAIN
+;#define BLUESERIES_12A_TAIL
+;#define BLUESERIES_12A_MULTI
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
 ;#define BLUESERIES_20A_MULTI
@@ -164,11 +167,44 @@
 ;#define SUNRISE_HIMULTI_40A_MAIN		; Inverted input
 ;#define SUNRISE_HIMULTI_40A_TAIL
 ;#define SUNRISE_HIMULTI_40A_MULTI
+;#define RCTIMER_40A_MAIN			
+;#define RCTIMER_40A_TAIL
+;#define RCTIMER_40A_MULTI
+;#define RCTIMER_NFS_30A_MAIN			; ICP1 as input		
+;#define RCTIMER_NFS_30A_TAIL
+;#define RCTIMER_NFS_30A_MULTI
+;#define YEP_7A_MAIN					
+;#define YEP_7A_TAIL
+;#define YEP_7A_MULTI
+;#define AFRO_12A_MAIN				; ICP1 as input		
+;#define AFRO_12A_TAIL
+;#define AFRO_12A_MULTI
+;#define AFRO_20A_MAIN				; ICP1 as input		
+;#define AFRO_20A_TAIL
+;#define AFRO_20A_MULTI
+;#define AFRO_30A_MAIN				; ICP1 as input		
+;#define AFRO_30A_TAIL
+;#define AFRO_30A_MULTI
 
 
 
 ;**** **** **** **** ****
 ; ESC selection statements
+#if defined(BLUESERIES_12A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "BlueSeries_12A.inc"		; Select BlueSeries 12A pinout
+#endif
+
+#if defined(BLUESERIES_12A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "BlueSeries_12A.inc"		; Select BlueSeries 12A pinout
+#endif
+
+#if defined(BLUESERIES_12A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "BlueSeries_12A.inc"		; Select BlueSeries 12A pinout
+#endif
+
 #if defined(BLUESERIES_20A_MAIN)
 .EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
 .INCLUDE "BlueSeries_20A.inc"		; Select BlueSeries 20A pinout
@@ -437,6 +473,96 @@
 #if defined(SUNRISE_HIMULTI_40A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "Sunrise_HiMulti_40A.inc"	; Select Sunrise HiMulti 40A pinout
+#endif
+
+#if defined(RCTIMER_40A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "RCTimer_40A.inc"		; Select RCTimer 40A pinout
+#endif
+
+#if defined(RCTIMER_40A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "RCTimer_40A.inc"		; Select RCTimer 40A pinout
+#endif
+
+#if defined(RCTIMER_40A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "RCTimer_40A.inc"		; Select RCTimer 40A pinout
+#endif
+
+#if defined(RCTIMER_NFS_30A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "RCTimer_NFS_30A.inc"	; Select RCTimer NFS 30A pinout
+#endif
+
+#if defined(RCTIMER_NFS_30A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "RCTimer_NFS_30A.inc"	; Select RCTimer NFS 30A pinout
+#endif
+
+#if defined(RCTIMER_NFS_30A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "RCTimer_NFS_30A.inc"	; Select RCTimer NFS 30A pinout
+#endif
+
+#if defined(YEP_7A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "YEP_7A.inc"			; Select YEP 7A pinout
+#endif
+
+#if defined(YEP_7A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "YEP_7A.inc"			; Select YEP 7A pinout
+#endif
+
+#if defined(YEP_7A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "YEP_7A.inc"			; Select YEP 7A pinout
+#endif
+
+#if defined(AFRO_12A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "AFRO_12A.inc"			; Select AFRO 12A pinout
+#endif
+
+#if defined(AFRO_12A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "AFRO_12A.inc"			; Select AFRO 12A pinout
+#endif
+
+#if defined(AFRO_12A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "AFRO_12A.inc"			; Select AFRO 12A pinout
+#endif
+
+#if defined(AFRO_20A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "AFRO_20A.inc"			; Select AFRO 20A pinout
+#endif
+
+#if defined(AFRO_20A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "AFRO_20A.inc"			; Select AFRO 20A pinout
+#endif
+
+#if defined(AFRO_20A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "AFRO_20A.inc"			; Select AFRO 20A pinout
+#endif
+
+#if defined(AFRO_30A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "AFRO_30A.inc"			; Select AFRO 30A pinout
+#endif
+
+#if defined(AFRO_30A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "AFRO_30A.inc"			; Select AFRO 30A pinout
+#endif
+
+#if defined(AFRO_30A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "AFRO_30A.inc"			; Select AFRO 30A pinout
 #endif
 
 
@@ -2647,7 +2773,7 @@ governor_activate_50k:
 	lsr	Temp4
 	ror	Temp3					; 50k eRPM range here
 governor_activate_range_set:
-	rcall div_u16_by_u16
+	xcall div_u16_by_u16
 	; Store governor target
 	sts	Gov_Target_L, Temp1
 	sts	Gov_Target_H, Temp2
@@ -2806,7 +2932,7 @@ calc_governor_prop_correction:
 	lds	Temp2, Gov_Proportional_H
 	rol	Temp2
 	; Apply gain
-	rcall mult_s16_by_u8_div_16
+	xcall mult_s16_by_u8_div_16
 	; Check error and limit (to low byte)
 	tst	Temp2
 	brpl	governor_check_prop_corr_limit_pos	; Check sign bit
@@ -2883,7 +3009,7 @@ calc_governor_int_correction:
 	lds	Temp1, Gov_Integral_H
 	lds	Temp2, Gov_Integral_X
 	; Apply gain
-	rcall mult_s16_by_u8_div_16
+	xcall mult_s16_by_u8_div_16
 	; Check integral and limit
 	tst	Temp2
 	brpl	governor_check_int_corr_limit_pos	; Check sign bit
@@ -2964,11 +3090,11 @@ measure_lipo_cells:
 .ENDIF
 measure_lipo_start:
 	; Set commutation to BpFET on
-	rcall comm5comm6			
+	xcall comm5comm6			
 	; Start adc
 	Start_Adc XH
 	; Wait for ADC reference to settle, and then start again
-	rcall wait1ms
+	xcall wait1ms
 	Start_Adc XH
 	; Wait for ADC conversion to complete
 measure_lipo_wait_adc:
@@ -2980,7 +3106,7 @@ measure_lipo_wait_adc:
 	; Stop ADC
 	Stop_Adc XH
 	; Switch power off
-	rcall switch_power_off		
+	xcall switch_power_off		
 	; Set limit step
 	ldi	Temp3, ADC_LIMIT_L
 	sts	Lipo_Adc_Limit_L, Temp3
@@ -3373,7 +3499,7 @@ wait_advance_timing_wait:
 	sbrc	Flags0, OC1A_PENDING 
 	rjmp	wait_advance_timing_wait
 
-	rcall setup_zc_scan_wait		; Setup wait time
+	xcall setup_zc_scan_wait		; Setup wait time
 	dec	Temp8
 	brne	wait_advance_timing_wait
 
@@ -3739,7 +3865,7 @@ wait_for_comm:
 
 	; Wait a blind wait
 wait_for_comm_blind:
-	rcall setup_zc_scan_wait					; Setup a zero cross scan wait (7.5 deg)
+	xcall setup_zc_scan_wait					; Setup a zero cross scan wait (7.5 deg)
 wait_demag_default_zc:	
 	sbrc	Flags0, OC1A_PENDING 
 	rjmp	wait_demag_default_zc
@@ -3753,7 +3879,7 @@ wait_demag_default_zc:
 	All_nFETs_off XH
 
 wait_for_comm_setup:
-	rcall	setup_comm_wait				; Setup commutation wait
+	xcall	setup_comm_wait				; Setup commutation wait
 wait_for_comm_wait:
 	sbrc	Flags0, OC1A_PENDING 
 	rjmp	wait_for_comm_wait
@@ -4354,7 +4480,7 @@ decode_governor_gains:
 	adc	ZH, Zero
 	lpm	XH, Z
 	sts	Pgm_Gov_I_Gain_Decoded, XH	
-	rcall switch_power_off		; Reset Z register
+	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4377,7 +4503,7 @@ decode_throttle_rate:
 	adc	ZH, Zero
 	lpm	XH, Z
 	sts	Pgm_Throttle_Rate_Decoded, XH	
-	rcall switch_power_off		; Reset Z register
+	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4400,7 +4526,7 @@ decode_startup_power:
 	adc	ZH, Zero
 	lpm	XH, Z
 	sts	Pgm_Startup_Pwr_Decoded, XH	
-	rcall switch_power_off		; Reset Z register
+	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4423,7 +4549,7 @@ decode_demag_comp:
 	adc	ZH, Zero
 	lpm	XH, Z
 	sts	Pgm_Demag_Comp_Power_Decoded, XH	
-	rcall switch_power_off		; Reset Z register
+	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4536,7 +4662,7 @@ reset:
 	ldi	XH, low(RAMEND)
 	out 	SPL, XH
 	; Switch power off
-	rcall switch_power_off
+	xcall switch_power_off
 	; PortB initialization
 	ldi	XH, INIT_PB		
 	out	PORTB, XH
@@ -4569,28 +4695,28 @@ clear_ram:
 	dec	Temp1
 	brne	clear_ram
 	; Set default programmed parameters
-	rcall set_default_parameters
+	xcall set_default_parameters
 	; Read all programmed parameters
-	rcall read_all_eeprom_parameters
+	xcall read_all_eeprom_parameters
 	; Decode parameters
-	rcall decode_parameters
+	xcall decode_parameters
 	; Decode governor gains
-	rcall decode_governor_gains
+	xcall decode_governor_gains
 	; Decode throttle rate
-	rcall decode_throttle_rate
+	xcall decode_throttle_rate
 	; Decode startup power
-	rcall decode_startup_power
+	xcall decode_startup_power
 	; Decode demag compensation
-	rcall decode_demag_comp
+	xcall decode_demag_comp
 	; Set BEC voltage
-	rcall set_bec_voltage
+	xcall set_bec_voltage
 	; Find throttle gain from stored min and max settings
-	rcall find_throttle_gain
+	xcall find_throttle_gain
 	; Set beep strength
 	lds	Temp1, Pgm_Beep_Strength
 	sts	Beep_Strength, Temp1
 	; Switch power off
-	rcall switch_power_off
+	xcall switch_power_off
 	; Timer0: clk/8 for regular interrupts
 	ldi	XH, (1<<CS01)
 	Set_Timer0_CS0 XH
@@ -4602,34 +4728,34 @@ clear_ram:
 	Set_Timer2_CS2 XH
 	; Initializing beep
 	cli					; Disable interrupts explicitly
-	rcall wait200ms	
-	rcall beep_f1
-	rcall wait30ms
-	rcall beep_f2
-	rcall wait30ms
-	rcall beep_f3
-	rcall wait30ms
+	xcall wait200ms	
+	xcall beep_f1
+	xcall wait30ms
+	xcall beep_f2
+	xcall wait30ms
+	xcall beep_f3
+	xcall wait30ms
 	; Wait for receiver to initialize
-	rcall wait1s
-	rcall wait200ms
-	rcall wait200ms
-	rcall wait100ms
+	xcall wait1s
+	xcall wait200ms
+	xcall wait200ms
+	xcall wait100ms
 	; Initialize interrupts and registers
 	Initialize_Interrupts XH			; Set all interrupt enable bits
 	; Initialize comparator
 	Comp_Init XH					; Initialize comparator
 	; Initialize ADC
 	Initialize_Adc	XH				; Initialize ADC operation
-	rcall wait1ms
+	xcall wait1ms
 	sei							; Enable all interrupts
 
 	; Measure number of lipo cells
-	rcall Measure_Lipo_Cells			; Measure number of lipo cells
+	xcall Measure_Lipo_Cells			; Measure number of lipo cells
 	; Initialize RC pulse
 	Rcp_Int_Enable XH	 			; Enable interrupt
 	Rcp_Clear_Int_Flag XH			; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)		; Set first edge flag
-	rcall wait200ms
+	xcall wait200ms
 	; Set initial arm variable
 	ldi	XH, 1
 	sts	Initial_Arm, XH
@@ -4647,7 +4773,7 @@ measure_pwm_freq_loop:
 
 	ldi	Temp3, 5						; Reset number of pulses to measure
 
-	rcall wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
+	xcall wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	lds	XH, New_Rcp					; Load value
 	cpi	XH, RCP_VALIDATE				; Higher than validate level?
 	brcs	measure_pwm_freq_start			; No - start over
@@ -4669,11 +4795,11 @@ measure_pwm_freq_loop:
 	Rcp_Int_First XH					; Enable interrupt and set to first edge
 	Rcp_Clear_Int_Flag XH				; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)			; Set first edge flag
-	rcall wait100ms					; Wait for new RC pulse
+	xcall wait100ms					; Wait for new RC pulse
 
 	; Validate RC pulse
 validate_rcp_start:	
-	rcall wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
+	xcall wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
 	ldi	Temp1, RCP_VALIDATE				; Set validate level as default
 	mov	XH, Flags3					; Check pwm frequency flags
 	andi	XH, ((1<<RCP_PWM_FREQ_1KHZ)+(1<<RCP_PWM_FREQ_2KHZ)+(1<<RCP_PWM_FREQ_4KHZ)+(1<<RCP_PWM_FREQ_8KHZ)+(1<<RCP_PWM_FREQ_12KHZ))
@@ -4687,11 +4813,11 @@ validate_rcp_start:
 
 	; Beep arm sequence start signal
 	cli								; Disable all interrupts
-	rcall beep_f1						; Signal that RC pulse is ready
-	rcall beep_f1
-	rcall beep_f1
+	xcall beep_f1						; Signal that RC pulse is ready
+	xcall beep_f1
+	xcall beep_f1
 	sei								; Enable all interrupts
-	rcall wait200ms	
+	xcall wait200ms	
 
 	; Arming sequence start
 	sts	Gov_Arm_Target, Zero	; Clear governor arm target
@@ -4704,7 +4830,7 @@ arming_start:
 	rjmp	program_by_tx_checked	; Disable tx programming if bidirectional operation
 .ENDIF
 
-	rcall wait3ms
+	xcall wait3ms
 	lds	XH, Pgm_Enable_TX_Program; Start programming mode entry if enabled
 	cpi	XH, 1				; Is TX programming enabled?
 	brcc	arming_initial_arm_check	; Yes - proceed
@@ -4732,20 +4858,20 @@ arming_ppm_check:
 
 program_by_tx_entry_pwm:	
 	cli						; Disable all interrupts
-	rcall beep_f4
+	xcall beep_f4
 	sei						; Enable all interrupts
-	rcall wait100ms
+	xcall wait100ms
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, RCP_STOP			; Below stop?
 	brcc	program_by_tx_entry_pwm	; No - start over
 
 program_by_tx_entry_wait_pwm:	
 	cli						; Disable all interrupts
-	rcall beep_f1
-	rcall wait10ms
-	rcall beep_f1
+	xcall beep_f1
+	xcall wait10ms
+	xcall beep_f1
 	sei						; Enable all interrupts
-	rcall wait100ms
+	xcall wait100ms
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, RCP_MAX			; At or above max?
 	brcs	program_by_tx_entry_wait_pwm	; No - start over
@@ -4759,12 +4885,12 @@ throttle_high_cal_start:
 throttle_high_cal:			
 	sbr	Flags3, (1<<FULL_THROTTLE_RANGE)	; Set range to 1000-2020us
 	cli		
-	rcall find_throttle_gain		; Set throttle gain
+	xcall find_throttle_gain		; Set throttle gain
 	sei		
-	rcall wait100ms			; Wait for new throttle value
+	xcall wait100ms			; Wait for new throttle value
 	cli						; Disable interrupts (freeze New_Rcp value)
 	cbr	Flags3, (1<<FULL_THROTTLE_RANGE)	; Set programmed range
-	rcall find_throttle_gain		; Set throttle gain
+	xcall find_throttle_gain		; Set throttle gain
 	lds	Temp7, New_Rcp			; Store new RC pulse value
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, (RCP_MAX/2)		; Is RC pulse above midstick?
@@ -4772,9 +4898,9 @@ throttle_high_cal:
 	brcc	PC+2
 	rjmp	arm_target_updated		; No - branch
 
-	rcall wait1ms		
+	xcall wait1ms		
 	cli						; Disable all interrupts
-	rcall beep_f4
+	xcall beep_f4
 	sei						; Enable all interrupts
 	dec	Temp8				
 	brne	throttle_high_cal		; Continue to wait
@@ -4782,10 +4908,10 @@ throttle_high_cal:
 	mov	XH, Temp7				; Limit to max 250
 	subi	XH, 5				; Subtract about 2% and ensure that it is 250 or lower
 	sts	Pgm_Ppm_Max_Throttle, XH	; Store
-	rcall wait200ms				
+	xcall wait200ms				
 	cli					
-	rcall store_all_in_eeprom	
-	rcall success_beep
+	xcall store_all_in_eeprom	
+	xcall success_beep
 	sei					
 
 throttle_low_cal_start:
@@ -4794,23 +4920,23 @@ throttle_low_cal_start:
 throttle_low_cal:			
 	sbr	Flags3, (1<<FULL_THROTTLE_RANGE)	; Set range to 1000-2020us
 	cli		
-	rcall find_throttle_gain		; Set throttle gain
+	xcall find_throttle_gain		; Set throttle gain
 	sei		
-	rcall wait100ms
+	xcall wait100ms
 	cli						; Disable interrupts (freeze New_Rcp value)
 	cbr	Flags3, (1<<FULL_THROTTLE_RANGE)	; Set programmed range
-	rcall find_throttle_gain		; Set throttle gain
+	xcall find_throttle_gain		; Set throttle gain
 	lds	Temp7, New_Rcp			; Store new RC pulse value
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, (RCP_MAX/2)		; Below midstick?
 	sei						; Enable interrupts
 	brcc	throttle_low_cal_start	; No - start over
 
-	rcall wait1ms		
+	xcall wait1ms		
 	cli						; Disable all interrupts
-	rcall beep_f1
-	rcall wait10ms
-	rcall beep_f1
+	xcall beep_f1
+	xcall wait10ms
+	xcall beep_f1
 	sei						; Enable all interrupts
 	dec	Temp8				
 	brne	throttle_low_cal		; Continue to wait
@@ -4818,16 +4944,16 @@ throttle_low_cal:
 	mov	XH, Temp7			
 	subi	XH, 0xFB				; Add about 2% (subtract negative number)
 	sts	Pgm_Ppm_Min_Throttle, XH	; Store
-	rcall wait200ms				
+	xcall wait200ms				
 	cli					
-	rcall store_all_in_eeprom	
-	rcall success_beep_inverted
+	xcall store_all_in_eeprom	
+	xcall success_beep_inverted
 	sei					
 
 program_by_tx_entry_wait_ppm:	
-	rcall wait100ms
+	xcall wait100ms
 	cli					
-	rcall find_throttle_gain		; Set throttle gain
+	xcall find_throttle_gain		; Set throttle gain
 	sei
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, RCP_MAX			; At or above max?
@@ -4844,7 +4970,7 @@ program_by_tx_checked:
 	sts	Gov_Arm_Target, Temp1	; Yes - update arm target
 
 arm_target_updated:
-	rcall wait100ms			; Wait for new throttle value
+	xcall wait100ms			; Wait for new throttle value
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, RCP_STOP			; Below stop?
 	brcs	arm_end_beep			; Yes - proceed
@@ -4854,11 +4980,11 @@ arm_target_updated:
 arm_end_beep:
 	; Beep arm sequence end signal
 	cli						; Disable all interrupts
-	rcall beep_f4				; Signal that rcpulse is ready
-	rcall beep_f4
-	rcall beep_f4
+	xcall beep_f4				; Signal that rcpulse is ready
+	xcall beep_f4
+	xcall beep_f4
 	sei						; Enable all interrupts
-	rcall wait200ms
+	xcall wait200ms
 
 	; Clear initial arm variable
 	sts	Initial_Arm, Zero
@@ -4909,14 +5035,14 @@ beep_delay_set:
 	lds	XH, Pgm_Beacon_Strength
 	sts	Beep_Strength, XH
 	cli						; Disable all interrupts
-	rcall beep_f4				; Signal that there is no signal
+	xcall beep_f4				; Signal that there is no signal
 	sei						; Enable all interrupts
 	lds	XH, Pgm_Beep_Strength
 	sts	Beep_Strength, XH
-	rcall wait100ms				; Wait for new RC pulse to be measured
+	xcall wait100ms				; Wait for new RC pulse to be measured
 
 wait_for_power_on_no_beep:
-	rcall wait10ms
+	xcall wait10ms
 	lds	XH, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
 	tst	XH
 	brne	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
@@ -4938,7 +5064,7 @@ wait_for_power_on_ppm_not_missing:
 	breq	PC+2					; Do not wait if bidirectional operation
 .ENDIF
 
-	rcall wait100ms			; Wait to see if start pulse was only a glitch
+	xcall wait100ms			; Wait to see if start pulse was only a glitch
 
 	lds	XH, Rcp_Timeout_Cnt		; Load RC pulse timeout counter value
 	tst	XH
@@ -4954,7 +5080,7 @@ wait_for_power_on_ppm_not_missing:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 init_start:
 	cli
-	rcall switch_power_off
+	xcall switch_power_off
 	sts	Requested_Pwm, Zero		; Set requested pwm to zero
 	sts	Governor_Req_Pwm, Zero	; Set governor requested pwm to zero
 	sts	Current_Pwm, Zero		; Set current pwm to zero
@@ -4971,14 +5097,14 @@ init_start:
 	ldi	Flags0, 0				; Clear flags0
 	ldi	Flags1, 0				; Clear flags1
 	sts	Demag_Consecutive_Cnt, Zero
-	rcall initialize_all_timings	; Initialize timing
+	xcall initialize_all_timings	; Initialize timing
 	;**** **** **** **** ****
 	; Motor start beginning
 	;**** **** **** **** **** 
 	ldi	XH, TEMP_CHECK_RATE					; Make sure a temp reading is done
 	sts	Adc_Conversion_Cnt, XH
 	Set_Adc_Ip_Temp
-	rcall wait1ms
+	xcall wait1ms
 	Start_Adc XH
 read_initial_temp:
 	Get_Adc_Status XH
@@ -4992,7 +5118,7 @@ read_initial_temp:
 	ldi	Temp1, 0xFF						; No - set average temperature value to 255
 
 	sts	Current_Average_Temp_Adc, Temp1		; Set initial average temp ADC reading
-	rcall check_temp_voltage_and_limit_power
+	xcall check_temp_voltage_and_limit_power
 	ldi	XH, TEMP_CHECK_RATE					; Make sure a temp reading is done next time
 	sts	Adc_Conversion_Cnt, XH
 	Set_Adc_Ip_Temp
@@ -5000,13 +5126,13 @@ read_initial_temp:
 	lds	Temp7, Pgm_Pwm_Freq		; Store setting in Temp7
 	ldi	XH, 2				; Set nondamped low frequency pwm mode
 	sts	Pgm_Pwm_Freq, XH
-	rcall decode_parameters		; (Decode_parameters uses Temp1 and Temp8)
+	xcall decode_parameters		; (Decode_parameters uses Temp1 and Temp8)
 	sts	Pgm_Pwm_Freq, Temp7		; Restore settings
 	; Set max allowed power
 	cli						; Disable interrupts to avoid that Requested_Pwm is overwritten
 	ldi	XH, 0xFF				; Set pwm limit to max
 	sts	Pwm_Limit, XH
-	rcall set_startup_pwm
+	xcall set_startup_pwm
 	lds	XH, Requested_Pwm
 	sts	Pwm_Limit, XH
 	sts	Pwm_Limit_Spoolup, XH
@@ -5020,11 +5146,11 @@ read_initial_temp:
 	sbr	Flags1, (1<<MOTOR_SPINNING)	; Set motor spinning flag
 	sbr	Flags1, (1<<STARTUP_PHASE)	; Set startup phase flag
 	sts	Startup_Ok_Cnt, Zero		; Reset ok counter
-	rcall comm5comm6				; Initialize commutation
-	rcall comm6comm1				
-	rcall calc_next_comm_timing		; Set virtual commutation point
-	rcall initialize_all_timings		; Initialize timing
-	rcall calc_new_wait_times		; Calculate new wait times
+	xcall comm5comm6				; Initialize commutation
+	xcall comm6comm1				
+	xcall calc_next_comm_timing		; Set virtual commutation point
+	xcall initialize_all_timings		; Initialize timing
+	xcall calc_new_wait_times		; Calculate new wait times
 	rjmp	run1
 
 
@@ -5036,8 +5162,8 @@ read_initial_temp:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 damped_transition:
 	; Transition from nondamped to damped if applicable
-	rcall decode_parameters		; Set programmed parameters
-	rcall comm6comm1
+	xcall decode_parameters		; Set programmed parameters
+	xcall comm6comm1
 	sts	Adc_Conversion_Cnt, Zero	; Make sure a voltage reading is done next time
 	Set_Adc_Ip_Volt			; Set adc measurement to voltage
 
@@ -5045,92 +5171,92 @@ damped_transition:
 ; Out_cA changes from low to high
 run1:
 	Set_Comp_Phase_A XH			; Set comparator to phase A
-	rcall wait_for_comp_out_high	; Wait zero cross wait and wait for high
-	rcall evaluate_comparator_integrity	; Check whether comparator reading has been normal
-	rcall setup_comm_wait		; Setup wait time from zero cross to commutation
-	rcall calc_governor_target	; Calculate governor target
-	rcall wait_for_comm			; Wait from zero cross to commutation
-	rcall comm1comm2			; Commutate
-	rcall calc_next_comm_timing	; Calculate next timing and start advance timing wait
-	rcall wait_advance_timing	; Wait advance timing and start zero cross wait
-	rcall calc_new_wait_times
-	rcall wait_before_zc_scan	; Wait zero cross wait and start zero cross timeout
+	xcall wait_for_comp_out_high	; Wait zero cross wait and wait for high
+	xcall evaluate_comparator_integrity	; Check whether comparator reading has been normal
+	xcall setup_comm_wait		; Setup wait time from zero cross to commutation
+	xcall calc_governor_target	; Calculate governor target
+	xcall wait_for_comm			; Wait from zero cross to commutation
+	xcall comm1comm2			; Commutate
+	xcall calc_next_comm_timing	; Calculate next timing and start advance timing wait
+	xcall wait_advance_timing	; Wait advance timing and start zero cross wait
+	xcall calc_new_wait_times
+	xcall wait_before_zc_scan	; Wait zero cross wait and start zero cross timeout
 
 ; Run 2 = A(p-on) + C(n-pwm) - comparator B evaluated
 ; Out_cB changes from high to low
 run2:
 	Set_Comp_Phase_B XH			
-	rcall wait_for_comp_out_low
-	rcall evaluate_comparator_integrity
-	rcall setup_comm_wait	
-	rcall calc_governor_prop_error
-	rcall wait_for_comm
-	rcall comm2comm3
-	rcall calc_next_comm_timing
-	rcall wait_advance_timing
-	rcall calc_new_wait_times
-	rcall wait_before_zc_scan	
+	xcall wait_for_comp_out_low
+	xcall evaluate_comparator_integrity
+	xcall setup_comm_wait	
+	xcall calc_governor_prop_error
+	xcall wait_for_comm
+	xcall comm2comm3
+	xcall calc_next_comm_timing
+	xcall wait_advance_timing
+	xcall calc_new_wait_times
+	xcall wait_before_zc_scan	
 
 ; Run 3 = A(p-on) + B(n-pwm) - comparator C evaluated
 ; Out_cC changes from low to high
 run3:
 	Set_Comp_Phase_C XH		
-	rcall wait_for_comp_out_high
-	rcall evaluate_comparator_integrity
-	rcall setup_comm_wait	
-	rcall calc_governor_int_error
-	rcall wait_for_comm
-	rcall comm3comm4
-	rcall calc_next_comm_timing
-	rcall wait_advance_timing
-	rcall calc_new_wait_times
-	rcall wait_before_zc_scan	
+	xcall wait_for_comp_out_high
+	xcall evaluate_comparator_integrity
+	xcall setup_comm_wait	
+	xcall calc_governor_int_error
+	xcall wait_for_comm
+	xcall comm3comm4
+	xcall calc_next_comm_timing
+	xcall wait_advance_timing
+	xcall calc_new_wait_times
+	xcall wait_before_zc_scan	
 
 ; Run 4 = C(p-on) + B(n-pwm) - comparator A evaluated
 ; Out_cA changes from high to low
 run4:
 	Set_Comp_Phase_A XH		
-	rcall wait_for_comp_out_low
-	rcall evaluate_comparator_integrity
-	rcall setup_comm_wait	
-	rcall calc_governor_prop_correction
-	rcall wait_for_comm
-	rcall comm4comm5
-	rcall calc_next_comm_timing
-	rcall wait_advance_timing
-	rcall calc_new_wait_times
-	rcall wait_before_zc_scan	
+	xcall wait_for_comp_out_low
+	xcall evaluate_comparator_integrity
+	xcall setup_comm_wait	
+	xcall calc_governor_prop_correction
+	xcall wait_for_comm
+	xcall comm4comm5
+	xcall calc_next_comm_timing
+	xcall wait_advance_timing
+	xcall calc_new_wait_times
+	xcall wait_before_zc_scan	
 
 ; Run 5 = C(p-on) + A(n-pwm) - comparator B evaluated
 ; Out_cB changes from low to high
 run5:
 	Set_Comp_Phase_B XH			
-	rcall wait_for_comp_out_high
-	rcall evaluate_comparator_integrity
-	rcall setup_comm_wait	
-	rcall calc_governor_int_correction
-	rcall wait_for_comm
-	rcall comm5comm6
-	rcall calc_next_comm_timing
-	rcall wait_advance_timing
-	rcall calc_new_wait_times
-	rcall wait_before_zc_scan	
+	xcall wait_for_comp_out_high
+	xcall evaluate_comparator_integrity
+	xcall setup_comm_wait	
+	xcall calc_governor_int_correction
+	xcall wait_for_comm
+	xcall comm5comm6
+	xcall calc_next_comm_timing
+	xcall wait_advance_timing
+	xcall calc_new_wait_times
+	xcall wait_before_zc_scan	
 
 ; Run 6 = B(p-on) + A(n-pwm) - comparator C evaluated
 ; Out_cC changes from high to low
 run6:
 	Set_Comp_Phase_C XH			
-	rcall wait_for_comp_out_low
+	xcall wait_for_comp_out_low
 	Start_Adc XH
-	rcall evaluate_comparator_integrity
-	rcall setup_comm_wait	
-	rcall wait_for_comm
-	rcall comm6comm1
-	rcall calc_next_comm_timing
-	rcall wait_advance_timing
-	rcall calc_new_wait_times
-	rcall check_temp_voltage_and_limit_power
-	rcall wait_before_zc_scan	
+	xcall evaluate_comparator_integrity
+	xcall setup_comm_wait	
+	xcall wait_for_comm
+	xcall comm6comm1
+	xcall calc_next_comm_timing
+	xcall wait_advance_timing
+	xcall calc_new_wait_times
+	xcall check_temp_voltage_and_limit_power
+	xcall wait_before_zc_scan	
 
 	; Check if it is startup
 	sbrs	Flags1, STARTUP_PHASE
@@ -5260,11 +5386,11 @@ run6_check_speed:
 
 run_to_wait_for_power_on:	
 	cli
-	rcall switch_power_off
+	xcall switch_power_off
 	lds	Temp7, Pgm_Pwm_Freq			; Store setting in Temp7
 	ldi	XH, 2					; Set low pwm mode (in order to turn off damping)
 	sts	Pgm_Pwm_Freq, XH
-	rcall decode_parameters			; (Decode_parameters uses Temp1 and Temp8)
+	xcall decode_parameters			; (Decode_parameters uses Temp1 and Temp8)
 	sts	Pgm_Pwm_Freq, Temp7			; Restore settings
 	sts	Requested_Pwm, Zero			; Set requested pwm to zero
 	sts	Governor_Req_Pwm, Zero		; Set governor requested pwm to zero
@@ -5273,8 +5399,8 @@ run_to_wait_for_power_on:
 	sts	Pwm_Motor_Idle, Zero		; Set motor idle to zero
 	cbr	Flags1, (1<<MOTOR_SPINNING)	; Clear motor spinning flag
 	sei
-	rcall wait1ms					; Wait for pwm to be stopped
-	rcall switch_power_off
+	xcall wait1ms					; Wait for pwm to be stopped
+	xcall switch_power_off
 .IF MODE == 0	; Main
 	mov	XH, Flags3				; Check pwm frequency flags
 	andi	XH, ((1<<RCP_PWM_FREQ_1KHZ)+(1<<RCP_PWM_FREQ_2KHZ)+(1<<RCP_PWM_FREQ_4KHZ)+(1<<RCP_PWM_FREQ_8KHZ)+(1<<RCP_PWM_FREQ_12KHZ))
