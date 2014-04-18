@@ -2450,7 +2450,7 @@ beep_onoff:
 	brne	PC-1	
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	ldi	XH, 135		; 25µs off
+	ldi	XH, 135		; 25ï¿½s off
 	dec	XH			
 	brne	PC-1	
 	dec	Temp2
@@ -3577,14 +3577,14 @@ adjust_timing:
 	sbrc	XH, 0				; If an odd number - branch
 	rjmp	adjust_timing_two_steps
 
-	add	Temp1, Temp5			; Add 7.5° and store in Temp1/2
+	add	Temp1, Temp5			; Add 7.5ï¿½ and store in Temp1/2
 	adc	Temp2, Temp6
-	mov	Temp3, Temp5			; Store 7.5° in Temp3/4
+	mov	Temp3, Temp5			; Store 7.5ï¿½ in Temp3/4
 	mov	Temp4, Temp6
 	rjmp	store_times_up_or_down
 
 adjust_timing_two_steps:
-	lsl	Temp1				; Add 15° and store in Temp1/2
+	lsl	Temp1				; Add 15ï¿½ and store in Temp1/2
 	rol	Temp2
 	ldi	Temp3, (COMM_TIME_MIN<<1); Store minimum time in Temp3/4
 	ldi	Temp4, 0
@@ -3595,20 +3595,20 @@ store_times_up_or_down:
 	brcs	store_times_decrease	; No - branch
 
 store_times_increase:
-	sts	Wt_Comm_L, Temp3		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	sts	Wt_Comm_L, Temp3		; Now commutation time (~60ï¿½) divided by 4 (~15ï¿½ nominal)
 	sts	Wt_Comm_H, Temp4
-	sts	Wt_Advance_L, Temp1		; New commutation advance time (~15° nominal)
+	sts	Wt_Advance_L, Temp1		; New commutation advance time (~15ï¿½ nominal)
 	sts	Wt_Advance_H, Temp2
-	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5ï¿½)
 	sts	Wt_Zc_Scan_H, Temp6
 	ret
 
 store_times_decrease:
-	sts	Wt_Comm_L, Temp1		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	sts	Wt_Comm_L, Temp1		; Now commutation time (~60ï¿½) divided by 4 (~15ï¿½ nominal)
 	sts	Wt_Comm_H, Temp2
-	sts	Wt_Advance_L, Temp3		; New commutation advance time (~15° nominal)
+	sts	Wt_Advance_L, Temp3		; New commutation advance time (~15ï¿½ nominal)
 	sts	Wt_Advance_H, Temp4
-	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5ï¿½)
 	sts	Wt_Zc_Scan_H, Temp6
 	ret
 
@@ -4641,8 +4641,8 @@ reset:
 	ldi	ZH, 0x00
 	Prepare_Lock_Or_Fuse_Read XH
 	lpm	XH, Z
-	cpi	XH, 0xFF
-	brne	reset			; If lock bits byte is not 0xFF, then loop here
+	andi	XH, 0x0F		; check for BLB02 BLB01 LB2 LB1 only
+	breq	reset			; If lock bits byte is not 0x0F, then loop here
 
 	; Check fuse high bits
 	ldi	ZL, 0x03
