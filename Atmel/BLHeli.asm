@@ -4641,8 +4641,8 @@ reset:
 	ldi	ZH, 0x00
 	Prepare_Lock_Or_Fuse_Read XH
 	lpm	XH, Z
-	cpi	XH, 0xFF
-	brne	reset			; If lock bits byte is not 0xFF, then loop here
+	andi	XH, 0x0F			; Check only for BLB02 BLB01 LB2 LB1
+	breq	reset			; If lock bits byte is not 0x0F, then loop here
 
 	; Check fuse high bits
 	ldi	ZL, 0x03
