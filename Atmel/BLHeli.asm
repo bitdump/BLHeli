@@ -115,7 +115,7 @@
 ;#define BLUESERIES_12A_MULTI
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI
+;#define BLUESERIES_20A_MULTI 
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI
@@ -155,6 +155,9 @@
 ;#define MULTISTAR_45A_MAIN			; Inverted input
 ;#define MULTISTAR_45A_TAIL
 ;#define MULTISTAR_45A_MULTI
+;#define MYSTERY_12A_MAIN			
+;#define MYSTERY_12A_TAIL
+;#define MYSTERY_12A_MULTI 
 ;#define MYSTERY_30A_MAIN			
 ;#define MYSTERY_30A_TAIL
 ;#define MYSTERY_30A_MULTI
@@ -413,6 +416,21 @@
 #if defined(MULTISTAR_45A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "Multistar_45A.inc"		; Select Multistar 45A pinout
+#endif
+
+#if defined(MYSTERY_12A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Mystery_12A.inc"		; Select Mystery 12A pinout
+#endif
+
+#if defined(MYSTERY_12A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Mystery_12A.inc"		; Select Mystery 12A pinout
+#endif
+
+#if defined(MYSTERY_12A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Mystery_12A.inc"		; Select Mystery 12A pinout
 #endif
 
 #if defined(MYSTERY_30A_MAIN)
@@ -3620,14 +3638,14 @@ store_times_decrease:
 ; No assumptions
 ;
 ; Waits for the zero cross scan wait time to elapse
-; Also sets up timer 3 to wait the zero cross scan timeout time
+; Also sets up timer 3 for the zero cross scan timeout time
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_before_zc_scan:	
 	sbrc	Flags0, OC1A_PENDING 
 	rjmp	wait_before_zc_scan
 
-	lds	Temp3, Comm_Period4x_L	; Set wait to zero comm period 4x value
+	lds	Temp3, Comm_Period4x_L	; Set timeout to zero comm period 4x value
 	lds	Temp4, Comm_Period4x_H
 	cli					; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp1
@@ -3852,7 +3870,7 @@ wait_for_comm:
 
 	; Check if a demag situation has occurred
 	sbrs	Flags0, DEMAG_DETECTED				; Demag detected?
-	rjmp	wait_for_comm_wait
+	rjmp	wait_for_comm_wait					; No - branch
 
 	; Load programmed demag compensation
 	lds	Temp3, Pgm_Demag_Comp_Power_Decoded	; Yes - load programmed demag compensation power decoded
@@ -4421,7 +4439,7 @@ decode_damping_done:
 	cbr	Flags1, (1<<CURR_PWMOFF_DAMPED)	; Set non damped status as start
 	tst	XH
 	breq	PC+2
-	sbr	Flags1, (1<<CURR_PWMOFF_DAMPED)	; Set non damped status as start if damped
+	sbr	Flags1, (1<<CURR_PWMOFF_DAMPED)	; Set damped status as start if damped
 	sbr	Flags1, (1<<CURR_PWMOFF_COMP_ABLE)	; Set comparator usable status
 	tst	XH
 	breq	PC+2
