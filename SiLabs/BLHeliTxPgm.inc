@@ -74,7 +74,7 @@ read_eeprom_store_defaults:
 
 read_eeprom_read:
 	; Read eeprom
-IF MODE == 0 OR MODE == 2	
+IF MODE == 0 OR MODE == 2  	;Main or multi
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
 ENDIF
 IF MODE == 1				; Tail
@@ -86,16 +86,16 @@ read_eeprom_block1:
 	call read_eeprom_byte
 	inc	DPTR				
 	inc	Temp1			
-djnz	Temp4, read_eeprom_block1
+	djnz	Temp4, read_eeprom_block1
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #19
+	mov	Temp4, #21	; 21 parameters 
 read_eeprom_block2:
 	call read_eeprom_byte
 	inc	DPTR				
 	inc	Temp1		
-djnz	Temp4, read_eeprom_block2
+	djnz	Temp4, read_eeprom_block2
 
 	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
 
@@ -128,7 +128,7 @@ erase_and_store_all_in_eeprom:
 	call write_eeprom_byte_from_acc
 
 	; Write eeprom
-IF MODE == 0 OR MODE == 2	
+IF MODE == 0 OR MODE == 2	;Main or multi
 	mov	DPTR, #Eep_Pgm_Gov_P_Gain
 ENDIF
 IF MODE == 1				; Tail
@@ -140,16 +140,16 @@ write_eeprom_block1:
 	call write_eeprom_byte
 	inc	DPTR						
 	inc	Temp1					
-djnz	Temp4, write_eeprom_block1
+	djnz	Temp4, write_eeprom_block1
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #19
+	mov	Temp4, #21	; 21 parameters 
 write_eeprom_block2:
 	call write_eeprom_byte
 	inc	DPTR						
 	inc	Temp1					
-djnz	Temp4, write_eeprom_block2
+	djnz	Temp4, write_eeprom_block2
 
 	call	write_tags
 	call write_eeprom_signature
@@ -425,7 +425,7 @@ store_tail_func_13:
 	cjne	Temp4, #13, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
 ENDIF
-IF MODE == 2
+IF MODE == 2 
 store_multi_func_1:
 	cjne	Temp4, #1, store_multi_func_2
 	mov	Temp2, #Pgm_Gov_P_Gain
@@ -699,7 +699,7 @@ IF MODE == 1
 	mov	A, Tx_Pgm_Func_No		
 	subb	A, #14				; Tail has 13 functions	
 ENDIF
-IF MODE == 2
+IF MODE == 2 
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
 	subb	A, #17				; Multi has 16 functions	

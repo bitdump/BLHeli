@@ -37,7 +37,7 @@ $NOMOD51
 ;
 ; The first lines of the software must be modified according to the chosen environment:
 ; Uncomment the selected ESC and main/tail/multi mode
-; BESC EQU "ESC"_"mode" 						
+; BESCNO EQU "ESC"_"mode" 						
 ; 
 ;**** **** **** **** ****
 ; Revision history:
@@ -175,6 +175,17 @@ $NOMOD51
 ;           Auto bailout functionality modified
 ;           Governor is deactivated for throttle inputs below 10%
 ;           Increased beacon delay times
+; - Rev12.0 Added programmable main spoolup time
+;           Added programmable temperature protection enable
+;           Bidirectional mode stop/start improved. Motor is now stopped before starting
+;           Power is limited for very low rpms (when BEMF is low), in order to avoid sync loss 
+;           Damped light mode is made more smooth and quiet, particularly at low and high rpms
+;           Comparator signal qualification scheme is changed
+;           Demag compensation scheme is significantly changed
+;           Increased jitter tolerance for PPM frequency measurement
+;           Fully damped mode removed, and damped light only supported on damped capable ESCs
+;           Default tail mode changed to damped light
+;           Miscellaneous other changes
 ;
 ;
 ;**** **** **** **** ****
@@ -312,1100 +323,1082 @@ Turnigy_KForce_120A_HV_Multi 		EQU 84
 Turnigy_KForce_120A_HV_v2_Main	EQU 85   
 Turnigy_KForce_120A_HV_v2_Tail 	EQU 86   
 Turnigy_KForce_120A_HV_v2_Multi 	EQU 87   
-Skywalker_12A_Main 				EQU 88
-Skywalker_12A_Tail 				EQU 89   
-Skywalker_12A_Multi 			EQU 90   
-Skywalker_20A_Main 				EQU 91
-Skywalker_20A_Tail 				EQU 92   
-Skywalker_20A_Multi 			EQU 93   
-Skywalker_40A_Main 				EQU 94
-Skywalker_40A_Tail 				EQU 95   
-Skywalker_40A_Multi 			EQU 96   
-HiModel_Cool_22A_Main 			EQU 97
-HiModel_Cool_22A_Tail 			EQU 98   
-HiModel_Cool_22A_Multi 			EQU 99   
-HiModel_Cool_33A_Main 			EQU 100
-HiModel_Cool_33A_Tail 			EQU 101   
-HiModel_Cool_33A_Multi 			EQU 102  
-HiModel_Cool_41A_Main 			EQU 103
-HiModel_Cool_41A_Tail 			EQU 104  
-HiModel_Cool_41A_Multi 			EQU 105  
-RCTimer_6A_Main 				EQU 106   
-RCTimer_6A_Tail 				EQU 107  
-RCTimer_6A_Multi 				EQU 108  
-Align_RCE_BL15X_Main			EQU 109   
-Align_RCE_BL15X_Tail 			EQU 110  
-Align_RCE_BL15X_Multi 			EQU 111  
-Align_RCE_BL15P_Main			EQU 112  
-Align_RCE_BL15P_Tail 			EQU 113  
-Align_RCE_BL15P_Multi 			EQU 114  
-Align_RCE_BL35X_Main			EQU 115  
-Align_RCE_BL35X_Tail 			EQU 116  
-Align_RCE_BL35X_Multi 			EQU 117  
-Align_RCE_BL35P_Main			EQU 118   
-Align_RCE_BL35P_Tail 			EQU 119  
-Align_RCE_BL35P_Multi 			EQU 120  
-Gaui_GE_183_18A_Main			EQU 121   
-Gaui_GE_183_18A_Tail 			EQU 122  
-Gaui_GE_183_18A_Multi 			EQU 123  
-H_King_10A_Main				EQU 124   
-H_King_10A_Tail 				EQU 125  
-H_King_10A_Multi 				EQU 126  
-H_King_20A_Main				EQU 127   
-H_King_20A_Tail 				EQU 128  
-H_King_20A_Multi 				EQU 129  
-H_King_35A_Main				EQU 130   
-H_King_35A_Tail 				EQU 131 
-H_King_35A_Multi 				EQU 132  
-H_King_50A_Main				EQU 133   
-H_King_50A_Tail 				EQU 134  
-H_King_50A_Multi 				EQU 135  
-Polaris_Thunder_12A_Main			EQU 136   
-Polaris_Thunder_12A_Tail 		EQU 137  
-Polaris_Thunder_12A_Multi 		EQU 138  
-Polaris_Thunder_20A_Main			EQU 139   
-Polaris_Thunder_20A_Tail 		EQU 140  
-Polaris_Thunder_20A_Multi 		EQU 141  
-Polaris_Thunder_30A_Main			EQU 142   
-Polaris_Thunder_30A_Tail 		EQU 143  
-Polaris_Thunder_30A_Multi 		EQU 144  
-Polaris_Thunder_40A_Main			EQU 145   
-Polaris_Thunder_40A_Tail 		EQU 146  
-Polaris_Thunder_40A_Multi 		EQU 147  
-Polaris_Thunder_60A_Main			EQU 148   
-Polaris_Thunder_60A_Tail 		EQU 149  
-Polaris_Thunder_60A_Multi 		EQU 150  
-Polaris_Thunder_80A_Main			EQU 151   
-Polaris_Thunder_80A_Tail 		EQU 152  
-Polaris_Thunder_80A_Multi 		EQU 153  
-Polaris_Thunder_100A_Main		EQU 154   
-Polaris_Thunder_100A_Tail 		EQU 155  
-Polaris_Thunder_100A_Multi 		EQU 156  
-Platinum_Pro_30A_Main			EQU 157   
-Platinum_Pro_30A_Tail 			EQU 158  
-Platinum_Pro_30A_Multi 			EQU 159  
-EAZY_3Av2_Main					EQU 160   
-EAZY_3Av2_Tail 				EQU 161  
-EAZY_3Av2_Multi 				EQU 162  
-Tarot_30A_Main					EQU 163   
-Tarot_30A_Tail 				EQU 164  
-Tarot_30A_Multi 				EQU 165  
-SkyIII_30A_Main				EQU 166   
-SkyIII_30A_Tail 				EQU 167  
-SkyIII_30A_Multi 				EQU 168  
+Skywalker_20A_Main 				EQU 88
+Skywalker_20A_Tail 				EQU 89   
+Skywalker_20A_Multi 			EQU 90   
+Skywalker_40A_Main 				EQU 91
+Skywalker_40A_Tail 				EQU 92   
+Skywalker_40A_Multi 			EQU 93   
+HiModel_Cool_22A_Main 			EQU 94
+HiModel_Cool_22A_Tail 			EQU 95   
+HiModel_Cool_22A_Multi 			EQU 96   
+HiModel_Cool_33A_Main 			EQU 97
+HiModel_Cool_33A_Tail 			EQU 98   
+HiModel_Cool_33A_Multi 			EQU 99  
+HiModel_Cool_41A_Main 			EQU 100
+HiModel_Cool_41A_Tail 			EQU 101  
+HiModel_Cool_41A_Multi 			EQU 102  
+RCTimer_6A_Main 				EQU 103   
+RCTimer_6A_Tail 				EQU 104  
+RCTimer_6A_Multi 				EQU 105  
+Align_RCE_BL15X_Main			EQU 106   
+Align_RCE_BL15X_Tail 			EQU 107  
+Align_RCE_BL15X_Multi 			EQU 108  
+Align_RCE_BL15P_Main			EQU 109  
+Align_RCE_BL15P_Tail 			EQU 110  
+Align_RCE_BL15P_Multi 			EQU 111  
+Align_RCE_BL35X_Main			EQU 112  
+Align_RCE_BL35X_Tail 			EQU 113  
+Align_RCE_BL35X_Multi 			EQU 114  
+Align_RCE_BL35P_Main			EQU 115   
+Align_RCE_BL35P_Tail 			EQU 116  
+Align_RCE_BL35P_Multi 			EQU 117  
+Gaui_GE_183_18A_Main			EQU 118   
+Gaui_GE_183_18A_Tail 			EQU 119  
+Gaui_GE_183_18A_Multi 			EQU 120  
+H_King_10A_Main				EQU 121   
+H_King_10A_Tail 				EQU 122  
+H_King_10A_Multi 				EQU 123  
+H_King_20A_Main				EQU 124   
+H_King_20A_Tail 				EQU 125  
+H_King_20A_Multi 				EQU 126  
+H_King_35A_Main				EQU 127   
+H_King_35A_Tail 				EQU 128 
+H_King_35A_Multi 				EQU 129  
+H_King_50A_Main				EQU 130   
+H_King_50A_Tail 				EQU 131  
+H_King_50A_Multi 				EQU 132  
+Polaris_Thunder_12A_Main			EQU 133   
+Polaris_Thunder_12A_Tail 		EQU 134  
+Polaris_Thunder_12A_Multi 		EQU 135  
+Polaris_Thunder_20A_Main			EQU 136   
+Polaris_Thunder_20A_Tail 		EQU 137  
+Polaris_Thunder_20A_Multi 		EQU 138  
+Polaris_Thunder_30A_Main			EQU 139   
+Polaris_Thunder_30A_Tail 		EQU 140  
+Polaris_Thunder_30A_Multi 		EQU 141  
+Polaris_Thunder_40A_Main			EQU 142   
+Polaris_Thunder_40A_Tail 		EQU 143  
+Polaris_Thunder_40A_Multi 		EQU 144  
+Polaris_Thunder_60A_Main			EQU 145   
+Polaris_Thunder_60A_Tail 		EQU 146  
+Polaris_Thunder_60A_Multi 		EQU 147  
+Polaris_Thunder_80A_Main			EQU 148   
+Polaris_Thunder_80A_Tail 		EQU 149  
+Polaris_Thunder_80A_Multi 		EQU 150  
+Polaris_Thunder_100A_Main		EQU 151   
+Polaris_Thunder_100A_Tail 		EQU 152  
+Polaris_Thunder_100A_Multi 		EQU 153  
+Platinum_Pro_30A_Main			EQU 154   
+Platinum_Pro_30A_Tail 			EQU 155  
+Platinum_Pro_30A_Multi 			EQU 156  
+EAZY_3Av2_Main					EQU 157   
+EAZY_3Av2_Tail 				EQU 158  
+EAZY_3Av2_Multi 				EQU 159  
+Tarot_30A_Main					EQU 160   
+Tarot_30A_Tail 				EQU 161  
+Tarot_30A_Multi 				EQU 162  
+SkyIII_30A_Main				EQU 163   
+SkyIII_30A_Tail 				EQU 164  
+SkyIII_30A_Multi 				EQU 165  
+
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
-;BESC EQU XP_3A_Main
-;BESC EQU XP_3A_Tail
-;BESC EQU XP_3A_Multi
-;BESC EQU XP_7A_Main
-;BESC EQU XP_7A_Tail
-;BESC EQU XP_7A_Multi
-;BESC EQU XP_7A_Fast_Main
-;BESC EQU XP_7A_Fast_Tail
-;BESC EQU XP_7A_Fast_Multi
-;BESC EQU XP_12A_Main
-;BESC EQU XP_12A_Tail 
-;BESC EQU XP_12A_Multi
-;BESC EQU XP_18A_Main 
-;BESC EQU XP_18A_Tail 
-;BESC EQU XP_18A_Multi
-;BESC EQU XP_25A_Main 
-;BESC EQU XP_25A_Tail 
-;BESC EQU XP_25A_Multi
-;BESC EQU XP_35A_SW_Main
-;BESC EQU XP_35A_SW_Tail 
-;BESC EQU XP_35A_SW_Multi
-;BESC EQU DP_3A_Main 						
-;BESC EQU DP_3A_Tail
-;BESC EQU DP_3A_Multi
-;BESC EQU Supermicro_3p5A_Main
-;BESC EQU Supermicro_3p5A_Tail
-;BESC EQU Supermicro_3p5A_Multi
-;BESC EQU Turnigy_Plush_6A_Main 
-;BESC EQU Turnigy_Plush_6A_Tail 
-;BESC EQU Turnigy_Plush_6A_Multi
-;BESC EQU Turnigy_Plush_10A_Main 
-;BESC EQU Turnigy_Plush_10A_Tail 
-;BESC EQU Turnigy_Plush_10A_Multi
-;BESC EQU Turnigy_Plush_12A_Main 
-;BESC EQU Turnigy_Plush_12A_Tail 
-;BESC EQU Turnigy_Plush_12A_Multi
-;BESC EQU Turnigy_Plush_18A_Main 
-;BESC EQU Turnigy_Plush_18A_Tail 
-;BESC EQU Turnigy_Plush_18A_Multi
-;BESC EQU Turnigy_Plush_25A_Main 
-;BESC EQU Turnigy_Plush_25A_Tail
-;BESC EQU Turnigy_Plush_25A_Multi
-;BESC EQU Turnigy_Plush_30A_Main 
-;BESC EQU Turnigy_Plush_30A_Tail 
-;BESC EQU Turnigy_Plush_30A_Multi
-;BESC EQU Turnigy_Plush_40A_Main  
-;BESC EQU Turnigy_Plush_40A_Tail 
-;BESC EQU Turnigy_Plush_40A_Multi
-;BESC EQU Turnigy_Plush_60A_Main
-;BESC EQU Turnigy_Plush_60A_Tail 
-;BESC EQU Turnigy_Plush_60A_Multi
-;BESC EQU Turnigy_Plush_80A_Main
-;BESC EQU Turnigy_Plush_80A_Tail 
-;BESC EQU Turnigy_Plush_80A_Multi
-;BESC EQU Turnigy_Plush_Nfet_18A_Main 
-;BESC EQU Turnigy_Plush_Nfet_18A_Tail 
-;BESC EQU Turnigy_Plush_Nfet_18A_Multi
-;BESC EQU Turnigy_Plush_Nfet_25A_Main 
-;BESC EQU Turnigy_Plush_Nfet_25A_Tail
-;BESC EQU Turnigy_Plush_Nfet_25A_Multi
-;BESC EQU Turnigy_Plush_Nfet_30A_Main  
-;BESC EQU Turnigy_Plush_Nfet_30A_Tail 
-;BESC EQU Turnigy_Plush_Nfet_30A_Multi
-;BESC EQU Turnigy_AE_20A_Main 
-;BESC EQU Turnigy_AE_20A_Tail 
-;BESC EQU Turnigy_AE_20A_Multi
-;BESC EQU Turnigy_AE_25A_Main 
-;BESC EQU Turnigy_AE_25A_Tail 
-;BESC EQU Turnigy_AE_25A_Multi
-;BESC EQU Turnigy_AE_30A_Main 
-;BESC EQU Turnigy_AE_30A_Tail 
-;BESC EQU Turnigy_AE_30A_Multi
-;BESC EQU Turnigy_AE_45A_Main
-;BESC EQU Turnigy_AE_45A_Tail 
-;BESC EQU Turnigy_AE_45A_Multi
-;BESC EQU Turnigy_KForce_40A_Main
-;BESC EQU Turnigy_KForce_40A_Tail 
-;BESC EQU Turnigy_KForce_40A_Multi
-;BESC EQU Turnigy_KForce_70A_HV_Main
-;BESC EQU Turnigy_KForce_70A_HV_Tail 
-;BESC EQU Turnigy_KForce_70A_HV_Multi
-;BESC EQU Turnigy_KForce_120A_HV_Main
-;BESC EQU Turnigy_KForce_120A_HV_Tail 
-;BESC EQU Turnigy_KForce_120A_HV_Multi
-;BESC EQU Turnigy_KForce_120A_HV_v2_Main
-;BESC EQU Turnigy_KForce_120A_HV_v2_Tail 
-;BESC EQU Turnigy_KForce_120A_HV_v2_Multi
-;BESC EQU Skywalker_12A_Main
-;BESC EQU Skywalker_12A_Tail 
-;BESC EQU Skywalker_12A_Multi
-;BESC EQU Skywalker_20A_Main
-;BESC EQU Skywalker_20A_Tail 
-;BESC EQU Skywalker_20A_Multi
-;BESC EQU Skywalker_40A_Main 
-;BESC EQU Skywalker_40A_Tail 
-;BESC EQU Skywalker_40A_Multi
-;BESC EQU HiModel_Cool_22A_Main
-;BESC EQU HiModel_Cool_22A_Tail
-;BESC EQU HiModel_Cool_22A_Multi
-;BESC EQU HiModel_Cool_33A_Main
-;BESC EQU HiModel_Cool_33A_Tail
-;BESC EQU HiModel_Cool_33A_Multi
-;BESC EQU HiModel_Cool_41A_Main
-;BESC EQU HiModel_Cool_41A_Tail
-;BESC EQU HiModel_Cool_41A_Multi
-;BESC EQU RCTimer_6A_Main
-;BESC EQU RCTimer_6A_Tail
-;BESC EQU RCTimer_6A_Multi
-;BESC EQU Align_RCE_BL15X_Main
-;BESC EQU Align_RCE_BL15X_Tail
-;BESC EQU Align_RCE_BL15X_Multi
-;BESC EQU Align_RCE_BL15P_Main
-;BESC EQU Align_RCE_BL15P_Tail
-;BESC EQU Align_RCE_BL15P_Multi
-;BESC EQU Align_RCE_BL35X_Main 
-;BESC EQU Align_RCE_BL35X_Tail
-;BESC EQU Align_RCE_BL35X_Multi
-;BESC EQU Align_RCE_BL35P_Main
-;BESC EQU Align_RCE_BL35P_Tail
-;BESC EQU Align_RCE_BL35P_Multi
-;BESC EQU Gaui_GE_183_18A_Main
-;BESC EQU Gaui_GE_183_18A_Tail
-;BESC EQU Gaui_GE_183_18A_Multi
-;BESC EQU H_King_10A_Main
-;BESC EQU H_King_10A_Tail
-;BESC EQU H_King_10A_Multi
-;BESC EQU H_King_20A_Main
-;BESC EQU H_King_20A_Tail
-;BESC EQU H_King_20A_Multi
-;BESC EQU H_King_35A_Main
-;BESC EQU H_King_35A_Tail
-;BESC EQU H_King_35A_Multi
-;BESC EQU H_King_50A_Main
-;BESC EQU H_King_50A_Tail
-;BESC EQU H_King_50A_Multi
-;BESC EQU Polaris_Thunder_12A_Main
-;BESC EQU Polaris_Thunder_12A_Tail
-;BESC EQU Polaris_Thunder_12A_Multi
-;BESC EQU Polaris_Thunder_20A_Main
-;BESC EQU Polaris_Thunder_20A_Tail
-;BESC EQU Polaris_Thunder_20A_Multi
-;BESC EQU Polaris_Thunder_30A_Main
-;BESC EQU Polaris_Thunder_30A_Tail
-;BESC EQU Polaris_Thunder_30A_Multi
-;BESC EQU Polaris_Thunder_40A_Main
-;BESC EQU Polaris_Thunder_40A_Tail
-;BESC EQU Polaris_Thunder_40A_Multi
-;BESC EQU Polaris_Thunder_60A_Main
-;BESC EQU Polaris_Thunder_60A_Tail
-;BESC EQU Polaris_Thunder_60A_Multi
-;BESC EQU Polaris_Thunder_80A_Main
-;BESC EQU Polaris_Thunder_80A_Tail
-;BESC EQU Polaris_Thunder_80A_Multi
-;BESC EQU Polaris_Thunder_100A_Main
-;BESC EQU Polaris_Thunder_100A_Tail
-;BESC EQU Polaris_Thunder_100A_Multi
-;BESC EQU Platinum_Pro_30A_Main
-;BESC EQU Platinum_Pro_30A_Tail
-;BESC EQU Platinum_Pro_30A_Multi
-;BESC EQU EAZY_3Av2_Main
-;BESC EQU EAZY_3Av2_Tail
-;BESC EQU EAZY_3Av2_Multi
-;BESC EQU Tarot_30A_Main
-;BESC EQU Tarot_30A_Tail
-;BESC EQU Tarot_30A_Multi
-;BESC EQU SkyIII_30A_Main
-;BESC EQU SkyIII_30A_Tail
-;BESC EQU SkyIII_30A_Multi
+;BESCNO EQU XP_3A_Main
+;BESCNO EQU XP_3A_Tail
+;BESCNO EQU XP_3A_Multi
+;BESCNO EQU XP_7A_Main
+;BESCNO EQU XP_7A_Tail
+;BESCNO EQU XP_7A_Multi
+;BESCNO EQU XP_7A_Fast_Main
+;BESCNO EQU XP_7A_Fast_Tail
+;BESCNO EQU XP_7A_Fast_Multi
+;BESCNO EQU XP_12A_Main
+;BESCNO EQU XP_12A_Tail 
+;BESCNO EQU XP_12A_Multi
+;BESCNO EQU XP_18A_Main 
+;BESCNO EQU XP_18A_Tail 
+;BESCNO EQU XP_18A_Multi
+;BESCNO EQU XP_25A_Main 
+;BESCNO EQU XP_25A_Tail 
+;BESCNO EQU XP_25A_Multi
+;BESCNO EQU XP_35A_SW_Main
+;BESCNO EQU XP_35A_SW_Tail 
+;BESCNO EQU XP_35A_SW_Multi
+;BESCNO EQU DP_3A_Main 						
+;BESCNO EQU DP_3A_Tail
+;BESCNO EQU DP_3A_Multi
+;BESCNO EQU Supermicro_3p5A_Main
+;BESCNO EQU Supermicro_3p5A_Tail
+;BESCNO EQU Supermicro_3p5A_Multi
+;BESCNO EQU Turnigy_Plush_6A_Main 
+;BESCNO EQU Turnigy_Plush_6A_Tail 
+;BESCNO EQU Turnigy_Plush_6A_Multi
+;BESCNO EQU Turnigy_Plush_10A_Main 
+;BESCNO EQU Turnigy_Plush_10A_Tail 
+;BESCNO EQU Turnigy_Plush_10A_Multi
+;BESCNO EQU Turnigy_Plush_12A_Main 
+;BESCNO EQU Turnigy_Plush_12A_Tail 
+;BESCNO EQU Turnigy_Plush_12A_Multi
+;BESCNO EQU Turnigy_Plush_18A_Main 
+;BESCNO EQU Turnigy_Plush_18A_Tail 
+;BESCNO EQU Turnigy_Plush_18A_Multi
+;BESCNO EQU Turnigy_Plush_25A_Main 
+;BESCNO EQU Turnigy_Plush_25A_Tail
+;BESCNO EQU Turnigy_Plush_25A_Multi
+;BESCNO EQU Turnigy_Plush_30A_Main 
+;BESCNO EQU Turnigy_Plush_30A_Tail 
+;BESCNO EQU Turnigy_Plush_30A_Multi
+;BESCNO EQU Turnigy_Plush_40A_Main  
+;BESCNO EQU Turnigy_Plush_40A_Tail 
+;BESCNO EQU Turnigy_Plush_40A_Multi
+;BESCNO EQU Turnigy_Plush_60A_Main
+;BESCNO EQU Turnigy_Plush_60A_Tail 
+;BESCNO EQU Turnigy_Plush_60A_Multi
+;BESCNO EQU Turnigy_Plush_80A_Main
+;BESCNO EQU Turnigy_Plush_80A_Tail 
+;BESCNO EQU Turnigy_Plush_80A_Multi
+;BESCNO EQU Turnigy_Plush_Nfet_18A_Main
+;BESCNO EQU Turnigy_Plush_Nfet_18A_Tail 
+;BESCNO EQU Turnigy_Plush_Nfet_18A_Multi
+;BESCNO EQU Turnigy_Plush_Nfet_25A_Main 
+;BESCNO EQU Turnigy_Plush_Nfet_25A_Tail
+;BESCNO EQU Turnigy_Plush_Nfet_25A_Multi
+;BESCNO EQU Turnigy_Plush_Nfet_30A_Main  
+;BESCNO EQU Turnigy_Plush_Nfet_30A_Tail 
+;BESCNO EQU Turnigy_Plush_Nfet_30A_Multi
+;BESCNO EQU Turnigy_AE_20A_Main 
+;BESCNO EQU Turnigy_AE_20A_Tail 
+;BESCNO EQU Turnigy_AE_20A_Multi
+;BESCNO EQU Turnigy_AE_25A_Main 
+;BESCNO EQU Turnigy_AE_25A_Tail 
+;BESCNO EQU Turnigy_AE_25A_Multi
+;BESCNO EQU Turnigy_AE_30A_Main 
+;BESCNO EQU Turnigy_AE_30A_Tail 
+;BESCNO EQU Turnigy_AE_30A_Multi
+;BESCNO EQU Turnigy_AE_45A_Main
+;BESCNO EQU Turnigy_AE_45A_Tail 
+;BESCNO EQU Turnigy_AE_45A_Multi
+;BESCNO EQU Turnigy_KForce_40A_Main
+;BESCNO EQU Turnigy_KForce_40A_Tail 
+;BESCNO EQU Turnigy_KForce_40A_Multi
+;BESCNO EQU Turnigy_KForce_70A_HV_Main
+;BESCNO EQU Turnigy_KForce_70A_HV_Tail 
+;BESCNO EQU Turnigy_KForce_70A_HV_Multi
+;BESCNO EQU Turnigy_KForce_120A_HV_Main
+;BESCNO EQU Turnigy_KForce_120A_HV_Tail 
+;BESCNO EQU Turnigy_KForce_120A_HV_Multi
+;BESCNO EQU Turnigy_KForce_120A_HV_v2_Main
+;BESCNO EQU Turnigy_KForce_120A_HV_v2_Tail 
+;BESCNO EQU Turnigy_KForce_120A_HV_v2_Multi
+;BESCNO EQU Skywalker_20A_Main
+;BESCNO EQU Skywalker_20A_Tail 
+;BESCNO EQU Skywalker_20A_Multi
+;BESCNO EQU Skywalker_40A_Main 
+;BESCNO EQU Skywalker_40A_Tail 
+;BESCNO EQU Skywalker_40A_Multi
+;BESCNO EQU HiModel_Cool_22A_Main
+;BESCNO EQU HiModel_Cool_22A_Tail
+;BESCNO EQU HiModel_Cool_22A_Multi
+;BESCNO EQU HiModel_Cool_33A_Main
+;BESCNO EQU HiModel_Cool_33A_Tail
+;BESCNO EQU HiModel_Cool_33A_Multi
+;BESCNO EQU HiModel_Cool_41A_Main
+;BESCNO EQU HiModel_Cool_41A_Tail
+;BESCNO EQU HiModel_Cool_41A_Multi
+;BESCNO EQU RCTimer_6A_Main
+;BESCNO EQU RCTimer_6A_Tail
+;BESCNO EQU RCTimer_6A_Multi
+;BESCNO EQU Align_RCE_BL15X_Main
+;BESCNO EQU Align_RCE_BL15X_Tail
+;BESCNO EQU Align_RCE_BL15X_Multi
+;BESCNO EQU Align_RCE_BL15P_Main
+;BESCNO EQU Align_RCE_BL15P_Tail
+;BESCNO EQU Align_RCE_BL15P_Multi
+;BESCNO EQU Align_RCE_BL35X_Main 
+;BESCNO EQU Align_RCE_BL35X_Tail
+;BESCNO EQU Align_RCE_BL35X_Multi
+;BESCNO EQU Align_RCE_BL35P_Main
+;BESCNO EQU Align_RCE_BL35P_Tail
+;BESCNO EQU Align_RCE_BL35P_Multi
+;BESCNO EQU Gaui_GE_183_18A_Main
+;BESCNO EQU Gaui_GE_183_18A_Tail
+;BESCNO EQU Gaui_GE_183_18A_Multi
+;BESCNO EQU H_King_10A_Main 
+;BESCNO EQU H_King_10A_Tail 
+;BESCNO EQU H_King_10A_Multi
+;BESCNO EQU H_King_20A_Main
+;BESCNO EQU H_King_20A_Tail
+;BESCNO EQU H_King_20A_Multi
+;BESCNO EQU H_King_35A_Main
+;BESCNO EQU H_King_35A_Tail
+;BESCNO EQU H_King_35A_Multi
+;BESCNO EQU H_King_50A_Main
+;BESCNO EQU H_King_50A_Tail
+;BESCNO EQU H_King_50A_Multi
+;BESCNO EQU Polaris_Thunder_12A_Main
+;BESCNO EQU Polaris_Thunder_12A_Tail
+;BESCNO EQU Polaris_Thunder_12A_Multi
+;BESCNO EQU Polaris_Thunder_20A_Main
+;BESCNO EQU Polaris_Thunder_20A_Tail
+;BESCNO EQU Polaris_Thunder_20A_Multi
+;BESCNO EQU Polaris_Thunder_30A_Main
+;BESCNO EQU Polaris_Thunder_30A_Tail
+;BESCNO EQU Polaris_Thunder_30A_Multi
+;BESCNO EQU Polaris_Thunder_40A_Main
+;BESCNO EQU Polaris_Thunder_40A_Tail
+;BESCNO EQU Polaris_Thunder_40A_Multi
+;BESCNO EQU Polaris_Thunder_60A_Main
+;BESCNO EQU Polaris_Thunder_60A_Tail
+;BESCNO EQU Polaris_Thunder_60A_Multi
+;BESCNO EQU Polaris_Thunder_80A_Main
+;BESCNO EQU Polaris_Thunder_80A_Tail
+;BESCNO EQU Polaris_Thunder_80A_Multi
+;BESCNO EQU Polaris_Thunder_100A_Main
+;BESCNO EQU Polaris_Thunder_100A_Tail
+;BESCNO EQU Polaris_Thunder_100A_Multi
+;BESCNO EQU Platinum_Pro_30A_Main
+;BESCNO EQU Platinum_Pro_30A_Tail
+;BESCNO EQU Platinum_Pro_30A_Multi 
+;BESCNO EQU EAZY_3Av2_Main
+;BESCNO EQU EAZY_3Av2_Tail
+;BESCNO EQU EAZY_3Av2_Multi
+;BESCNO EQU Tarot_30A_Main
+;BESCNO EQU Tarot_30A_Tail
+;BESCNO EQU Tarot_30A_Multi
+;BESCNO EQU SkyIII_30A_Main
+;BESCNO EQU SkyIII_30A_Tail
+;BESCNO EQU SkyIII_30A_Multi
+
 
 ;**** **** **** **** ****
 ; ESC selection statements
-IF BESC == XP_3A_Main
+IF BESCNO == XP_3A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_3A.inc)			; Select XP 3A pinout
 ENDIF
 
-IF BESC == XP_3A_Tail
+IF BESCNO == XP_3A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_3A.inc)			; Select XP 3A pinout
 ENDIF
 
-IF BESC == XP_3A_Multi
+IF BESCNO == XP_3A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_3A.inc)			; Select XP 3A pinout
 ENDIF
 
-IF BESC == XP_7A_Main
+IF BESCNO == XP_7A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_7A.inc)			; Select XP 7A pinout
 ENDIF
 
-IF BESC == XP_7A_Tail
+IF BESCNO == XP_7A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_7A.inc)			; Select XP 7A pinout
 ENDIF
 
-IF BESC == XP_7A_Multi
+IF BESCNO == XP_7A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_7A.inc)			; Select XP 7A pinout
 ENDIF
 
-IF BESC == XP_7A_Fast_Main
+IF BESCNO == XP_7A_Fast_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_7A_Fast.inc)		; Select XP 7A Fast pinout
 ENDIF
 
-IF BESC == XP_7A_Fast_Tail
+IF BESCNO == XP_7A_Fast_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_7A_Fast.inc)		; Select XP 7A Fast pinout
 ENDIF
 
-IF BESC == XP_7A_Fast_Multi
+IF BESCNO == XP_7A_Fast_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_7A_Fast.inc)		; Select XP 7A Fast pinout
 ENDIF
 
-IF BESC == XP_12A_Main
+IF BESCNO == XP_12A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_12A.inc)			; Select XP 12A pinout
 ENDIF
 
-IF BESC == XP_12A_Tail
+IF BESCNO == XP_12A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_12A.inc)			; Select XP 12A pinout
 ENDIF
 
-IF BESC == XP_12A_Multi
+IF BESCNO == XP_12A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_12A.inc)			; Select XP 12A pinout
 ENDIF
 
-IF BESC == XP_18A_Main
+IF BESCNO == XP_18A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_18A.inc)			; Select XP 18A pinout
 ENDIF
 
-IF BESC == XP_18A_Tail
+IF BESCNO == XP_18A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_18A.inc)			; Select XP 18A pinout
 ENDIF
 
-IF BESC == XP_18A_Multi
+IF BESCNO == XP_18A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_18A.inc)			; Select XP 18A pinout
 ENDIF
 
-IF BESC == XP_25A_Main
+IF BESCNO == XP_25A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_25A.inc)			; Select XP 25A pinout
 ENDIF
 
-IF BESC == XP_25A_Tail
+IF BESCNO == XP_25A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_25A.inc)			; Select XP 25A pinout
 ENDIF
 
-IF BESC == XP_25A_Multi
+IF BESCNO == XP_25A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_25A.inc)			; Select XP 25A pinout
 ENDIF
 
-IF BESC == XP_35A_SW_Main
+IF BESCNO == XP_35A_SW_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XP_35A_SW.inc)			; Select XP 35A SW pinout
 ENDIF
 
-IF BESC == XP_35A_SW_Tail
+IF BESCNO == XP_35A_SW_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (XP_35A_SW.inc)			; Select XP 35A SW pinout
 ENDIF
 
-IF BESC == XP_35A_SW_Multi
+IF BESCNO == XP_35A_SW_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XP_35A_SW.inc)			; Select XP 35A SW pinout
 ENDIF
 
-IF BESC == DP_3A_Main
+IF BESCNO == DP_3A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (DP_3A.inc)			; Select DP 3A pinout
 ENDIF
 
-IF BESC == DP_3A_Tail
+IF BESCNO == DP_3A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (DP_3A.inc)			; Select DP 3A pinout
 ENDIF
 
-IF BESC == DP_3A_Multi
+IF BESCNO == DP_3A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (DP_3A.inc)			; Select DP 3A pinout
 ENDIF
 
-IF BESC == Supermicro_3p5A_Main
+IF BESCNO == Supermicro_3p5A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Supermicro_3p5A.inc)	; Select Supermicro 3.5A pinout
 ENDIF
 
-IF BESC == Supermicro_3p5A_Tail
+IF BESCNO == Supermicro_3p5A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Supermicro_3p5A.inc)	; Select Supermicro 3.5A pinout
 ENDIF
 
-IF BESC == Supermicro_3p5A_Multi
+IF BESCNO == Supermicro_3p5A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Supermicro_3p5A.inc)	; Select Supermicro 3.5A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_6A_Main
+IF BESCNO == Turnigy_Plush_6A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_6A.inc)	; Select Turnigy Plush 6A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_6A_Tail
+IF BESCNO == Turnigy_Plush_6A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_6A.inc)	; Select Turnigy Plush 6A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_6A_Multi
+IF BESCNO == Turnigy_Plush_6A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_6A.inc)	; Select Turnigy Plush 6A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_10A_Main
+IF BESCNO == Turnigy_Plush_10A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_10A.inc)	; Select Turnigy Plush 10A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_10A_Tail
+IF BESCNO == Turnigy_Plush_10A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_10A.inc)	; Select Turnigy Plush 10A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_10A_Multi
+IF BESCNO == Turnigy_Plush_10A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_10A.inc)	; Select Turnigy Plush 10A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_12A_Main
+IF BESCNO == Turnigy_Plush_12A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_12A.inc)	; Select Turnigy Plush 12A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_12A_Tail
+IF BESCNO == Turnigy_Plush_12A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_12A.inc)	; Select Turnigy Plush 12A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_12A_Multi
+IF BESCNO == Turnigy_Plush_12A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_12A.inc)	; Select Turnigy Plush 12A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_18A_Main
+IF BESCNO == Turnigy_Plush_18A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_18A.inc)	; Select Turnigy Plush 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_18A_Tail
+IF BESCNO == Turnigy_Plush_18A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_18A.inc)	; Select Turnigy Plush 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_18A_Multi
+IF BESCNO == Turnigy_Plush_18A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_18A.inc)	; Select Turnigy Plush 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_25A_Main
+IF BESCNO == Turnigy_Plush_25A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_25A.inc)	; Select Turnigy Plush 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_25A_Tail
+IF BESCNO == Turnigy_Plush_25A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_25A.inc)	; Select Turnigy Plush 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_25A_Multi
+IF BESCNO == Turnigy_Plush_25A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_25A.inc)	; Select Turnigy Plush 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_30A_Main
+IF BESCNO == Turnigy_Plush_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_30A.inc)	; Select Turnigy Plush 30A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_30A_Tail
+IF BESCNO == Turnigy_Plush_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_30A.inc)	; Select Turnigy Plush 30A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_30A_Multi
+IF BESCNO == Turnigy_Plush_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_30A.inc)	; Select Turnigy Plush 30A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_40A_Main
+IF BESCNO == Turnigy_Plush_40A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_40A.inc)	; Select Turnigy Plush 40A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_40A_Tail
+IF BESCNO == Turnigy_Plush_40A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_40A.inc)	; Select Turnigy Plush 40A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_40A_Multi
+IF BESCNO == Turnigy_Plush_40A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_40A.inc)	; Select Turnigy Plush 40A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_60A_Main
+IF BESCNO == Turnigy_Plush_60A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_60A.inc)	; Select Turnigy Plush 60A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_60A_Tail
+IF BESCNO == Turnigy_Plush_60A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_60A.inc)	; Select Turnigy Plush 60A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_60A_Multi
+IF BESCNO == Turnigy_Plush_60A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_60A.inc)	; Select Turnigy Plush 60A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_80A_Main
+IF BESCNO == Turnigy_Plush_80A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_80A.inc)	; Select Turnigy Plush 80A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_80A_Tail
+IF BESCNO == Turnigy_Plush_80A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_80A.inc)	; Select Turnigy Plush 80A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_80A_Multi
+IF BESCNO == Turnigy_Plush_80A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_80A.inc)	; Select Turnigy Plush 80A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_18A_Main
+IF BESCNO == Turnigy_Plush_Nfet_18A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_Nfet_18A.inc)	; Select Turnigy Plush Nfet 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_18A_Tail
+IF BESCNO == Turnigy_Plush_Nfet_18A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_Nfet_18A.inc)	; Select Turnigy Plush Nfet 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_18A_Multi
+IF BESCNO == Turnigy_Plush_Nfet_18A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_Nfet_18A.inc)	; Select Turnigy Plush Nfet 18A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_25A_Main
+IF BESCNO == Turnigy_Plush_Nfet_25A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_Nfet_25A.inc)	; Select Turnigy Plush Nfet 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_25A_Tail
+IF BESCNO == Turnigy_Plush_Nfet_25A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_Nfet_25A.inc)	; Select Turnigy Plush Nfet 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_25A_Multi
+IF BESCNO == Turnigy_Plush_Nfet_25A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_Nfet_25A.inc)	; Select Turnigy Plush Nfet 25A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_30A_Main
+IF BESCNO == Turnigy_Plush_Nfet_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_Plush_Nfet_30A.inc)	; Select Turnigy Plush Nfet 30A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_30A_Tail
+IF BESCNO == Turnigy_Plush_Nfet_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_Plush_Nfet_30A.inc)	; Select Turnigy Plush Nfet 30A pinout
 ENDIF
 
-IF BESC == Turnigy_Plush_Nfet_30A_Multi
+IF BESCNO == Turnigy_Plush_Nfet_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_Plush_Nfet_30A.inc)	; Select Turnigy Plush Nfet 30A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_20A_Main
+IF BESCNO == Turnigy_AE_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_AE_20A.inc)		; Select Turnigy AE-20A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_20A_Tail
+IF BESCNO == Turnigy_AE_20A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_AE_20A.inc)		; Select Turnigy AE-20A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_20A_Multi
+IF BESCNO == Turnigy_AE_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_AE_20A.inc)		; Select Turnigy AE-20A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_25A_Main
+IF BESCNO == Turnigy_AE_25A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_AE_25A.inc)		; Select Turnigy AE-25A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_25A_Tail
+IF BESCNO == Turnigy_AE_25A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_AE_25A.inc)		; Select Turnigy AE-25A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_25A_Multi
+IF BESCNO == Turnigy_AE_25A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_AE_25A.inc)		; Select Turnigy AE-25A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_30A_Main
+IF BESCNO == Turnigy_AE_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_AE_30A.inc)		; Select Turnigy AE-30A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_30A_Tail
+IF BESCNO == Turnigy_AE_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_AE_30A.inc)		; Select Turnigy AE-30A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_30A_Multi
+IF BESCNO == Turnigy_AE_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_AE_30A.inc)		; Select Turnigy AE-30A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_45A_Main
+IF BESCNO == Turnigy_AE_45A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_AE_45A.inc)		; Select Turnigy AE-45A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_45A_Tail
+IF BESCNO == Turnigy_AE_45A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_AE_45A.inc)		; Select Turnigy AE-45A pinout
 ENDIF
 
-IF BESC == Turnigy_AE_45A_Multi
+IF BESCNO == Turnigy_AE_45A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_AE_45A.inc)		; Select Turnigy AE-45A pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_40A_Main
+IF BESCNO == Turnigy_KForce_40A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_KForce_40A.inc)	; Select Turnigy KForce 40A pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_40A_Tail
+IF BESCNO == Turnigy_KForce_40A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_KForce_40A.inc)	; Select Turnigy KForce 40A pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_40A_Multi
+IF BESCNO == Turnigy_KForce_40A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_KForce_40A.inc)	; Select Turnigy KForce 40A pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_70A_HV_Main
+IF BESCNO == Turnigy_KForce_70A_HV_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_KForce_70A_HV.inc)	; Select Turnigy KForce 70A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_70A_HV_Tail
+IF BESCNO == Turnigy_KForce_70A_HV_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_KForce_70A_HV.inc)	; Select Turnigy KForce 70A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_70A_HV_Multi
+IF BESCNO == Turnigy_KForce_70A_HV_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_KForce_70A_HV.inc)	; Select Turnigy KForce 70A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_Main
+IF BESCNO == Turnigy_KForce_120A_HV_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_KForce_120A_HV.inc)	; Select Turnigy KForce 120A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_Tail
+IF BESCNO == Turnigy_KForce_120A_HV_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_KForce_120A_HV.inc)	; Select Turnigy KForce 120A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_Multi
+IF BESCNO == Turnigy_KForce_120A_HV_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_KForce_120A_HV.inc)	; Select Turnigy KForce 120A HV pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_v2_Main
+IF BESCNO == Turnigy_KForce_120A_HV_v2_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_v2_Tail
+IF BESCNO == Turnigy_KForce_120A_HV_v2_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
 ENDIF
 
-IF BESC == Turnigy_KForce_120A_HV_v2_Multi
+IF BESCNO == Turnigy_KForce_120A_HV_v2_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Turnigy_KForce_120A_HV_v2.inc); Select Turnigy KForce 120A HV v2 pinout
 ENDIF
 
-IF BESC == Skywalker_12A_Main
-MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
-$include (Skywalker_12A.inc)		; Select Skywalker 12A pinout
-ENDIF
-
-IF BESC == Skywalker_12A_Tail
-MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
-$include (Skywalker_12A.inc)		; Select Skywalker 12A pinout
-ENDIF
-
-IF BESC == Skywalker_12A_Multi
-MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
-$include (Skywalker_12A.inc)		; Select Skywalker 12A pinout
-ENDIF
-
-IF BESC == Skywalker_20A_Main
+IF BESCNO == Skywalker_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Skywalker_20A.inc)		; Select Skywalker 20A pinout
 ENDIF
 
-IF BESC == Skywalker_20A_Tail
+IF BESCNO == Skywalker_20A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Skywalker_20A.inc)		; Select Skywalker 20A pinout
 ENDIF
 
-IF BESC == Skywalker_20A_Multi
+IF BESCNO == Skywalker_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Skywalker_20A.inc)		; Select Skywalker 20A pinout
 ENDIF
 
-IF BESC == Skywalker_40A_Main
+IF BESCNO == Skywalker_40A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Skywalker_40A.inc)		; Select Skywalker 40A pinout
 ENDIF
 
-IF BESC == Skywalker_40A_Tail
+IF BESCNO == Skywalker_40A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Skywalker_40A.inc)		; Select Skywalker 40A pinout
 ENDIF
 
-IF BESC == Skywalker_40A_Multi
+IF BESCNO == Skywalker_40A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Skywalker_40A.inc)		; Select Skywalker 40A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_22A_Main
+IF BESCNO == HiModel_Cool_22A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (HiModel_Cool_22A.inc)	; Select HiModel Cool 22A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_22A_Tail
+IF BESCNO == HiModel_Cool_22A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (HiModel_Cool_22A.inc)	; Select HiModel Cool 22A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_22A_Multi
+IF BESCNO == HiModel_Cool_22A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (HiModel_Cool_22A.inc)	; Select HiModel Cool 22A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_33A_Main
+IF BESCNO == HiModel_Cool_33A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_33A_Tail
+IF BESCNO == HiModel_Cool_33A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_33A_Multi
+IF BESCNO == HiModel_Cool_33A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (HiModel_Cool_33A.inc)	; Select HiModel Cool 33A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_41A_Main
+IF BESCNO == HiModel_Cool_41A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_41A_Tail
+IF BESCNO == HiModel_Cool_41A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
 ENDIF
 
-IF BESC == HiModel_Cool_41A_Multi
+IF BESCNO == HiModel_Cool_41A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (HiModel_Cool_41A.inc)	; Select HiModel Cool 41A pinout
 ENDIF
 
-IF BESC == RCTimer_6A_Main
+IF BESCNO == RCTimer_6A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (RCTimer_6A.inc)		; Select RC Timer 6A pinout
 ENDIF
 
-IF BESC == RCTimer_6A_Tail
+IF BESCNO == RCTimer_6A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (RCTimer_6A.inc)		; Select RC Timer 6A pinout
 ENDIF
 
-IF BESC == RCTimer_6A_Multi
+IF BESCNO == RCTimer_6A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (RCTimer_6A.inc)		; Select RC Timer 6A pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15X_Main
+IF BESCNO == Align_RCE_BL15X_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15X_Tail
+IF BESCNO == Align_RCE_BL15X_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15X_Multi
+IF BESCNO == Align_RCE_BL15X_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL15X.inc)	; Select Align RCE-BL15X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15P_Main
+IF BESCNO == Align_RCE_BL15P_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15P_Tail
+IF BESCNO == Align_RCE_BL15P_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
 ENDIF
 
-IF BESC == Align_RCE_BL15P_Multi
+IF BESCNO == Align_RCE_BL15P_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL15P.inc)	; Select Align RCE-BL15P pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35X_Main
+IF BESCNO == Align_RCE_BL35X_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35X_Tail
+IF BESCNO == Align_RCE_BL35X_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35X_Multi
+IF BESCNO == Align_RCE_BL35X_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL35X.inc)	; Select Align RCE-BL35X pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35P_Main
+IF BESCNO == Align_RCE_BL35P_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35P_Tail
+IF BESCNO == Align_RCE_BL35P_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
 ENDIF
 
-IF BESC == Align_RCE_BL35P_Multi
+IF BESCNO == Align_RCE_BL35P_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_RCE_BL35P.inc)	; Select Align RCE-BL35P pinout
 ENDIF
 
-IF BESC == Gaui_GE_183_18A_Main
+IF BESCNO == Gaui_GE_183_18A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
 ENDIF
 
-IF BESC == Gaui_GE_183_18A_Tail
+IF BESCNO == Gaui_GE_183_18A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
 ENDIF
 
-IF BESC == Gaui_GE_183_18A_Multi
+IF BESCNO == Gaui_GE_183_18A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Gaui_GE_183_18A.inc)	; Select Gaui GE-183 18A pinout
 ENDIF
 
-IF BESC == H_King_10A_Main
+IF BESCNO == H_King_10A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (H_King_10A.inc)		; Select H-King 10A pinout
 ENDIF
 
-IF BESC == H_King_10A_Tail
+IF BESCNO == H_King_10A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (H_King_10A.inc)		; Select H-King 10A pinout
 ENDIF
 
-IF BESC == H_King_10A_Multi
+IF BESCNO == H_King_10A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_10A.inc)		; Select H-King 10A pinout
 ENDIF
 
-IF BESC == H_King_20A_Main
+IF BESCNO == H_King_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (H_King_20A.inc)		; Select H-King 20A pinout
 ENDIF
 
-IF BESC == H_King_20A_Tail
+IF BESCNO == H_King_20A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (H_King_20A.inc)		; Select H-King 20A pinout
 ENDIF
 
-IF BESC == H_King_20A_Multi
+IF BESCNO == H_King_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_20A.inc)		; Select H-King 20A pinout
 ENDIF
 
-IF BESC == H_King_35A_Main
+IF BESCNO == H_King_35A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (H_King_35A.inc)		; Select H-King 35A pinout
 ENDIF
 
-IF BESC == H_King_35A_Tail
+IF BESCNO == H_King_35A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (H_King_35A.inc)		; Select H-King 35A pinout
 ENDIF
 
-IF BESC == H_King_35A_Multi
+IF BESCNO == H_King_35A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_35A.inc)		; Select H-King 35A pinout
 ENDIF
 
-IF BESC == H_King_50A_Main
+IF BESCNO == H_King_50A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (H_King_50A.inc)		; Select H-King 50A pinout
 ENDIF
 
-IF BESC == H_King_50A_Tail
+IF BESCNO == H_King_50A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (H_King_50A.inc)		; Select H-King 50A pinout
 ENDIF
 
-IF BESC == H_King_50A_Multi
+IF BESCNO == H_King_50A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (H_King_50A.inc)		; Select H-King 50A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_12A_Main
+IF BESCNO == Polaris_Thunder_12A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_12A_Tail
+IF BESCNO == Polaris_Thunder_12A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_12A_Multi
+IF BESCNO == Polaris_Thunder_12A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_12A.inc)	; Select Polaris Thunder 12A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_20A_Main
+IF BESCNO == Polaris_Thunder_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_20A_Tail
+IF BESCNO == Polaris_Thunder_20A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_20A_Multi
+IF BESCNO == Polaris_Thunder_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_20A.inc)	; Select Polaris Thunder 20A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_30A_Main
+IF BESCNO == Polaris_Thunder_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_30A_Tail
+IF BESCNO == Polaris_Thunder_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_30A_Multi
+IF BESCNO == Polaris_Thunder_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_30A.inc)	; Select Polaris Thunder 30A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_40A_Main
+IF BESCNO == Polaris_Thunder_40A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_40A_Tail
+IF BESCNO == Polaris_Thunder_40A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_40A_Multi
+IF BESCNO == Polaris_Thunder_40A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_40A.inc)	; Select Polaris Thunder 40A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_60A_Main
+IF BESCNO == Polaris_Thunder_60A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_60A_Tail
+IF BESCNO == Polaris_Thunder_60A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_60A_Multi
+IF BESCNO == Polaris_Thunder_60A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_60A.inc)	; Select Polaris Thunder 60A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_80A_Main
+IF BESCNO == Polaris_Thunder_80A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_80A_Tail
+IF BESCNO == Polaris_Thunder_80A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_80A_Multi
+IF BESCNO == Polaris_Thunder_80A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_80A.inc)	; Select Polaris Thunder 80A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_100A_Main
+IF BESCNO == Polaris_Thunder_100A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_100A_Tail
+IF BESCNO == Polaris_Thunder_100A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
 ENDIF
 
-IF BESC == Polaris_Thunder_100A_Multi
+IF BESCNO == Polaris_Thunder_100A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Polaris_Thunder_100A.inc); Select Polaris Thunder 100A pinout
 ENDIF
 
-IF BESC == Platinum_Pro_30A_Main
+IF BESCNO == Platinum_Pro_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == Platinum_Pro_30A_Tail
+IF BESCNO == Platinum_Pro_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == Platinum_Pro_30A_Multi
+IF BESCNO == Platinum_Pro_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == EAZY_3Av2_Main
+IF BESCNO == EAZY_3Av2_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == EAZY_3Av2_Tail
+IF BESCNO == EAZY_3Av2_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == EAZY_3Av2_Multi
+IF BESCNO == EAZY_3Av2_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
 ENDIF
 
-IF BESC == Tarot_30A_Main
+IF BESCNO == Tarot_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Tarot_30A.inc)			; Select Tarot 30A pinout
 ENDIF
 
-IF BESC == Tarot_30A_Tail
+IF BESCNO == Tarot_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (Tarot_30A.inc)			; Select Tarot 30A pinout
 ENDIF
 
-IF BESC == Tarot_30A_Multi
+IF BESCNO == Tarot_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Tarot_30A.inc)			; Select Tarot 30A pinout
 ENDIF
 
-IF BESC == SkyIII_30A_Main
+IF BESCNO == SkyIII_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (SkyIII_30A.inc)		; Select SkyIII 30A pinout
 ENDIF
 
-IF BESC == SkyIII_30A_Tail
+IF BESCNO == SkyIII_30A_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
 $include (SkyIII_30A.inc)		; Select SkyIII 30A pinout
 ENDIF
 
-IF BESC == SkyIII_30A_Multi
+IF BESCNO == SkyIII_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (SkyIII_30A.inc)		; Select SkyIII 30A pinout
 ENDIF
+
 
 ;**** **** **** **** ****
 ; TX programming defaults
@@ -1416,7 +1409,7 @@ ENDIF
 ; - Startup rpm and startup accel is only used if stepped startup method is selected
 ; - Damping force is only used if DampedLight or Damped is selected
 ;
-; Main
+; MAIN
 DEFAULT_PGM_MAIN_P_GAIN 			EQU 7 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MAIN_I_GAIN 			EQU 7 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MAIN_GOVERNOR_MODE 	EQU 1 	; 1=Tx 		2=Arm 		3=Setup		4=Off
@@ -1427,7 +1420,11 @@ DEFAULT_PGM_MAIN_STARTUP_ACCEL	EQU 1 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
 DEFAULT_PGM_MAIN_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_MAIN_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_MAIN_DAMPING_FORCE	EQU 1 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
+IF DAMPED_MODE_ENABLE == 1
 DEFAULT_PGM_MAIN_PWM_FREQ 		EQU 2 	; 1=High 		2=Low		3=DampedLight
+ELSE
+DEFAULT_PGM_MAIN_PWM_FREQ 		EQU 2 	; 1=High 		2=Low	
+ENDIF
 DEFAULT_PGM_MAIN_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=Low		3=High
 DEFAULT_PGM_MAIN_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed
 DEFAULT_PGM_MAIN_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
@@ -1436,7 +1433,8 @@ DEFAULT_PGM_MAIN_REARM_START		EQU 0 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_MAIN_BEEP_STRENGTH	EQU 120	; Beep strength
 DEFAULT_PGM_MAIN_BEACON_STRENGTH	EQU 200	; Beacon strength
 DEFAULT_PGM_MAIN_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-; Tail
+
+; TAIL
 DEFAULT_PGM_TAIL_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_TAIL_IDLE_SPEED 		EQU 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_TAIL_STARTUP_RPM		EQU 3 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
@@ -1445,9 +1443,9 @@ DEFAULT_PGM_TAIL_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumH
 DEFAULT_PGM_TAIL_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_TAIL_DAMPING_FORCE	EQU 5 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
 IF DAMPED_MODE_ENABLE == 1
-DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 4 	; 1=High 		2=Low 		3=DampedLight  4=Damped 	
+DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 3 	; 1=High 		2=Low 		3=DampedLight 
 ELSE
-DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 3 	; 1=High 		2=Low		3=DampedLight
+DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low		
 ENDIF
 DEFAULT_PGM_TAIL_DEMAG_COMP 		EQU 1 	; 1=Disabled	2=Low		3=High
 DEFAULT_PGM_TAIL_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
@@ -1455,7 +1453,8 @@ DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
 DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-; Multi
+
+; MULTI
 DEFAULT_PGM_MULTI_P_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MULTI_I_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 DEFAULT_PGM_MULTI_GOVERNOR_MODE 	EQU 4 	; 1=HiRange	2=MidRange	3=LoRange		4=Off
@@ -1467,9 +1466,9 @@ DEFAULT_PGM_MULTI_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=Medium
 DEFAULT_PGM_MULTI_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
 DEFAULT_PGM_MULTI_DAMPING_FORCE	EQU 6 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
 IF DAMPED_MODE_ENABLE == 1
-DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low 		3=DampedLight  4=Damped 	
+DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low 		3=DampedLight 
 ELSE
-DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low		3=DampedLight
+DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low
 ENDIF
 DEFAULT_PGM_MULTI_DEMAG_COMP 		EQU 2 	; 1=Disabled	2=Low		3=High
 DEFAULT_PGM_MULTI_DIRECTION		EQU 1 	; 1=Normal 	2=Reversed	3=Bidirectional
@@ -1477,12 +1476,14 @@ DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
 DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-; Common
+
+; COMMON
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_PPM_MIN_THROTTLE		EQU 37	; 4*37+1000=1148
 DEFAULT_PGM_PPM_MAX_THROTTLE		EQU 208	; 4*208+1000=1832
 DEFAULT_PGM_PPM_CENTER_THROTTLE	EQU 122	; 4*122+1000=1488 (used in bidirectional mode)
 DEFAULT_PGM_BEC_VOLTAGE_HIGH		EQU 0	; 0=Low		1= High
+DEFAULT_PGM_ENABLE_TEMP_PROT	 	EQU 1 	; 1=Enabled 	0=Disabled
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -1502,7 +1503,7 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	80 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_RED		EQU 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1524,7 +1525,7 @@ RCP_STOP_LIMIT		EQU 	130	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	8	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_RED		EQU 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1547,7 +1548,7 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 PWM_SETTLE		EQU 	50 	; PWM used when in start settling phase (also max power during direct start)
 PWM_STEPPER		EQU 	120 	; PWM used when in start stepper phase
 
-COMM_TIME_RED		EQU 	10	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+COMM_TIME_RED		EQU 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1586,11 +1587,11 @@ Flags0:					DS	1    	; State flags. Reset upon init_start
 T3_PENDING				EQU 	0		; Timer3 pending flag
 RCP_MEAS_PWM_FREQ			EQU	1		; Measure RC pulse pwm frequency
 PWM_ON					EQU	2		; Set in on part of pwm cycle
-DEMAG_DETECTED				EQU 	3		; Set when excessive demag time is detected
-DEMAG_CUT_POWER			EQU 	4		; Set when demag compensation cuts power
-;						EQU 	5
-;						EQU 	6
-;						EQU 	7
+DEMAG_ENABLED				EQU 	3		; Set when demag compensation is enabled (above a min speed and throttle)
+DEMAG_DETECTED				EQU 	4		; Set when excessive demag time is detected
+DEMAG_CUT_POWER			EQU 	5		; Set when demag compensation cuts power
+DIR_CHANGE_BRAKE			EQU 	6		; Set when braking before direction change
+;						EQU 	7	
 
 Flags1:					DS	1    	; State flags. Reset upon init_start 
 MOTOR_SPINNING				EQU	0		; Set when in motor is spinning
@@ -1599,16 +1600,16 @@ STEPPER_PHASE				EQU	2		; Set when in motor start stepper motor phase
 DIRECT_STARTUP_PHASE		EQU 	3		; Set when in direct startup phase
 INITIAL_RUN_PHASE			EQU	4		; Set when in initial run phase, before synchronized run is achieved
 CURR_PWMOFF_DAMPED			EQU	5		; Currently running pwm off cycle is damped
-CURR_PWMOFF_COMP_ABLE		EQU	6		; Currently running pwm off cycle is usable for comparator
+;						EQU 	6
 ;						EQU 	7
 
 Flags2:					DS	1		; State flags. NOT reset upon init_start
 RCP_UPDATED				EQU 	0		; New RC pulse length value available
 RCP_EDGE_NO				EQU 	1		; RC pulse edge no. 0=rising, 1=falling
-PGM_PWMOFF_DAMPED			EQU	2		; Programmed pwm off damped mode. Set when fully damped or damped light mode is selected
-PGM_PWMOFF_DAMPED_FULL		EQU	3		; Programmed pwm off fully damped mode. Set when all pfets shall be on in pwm_off period
-PGM_PWMOFF_DAMPED_LIGHT		EQU	4		; Programmed pwm off damped light mode. Set when only 2 pfets shall be on in pwm_off period
-PGM_PWM_HIGH_FREQ			EQU	5		; Progremmed pwm high frequency
+PGM_PWMOFF_DAMPED			EQU	2		; Programmed pwm off damped mode
+PGM_PWM_HIGH_FREQ			EQU	3		; Progremmed pwm high frequency
+;						EQU 	4	
+;						EQU 	5	
 ;						EQU 	6	
 ;						EQU 	7	
 
@@ -1637,14 +1638,16 @@ Stepper_Step_End_L:			DS	1		; Stepper phase step time at the end (lo byte)
 Stepper_Step_End_H:			DS	1		; Stepper phase step time at the end (hi byte)
 Startup_Rot_Cnt:			DS	1		; Startup phase rotations counter
 Direct_Startup_Ok_Cnt:		DS	1		; Direct startup phase ok comparator waits counter (incrementing)
-Demag_Consecutive_Cnt:		DS	1		; Counter used to count consecutive demag events
+Demag_Detected_Metric:		DS	1		; Metric used to gauge demag event frequency
+Demag_Pwr_Off_Thresh:		DS	1		; Metric threshold above which power is cut
+Low_Rpm_Pwr_Slope:			DS	1		; Sets the slope of power increase for low rpms
 
 Prev_Comm_L:				DS	1		; Previous commutation timer3 timestamp (lo byte)
 Prev_Comm_H:				DS	1		; Previous commutation timer3 timestamp (hi byte)
 Comm_Period4x_L:			DS	1		; Timer3 counts between the last 4 commutations (lo byte)
 Comm_Period4x_H:			DS	1		; Timer3 counts between the last 4 commutations (hi byte)
 Comm_Phase:				DS	1		; Current commutation phase
-Comp_Wait_Reads: 			DS	1		; Comparator wait comparator reads
+Comparator_Read_Cnt: 		DS	1		; Number of comparator reads done
 
 Gov_Target_L:				DS	1		; Governor target (lo byte)
 Gov_Target_H:				DS	1		; Governor target (hi byte)
@@ -1680,7 +1683,8 @@ Rcp_Stop_Cnt:				DS	1		; Counter for RC pulses below stop value
 Auto_Bailout_Armed:			DS	1		; Set when auto rotation bailout is armed 
 
 Pwm_Limit:				DS	1		; Maximum allowed pwm 
-Pwm_Limit_Spoolup:			DS	1		; Maximum allowed pwm during spoolup of main
+Pwm_Limit_Spoolup:			DS	1		; Maximum allowed pwm during spoolup
+Pwm_Limit_Low_Rpm:			DS	1		; Maximum allowed pwm for low rpms
 Pwm_Spoolup_Beg:			DS	1		; Pwm to begin main spoolup with
 Pwm_Motor_Idle:			DS	1		; Motor idle speed pwm
 Pwm_On_Cnt:				DS	1		; Pwm on event counter (used to increase pwm off time for low pwm)
@@ -1688,6 +1692,9 @@ Pwm_Off_Cnt:				DS	1		; Pwm off event counter (used to run some pwm cycles witho
 
 Spoolup_Limit_Cnt:			DS	1		; Interrupt count for spoolup limit
 Spoolup_Limit_Skip:			DS	1		; Interrupt skips for spoolup limit increment (1=no skips, 2=skip one etc)
+Main_Spoolup_Time_3x:		DS	1		; Main spoolup time x3
+Main_Spoolup_Time_10x:		DS	1		; Main spoolup time x10
+Main_Spoolup_Time_15x:		DS	1		; Main spoolup time x15
 
 Damping_Period:			DS	1		; Damping on/off period
 Damping_On:				DS	1		; Damping on part of damping period
@@ -1740,13 +1747,14 @@ Pgm_Throttle_Rate:			DS	1		; Programmed throttle rate
 Pgm_Demag_Comp:			DS	1		; Programmed demag compensation
 Pgm_BEC_Voltage_High:		DS	1		; Programmed BEC voltage
 Pgm_Ppm_Center_Throttle:		DS	1		; Programmed throttle center (in bidirectional mode)
+Pgm_Main_Spoolup_Time:		DS	1		; Programmed main spoolup time
+Pgm_Enable_Temp_Prot:		DS	1		; Programmed temperature protection enable
 
 ; The sequence of the variables below is no longer of importance
 Pgm_Gov_P_Gain_Decoded:		DS	1		; Programmed governor decoded P gain
 Pgm_Gov_I_Gain_Decoded:		DS	1		; Programmed governor decoded I gain
 Pgm_Throttle_Rate_Decoded:	DS	1		; Programmed throttle rate decoded
 Pgm_Startup_Pwr_Decoded:		DS	1		; Programmed startup power decoded
-Pgm_Demag_Comp_Power_Decoded:	DS	1		; Programmed demag compensation power cut decoded
 
 
 ; Indirect addressing data segment
@@ -1756,9 +1764,9 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
-EEPROM_FW_MAIN_REVISION		EQU	11		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION		EQU	17		; Revision of the EEPROM layout
+EEPROM_FW_MAIN_REVISION		EQU	12		; Main revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_LAYOUT_REVISION		EQU	18		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -1796,6 +1804,8 @@ Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_MAIN_THROTTLE_RATE	; EEPROM copy of progr
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_MAIN_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
 _Eep_Pgm_Ppm_Center_Throttle:	DB	0FFh							; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
+Eep_Pgm_Main_Spoolup_Time:	DB	DEFAULT_PGM_MAIN_SPOOLUP_TIME		; EEPROM copy of programmed main spoolup time
+Eep_Pgm_Temp_Prot_Enable:	DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
 ENDIF
 
 IF MODE == 1
@@ -1830,6 +1840,8 @@ Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_TAIL_THROTTLE_RATE	; EEPROM copy of progr
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_TAIL_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
 Eep_Pgm_Ppm_Center_Throttle:	DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
+_Eep_Pgm_Main_Spoolup_Time:	DB	0FFh
+Eep_Pgm_Temp_Prot_Enable:	DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
 ENDIF
 
 IF MODE == 2
@@ -1864,8 +1876,9 @@ Eep_Pgm_Throttle_Rate:		DB	DEFAULT_PGM_MULTI_THROTTLE_RATE	; EEPROM copy of prog
 Eep_Pgm_Demag_Comp:			DB	DEFAULT_PGM_MULTI_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
 Eep_Pgm_Ppm_Center_Throttle:	DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
+_Eep_Pgm_Main_Spoolup_Time:	DB	0FFh
+Eep_Pgm_Temp_Prot_Enable:	DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
 ENDIF
-
 
 Eep_Dummy:				DB	0FFh							; EEPROM address for safety reason
 
@@ -1873,7 +1886,7 @@ CSEG AT 1A60h
 Eep_Name:					DB	"                "				; Name tag (16 Bytes)
 
 ;**** **** **** **** ****
-        		Interrupt_Table_Definition		; SiLabs interrupts
+Interrupt_Table_Definition		; SiLabs interrupts
 CSEG AT 80h			; Code segment after interrupt vectors 
 
 ;**** **** **** **** ****
@@ -1882,26 +1895,32 @@ CSEG AT 80h			; Code segment after interrupt vectors
 GOV_GAIN_TABLE:   		DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h
 THROTTLE_RATE_TABLE:  	DB 	02h, 03h, 04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 80h, 0FFh
 STARTUP_POWER_TABLE:  	DB 	04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h, 0A0h, 0C0h
-DEMAG_POWER_TABLE:  	DB 	0, 2, 1
 IF MODE == 0
-TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 3, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 2, 2
+  IF DAMPED_MODE_ENABLE == 1
+TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 3, 6, 2, 13, 5, 5, 5, 13, 6, 3, 3, 2, 2
+  ENDIF
+  IF DAMPED_MODE_ENABLE == 0
+TX_PGM_PARAMS_MAIN:  	DB 	13, 13, 4, 3, 6, 2, 13, 5, 5, 5, 13, 6, 2, 3, 2, 2
+  ENDIF
 ENDIF
 IF MODE == 1
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 4, 5, 3, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 3, 3, 3, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 3, 5, 3, 2
+TX_PGM_PARAMS_TAIL:  	DB 	5, 5, 2, 13, 5, 5, 5, 13, 6, 2, 3, 3, 2
   ENDIF
 ENDIF
 IF MODE == 2
   IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 4, 5, 3, 2
+TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 3, 3, 3, 2
   ENDIF
   IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 3, 5, 3, 2
+TX_PGM_PARAMS_MULTI:  	DB 	13, 13, 4, 5, 6, 2, 13, 5, 5, 5, 13, 6, 2, 3, 3, 2
   ENDIF
 ENDIF
+
+
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
@@ -1919,22 +1938,21 @@ t0_int:	; Used for pwm control
 	jb	Flags0.PWM_ON, t0_int_pwm_off	; Is pwm on?
 
 	; Do not execute pwm when stopped
-	jnb	Flags1.MOTOR_SPINNING, t0_int_pwm_on_stopped
+	jb	Flags1.MOTOR_SPINNING, ($+5)
+	ajmp	t0_int_pwm_on_exit
 	; Do not execute pwm on during demag recovery
-	jb	Flags0.DEMAG_CUT_POWER, t0_int_pwm_on_stopped
+	jnb	Flags0.DEMAG_CUT_POWER, ($+5) 
+	ajmp	t0_int_pwm_on_exit_pfets_off
 	; Pwm on cycle. 
+IF MODE == 1				; Tail
 	jnb	Current_Pwm_Limited.7, t0_int_pwm_on_low_pwm	; Jump for low pwm (<50%)
+ENDIF
 
 t0_int_pwm_on_execute:
 	clr	A					
 	jmp	@A+DPTR					; Jump to pwm on routines. DPTR should be set to one of the pwm_nfet_on labels
 
 t0_int_pwm_on_low_pwm:
-
-IF MODE == 0 OR MODE == 2	; Main or multi
-	jmp	t0_int_pwm_on_execute
-ENDIF
-IF MODE == 1				; Tail
 	; Skip pwm on cycles for very low pwm
 	inc	Pwm_On_Cnt				; Increment event counter
 	clr	C
@@ -1950,10 +1968,6 @@ IF MODE == 1				; Tail
 	jnz	($+5)
 	mov	TL0, #0					; Write start point for timer (long time for zero pwm)
 	jmp	t0_int_pwm_on_exit_no_timer_update
-ENDIF
-
-t0_int_pwm_on_stopped:
-	jmp	t0_int_pwm_on_exit
 
 
 t0_int_pwm_off:
@@ -1972,10 +1986,13 @@ t0_int_pwm_off_start_checked:
 
 	inc	Pwm_Off_Cnt				; Increment event counter
 	; Do not execute pwm when stopped
-	jnb	Flags1.MOTOR_SPINNING, t0_int_pwm_off_stopped
+	jb	Flags1.MOTOR_SPINNING, ($+5)
+	ajmp	t0_int_pwm_off_exit_nfets_off
 
+IF DAMPED_MODE_ENABLE == 1
 	; If damped operation, set pFETs on in pwm_off
 	jb	Flags2.PGM_PWMOFF_DAMPED, t0_int_pwm_off_damped	; Damped operation?
+ENDIF
 
 	; Separate exit commands here for minimum delay
 	mov	TL1, #0		; Reset timer1	
@@ -1985,13 +2002,8 @@ t0_int_pwm_off_start_checked:
 	setb	EA			; Enable all interrupts
 	reti
 
-t0_int_pwm_off_stopped:
-	All_nFETs_Off 					; Switch off all nfets
-	jmp	t0_int_pwm_off_exit
-
 t0_int_pwm_off_damped:
 	setb	Flags1.CURR_PWMOFF_DAMPED	; Set damped status
-	clr	Flags1.CURR_PWMOFF_COMP_ABLE	; Set comparator unusable status
 	mov	A, Damping_On
 	jz	t0_int_pwm_off_do_damped		; Highest damping - apply damping always
 
@@ -2002,100 +2014,38 @@ t0_int_pwm_off_damped:
 	jc	t0_int_pwm_off_do_damped		; No - apply damping
 
 	clr	Flags1.CURR_PWMOFF_DAMPED	; Set non damped status
-	setb	Flags1.CURR_PWMOFF_COMP_ABLE	; Set comparator usable status
 	clr	C
 	mov	A, Pwm_Off_Cnt					
 	subb	A, Damping_Period			; Is damped period number reached?
 	jnc	t0_int_pwm_off_clr_cnt		; Yes - Proceed
 
-	jmp	t0_int_pwm_off_exit			; No - Branch
+	jmp	t0_int_pwm_off_exit_nfets_off	; No - Branch
 
 t0_int_pwm_off_clr_cnt:
 	mov	Pwm_Off_Cnt, #0			; Yes - clear counter
-	jmp	t0_int_pwm_off_exit			; Not damped cycle - exit	
+	jmp	t0_int_pwm_off_exit_nfets_off	; Not damped cycle - exit	
 
 t0_int_pwm_off_do_damped:
-	; Delay to allow nFETs to go off before pFETs are turned on (only in full damped mode)
-	jb	Flags2.PGM_PWMOFF_DAMPED_LIGHT, t0_int_pwm_off_damped_light	; If damped light operation - branch
-
 	All_nFETs_Off 					; Switch off all nfets
 	mov	A, #PFETON_DELAY
 	djnz	ACC, $	
-	All_pFETs_On 					; Switch on all pfets
-	jmp	t0_int_pwm_off_exit
-
-t0_int_pwm_off_damped_light:
-IF DAMPED_MODE_ENABLE == 1
-	setb	Flags1.CURR_PWMOFF_COMP_ABLE	; Set comparator usable status always for damped light mode on fully damped capable escs
-ENDIF
-	All_nFETs_Off 					; Switch off all nfets
 	mov	A, Comm_Phase				; Turn on pfets according to commutation phase
-	jb	ACC.2, t0_int_pwm_off_comm_4_5_6
-	jb	ACC.1, t0_int_pwm_off_comm_2_3
+	dec	A
+	jb	ACC.2, t0_int_pwm_off_comm_5_6
+	jb	ACC.1, t0_int_pwm_off_comm_3_4
 
-IF DAMPED_MODE_ENABLE == 0
-	ApFET_On			; Comm phase 1 - turn on A
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	CpFET_On			; Comm phase 1 - turn on C
-ENDIF
+	CpFET_On			; Comm phase 1 or 2 - turn on C
 	jmp	t0_int_pwm_off_exit
 
-t0_int_pwm_off_comm_2_3:
-	jb	ACC.0, t0_int_pwm_off_comm_3
-IF DAMPED_MODE_ENABLE == 0
-	BpFET_On			; Comm phase 2 - turn on B
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	CpFET_On			; Comm phase 2 - turn on C
-ENDIF
+t0_int_pwm_off_comm_3_4:
+	BpFET_On			; Comm phase 3 or 4 - turn on B
 	jmp	t0_int_pwm_off_exit
 
-t0_int_pwm_off_comm_3:
-IF DAMPED_MODE_ENABLE == 0
-	CpFET_On			; Comm phase 3 - turn on C
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	BpFET_On			; Comm phase 3 - turn on B
-ENDIF
+t0_int_pwm_off_comm_5_6:
+	ApFET_On			; Comm phase 5 or 6 - turn on A
 	jmp	t0_int_pwm_off_exit
 
-t0_int_pwm_off_comm_4_5_6:
-	jb	ACC.1, t0_int_pwm_off_comm_6
-	jb	ACC.0, t0_int_pwm_off_comm_5
-
-IF DAMPED_MODE_ENABLE == 0
-	ApFET_On			; Comm phase 4 - turn on A
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	BpFET_On			; Comm phase 4 - turn on B
-ENDIF
-	jmp	t0_int_pwm_off_exit
-
-t0_int_pwm_off_comm_5:
-IF DAMPED_MODE_ENABLE == 0
-	BpFET_On			; Comm phase 5 - turn on B
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	ApFET_On			; Comm phase 5 - turn on A
-ENDIF
-	jmp	t0_int_pwm_off_exit
-
-t0_int_pwm_off_comm_6:
-IF DAMPED_MODE_ENABLE == 0
-	CpFET_On			; Comm phase 6 - turn on C
-ELSE
-	mov	A, #PFETON_DELAY
-	djnz	ACC, $	
-	ApFET_On			; Comm phase 6 - turn on A
-ENDIF
-
-t0_int_pwm_off_exit:	; Exit from pwm off cycle
+t0_int_pwm_off_exit_nfets_off:	; Exit from pwm off cycle
 	mov	TL1, #0		; Reset timer1	
 	pop	ACC			; Restore preserved registers
 	pop	PSW
@@ -2103,12 +2053,13 @@ t0_int_pwm_off_exit:	; Exit from pwm off cycle
 	setb	EA			; Enable all interrupts
 	reti
 
-t0_int_pwm_off_fullpower_exit:	; Exit from pwm off cycle, leaving power on
+t0_int_pwm_off_exit:
+	mov	TL1, #0		; Reset timer1	
+t0_int_pwm_off_fullpower_exit:	
 	pop	ACC			; Restore preserved registers
 	pop	PSW
 	setb	EA			; Enable all interrupts
 	reti
-
 
 
 pwm_nofet_on:	; Dummy pwm on cycle
@@ -2129,13 +2080,7 @@ pwm_cfet_on:	; Pwm on cycle cfet on (afet off)
 	AnFET_off
 	ajmp	t0_int_pwm_on_exit
 
-pwm_anfet_bpfet_on_fast:	; Pwm on cycle anfet on (bnfet off) and bpfet on (used in damped state 6)
-	ApFET_off
-	AnFET_on								; Switch nFETs
-	CpFET_off
-	BnFET_off 							
-	ajmp	t0_int_pwm_on_exit
-pwm_anfet_bpfet_on_safe:	; Pwm on cycle anfet on (bnfet off) and bpfet on (used in damped state 6)
+pwm_anfet_bpfet_on:	; Pwm on cycle anfet on (bnfet off) and bpfet on (used in damped state 6)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	ApFET_off
 	CpFET_off
@@ -2145,13 +2090,7 @@ pwm_anfet_bpfet_on_safe:	; Pwm on cycle anfet on (bnfet off) and bpfet on (used 
 	BnFET_off 							
 	ajmp	t0_int_pwm_on_exit
 
-pwm_anfet_cpfet_on_fast:	; Pwm on cycle anfet on (bnfet off) and cpfet on (used in damped state 5)
-	ApFET_off
-	AnFET_on								; Switch nFETs
-	BpFET_off
-	BnFET_off								
-	ajmp	t0_int_pwm_on_exit
-pwm_anfet_cpfet_on_safe:	; Pwm on cycle anfet on (bnfet off) and cpfet on (used in damped state 5)
+pwm_anfet_cpfet_on:	; Pwm on cycle anfet on (bnfet off) and cpfet on (used in damped state 5)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	ApFET_off
 	BpFET_off
@@ -2161,13 +2100,7 @@ pwm_anfet_cpfet_on_safe:	; Pwm on cycle anfet on (bnfet off) and cpfet on (used 
 	BnFET_off								
 	ajmp	t0_int_pwm_on_exit
 
-pwm_bnfet_cpfet_on_fast:	; Pwm on cycle bnfet on (cnfet off) and cpfet on (used in damped state 4)
-	BpFET_off
-	BnFET_on								; Switch nFETs
-	ApFET_off
-	CnFET_off								
-	ajmp	t0_int_pwm_on_exit
-pwm_bnfet_cpfet_on_safe:	; Pwm on cycle bnfet on (cnfet off) and cpfet on (used in damped state 4)
+pwm_bnfet_cpfet_on:	; Pwm on cycle bnfet on (cnfet off) and cpfet on (used in damped state 4)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	BpFET_off
 	ApFET_off
@@ -2177,13 +2110,7 @@ pwm_bnfet_cpfet_on_safe:	; Pwm on cycle bnfet on (cnfet off) and cpfet on (used 
 	CnFET_off								
 	ajmp	t0_int_pwm_on_exit
 
-pwm_bnfet_apfet_on_fast:	; Pwm on cycle bnfet on (cnfet off) and apfet on (used in damped state 3)
-	BpFET_off
-	BnFET_on								; Switch nFETs
-	CpFET_off
-	CnFET_off								
-	ajmp	t0_int_pwm_on_exit
-pwm_bnfet_apfet_on_safe:	; Pwm on cycle bnfet on (cnfet off) and apfet on (used in damped state 3)
+pwm_bnfet_apfet_on:	; Pwm on cycle bnfet on (cnfet off) and apfet on (used in damped state 3)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	BpFET_off
 	CpFET_off
@@ -2193,13 +2120,7 @@ pwm_bnfet_apfet_on_safe:	; Pwm on cycle bnfet on (cnfet off) and apfet on (used 
 	CnFET_off								
 	ajmp	t0_int_pwm_on_exit
 
-pwm_cnfet_apfet_on_fast:	; Pwm on cycle cnfet on (anfet off) and apfet on (used in damped state 2)
-	CpFET_off
-	CnFET_on								; Switch nFETs
-	BpFET_off
-	AnFET_off								
-	ajmp	t0_int_pwm_on_exit
-pwm_cnfet_apfet_on_safe:	; Pwm on cycle cnfet on (anfet off) and apfet on (used in damped state 2)
+pwm_cnfet_apfet_on:	; Pwm on cycle cnfet on (anfet off) and apfet on (used in damped state 2)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	CpFET_off
 	BpFET_off
@@ -2209,13 +2130,7 @@ pwm_cnfet_apfet_on_safe:	; Pwm on cycle cnfet on (anfet off) and apfet on (used 
 	AnFET_off								
 	ajmp	t0_int_pwm_on_exit
 
-pwm_cnfet_bpfet_on_fast:	; Pwm on cycle cnfet on (anfet off) and bpfet on (used in damped state 1)
-	CpFET_off
-	CnFET_on								; Switch nFETs
-	ApFET_off
-	AnFET_off								
-	ajmp	t0_int_pwm_on_exit
-pwm_cnfet_bpfet_on_safe:	; Pwm on cycle cnfet on (anfet off) and bpfet on (used in damped state 1)
+pwm_cnfet_bpfet_on:	; Pwm on cycle cnfet on (anfet off) and bpfet on (used in damped state 1)
 	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
 	CpFET_off
 	ApFET_off
@@ -2224,6 +2139,27 @@ pwm_cnfet_bpfet_on_safe:	; Pwm on cycle cnfet on (anfet off) and bpfet on (used 
 	CnFET_on								; Switch nFETs
 	AnFET_off								
 	ajmp	t0_int_pwm_on_exit
+
+t0_int_pwm_on_exit_pfets_off:
+	jnb	Flags2.PGM_PWMOFF_DAMPED, t0_int_pwm_on_exit	; If not damped operation - branch
+	mov	A, Comm_Phase				; Turn off pfets according to commutation phase
+	jb	ACC.2, t0_int_pfets_off_comm_4_5_6
+	jb	ACC.1, t0_int_pfets_off_comm_2_3
+
+t0_int_pfets_off_comm_1_6:
+	ApFET_Off			; Comm phase 1 and 6 - turn off A and C
+	CpFET_Off			
+	jmp	t0_int_pwm_on_exit
+
+t0_int_pfets_off_comm_4_5_6:
+	jb	ACC.1, t0_int_pfets_off_comm_1_6
+	ApFET_Off			; Comm phase 4 and 5 - turn off A and B
+	BpFET_Off			
+	jmp	t0_int_pwm_on_exit
+
+t0_int_pfets_off_comm_2_3:
+	BpFET_Off			; Comm phase 2 and 3 - turn off B and C
+	CpFET_Off			
 
 t0_int_pwm_on_exit:
 	; Set timer for coming on cycle length
@@ -2324,7 +2260,7 @@ t2_int_skip_end:
 t2_int_rcp_update_start:
 	; Process updated RC pulse
 	jb	Flags2.RCP_UPDATED, ($+5)	; Is there an updated RC pulse available?
-	ajmp	t2_int_pwm_exit			; No - exit
+	ajmp	t2_int_current_pwm_done		; No - update pwm limits and exit
 
 	mov	A, New_Rcp				; Load new pulse value
 	mov	Temp1, A
@@ -2336,9 +2272,9 @@ t2_int_rcp_update_start:
 
 IF MODE == 0	; Main - do not adjust gain
 	ajmp	t2_int_pwm_min_run
-ENDIF
+ELSE
 
-IF MODE == 2	; Multi
+IF MODE == 2	; Multi 
 	mov	Temp2, #Pgm_Gov_Mode		; Closed loop mode?
 	cjne	@Temp2, #4, t2_int_pwm_min_run; Yes - branch
 ENDIF
@@ -2390,6 +2326,7 @@ t2_int_rcp_gain_pos:
 
 	mov	A, #0FFh					; Yes - limit
 	mov	Temp1, A
+ENDIF
 
 t2_int_pwm_min_run: 
 IF MODE == 1	; Tail - limit minimum pwm
@@ -2458,9 +2395,27 @@ IF MODE >= 1	; Tail or multi
 
 	mov	Temp1, Pwm_Limit			; Limit pwm
 
+IF MODE == 2	; Multi
+	; Limit pwm for low rpms
+	clr	C
+	mov	A, Temp1					; Check against limit
+	subb	A, Pwm_Limit_Low_Rpm
+	jc	($+4)					; If current pwm below limit - branch
+
+	mov	Temp1, Pwm_Limit_Low_Rpm		; Limit pwm
+
+ENDIF
 	mov	Current_Pwm_Limited, Temp1
 ENDIF
 t2_int_pwm_exit:	
+	; Set demag enabled if pwm is above limit
+	clr	C
+	mov	A, Current_Pwm_Limited	
+	subb	A, #40h					; Set if above 25%
+	jc	($+4)
+
+	setb	Flags0.DEMAG_ENABLED
+
 	; Check if high byte flag is set
 	jb	TF2H, t2h_int		
 	pop	ACC			; Restore preserved registers
@@ -2568,12 +2523,13 @@ t2h_int_rcp_gov_pwm_done:
 
 	clr	C
 	mov	A, Spoolup_Limit_Cnt
-	subb	A, #(3*MAIN_SPOOLUP_TIME)		; No spoolup until "30"*32ms
+	subb	A, Main_Spoolup_Time_3x			; No spoolup until 3*N*32ms
+
 	jc	t2h_int_rcp_exit
 
 	clr	C
 	mov	A, Spoolup_Limit_Cnt
-	subb	A, #(10*MAIN_SPOOLUP_TIME)		; Slow spoolup until "100"*32ms
+	subb	A, Main_Spoolup_Time_10x			; Slow spoolup until "100"*N*32ms
 	jnc	t2h_int_rcp_limit_middle_ramp
 
 	mov	Temp1, #1						; Slow initial spoolup
@@ -2583,7 +2539,7 @@ t2h_int_rcp_gov_pwm_done:
 t2h_int_rcp_limit_middle_ramp:
 	clr	C
 	mov	A, Spoolup_Limit_Cnt
-	subb	A, #(15*MAIN_SPOOLUP_TIME)		; Faster spoolup until "150"*32ms
+	subb	A, Main_Spoolup_Time_15x			; Faster spoolup until "150"*N*32ms
 	jnc	t2h_int_rcp_set_limit
 
 	mov	Temp1, #1						; Faster middle spoolup
@@ -2608,8 +2564,7 @@ t2h_int_rcp_set_limit:
 	inc	A
 	jz	($+5)
 
-	mov	Spoolup_Limit_Cnt, #(3*MAIN_SPOOLUP_TIME)	; Stay in an early part of the spoolup sequence (unless "bailout" ramp)
-
+	mov	Spoolup_Limit_Cnt, Main_Spoolup_Time_3x	; Stay in an early part of the spoolup sequence (unless "bailout" ramp)
 	mov	Spoolup_Limit_Skip, #1			; Set skip count
 	mov	Governor_Req_Pwm, #60			; Set governor requested speed to ensure that it requests higher speed
 									; 20=Fail on jerk when governor activates
@@ -2636,6 +2591,7 @@ t2h_int_rcp_bailout_arm:
 	mov	Auto_Bailout_Armed, #255			; Arm bailout
 	mov	Spoolup_Limit_Cnt, #255			
 
+t2h_int_rcp_exit:
 ENDIF
 IF MODE == 2	; Multi
 	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 0.8 seconds spoolup
@@ -2643,13 +2599,13 @@ IF MODE == 2	; Multi
 	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
 
 	mov	Pwm_Limit_Spoolup, #0FFh
-	ajmp	t2h_int_rcp_exit
+	ajmp	t2h_int_rcp_limit_set
 
 t2h_int_rcp_no_limit:
 	mov	Pwm_Limit_Spoolup, A
-ENDIF
 
-t2h_int_rcp_exit:
+t2h_int_rcp_limit_set:
+ENDIF
 	pop	ACC			; Restore preserved registers
 	pop	PSW
 	clr	PSW.3		; Select register bank 0 for main program routines	
@@ -2708,7 +2664,7 @@ pca_int:	; Used for RC pulse timing
 	; RC pulse was high, store RC pulse start timestamp
 	mov	Rcp_Prev_Edge_L, Temp1
 	mov	Rcp_Prev_Edge_H, Temp2
-	ljmp	pca_int_exit				; Exit
+	ajmp	pca_int_exit				; Exit
 
 pca_int_fail_minimum:
 	; Prepare for next interrupt
@@ -2724,6 +2680,7 @@ pca_int_fail_minimum:
 	mov	Temp1, #RCP_MIN			; Set RC pulse value to minimum
 	Read_Rcp_Int 					; Test RC signal level again
 	jnb	ACC.Rcp_In, ($+5)			; Is it high?
+
 	ajmp	pca_int_set_timeout			; Yes - set new timeout and exit
 
 	mov	New_Rcp, Temp1				; Store new pulse length
@@ -2754,7 +2711,8 @@ pca_int_second_meas_pwm_freq:
 	mov	Temp2, A
 	clr	A
 	mov	Temp4, A
-	mov	Temp3, #250				; Set default period tolerance requirement
+	mov	Temp7, #2					; Set default period tolerance requirement (MSB)
+	mov	Temp3, #0					; (LSB)
 	; Check if pwm frequency is 12kHz
 	clr	C
 	mov	A, Temp1
@@ -2766,7 +2724,8 @@ pca_int_second_meas_pwm_freq:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_12KHZ
 	mov	Temp4, A
-	mov	Temp3, #10				; Set period tolerance requirement
+	mov	Temp7, #0					; Set period tolerance requirement
+	mov	Temp3, #10				; (LSB)
 	ajmp	pca_int_restore_edge
 
 pca_int_check_8kHz:
@@ -2781,7 +2740,8 @@ pca_int_check_8kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_8KHZ
 	mov	Temp4, A
-	mov	Temp3, #15				; Set period tolerance requirement
+	mov	Temp7, #0					; Set period tolerance requirement
+	mov	Temp3, #15				; (LSB)
 	ajmp	pca_int_restore_edge
 
 pca_int_check_4kHz:
@@ -2796,7 +2756,8 @@ pca_int_check_4kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_4KHZ
 	mov	Temp4, A
-	mov	Temp3, #30				; Set period tolerance requirement
+	mov	Temp7, #0					; Set period tolerance requirement
+	mov	Temp3, #30				; (LSB)
 	ajmp	pca_int_restore_edge
 
 pca_int_check_2kHz:
@@ -2811,7 +2772,8 @@ pca_int_check_2kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_2KHZ
 	mov	Temp4, A
-	mov	Temp3, #60				; Set period tolerance requirement
+	mov	Temp7, #0					; Set period tolerance requirement
+	mov	Temp3, #60				; (LSB)
 	ajmp	pca_int_restore_edge
 
 pca_int_check_1kHz:
@@ -2826,7 +2788,8 @@ pca_int_check_1kHz:
 	clr	A
 	setb	ACC.RCP_PWM_FREQ_1KHZ
 	mov	Temp4, A
-	mov	Temp3, #120				; Set period tolerance requirement
+	mov	Temp7, #0					; Set period tolerance requirement
+	mov	Temp3, #120				; (LSB)
 
 pca_int_restore_edge:
 	; Calculate difference between this period and previous period
@@ -2850,11 +2813,11 @@ pca_int_restore_edge:
 pca_int_check_diff:
 	; Check difference
 	mov	Rcp_Period_Diff_Accepted, #0		; Set not accepted as default
-	jnz	pca_int_store_data				; Check if high byte is zero
-
 	clr	C
 	mov	A, Temp5
 	subb	A, Temp3						; Check difference
+	mov	A, Temp6
+	subb	A, Temp7						
 	jnc	pca_int_store_data
 
 	mov	Rcp_Period_Diff_Accepted, #1		; Set accepted
@@ -2881,6 +2844,7 @@ pca_int_fall:
 	mov	Temp2, A
 	jnb	Flags3.RCP_PWM_FREQ_12KHZ, ($+5)	; Is RC input pwm frequency 12kHz?
 	ajmp	pca_int_pwm_divide_done			; Yes - branch forward
+
 	jnb	Flags3.RCP_PWM_FREQ_8KHZ, ($+5)	; Is RC input pwm frequency 8kHz?
 	ajmp	pca_int_pwm_divide_done			; Yes - branch forward
 
@@ -2925,9 +2889,9 @@ pca_int_fall:
 	subb	A, #28
 	mov	A, Temp6
 	subb A, #2
-	jc	($+5)						; No - proceed
+	jc	($+4)						; No - proceed
 
-	ljmp	pca_int_set_timeout				; Yes - ignore pulse
+	ajmp	pca_int_set_timeout				; Yes - ignore pulse
 
 	; Check if below 800us (in order to ignore false pulses)
 	mov	A, Temp6
@@ -2996,8 +2960,11 @@ pca_int_ppm_bidir_fwd:
 pca_int_ppm_bidir_dir_change:
 	All_nFETs_Off
 	All_pFETs_Off
-	setb	EA
+	jb	Flags1.DIRECT_STARTUP_PHASE, ($+5)	; Do not brake when in direct start
 
+	setb	Flags0.DIR_CHANGE_BRAKE			; Set brake flag
+
+	setb	EA
 pca_int_ppm_bidir_dir_set:
 	mov	C, Bit_Access_Int.0
 ENDIF
@@ -3119,6 +3086,7 @@ pca_int_limited:
 	mov	New_Rcp, Temp1				; Store new pulse length
 	setb	Flags2.RCP_UPDATED		 	; Set updated flag
 	jb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
+
 	ajmp	pca_int_set_timeout			; No - skip measurements
 
 	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
@@ -3137,6 +3105,7 @@ pca_int_set_timeout:
 
 pca_int_ppm_timeout_set:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
+
 	ajmp pca_int_exit				; Yes - exit
 
 	mov	A, #((1 SHL RCP_PWM_FREQ_1KHZ)+(1 SHL RCP_PWM_FREQ_2KHZ)+(1 SHL RCP_PWM_FREQ_4KHZ)+(1 SHL RCP_PWM_FREQ_8KHZ)+(1 SHL RCP_PWM_FREQ_12KHZ))
@@ -3596,7 +3565,7 @@ governor_activate:
 	mov	Temp2, #0C7h
 	mov	Temp3, Comm_Period4x_L		; Load comm period
 	mov	Temp4, Comm_Period4x_H		
-	; Set speed range. Bare Comm_Period4x corresponds to 400k rpm, because it is 500n units
+	; Set speed range. Bare Comm_Period4x corresponds to 400k eRPM, because it is 500n units
 	clr	C
 	mov	A, Temp4
 	rrc	A
@@ -3973,6 +3942,57 @@ calc_governor_int_corr_exit:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
+; Set pwm limit low rpm
+;
+; No assumptions
+;
+; Sets power limit for low rpms and disables demag for low rpms
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+set_pwm_limit_low_rpm:
+	; Set pwm limit and demag disable for low rpms
+	mov	Temp1, #0FFh					; Default full power
+	clr	Flags0.DEMAG_ENABLED			; Default disabled
+	mov	A, Flags1
+	anl	A, #((1 SHL SETTLE_PHASE)+(1 SHL STEPPER_PHASE)+(1 SHL DIRECT_STARTUP_PHASE)+(1 SHL INITIAL_RUN_PHASE))
+	jnz	set_pwm_limit_low_rpm_exit		; Exit if any startup phase set
+
+	setb	Flags0.DEMAG_ENABLED			; Enable demag
+	clr	C
+	mov	A, Comm_Period4x_H
+	subb	A, #08h						; ~39063 eRPM
+	jc	($+4)						; If speed above - branch
+
+	clr	Flags0.DEMAG_ENABLED			; Disable demag
+
+	mov	A, Comm_Period4x_H
+	jz	set_pwm_limit_low_rpm_exit		; Avoid divide by zero
+
+	mov	A, #255						; Divide 255 by Comm_Period4x_H
+	mov	B, Comm_Period4x_H
+	div	AB
+	mov	B, Low_Rpm_Pwr_Slope			; Multiply by slope
+	mul	AB
+	mov	Temp1, A						; Set new limit				
+	xch	A, B
+	jz	($+4)						; Limit to max
+	
+	mov	Temp1, #0FFh				
+
+	clr	C
+	mov	A, Temp1						; Limit to min
+	subb	A, Pwm_Spoolup_Beg
+	jnc	set_pwm_limit_low_rpm_exit
+
+	mov	Temp1, Pwm_Spoolup_Beg				
+
+set_pwm_limit_low_rpm_exit:
+	mov	Pwm_Limit_Low_Rpm, Temp1				
+	ret
+	
+	
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
 ; Measure lipo cells
 ;
 ; No assumptions
@@ -4163,7 +4183,13 @@ check_temp_voltage_and_limit_power:
 	jc	check_voltage_start			; No - check voltage
 
 	mov	Adc_Conversion_Cnt, #0		; Yes - temperature check. Reset counter
-	mov	A, Temp2					; Is temperature reading below 256?
+	mov	A, Temp2					; Move ADC MSB to Temp3
+	mov	Temp3, A
+	mov	Temp2, #Pgm_Enable_Temp_Prot	; Is temp protection enabled?
+	mov	A, @Temp2
+	jz	temp_check_exit			; No - branch
+
+	mov	A, Temp3					; Is temperature reading below 256?
 	jnz	temp_average_inc_dec		; No - proceed
 
 	mov	A, Current_Average_Temp		; Yes -  decrement average
@@ -4259,6 +4285,17 @@ check_voltage_good:
 	jz	check_voltage_lim			; If limit max - branch
 
 	inc	Pwm_Limit					; Increment limit
+IF MODE == 2	; Multi
+	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
+	mov	A, @Temp1				
+	cjne	A, #3, check_voltage_lim
+
+	mov  A, Pwm_Limit
+	add	A, #4			
+	jc	check_voltage_lim			; If limit max - branch
+
+	mov	Pwm_Limit, A				; Increment limit two steps more
+ENDIF
 
 check_voltage_lim:
 	mov	Temp1, Pwm_Limit			; Set limit
@@ -4284,10 +4321,39 @@ check_voltage_spoolup_lim:
 	mov	Pwm_Limit, Pwm_Limit_Spoolup	; Set pwm limit to spoolup limit during ramp (to avoid governor integral buildup)
 
 check_voltage_exit:
+IF MODE == 0	; Main 
 	mov  Current_Pwm_Limited, Temp1
 ENDIF
-	; Set adc mux for next conversion
+IF MODE == 2	; Multi
+	; Set current pwm limited if closed loop mode
+	mov	Temp2, #Pgm_Gov_Mode			; Governor mode?
+	cjne	@Temp2, #4, check_voltage_set_pwm	; Yes - branch
+	ajmp	check_voltage_pwm_done
+
+check_voltage_set_pwm:
+	; Limit pwm for low rpms
 	clr	C
+	mov	A, Temp1					; Check against limit
+	subb	A, Pwm_Limit_Low_Rpm
+	jc	($+4)					; If current pwm below limit - branch
+
+	mov	Temp1, Pwm_Limit_Low_Rpm		; Limit pwm
+
+	mov  Current_Pwm_Limited, Temp1
+check_voltage_pwm_done:
+ENDIF
+ENDIF
+IF MODE == 1	; Tail
+	; Increase pwm limit
+	mov  A, Pwm_Limit
+	cpl	A			
+	jz	check_voltage_lim			; If limit max - branch
+
+	inc	Pwm_Limit					; Increment limit
+
+check_voltage_lim:
+ENDIF
+	; Set adc mux for next conversion
 	mov	A, Adc_Conversion_Cnt		; Is next conversion for temperature?
 	cjne	A, #(TEMP_CHECK_RATE-1), check_voltage_ret
 
@@ -4435,17 +4501,17 @@ stepper_step_set:
 calc_next_comm_timing_start:	; Entry point for startup
 	mov	Temp1, Wt_Stepper_Step_L	; Set up stepper step wait 
 	mov	Temp2, Wt_Stepper_Step_H
-	jmp	read_timer
+	jmp	calc_next_comm_read_timer
 
 calc_next_comm_timing:		; Entry point for run phase
 	mov	Temp1, Wt_Advance_L	; Set up advance timing wait 
 	mov	Temp2, Wt_Advance_H
-read_timer:
+calc_next_comm_read_timer:
 	; Set up next wait
 	mov	TMR3CN, #00h		; Timer3 disabled
 	clr	C
 	clr	A
-	subb	A, Temp1			; Set wait to zero cross scan value
+	subb	A, Temp1			; Set wait advance value
 	mov	TMR3L, A
 	clr	A
 	subb	A, Temp2		
@@ -4469,33 +4535,62 @@ read_timer:
 	mov	A, Temp2
 	subb	A, Temp4
 	mov	Temp2, A
-	; Calculate next zero cross scan timeout 
-	mov	Temp3, Comm_Period4x_L	; Comm_Period4x(-l-h-x) holds the time of 4 commutations
+	; Calculate new commutation time 
+	mov	Temp3, Comm_Period4x_L	; Comm_Period4x(-l-h) holds the time of 4 commutations
 	mov	Temp4, Comm_Period4x_H
+	mov	Temp5, Comm_Period4x_L	; Copy variables
+	mov	Temp6, Comm_Period4x_H
+	mov	Temp7, #4				; Divide Comm_Period4x 4 times as default
+	mov	Temp8, #2				; Divide new commutation time 2 times as default
 	clr	C
-	mov	A, Temp4					
+	mov	A, Comm_Period4x_H
+	subb	A, #04h
+	jc	($+4)
+
+	dec	Temp7				; Reduce averaging time constant for low speeds
+	dec	Temp8
+
+	clr	C
+	mov	A, Comm_Period4x_H
+	subb	A, #08h
+	jc	($+4)
+
+	dec	Temp7				; Reduce averaging time constant more for even lower speeds
+	dec	Temp8
+
+calc_next_comm_avg_period_div:
+	clr	C
+	mov	A, Temp6					
 	rrc	A					; Divide by 2
 	mov	Temp6, A	
-	mov	A, Temp3				
-	rrc	A
-	mov	Temp5, A
-	clr	C
-	mov	A, Temp6				
-	rrc	A					; Divide by 2 again
-	mov	Temp6, A
 	mov	A, Temp5				
 	rrc	A
 	mov	Temp5, A
+	djnz	Temp7, calc_next_comm_avg_period_div
+
 	clr	C
 	mov	A, Temp3
-	subb	A, Temp5				; Subtract a quarter
+	subb	A, Temp5				; Subtract a fraction
 	mov	Temp3, A
 	mov	A, Temp4
 	subb	A, Temp6
 	mov	Temp4, A
+	mov	A, Temp8				; Divide new time
+	jz	calc_next_comm_new_period_div_done
 
+calc_next_comm_new_period_div:
+	clr	C
+	mov	A, Temp2					
+	rrc	A					; Divide by 2
+	mov	Temp2, A	
+	mov	A, Temp1				
+	rrc	A
+	mov	Temp1, A
+	djnz	Temp8, calc_next_comm_new_period_div
+
+calc_next_comm_new_period_div_done:
 	mov	A, Temp3
-	add	A, Temp1				; Add the new time
+	add	A, Temp1				; Add the divided new time
 	mov	Temp3, A
 	mov	A, Temp4
 	addc	A, Temp2
@@ -4541,26 +4636,14 @@ setup_zc_scan_wait:
 ;
 ; No assumptions
 ;
-; Waits for the advance timing to elapse, waits one zero cross
-; wait and sets up the next zero cross wait
+; Waits for the advance timing to elapse and sets up the next zero cross wait
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_advance_timing:	
-	mov	Temp8, #1				; Default one zero cross scan wait	(prevents squealing that can happen if two are used when demag comp is off)				
-	mov	Temp1, #Pgm_Demag_Comp	; Load programmed demag compensation
-	mov	A, @Temp1				
-	dec	A
-	jz	wait_advance_timing_wait
-
-	mov	Temp8, #2				; Do two zero cross scan waits when demag comp is on (gives more correct blind advance)						
-
-wait_advance_timing_wait:
 	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_advance_timing_wait
+	ajmp	wait_advance_timing
 
 	call	setup_zc_scan_wait					; Setup wait time
-	djnz	Temp8, wait_advance_timing_wait
-
 	ret
 
 
@@ -4578,26 +4661,58 @@ calc_new_wait_times:
 	mov	Temp1, #Pgm_Comm_Timing	; Load timing setting
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
+	clr	C
+	mov	A, Demag_Detected_Metric	; Check demag metric
+	subb	A, #130
+	jc	($+3)
+
+	inc	Temp8				; Increase timing
+
+	clr	C
+	mov	A, Demag_Detected_Metric
+	subb	A, #160
+	jc	($+3)
+
+	inc	Temp8				; Increase timing again
+
+	clr	C
+	mov	A, Temp8				; Limit timing to max
+	subb	A, #6
+	jc	($+4)
+
+	mov	Temp8, #5				; Set timing to max
+
 	mov	Temp7, #(COMM_TIME_RED SHL 1)	
-IF MODE == 2
-	mov	Temp1, Comm_Period4x_H	; Higher reduction for higher speed in MULTI mode
-	clr	C					; A COMM_TIME_RED of 6 gives good acceleration performance on pancake motor at high voltage
-	mov	A, Temp1				; A COMM_TIME_RED of 10 gives good high speed performance for a small motor
-	subb	A, #4
-	jc	calc_new_wait_red_set
-
-	mov	Temp1, #4
-
-calc_new_wait_red_set:
 	clr	C
-	mov	A, Temp1
-	rlc	A
-	mov	Temp1, A
+	mov	A, Comm_Period4x_H		; More reduction for higher rpms
+	subb	A, #3				; 104k eRPM
+	jnc	calc_new_wait_per_low
+
+	inc	Temp7				; Increase by 2
+	inc	Temp7
+
 	clr	C
-	mov	A, Temp7
-	subb	A, Temp1
-	mov	Temp7, A
-ENDIF
+	jnb	Flags2.PGM_PWMOFF_DAMPED, ($+5)	; More reduction for damped
+
+	inc	Temp7				; Increase by 2
+	inc	Temp7
+
+calc_new_wait_per_low:
+	clr	C
+	mov	A, Comm_Period4x_H		; More reduction for higher rpms
+	subb	A, #2				; 156k eRPM
+	jnc	calc_new_wait_per_high
+
+	inc	Temp7				; Increase by 2 more
+	inc	Temp7
+
+	clr	C
+	jnb	Flags2.PGM_PWMOFF_DAMPED, ($+5)	; More reduction for damped
+
+	inc	Temp7				; Increase by 2
+	inc	Temp7
+
+calc_new_wait_per_high:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, calc_new_wait_dir_start_set	; Set timing for direct start
 
 	mov	Temp8, #3				; Set medium timing
@@ -4659,24 +4774,31 @@ adjust_timing:
 	mov	A, Temp8				
 	jb	ACC.0, adjust_timing_two_steps	; If an odd number - branch
 
-	mov	A, Temp1				; Add 7.5° and store in Temp1/2
+	mov	A, Temp1				; Add 7.5deg and store in Temp1/2
 	add	A, Temp5
 	mov	Temp1, A
 	mov	A, Temp2
 	addc	A, Temp6
 	mov	Temp2, A
-	mov	A, Temp5				; Store 7.5° in Temp3/4
+	mov	A, Temp5				; Store 7.5deg in Temp3/4
 	mov	Temp3, A
 	mov	A, Temp6			
 	mov	Temp4, A
 	jmp	store_times_up_or_down
 
 adjust_timing_two_steps:
-	mov	A, Temp1				; Add 15° and store in Temp1/2
+	mov	A, Temp1				; Add 15deg and store in Temp1/2
 	add	A, Temp1
 	mov	Temp1, A
 	mov	A, Temp2
 	addc	A, Temp2
+	mov	Temp2, A
+	clr	C
+	mov	A, Temp1
+	subb	A, #(COMM_TIME_MIN SHL 1)
+	mov	Temp1, A
+	mov	A, Temp2
+	subb	A, #0
 	mov	Temp2, A
 	mov	Temp3, #(COMM_TIME_MIN SHL 1)	; Store minimum time in Temp3/4
 	clr	A
@@ -4689,20 +4811,20 @@ store_times_up_or_down:
 	jc	store_times_decrease	; No - branch
 
 store_times_increase:
-	mov	Wt_Comm_L, Temp3		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	mov	Wt_Comm_L, Temp3		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	mov	Wt_Comm_H, Temp4
-	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15° nominal)
+	mov	Wt_Advance_L, Temp1		; New commutation advance time (~15deg nominal)
 	mov	Wt_Advance_H, Temp2
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
 store_times_decrease:
-	mov	Wt_Comm_L, Temp1		; Now commutation time (~60°) divided by 4 (~15° nominal)
+	mov	Wt_Comm_L, Temp1		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	mov	Wt_Comm_H, Temp2
-	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15° nominal)
+	mov	Wt_Advance_L, Temp3		; New commutation advance time (~15deg nominal)
 	mov	Wt_Advance_H, Temp4
-	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5°)
+	mov	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
 	mov	Wt_Zc_Scan_H, Temp6
 	ret
 
@@ -4714,22 +4836,37 @@ store_times_decrease:
 ; No assumptions
 ;
 ; Waits for the zero cross scan wait time to elapse
-; Also sets up timer 3 to wait the zero cross scan timeout time
+; Also sets up timer 3 for the zero cross scan timeout time
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_before_zc_scan:	
 	jnb	Flags0.T3_PENDING, ($+5)
 	ajmp	wait_before_zc_scan
 
-	mov	TMR3CN, #00h		; Timer3 disabled
+	clr	C
+	mov	A, Wt_Zc_Scan_L		; Set timeout to two zero cross scan waits (15deg)
+	rlc	A
+	mov	Temp1, A
+	mov	A, Wt_Zc_Scan_H
+	rlc	A
+	mov	Temp2, A
+	mov	A, Flags1
+	anl	A, #((1 SHL DIRECT_STARTUP_PHASE)+(1 SHL INITIAL_RUN_PHASE))
+	jz	wait_before_zc_timeout_selected		
+
+	mov	Temp1, Comm_Period4x_L	; Set long timeout when starting
+	mov	Temp2, Comm_Period4x_H
+
+wait_before_zc_timeout_selected:
+	mov	TMR3CN, #00h			; Timer3 disabled
 	clr	C
 	clr	A
-	subb	A, Comm_Period4x_L	; Set wait to zero comm period 4x value
+	subb	A, Temp1				; Set timeout
 	mov	TMR3L, A
 	clr	A
-	subb	A, Comm_Period4x_H		
+	subb	A, Temp2		
 	mov	TMR3H, A
-	mov	TMR3CN, #04h		; Timer3 enabled
+	mov	TMR3CN, #04h			; Timer3 enabled
 	setb	Flags0.T3_PENDING
 	ret
 
@@ -4745,20 +4882,32 @@ wait_before_zc_scan:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_for_comp_out_low:
-	mov	Comp_Wait_Reads, #0
+	setb	Flags0.DEMAG_DETECTED		; Set demag detected flag as default
+	mov	Comparator_Read_Cnt, #0		; Reset number of comparator reads
 	mov	Bit_Access, #00h			; Desired comparator output
 	jmp	wait_for_comp_out_start
 
 wait_for_comp_out_high:
-	mov	Comp_Wait_Reads, #0
+	setb	Flags0.DEMAG_DETECTED		; Set demag detected flag as default
+	mov	Comparator_Read_Cnt, #0		; Reset number of comparator reads
 	mov	Bit_Access, #40h			; Desired comparator output
 
 wait_for_comp_out_start:
-	setb	EA						; Enable interrupts
-	inc	Comp_Wait_Reads
-	jb	Flags0.T3_PENDING, ($+4)		; Has zero cross scan timeout elapsed?
-	ret							; Yes - return
+	mov	A, Flags1					; Clear demag detected flag if start phases
+	anl	A, #((1 SHL DIRECT_STARTUP_PHASE)+(1 SHL INITIAL_RUN_PHASE))
+	jz	($+4)
+		
+	clr	Flags0.DEMAG_DETECTED
 
+	setb	EA						; Enable interrupts
+	jb	Flags0.T3_PENDING, wait_for_comp_out_not_timed_out; Has zero cross scan timeout elapsed?
+
+	mov	A, Comparator_Read_Cnt		; Check that comparator has been read
+	jz	wait_for_comp_out_not_timed_out	; If not read - branch
+
+	ret							; Return
+
+wait_for_comp_out_not_timed_out:
 	; Set default comparator response times
 	mov	CPT0MD, #0				; Set fast response (100ns) as default		
 IF COMP1_USED==1			
@@ -4773,32 +4922,22 @@ ENDIF
 	mov	Temp1, A
 	inc	Temp1					; Add one to be sure it is always larger than zero
 	jz	comp_wait_on_comp_able		; If minimum number of readings - jump directly to reading
-	; For damped mode, do fewer comparator readings (since comparator info is primarily only available in the pwm on period)
-	jnb	Flags2.PGM_PWMOFF_DAMPED, comp_wait_set_max_readings
 
 	clr	C
-	rrc	A						; Divide by 4 again
-	clr	C
-	rrc	A
-	mov	Temp1, A
-	inc	Temp1					; Add one to be sure it is always larger than zero
-
-comp_wait_set_max_readings:
-	clr	C
-	mov	A, Temp1					; Limit to a max of 10
-	subb	A, #10
+	mov	A, Temp1					; Limit to a max of 6
+	subb	A, #6
 	jc	($+4)
 
-	mov	Temp1, #10
+	mov	Temp1, #6
 
 	jnb	Flags2.PGM_PWM_HIGH_FREQ, comp_wait_set_response_time	; Jump if pwm frequency is low
 
 	clr	C
-	mov	A, Temp1					; Limit to a max of 4
-	subb	A, #4
+	mov	A, Temp1					; Limit to a max of 3
+	subb	A, #3
 	jc	($+4)
 
-	mov	Temp1, #4
+	mov	Temp1, #3
 
 comp_wait_set_response_time:
 	clr	C
@@ -4821,10 +4960,15 @@ IF COMP1_USED==1
 ENDIF
 
 comp_wait_on_comp_able:
-	jb	Flags0.T3_PENDING, ($+6)			; Has zero cross scan timeout elapsed?
+	jb	Flags0.T3_PENDING, comp_wait_on_comp_able_not_timed_out	; Has zero cross scan timeout elapsed?
+
+	mov	A, Comparator_Read_Cnt			; Check that comparator has been read
+	jz	comp_wait_on_comp_able_not_timed_out	; If not read - branch
+
 	setb	EA							; Enable interrupts
 	ret								; Yes - return
 
+comp_wait_on_comp_able_not_timed_out:
 	mov	Temp2, #COMP_PWM_HIGH_ON_DELAY	; Wait time after pwm has been switched on (motor wire electrical settling)
 	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
 	mov	Temp2, #COMP_PWM_LOW_ON_DELAY
@@ -4837,9 +4981,8 @@ comp_wait_on_comp_able:
 	mov	Temp2, #COMP_PWM_HIGH_OFF_DELAY	; Wait time after pwm has been switched off (motor wire electrical settling)
 	jb	Flags2.PGM_PWM_HIGH_FREQ, ($+5)
 	mov	Temp2, #COMP_PWM_LOW_OFF_DELAY	
-	jnb	Flags1.CURR_PWMOFF_COMP_ABLE, comp_wait_on_comp_able	; If comparator is not usable in pwm off - go back
 
-pwm_wait_startup:						
+pwm_wait_startup:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, pwm_wait	; Set a long delay from pwm on/off events during direct startup
 
 	mov	Temp2, #120
@@ -4847,22 +4990,36 @@ pwm_wait:
 	clr	C
 	mov	A, TL1
 	subb	A, Temp2
-IF MODE == 1 AND DAMPED_MODE_ENABLE == 1; Assume same pwm cycle for fast tail escs
-	jb	Flags1.DIRECT_STARTUP_PHASE, ($+5)
-	jc	pwm_wait
-	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle during direct start
-ELSE
-	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle for slower escs
-ENDIF
+	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle
 
-comp_read:
+	inc	Comparator_Read_Cnt			; Increment comparator read count
 	Read_Comp_Out 					; Read comparator output
 	cpl	A
 	anl	A, #40h
-	cjne	A, Bit_Access, ($+5)		; If comparator output is correct - proceed
+	cjne	A, Bit_Access, comp_read_ok	; If comparator output is correct - proceed
 
+	jb	Flags0.DEMAG_DETECTED, ($+5)	
+	ajmp	wait_for_comp_out_start		; If comparator output is not correct, and timeout already extended - go back and restart
+
+	clr	Flags0.DEMAG_DETECTED		; Clear demag detected flag
+	mov	TMR3CN, #00h				; Timer3 disabled
+	clr	C
+	clr	A
+	subb	A, Comm_Period4x_L			; Set timeout to zero comm period 4x value
+	mov	TMR3L, A
+	clr	A
+	subb	A, Comm_Period4x_H		
+	mov	TMR3H, A
+	mov	TMR3CN, #04h				; Timer3 enabled
+	setb	Flags0.T3_PENDING
+	anl	TMR3CN, #07Fh				; Clear interrupt flag in case there are pending interrupts
 	ajmp	wait_for_comp_out_start		; If comparator output is not correct - go back and restart
 
+comp_read_ok:
+	jnb	Flags0.DEMAG_DETECTED, ($+5)	; Do not accept correct comparator output if it is demag	
+	ajmp	wait_for_comp_out_start
+
+comp_read_ok_accepted:
 	djnz	Temp1, comp_wait_on_comp_able	; Decrement readings counter - repeat comparator reading if not zero
 
 	setb	EA						; Enable interrupts
@@ -4879,23 +5036,6 @@ comp_read:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 evaluate_comparator_integrity:
-	clr	Flags0.DEMAG_DETECTED			; Clear demag detected flag
-	; Check if demag compensation is enabled
-	mov	Temp1, #Pgm_Demag_Comp			; Load programmed demag compensation
-	mov	A, @Temp1				
-	dec	A
-	jz	eval_comp_no_demag
-
-	; Check if a demag situation has occurred
-	mov	A, Comp_Wait_Reads				; Check if there were no waits (there shall be some). If none a demag situation has occurred
-	dec	A
-	jnz	eval_comp_no_demag
-
-	jb	Flags1.DIRECT_STARTUP_PHASE, eval_comp_no_demag	; Do not set demag flag during direct start
-
-	setb	Flags0.DEMAG_DETECTED			; Set demag detected flag
-
-eval_comp_no_demag:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, eval_comp_check_timeout
 
 	inc	Direct_Startup_Ok_Cnt			; Increment ok counter
@@ -4906,6 +5046,8 @@ eval_comp_no_demag:
 
 eval_comp_check_timeout:
 	jb	Flags0.T3_PENDING, eval_comp_exit	; Has timeout elapsed?
+	jb	Flags0.DEMAG_DETECTED, eval_comp_exit	; Do not exit run mode if it is a demag situation
+	jb	Flags0.DIR_CHANGE_BRAKE, eval_comp_exit	; Do not exit run mode if it is a direction change brake
 	dec	SP							; Routine exit without "ret" command
 	dec	SP
 	ljmp	run_to_wait_for_power_on			; Yes - exit run mode
@@ -4947,41 +5089,43 @@ setup_comm_wait:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_for_comm: 
-	; Increment or reset consecutive count
-	inc	Demag_Consecutive_Cnt
-	jb	Flags0.DEMAG_DETECTED, ($+6)
+	call	setup_comm_wait		; Setup commutation wait
+	; Update demag metric
+	mov	Temp1, #0
+	jnb	Flags0.DEMAG_ENABLED, ($+8); If demag disabled - branch
+	jnb	Flags0.DEMAG_DETECTED, ($+5)
 
-	mov	Demag_Consecutive_Cnt, #0
+	mov	Temp1, #1
 
-	; Check if a demag situation has occurred
-	jnb	Flags0.DEMAG_DETECTED, wait_for_comm_wait; Demag detected?
+	mov	A, Demag_Detected_Metric	; Sliding average of 8, 256 when demag and 0 when not. Limited to minimum 120
+	mov	B, #7
+	mul	AB					; Multiply by 7
+	mov	Temp2, A
+	mov	A, B					; Add new value for current demag status
+	add	A, Temp1				
+	mov	B, A
+	mov	A, Temp2
+	mov	C, B.0				; Divide by 8
+	rrc	A					
+	mov	C, B.1
+	rrc	A
+	mov	C, B.2
+	rrc	A
+	mov	Demag_Detected_Metric, A
+	clr	C
+	subb	A, #120				; Limit to minimum 120
+	jnc	($+5)
 
-	; Load programmed demag compensation
-	mov	Temp1, #Pgm_Demag_Comp_Power_Decoded	; Yes - load programmed demag compensation power decoded
-	mov	A, @Temp1				
-	mov	Temp8, A							; Store in Temp8
+	mov	Demag_Detected_Metric, #120
 
-	; Check for power off
-	cjne	Temp8, #1, wait_for_comm_blind
+	clr	C
+	mov	A, Demag_Detected_Metric	; Check demag metric
+	subb	A, Demag_Pwr_Off_Thresh
+	jc	wait_for_comm_wait		; Cut power if many consecutive demags. This will help retain sync during hard accelerations
 
-	setb	Flags0.DEMAG_CUT_POWER				; Turn off motor power
+	setb	Flags0.DEMAG_CUT_POWER	; Set demag power cut flag
 	All_nFETs_off
 
-	; Wait a blind wait
-wait_for_comm_blind:
-	call	setup_zc_scan_wait					; Setup a zero cross scan wait (7.5 deg)
-wait_demag_default_zc:	
-	jnb	Flags0.T3_PENDING, ($+5)
-	ajmp	wait_demag_default_zc
-
-	; Check for power off
-	cjne	Temp8, #2, wait_for_comm_setup
-
-	setb	Flags0.DEMAG_CUT_POWER				; Turn off motor power
-	All_nFETs_off
-
-wait_for_comm_setup:
-	call	setup_comm_wait					; Setup commutation wait
 wait_for_comm_wait:
 	jnb Flags0.T3_PENDING, ($+5)			
 	ajmp	wait_for_comm_wait					
@@ -5001,29 +5145,24 @@ wait_for_comm_wait:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 comm1comm2:	
 	clr 	EA					; Disable all interrupts
-	BpFET_off					; Bp off
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm12_damp
-	jmp	comm12_nondamp
-comm12_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_cnfet_apfet_on_fast
-	jb	Flags2.PGM_PWMOFF_DAMPED_LIGHT, comm12_nondamp
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_cnfet_apfet_on_safe	
-ENDIF
+	All_pFETs_off				; All pfets off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm12_nondamp
+	mov	DPTR, #pwm_cnfet_apfet_on	
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm12_nondamp		; If pwm off not damped - branch
-	CpFET_off				
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm12_nondamp:
 IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	mov	A, Comm_Period4x_H
+	anl	A, #0FCh				; Check if comm period is less than 4
+	jz	comm12_prech_done
 	AnFET_on				
 	mov	A, #HIGH_DRIVER_PRECHG_TIME
 	djnz ACC,	$
 	AnFET_off				
 	mov	A, #PFETON_DELAY
 	djnz ACC,	$
+comm12_prech_done:
 ENDIF
 	ApFET_on					; Ap on
 	Set_Comp_Phase_B 			; Set comparator to phase B
@@ -5032,15 +5171,9 @@ ENDIF
 
 comm2comm3:	
 	clr 	EA					; Disable all interrupts
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm23_damp
-	jmp	comm23_nondamp
-comm23_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_bnfet_apfet_on_fast
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_bnfet_apfet_on_safe	
-ENDIF
+	CnFET_off					; Cn off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm23_nondamp
+	mov	DPTR, #pwm_bnfet_apfet_on	
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm23_nfet			; If pwm off not damped - branch
 	BpFET_off				
 	CpFET_off				
@@ -5050,7 +5183,6 @@ ENDIF
 comm23_nondamp:
 	mov	DPTR, #pwm_bfet_on	
 comm23_nfet:
-	CnFET_off					; Cn off
 	jnb	Flags0.PWM_ON, comm23_cp	; Is pwm on?
 	BnFET_on					; Yes - Bn on
 comm23_cp:
@@ -5060,29 +5192,24 @@ comm23_cp:
 
 comm3comm4:	
 	clr 	EA					; Disable all interrupts
-	ApFET_off					; Ap off
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm34_damp
-	jmp	comm34_nondamp
-comm34_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_bnfet_cpfet_on_fast
-	jb	Flags2.PGM_PWMOFF_DAMPED_LIGHT, comm34_nondamp
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_bnfet_cpfet_on_safe
-ENDIF
+	All_pFETs_off				; All pfets off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm34_nondamp
+	mov	DPTR, #pwm_bnfet_cpfet_on
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm34_nondamp		; If pwm off not damped - branch
-	BpFET_off				
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm34_nondamp:
 IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	mov	A, Comm_Period4x_H
+	anl	A, #0FCh				; Check if comm period is less than 4
+	jz	comm34_prech_done
 	CnFET_on				
 	mov	A, #HIGH_DRIVER_PRECHG_TIME
 	djnz ACC,	$
 	CnFET_off				
 	mov	A, #PFETON_DELAY
 	djnz ACC,	$
+comm34_prech_done:
 ENDIF
 	CpFET_on					; Cp on
 	Set_Comp_Phase_A 			; Set comparator to phase A
@@ -5091,15 +5218,9 @@ ENDIF
 
 comm4comm5:	
 	clr 	EA					; Disable all interrupts
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm45_damp
-	jmp	comm45_nondamp
-comm45_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_anfet_cpfet_on_fast
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_anfet_cpfet_on_safe
-ENDIF
+	BnFET_off					; Bn off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm45_nondamp
+	mov	DPTR, #pwm_anfet_cpfet_on
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm45_nfet			; If pwm off not damped - branch
 	ApFET_off				
 	BpFET_off				
@@ -5109,7 +5230,6 @@ ENDIF
 comm45_nondamp:
 	mov	DPTR, #pwm_afet_on
 comm45_nfet:
-	BnFET_off					; Bn off
 	jnb	Flags0.PWM_ON, comm45_cp	; Is pwm on?
 	AnFET_on					; Yes - An on
 comm45_cp:
@@ -5119,29 +5239,24 @@ comm45_cp:
 
 comm5comm6:	
 	clr 	EA					; Disable all interrupts
-	CpFET_off					; Cp off
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm56_damp
-	jmp	comm56_nondamp
-comm56_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_anfet_bpfet_on_fast
-	jb	Flags2.PGM_PWMOFF_DAMPED_LIGHT, comm56_nondamp
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_anfet_bpfet_on_safe
-ENDIF
+	All_pFETs_off				; All pfets off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm56_nondamp
+	mov	DPTR, #pwm_anfet_bpfet_on
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm56_nondamp		; If pwm off not damped - branch
-	ApFET_off				
 	mov	A, #NFETON_DELAY		; Delay
 	djnz ACC,	$
 comm56_nondamp:
 IF HIGH_DRIVER_PRECHG_TIME NE 0	; Precharge high side gate driver
+	mov	A, Comm_Period4x_H
+	anl	A, #0FCh				; Check if comm period is less than 4
+	jz	comm56_prech_done
 	BnFET_on				
 	mov	A, #HIGH_DRIVER_PRECHG_TIME
 	djnz ACC,	$
 	BnFET_off				
 	mov	A, #PFETON_DELAY
 	djnz ACC,	$
+comm56_prech_done:
 ENDIF
 	BpFET_on					; Bp on
 	Set_Comp_Phase_C 			; Set comparator to phase C
@@ -5150,15 +5265,9 @@ ENDIF
 
 comm6comm1:	
 	clr 	EA					; Disable all interrupts
-	jb	Flags2.PGM_PWMOFF_DAMPED, comm61_damp
-	jmp	comm61_nondamp
-comm61_damp:
-IF DAMPED_MODE_ENABLE == 0
-	mov	DPTR, #pwm_cnfet_bpfet_on_fast
-ENDIF
-IF DAMPED_MODE_ENABLE == 1
-	mov	DPTR, #pwm_cnfet_bpfet_on_safe
-ENDIF
+	AnFET_off					; An off
+	jnb	Flags2.PGM_PWMOFF_DAMPED, comm61_nondamp
+	mov	DPTR, #pwm_cnfet_bpfet_on
 	jnb	Flags1.CURR_PWMOFF_DAMPED, comm61_nfet			; If pwm off not damped - branch
 	ApFET_off				
 	CpFET_off				
@@ -5168,7 +5277,6 @@ ENDIF
 comm61_nondamp:
 	mov	DPTR, #pwm_cfet_on
 comm61_nfet:
-	AnFET_off					; An off
 	jnb	Flags0.PWM_ON, comm61_cp	; Is pwm on?
 	CnFET_on					; Yes - Cn on
 comm61_cp:
@@ -5176,22 +5284,20 @@ comm61_cp:
 	mov	Comm_Phase, #1
 
 comm_exit:
-	setb	EA					; Enable all interrupts
-	mov	Temp1, #Pgm_Demag_Comp	; Check demag comp setting
-	mov	A, @Temp1	
-	clr	C
-	subb	A, #2				; Check whether power shall be kept off upon consecutive demgs			
-	jc	comm_restore_power		; Less than value - branch
+IF MODE >= 1	; Tail or multi
+	jnb	Flags0.DIR_CHANGE_BRAKE, comm_dir_change_done	; Is it a direction change?
 
-	clr	C
-	mov	A, Demag_Consecutive_Cnt	; Check consecutive demags
-	subb	A, #3
-	jnc	comm_return			; Do not reapply power if many consecutive demags. This will help retain sync during hard accelerations
+	call	switch_power_off		; Switch off power
+	mov	A, #NFETON_DELAY		; Delay
+	djnz ACC,	$
+	mov	A, #PFETON_DELAY		; Delay
+	djnz ACC,	$
+	All_pFETs_on				; All pfets on - Break
 
-comm_restore_power:
+comm_dir_change_done:
+ENDIF
 	clr	Flags0.DEMAG_CUT_POWER	; Clear demag power cut flag
-
-comm_return:
+	setb	EA					; Enable all interrupts
 	ret
 
 
@@ -5332,9 +5438,9 @@ IF MODE == 0	; Main
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_LOW_VOLTAGE_LIM
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Motor gain
+	mov	@Temp1, #0FFh	; Motor gain
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Motor idle
+	mov	@Temp1, #0FFh	; Motor idle
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_PWR
 	inc	Temp1
@@ -5355,7 +5461,7 @@ IF MODE == 0	; Main
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_STARTUP_ACCEL
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Voltage comp
+	mov	@Temp1, #0FFh	; Voltage comp
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MAIN_COMM_TIMING
 	inc	Temp1
@@ -5382,16 +5488,20 @@ IF MODE == 0	; Main
 	mov	@Temp1, #DEFAULT_PGM_BEC_VOLTAGE_HIGH
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_PPM_CENTER_THROTTLE
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_MAIN_SPOOLUP_TIME
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_ENABLE_TEMP_PROT
 ENDIF
 IF MODE == 1	; Tail
 	mov	Temp1, #Pgm_Gov_P_Gain
-	mov	@Temp1, #0xFF	; Governor P gain
+	mov	@Temp1, #0FFh	; Governor P gain
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor I gain
+	mov	@Temp1, #0FFh	; Governor I gain
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor mode
+	mov	@Temp1, #0FFh	; Governor mode
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Low voltage limit
+	mov	@Temp1, #0FFh	; Low voltage limit
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_GAIN
 	inc	Temp1
@@ -5408,21 +5518,21 @@ IF MODE == 1	; Tail
 	mov	Temp1, #Pgm_Enable_TX_Program
 	mov	@Temp1, #DEFAULT_PGM_ENABLE_TX_PROGRAM
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Main rearm start
+	mov	@Temp1, #0FFh	; Main rearm start
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor setup target
+	mov	@Temp1, #0FFh	; Governor setup target
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_RPM
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_ACCEL
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Voltage comp
+	mov	@Temp1, #0FFh	; Voltage comp
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_COMM_TIMING
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_DAMPING_FORCE
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor range
+	mov	@Temp1, #0FFh	; Governor range
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_TAIL_STARTUP_METHOD
 	inc	Temp1
@@ -5443,6 +5553,10 @@ IF MODE == 1	; Tail
 	mov	@Temp1, #DEFAULT_PGM_BEC_VOLTAGE_HIGH
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_PPM_CENTER_THROTTLE
+	inc	Temp1
+	mov	@Temp1, #0FFh	; Main spoolup time
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_ENABLE_TEMP_PROT
 ENDIF
 IF MODE == 2	; Multi
 	mov	Temp1, #Pgm_Gov_P_Gain
@@ -5456,7 +5570,7 @@ IF MODE == 2	; Multi
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_GAIN
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Motor idle
+	mov	@Temp1, #0FFh	; Motor idle
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_PWR
 	inc	Temp1
@@ -5469,21 +5583,21 @@ IF MODE == 2	; Multi
 	mov	Temp1, #Pgm_Enable_TX_Program
 	mov	@Temp1, #DEFAULT_PGM_ENABLE_TX_PROGRAM
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Main rearm start
+	mov	@Temp1, #0FFh	; Main rearm start
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor setup target
+	mov	@Temp1, #0FFh	; Governor setup target
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_RPM
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_ACCEL
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Voltage comp
+	mov	@Temp1, #0FFh	; Voltage comp
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_COMM_TIMING
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_DAMPING_FORCE
 	inc	Temp1
-	mov	@Temp1, #0xFF	; Governor range
+	mov	@Temp1, #0FFh	; Governor range
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_MULTI_STARTUP_METHOD
 	inc	Temp1
@@ -5504,6 +5618,10 @@ IF MODE == 2	; Multi
 	mov	@Temp1, #DEFAULT_PGM_BEC_VOLTAGE_HIGH
 	inc	Temp1
 	mov	@Temp1, #DEFAULT_PGM_PPM_CENTER_THROTTLE
+	inc	Temp1
+	mov	@Temp1, #0FFh	; Main spoolup time
+	inc	Temp1
+	mov	@Temp1, #DEFAULT_PGM_ENABLE_TEMP_PROT
 ENDIF
 	ret
 
@@ -5525,35 +5643,30 @@ decode_parameters:
 	; Decode damping
 	mov	Damping_Period, #9		; Set default
 	mov	Damping_On, #1
-	clr	C
 	cjne	Temp8, #2, decode_damping_3	; Look for 2
 
 	mov	Damping_Period, #5
 	mov	Damping_On, #1
 
 decode_damping_3:
-	clr	C
 	cjne	Temp8, #3, decode_damping_4	; Look for 3
 
 	mov	Damping_Period, #5
 	mov	Damping_On, #2
 
 decode_damping_4:
-	clr	C
 	cjne	Temp8, #4, decode_damping_5	; Look for 4
 
 	mov	Damping_Period, #5
 	mov	Damping_On, #3
 
 decode_damping_5:
-	clr	C
 	cjne	Temp8, #5, decode_damping_6	; Look for 5
 
 	mov	Damping_Period, #9
 	mov	Damping_On, #7
 
 decode_damping_6:
-	clr	C
 	cjne	Temp8, #6, decode_damping_done; Look for 6
 
 	mov	Damping_Period, #0
@@ -5564,34 +5677,12 @@ decode_damping_done:
 	mov	Temp1, #Pgm_Pwm_Freq	; Load pwm freq
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
-IF MODE == 0	; Main
-	clr	Flags2.PGM_PWMOFF_DAMPED_LIGHT
-	clr	C
+	clr	Flags2.PGM_PWMOFF_DAMPED
 	cjne	Temp8, #3, ($+5)
-	setb	Flags2.PGM_PWMOFF_DAMPED_LIGHT
-	clr	Flags2.PGM_PWMOFF_DAMPED_FULL
-ENDIF
-IF MODE >= 1	; Tail or multi
-	clr	Flags2.PGM_PWMOFF_DAMPED_LIGHT
-	clr	C
-	cjne	Temp8, #3, ($+5)
-	setb	Flags2.PGM_PWMOFF_DAMPED_LIGHT
-	clr	Flags2.PGM_PWMOFF_DAMPED_FULL
-	clr	C
-	cjne	Temp8, #4, ($+5)
-	setb	Flags2.PGM_PWMOFF_DAMPED_FULL
-ENDIF
-	clr	Flags2.PGM_PWMOFF_DAMPED		; Set damped flag if fully damped or damped light is set
-	mov	A, #((1 SHL PGM_PWMOFF_DAMPED_FULL)+(1 SHL PGM_PWMOFF_DAMPED_LIGHT))
-	anl	A, Flags2					; Check if any damped mode is set
-	jz	($+4)
 	setb	Flags2.PGM_PWMOFF_DAMPED
 	clr	Flags1.CURR_PWMOFF_DAMPED	; Set non damped status as start
-	jz	($+4)
-	setb	Flags1.CURR_PWMOFF_DAMPED	; Set non damped status as start if damped
-	setb	Flags1.CURR_PWMOFF_COMP_ABLE	; Set comparator usable status
-	jz	($+4)
-	clr	Flags1.CURR_PWMOFF_COMP_ABLE	; Set comparator not usable status if damped
+	cjne	Temp8, #3, ($+5)
+	setb	Flags1.CURR_PWMOFF_DAMPED	; Set damped status as start if damped
 	; Load programmed direction
 	mov	Temp1, #Pgm_Direction	
 IF MODE >= 1	; Tail or multi
@@ -5703,6 +5794,48 @@ decode_startup_power:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
+; Decode main spoolup time
+;
+; No assumptions
+;
+; Decodes main spoolup time
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+decode_main_spoolup_time:
+IF MODE == 0	; Main
+	; Decode spoolup time
+	mov	Temp1, #Pgm_Main_Spoolup_Time		
+	mov	A, @Temp1
+	mov	Temp1, A		; Store
+	jnz	($+3)		; If not zero - branch
+	
+	inc	Temp1
+
+	clr	C
+	mov	A, Temp1
+	subb	A, #17		; Limit to 17 max
+	jc	($+4)
+
+	mov	Temp1, #17
+
+	mov	A, Temp1
+	add	A, Temp1
+	add	A, Temp1		; Now 3x
+	mov	Main_Spoolup_Time_3x, A
+	add	A, Main_Spoolup_Time_3x
+	add	A, Main_Spoolup_Time_3x
+	add	A, Temp1		; Now 10x
+	mov	Main_Spoolup_Time_10x, A
+	add	A, Main_Spoolup_Time_3x
+	add	A, Temp1		
+	add	A, Temp1		; Now 15x
+	mov	Main_Spoolup_Time_15x, A
+ENDIF
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
 ; Decode demag compensation
 ;
 ; No assumptions
@@ -5714,12 +5847,20 @@ decode_demag_comp:
 	; Decode demag compensation
 	mov	Temp1, #Pgm_Demag_Comp		
 	mov	A, @Temp1				
-	dec	A	
-	mov	DPTR, #DEMAG_POWER_TABLE
-	movc A, @A+DPTR	
-	mov	Temp1, #Pgm_Demag_Comp_Power_Decoded
-	mov	@Temp1, A	
-	call	switch_power_off			; Reset DPTR
+	mov	Demag_Pwr_Off_Thresh, #255	; Set default
+	mov	Low_Rpm_Pwr_Slope, #12		; Set default
+	cjne	A, #2, decode_demag_high
+
+	mov	Demag_Pwr_Off_Thresh, #160	; Settings for demag comp low
+	mov	Low_Rpm_Pwr_Slope, #10		
+
+decode_demag_high:
+	cjne	A, #3, decode_demag_done
+
+	mov	Demag_Pwr_Off_Thresh, #130	; Settings for demag comp high
+	mov	Low_Rpm_Pwr_Slope, #5		
+
+decode_demag_done:
 	ret
 
 
@@ -5903,6 +6044,8 @@ clear_ram:
 	call	decode_throttle_rate
 	; Decode startup power
 	call	decode_startup_power
+	; Decode main spoolup time
+	call	decode_main_spoolup_time
 	; Decode demag compensation
 	call	decode_demag_comp
 	; Set BEC voltage
@@ -5935,7 +6078,9 @@ clear_ram:
 	call wait30ms
 
 	; Wait for receiver to initialize
+IF MODE <= 1	; Main or tail
 	call	wait1s
+ENDIF
 	call	wait200ms
 	call	wait200ms
 	call	wait100ms
@@ -6089,7 +6234,11 @@ program_by_tx_entry_wait_pwm:
 
 	; PPM throttle calibration and tx program entry
 throttle_high_cal_start:
+IF MODE <= 1	; Main or tail
 	mov	Temp8, #5				; Set 3 seconds wait time
+ELSE
+	mov	Temp8, #2				; Set 1 seconds wait time
+ENDIF
 throttle_high_cal:			
 	setb	Flags3.FULL_THROTTLE_RANGE	; Set range to 1000-2020us
 	call	find_throttle_gain		; Set throttle gain
@@ -6171,9 +6320,16 @@ program_by_tx_checked:
 
 arm_target_updated:
 	call wait100ms				; Wait for new throttle value
+	mov	Temp1, #RCP_STOP		; Default stop value
+	mov	Temp2, #Pgm_Direction	; Check if bidirectional operation
+	mov	A, @Temp2				
+	cjne	A, #3, ($+5)			; No - branch
+
+	mov	Temp1, #(RCP_STOP+4)	; Higher stop value for bidirectional
+
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
-	subb	A, #RCP_STOP			; Below stop?
+	subb	A, Temp1				; Below stop?
 	jc	arm_end_beep			; Yes - proceed
 
 	jmp	arming_start			; No - start over
@@ -6261,15 +6417,16 @@ IF MODE >= 1	; Tail or multi
 	mov	A, @Temp1				
 	clr	C
 	subb	A, #3
-	jz 	($+5)				; Do not wait if bidirectional operation
+	jz 	wait_for_power_on_check_timeout	; Do not wait if bidirectional operation
 ENDIF
 
 	lcall wait100ms			; Wait to see if start pulse was only a glitch
 
+wait_for_power_on_check_timeout:
 	mov	A, Rcp_Timeout_Cnt		; Load RC pulse timeout counter value
-	jnz	($+5)				; If it is not zero - proceed
+	jnz	($+4)				; If it is not zero - proceed
 
-	ljmp	measure_pwm_freq_init	; If it is zero (pulses missing) - go back to measure pwm frequency
+	ajmp	measure_pwm_freq_init	; If it is zero (pulses missing) - go back to measure pwm frequency
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -6297,7 +6454,7 @@ init_start:
 	mov	Gov_Active, A
 	mov	Flags0, A				; Clear flags0
 	mov	Flags1, A				; Clear flags1
-	mov	Demag_Consecutive_Cnt, A
+	mov	Demag_Detected_Metric, A	; Clear demag metric
 	call initialize_all_timings	; Initialize timing
 	;**** **** **** **** ****
 	; Motor start beginning
@@ -6344,6 +6501,7 @@ direct_method_start:
 	call set_startup_pwm
 	mov	Pwm_Limit, Requested_Pwm
 	mov	Pwm_Limit_Spoolup, Requested_Pwm
+	mov	Pwm_Limit_Low_Rpm, Requested_Pwm
 	setb	EA
 	clr	Flags1.SETTLE_PHASE		
 	mov	Current_Pwm_Limited, #1		; Set low pwm again after calling set_startup_pwm
@@ -6386,6 +6544,7 @@ stepper_method_start:
 	call comm6comm1			
 	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	call set_startup_pwm
+	mov	Pwm_Limit_Low_Rpm, #0FFh
 	call wait1ms
 	call comm1comm2
 	call wait1ms
@@ -6537,6 +6696,7 @@ run2:
 	call	evaluate_comparator_integrity
 	call setup_comm_wait	
 	call calc_governor_prop_error
+	call	set_pwm_limit_low_rpm
 	call wait_for_comm
 	call comm2comm3
 	call calc_next_comm_timing
@@ -6603,6 +6763,7 @@ run6:
 
 	; Check if it is direct startup
 	jnb	Flags1.DIRECT_STARTUP_PHASE, normal_run_checks
+	jb	Flags0.DIR_CHANGE_BRAKE, normal_run_checks	; If a direction change - branch
 
 	; Set spoolup power variables
 	mov	Pwm_Limit, Pwm_Spoolup_Beg		; Set initial max power
@@ -6612,16 +6773,6 @@ run6:
 	; Check startup ok counter
 	mov	Temp2, #100				; Set nominal startup parameters
 	mov	Temp3, #20
-IF MODE >= 1	; Tail or multi
-	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
-	mov	A, @Temp1				
-	cjne	A, #3, direct_start_params_set; No - branch
-
-	mov	Temp2, #30				; Set faster startup parameters for bidirectional operation
-	mov	Temp3, #5
-
-direct_start_params_set:
-ENDIF
 	clr	C
 	mov	A, Direct_Startup_Ok_Cnt		; Load ok counter
 	subb	A, Temp2					; Is counter above requirement?
@@ -6639,8 +6790,9 @@ IF MODE == 2	; Multi
 	mov	A, @Temp1				
 	cjne	A, #3, direct_start_pwm_lim_set
 
-	mov	Pwm_Limit, #0FFh			; Allow full power in bidirectional operation
+	mov	Pwm_Limit, Pwm_Spoolup_Beg
 	mov	Pwm_Limit_Spoolup, #0FFh	
+	mov	Pwm_Limit_Low_Rpm, #20h
 
 direct_start_pwm_lim_set:
 ENDIF
@@ -6659,7 +6811,8 @@ direct_start_check_rcp:
 
 normal_run_checks:
 	; Check if it is initial run phase
-	jnb	Flags1.INITIAL_RUN_PHASE, initial_run_phase_done; If not initial run phase - branch
+	jnb	Flags1.INITIAL_RUN_PHASE, initial_run_phase_done	; If not initial run phase - branch
+	jb	Flags0.DIR_CHANGE_BRAKE, initial_run_phase_done	; If a direction change - branch
 
 	; Decrement startup rotaton count
 	mov	A, Startup_Rot_Cnt
@@ -6668,7 +6821,7 @@ normal_run_checks:
 	jnz 	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
-	ljmp damped_transition			; Do damped transition if counter is zero
+	jmp damped_transition			; Do damped transition if counter is zero
 
 normal_run_check_startup_rot:
 	mov	Startup_Rot_Cnt, A			; Not zero - store counter
@@ -6681,7 +6834,6 @@ normal_run_check_startup_rot:
 	ljmp	run1						; Continue to run 
 
 	jmp	run_to_wait_for_power_on
-
 
 initial_run_phase_done:
 IF MODE == 0	; Main
@@ -6714,7 +6866,12 @@ run6_check_rcp_timeout:
 run6_check_speed:
 	clr	C
 	mov	A, Comm_Period4x_H			; Is Comm_Period4x more than 32ms (~1220 eRPM)?
-	subb	A, #0F0h
+	mov	Temp1, #0F0h				; Default minimum speed
+	jnb	Flags0.DIR_CHANGE_BRAKE, ($+5); Is it a direction change?
+
+	mov	Temp1, #60h				; Bidirectional minimum speed
+
+	subb	A, Temp1
 	jnc	run_to_wait_for_power_on		; Yes - go back to motor start
 	jmp	run1						; Go back to run 1
 
@@ -6792,6 +6949,9 @@ $include (BLHeliTxPgm.inc)			; Include source code for programming the ESC with 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
 
+; TEST code size
+;CSEG AT 1E00h		; Last code segment. Take care that there is enough space!
+;nop
 
 
 END

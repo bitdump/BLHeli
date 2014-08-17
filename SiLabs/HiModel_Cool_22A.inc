@@ -55,19 +55,19 @@ DAMPED_MODE_ENABLE		EQU	0	; Damped mode disabled
 NFETON_DELAY			EQU	40	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 COMP_PWM_HIGH_ON_DELAY	EQU	30	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
-COMP_PWM_HIGH_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
+COMP_PWM_HIGH_OFF_DELAY	EQU	60	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
 COMP_PWM_LOW_ON_DELAY	EQU	10	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
-COMP_PWM_LOW_OFF_DELAY	EQU	7	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
+COMP_PWM_LOW_OFF_DELAY	EQU	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 HIGH_DRIVER_PRECHG_TIME	EQU	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
 ADC_LIMIT_L			EQU 	133	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	109	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
-MAIN_SPOOLUP_TIME		EQU	10	; Main motor spoolup time
 
 ;**** **** **** **** ****
 ; ESC specific defaults
 ;**** **** **** **** ****
+DEFAULT_PGM_MAIN_SPOOLUP_TIME		EQU 10	; Main motor spoolup time
 DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 10 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 10 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 10 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50

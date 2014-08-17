@@ -16,7 +16,7 @@ RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
 MKDIR Output\Eep
-SET Revision=REV11_2
+SET Revision=REV12_0
 SET AtmelPath=C:\Atmel\avrassembler
 rem SET AtmelPath="C:\Dev\Atmel\AVR Tools\AvrAssembler2"
 

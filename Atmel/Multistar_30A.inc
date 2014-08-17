@@ -61,11 +61,11 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .EQU	ADC_LIMIT_H			=	0	; 4.7k/47k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
 .EQU	TEMP_LIMIT			= 	0	; No sensor. Temperature measurement ADC value for which main motor power is limited
 .EQU	TEMP_LIMIT_STEP		=	0	; No sensor. Temperature measurement ADC value increment for which main motor power is further limited
-.EQU	MAIN_SPOOLUP_TIME		=	10	; Main motor spoolup time
 
 ;**** **** **** **** ****
 ; ESC specific defaults
 ;**** **** **** **** ****
+.EQU	DEFAULT_PGM_MAIN_SPOOLUP_TIME		= 10	; Main motor spoolup time
 .EQU	DEFAULT_PGM_MAIN_STARTUP_PWR 		= 9	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 .EQU	DEFAULT_PGM_TAIL_STARTUP_PWR 		= 9	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 .EQU	DEFAULT_PGM_MULTI_STARTUP_PWR 	= 9	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
