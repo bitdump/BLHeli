@@ -13,7 +13,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=REV12_0
+SET Revision=REV12_1
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 
@@ -126,6 +126,10 @@ call:compile
 SET BESCNAME=POLARIS_THUNDER_100A
 call:compile
 SET BESCNAME=PLATINUM_PRO_30A
+call:compile
+SET BESCNAME=PLATINUM_PRO_150A
+call:compile
+SET BESCNAME=PLATINUM_50AV3
 call:compile
 SET BESCNAME=EAZY_3AV2
 call:compile

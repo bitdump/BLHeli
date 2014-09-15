@@ -80,6 +80,10 @@
 ;           Fully damped mode removed, and damped light only supported on damped capable ESCs
 ;           Default tail mode changed to damped light
 ;           Miscellaneous other changes
+; - Rev12.1 Fixed bug in tail code
+;           Improved startup for Atmel
+;           Added support for multiple high BEC voltages
+;           Added support for RPM output
 ;
 ;
 ;**** **** **** **** ****
@@ -133,6 +137,18 @@
 ;#define BLUESERIES_40A_MAIN
 ;#define BLUESERIES_40A_TAIL
 ;#define BLUESERIES_40A_MULTI
+;#define BLUESERIES_60A_MAIN
+;#define BLUESERIES_60A_TAIL
+;#define BLUESERIES_60A_MULTI
+;#define BLUESERIES_70A_MAIN
+;#define BLUESERIES_70A_TAIL
+;#define BLUESERIES_70A_MULTI
+;#define HK_UBEC_6A_MAIN
+;#define HK_UBEC_6A_TAIL
+;#define HK_UBEC_6A_MULTI
+;#define HK_UBEC_10A_MAIN
+;#define HK_UBEC_10A_TAIL
+;#define HK_UBEC_10A_MULTI
 ;#define HK_UBEC_20A_MAIN
 ;#define HK_UBEC_20A_TAIL
 ;#define HK_UBEC_20A_MULTI
@@ -160,6 +176,9 @@
 ;#define MULTISTAR_20A_MAIN			; Inverted input
 ;#define MULTISTAR_20A_TAIL
 ;#define MULTISTAR_20A_MULTI
+;#define MULTISTAR_20A_NFET_MAIN		; Inverted input
+;#define MULTISTAR_20A_NFET_TAIL
+;#define MULTISTAR_20A_NFET_MULTI
 ;#define MULTISTAR_30A_MAIN			; Inverted input
 ;#define MULTISTAR_30A_TAIL
 ;#define MULTISTAR_30A_MULTI
@@ -196,9 +215,18 @@
 ;#define AFRO_20A_MAIN				; ICP1 as input		
 ;#define AFRO_20A_TAIL
 ;#define AFRO_20A_MULTI
+;#define AFRO_20A_HV_MAIN			; ICP1 as input		
+;#define AFRO_20A_HV_TAIL
+;#define AFRO_20A_HV_MULTI
 ;#define AFRO_30A_MAIN				; ICP1 as input		
 ;#define AFRO_30A_TAIL
 ;#define AFRO_30A_MULTI
+;#define SUNRISE_BLHELI_SLIM_20A_MAIN	
+;#define SUNRISE_BLHELI_SLIM_20A_TAIL
+;#define SUNRISE_BLHELI_SLIM_20A_MULTI 
+;#define SUNRISE_BLHELI_SLIM_30A_MAIN	
+;#define SUNRISE_BLHELI_SLIM_30A_TAIL
+;#define SUNRISE_BLHELI_SLIM_30A_MULTI
 
 
 
@@ -262,6 +290,66 @@
 #if defined(BLUESERIES_40A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "BlueSeries_40A.inc"		; Select BlueSeries 40A pinout
+#endif
+
+#if defined(BLUESERIES_60A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "BlueSeries_60A.inc"		; Select BlueSeries 60A pinout
+#endif
+
+#if defined(BLUESERIES_60A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "BlueSeries_60A.inc"		; Select BlueSeries 60A pinout
+#endif
+
+#if defined(BLUESERIES_60A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "BlueSeries_60A.inc"		; Select BlueSeries 60A pinout
+#endif
+
+#if defined(BLUESERIES_70A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "BlueSeries_70A.inc"		; Select BlueSeries 70A pinout
+#endif
+
+#if defined(BLUESERIES_70A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "BlueSeries_70A.inc"		; Select BlueSeries 70A pinout
+#endif
+
+#if defined(BLUESERIES_70A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "BlueSeries_70A.inc"		; Select BlueSeries 70A pinout
+#endif
+
+#if defined(HK_UBEC_6A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "HK_UBEC_6A.inc"		; Select Hobbyking UBEC 6A pinout
+#endif
+
+#if defined(HK_UBEC_6A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "HK_UBEC_6A.inc"		; Select Hobbyking UBEC 6A pinout
+#endif
+
+#if defined(HK_UBEC_6A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "HK_UBEC_6A.inc"		; Select Hobbyking UBEC 6A pinout
+#endif
+
+#if defined(HK_UBEC_10A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "HK_UBEC_10A.inc"		; Select Hobbyking UBEC 10A pinout
+#endif
+
+#if defined(HK_UBEC_10A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "HK_UBEC_10A.inc"		; Select Hobbyking UBEC 10A pinout
+#endif
+
+#if defined(HK_UBEC_10A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "HK_UBEC_10A.inc"		; Select Hobbyking UBEC 10A pinout
 #endif
 
 #if defined(HK_UBEC_20A_MAIN)
@@ -397,6 +485,21 @@
 #if defined(MULTISTAR_20A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "Multistar_20A.inc"		; Select Multistar 20A pinout
+#endif
+
+#if defined(MULTISTAR_20A_NFET_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Multistar_20A_NFET.inc"	; Select Multistar 20A NFET pinout
+#endif
+
+#if defined(MULTISTAR_20A_NFET_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Multistar_20A_NFET.inc"	; Select Multistar 20A NFET pinout
+#endif
+
+#if defined(MULTISTAR_20A_NFET_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Multistar_20A_NFET.inc"	; Select Multistar 20A NFET pinout
 #endif
 
 #if defined(MULTISTAR_30A_MAIN)
@@ -579,6 +682,21 @@
 .INCLUDE "AFRO_20A.inc"			; Select AFRO 20A pinout
 #endif
 
+#if defined(AFRO_20A_HV_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "AFRO_20A_HV.inc"		; Select AFRO 20A HV pinout
+#endif
+
+#if defined(AFRO_20A_HV_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "AFRO_20A_HV.inc"		; Select AFRO 20A HV pinout
+#endif
+
+#if defined(AFRO_20A_HV_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "AFRO_20A_HV.inc"		; Select AFRO 20A HV pinout
+#endif
+
 #if defined(AFRO_30A_MAIN)
 .EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
 .INCLUDE "AFRO_30A.inc"			; Select AFRO 30A pinout
@@ -592,6 +710,36 @@
 #if defined(AFRO_30A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "AFRO_30A.inc"			; Select AFRO 30A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_20A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Sunrise_BLHeli_Slim_20A.inc"	; Select Sunrise BLHeli slim 20A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_20A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Sunrise_BLHeli_Slim_20A.inc"	; Select Sunrise BLHeli slim 20A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_20A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Sunrise_BLHeli_Slim_20A.inc"	; Select Sunrise BLHeli slim 20A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_30A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Sunrise_BLHeli_Slim_30A.inc"	; Select Sunrise BLHeli slim 30A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_30A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Sunrise_BLHeli_Slim_30A.inc"	; Select Sunrise BLHeli slim 30A pinout
+#endif
+
+#if defined(SUNRISE_BLHELI_SLIM_30A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Sunrise_BLHeli_Slim_30A.inc"	; Select Sunrise BLHeli slim 30A pinout
 #endif
 
 
@@ -631,7 +779,7 @@
 .EQU	DEFAULT_PGM_TAIL_IDLE_SPEED 		= 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 .EQU	DEFAULT_PGM_TAIL_COMM_TIMING		= 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 .EQU	DEFAULT_PGM_TAIL_THROTTLE_RATE	= 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
-.EQU	DEFAULT_PGM_TAIL_DAMPING_FORCE	= 5 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
+.EQU	DEFAULT_PGM_TAIL_DAMPING_FORCE	= 6	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
 .IF DAMPED_MODE_ENABLE == 1
 .EQU	DEFAULT_PGM_TAIL_PWM_FREQ	 	= 3 	; 1=High 		2=Low 		3=DampedLight 
 .ELSE
@@ -688,7 +836,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -709,7 +857,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -731,7 +879,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -807,6 +955,7 @@
 .EQU	PGM_DIR_REV			= 	5		; Programmed direction. 0=normal, 1=reversed
 .EQU	PGM_RCP_PWM_POL		=	6		; Programmed RC pulse pwm polarity. 0=positive, 1=negative
 .EQU	FULL_THROTTLE_RANGE		= 	7		; When set full throttle range is used (1000-2000us) and stored calibration values are ignored
+
 
 ; Here the general temporary register XYZ are placed (R26-R31)
 
@@ -960,7 +1109,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	12		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	0		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	1		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	18		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -3856,26 +4005,28 @@ wait_for_comp_out_start:
 	ret							; Return
 
 wait_for_comp_out_not_timed_out:
-	; Select number of comparator readings based upon current rotation speed
-	lds 	XH, Comm_Period4x_H			; Load rotation period
-	lsr	XH						; Divide by 4
-	lsr	XH
-	mov	Temp1, XH
-	inc	Temp1					; Add one to be sure it is always larger than zero
-	breq	comp_wait_on_comp_able		; If minimum number of readings - jump directly to reading
+	; Set number of comparator readings
+	ldi	Temp1, 1
+	sbrs	Flags0, DEMAG_ENABLED		; If demag disabled - branch
+	rjmp	comp_wait_demag_checked	
 
-	cpi	Temp1, 6					; Limit to a max of 6
+	lds 	XH, Comm_Period4x_H			; Set number of readings higher for lower speeds
+	cpi	XH, 0x03
 	brcs	PC+2
 
-	ldi	Temp1, 6
+	ldi	Temp1, 2
 
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ	; Jump if pwm frequency is low
-	rjmp	comp_wait_on_comp_able
-
-	cpi	Temp1, 3					; Limit to a max of 3
+	lds 	XH, Comm_Period4x_H			
+	cpi	XH, 0x06
 	brcs	PC+2
 
 	ldi	Temp1, 3
+
+comp_wait_demag_checked:
+	sbrs	Flags1, STARTUP_PHASE 		; Set many samples during startup
+	rjmp	comp_wait_on_comp_able
+
+	ldi	Temp1, 6
 
 comp_wait_on_comp_able:
 	sbrc	Flags0, OC1A_PENDING			; Has zero cross scan timeout elapsed?
@@ -3922,10 +4073,24 @@ pwm_wait:
 	lds	XH, Comparator_Read_Cnt			; Increment comparator read count
 	inc	XH
 	sts	Comparator_Read_Cnt, XH
+	ldi	XH, 5
+	mov	Temp4, XH						; Read comparator multiple times to filter out HF noise
+	mov	Temp5, XH
+	mov	Temp6, Zero					; Count number of ok comparator readings
+read_comp_loop:
 	Read_Comp_Out XH					; Read comparator output
 	andi	XH, (1<<ACO)
 	cp	XH, Temp3
-	brne	comp_read_ok					; If comparator output is correct - proceed
+	breq	PC+2
+
+	inc	Temp6						; Increment OK count
+
+	dec	Temp4						; Decrement readings count
+	brne	read_comp_loop
+
+	inc	Temp6
+	cp	Temp6, Temp5
+	brcc	comp_read_ok
 
 	sbrs	Flags0, DEMAG_DETECTED
 	rjmp	wait_for_comp_out_start			; If comparator output is not correct, and timeout already extended - go back and restart
@@ -3948,7 +4113,8 @@ comp_read_ok:
 	rjmp	wait_for_comp_out_start
 
 	dec	Temp1						; Decrement readings counter - repeat comparator reading if not zero
-	brne	comp_wait_on_comp_able
+	breq	PC+2
+	rjmp	comp_wait_on_comp_able
 
 	sei								; Enable interrupts
 	ret							
@@ -4084,6 +4250,7 @@ wait_for_comm_wait:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 comm1comm2:	
+	Set_RPM_Out
 	cli						; Disable all interrupts
 	All_pFETs_Off XH			; Turn off all pfets
 	sbrs	Flags2, PGM_PWMOFF_DAMPED
@@ -4116,6 +4283,7 @@ comm12_prech_done:
 	rjmp	comm_exit
 
 comm2comm3:	
+	Clear_RPM_Out
 	cli						; Disable all interrupts
 	CnFET_off					; Cn off
 	sbrs	Flags2, PGM_PWMOFF_DAMPED
@@ -4561,13 +4729,17 @@ decode_damping_done:
 	; Load programmed pwm frequency
 	lds	Temp3, Pgm_Pwm_Freq			; Load pwm freq and store in Temp3
 	cbr	Flags2, (1<<PGM_PWMOFF_DAMPED)
+.IF DAMPED_MODE_ENABLE == 1
 	cpi	Temp3, 3
 	brne	PC+2
 	sbr	Flags2, (1<<PGM_PWMOFF_DAMPED)
+.ENDIF
 	cbr	Flags1, (1<<CURR_PWMOFF_DAMPED)	; Set non damped status as start
+.IF DAMPED_MODE_ENABLE == 1
 	cpi	Temp3, 3
 	brne	PC+2
 	sbr	Flags1, (1<<CURR_PWMOFF_DAMPED)	; Set damped status as start if damped
+.ENDIF
 	; Load programmed direction
 	lds	XH, Pgm_Direction	
 .IF MODE >= 1	; Tail or multi
@@ -4756,13 +4928,29 @@ decode_demag_done:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 set_bec_voltage:
 	; Set bec voltage
-.IF DUAL_BEC_VOLTAGE == 1
+.IF HIGH_BEC_VOLTAGE == 1
 	Set_BEC_Lo XH			; Set default to low
 	lds	Temp1, Pgm_BEC_Voltage_High		
 	tst	Temp1				
 	breq	set_bec_voltage_exit	
 
 	Set_BEC_Hi XH			; Set to high
+
+set_bec_voltage_exit:
+.ENDIF
+.IF HIGH_BEC_VOLTAGE == 2
+	Set_BEC_0				; Set default to low
+	lds	Temp1, Pgm_BEC_Voltage_High		
+	cpi	Temp1, 1
+	brne set_bec_voltage_2	
+
+	Set_BEC_1				; Set to level 1
+
+set_bec_voltage_2:
+	cpi	Temp1, 2
+	brne set_bec_voltage_exit	
+
+	Set_BEC_2				; Set to level 2
 
 set_bec_voltage_exit:
 .ENDIF
@@ -4828,15 +5016,6 @@ test_throttle_gain:
 reset:
 	; Disable interrupts explicitly
 	cli
-	; Check lock bits
-	ldi	ZL, 0x01
-	ldi	ZH, 0x00
-	Prepare_Lock_Or_Fuse_Read XH
-	lpm	XH, Z
-	andi	XH, 0x0F            	; Clear upper nibbles with BLB11, BLB12
-	cpi	XH, 0x0F            	; Check only for BLB02 BLB01 LB2 LB1
-	brne	reset            		; If lock bits byte is not 0x0F, then loop here
-
 	; Check fuse high bits
 	ldi	ZL, 0x03
 	ldi	ZH, 0x00
@@ -5348,6 +5527,8 @@ read_initial_temp:
 	sts	Pwm_Limit_Low_Rpm, XH
 	sei
 	ldi	XH, 1				; Set low pwm again after calling set_startup_pwm
+	sts	Requested_Pwm, XH
+	sts	Current_Pwm, XH
 	mov	Current_Pwm_Limited, XH
 	sts	Spoolup_Limit_Skip, XH			
 	lds	XH, Auto_Bailout_Armed
@@ -5373,7 +5554,6 @@ read_initial_temp:
 damped_transition:
 	; Transition from nondamped to damped if applicable
 	xcall decode_parameters		; Set programmed parameters
-	xcall comm6comm1
 	sts	Adc_Conversion_Cnt, Zero	; Make sure a voltage reading is done next time
 	Set_Adc_Ip_Volt			; Set adc measurement to voltage
 

@@ -16,7 +16,7 @@ RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
 MKDIR Output\Eep
-SET Revision=REV12_0
+SET Revision=REV12_1
 SET AtmelPath=C:\Atmel\avrassembler
 rem SET AtmelPath="C:\Dev\Atmel\AVR Tools\AvrAssembler2"
 
@@ -30,11 +30,15 @@ SET NAME=BLUESERIES_20A
 call:compile
 SET NAME=BLUESERIES_30A
 call :compile
-SET BESC=BLUESERIES_20A
-call :compile
-SET NAME=BLUESERIES_30A
-call :compile
 SET NAME=BLUESERIES_40A
+call :compile
+SET NAME=BLUESERIES_60A
+call :compile
+SET NAME=BLUESERIES_70A
+call :compile
+SET NAME=HK_UBEC_6A
+call :compile
+SET NAME=HK_UBEC_10A
 call :compile
 SET NAME=HK_UBEC_20A
 call :compile
@@ -53,6 +57,8 @@ call :compile
 SET NAME=MULTISTAR_15A
 call :compile
 SET NAME=MULTISTAR_20A
+call :compile
+SET NAME=MULTISTAR_20A_NFET
 call :compile
 SET NAME=MULTISTAR_30A
 call :compile
@@ -78,7 +84,13 @@ SET NAME=AFRO_12A
 call :compile
 SET NAME=AFRO_20A
 call :compile
+SET NAME=AFRO_20A_HV
+call :compile
 SET NAME=AFRO_30A
+call :compile
+SET NAME=SUNRISE_BLHELI_SLIM_20A
+call :compile
+SET NAME=SUNRISE_BLHELI_SLIM_30A
 call :compile
 
 goto :end

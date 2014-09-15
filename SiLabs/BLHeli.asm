@@ -186,6 +186,10 @@ $NOMOD51
 ;           Fully damped mode removed, and damped light only supported on damped capable ESCs
 ;           Default tail mode changed to damped light
 ;           Miscellaneous other changes
+; - Rev12.1 Fixed bug in tail code
+;           Improved startup for Atmel
+;           Added support for multiple high BEC voltages
+;           Added support for RPM output
 ;
 ;
 ;**** **** **** **** ****
@@ -392,15 +396,21 @@ Polaris_Thunder_100A_Multi 		EQU 153
 Platinum_Pro_30A_Main			EQU 154   
 Platinum_Pro_30A_Tail 			EQU 155  
 Platinum_Pro_30A_Multi 			EQU 156  
-EAZY_3Av2_Main					EQU 157   
-EAZY_3Av2_Tail 				EQU 158  
-EAZY_3Av2_Multi 				EQU 159  
-Tarot_30A_Main					EQU 160   
-Tarot_30A_Tail 				EQU 161  
-Tarot_30A_Multi 				EQU 162  
-SkyIII_30A_Main				EQU 163   
-SkyIII_30A_Tail 				EQU 164  
-SkyIII_30A_Multi 				EQU 165  
+Platinum_Pro_150A_Main			EQU 157   
+Platinum_Pro_150A_Tail 			EQU 158  
+Platinum_Pro_150A_Multi 			EQU 159  
+Platinum_50Av3_Main				EQU 160   
+Platinum_50Av3_Tail 			EQU 161  
+Platinum_50Av3_Multi 			EQU 162  
+EAZY_3Av2_Main					EQU 163   
+EAZY_3Av2_Tail 				EQU 164  
+EAZY_3Av2_Multi 				EQU 165  
+Tarot_30A_Main					EQU 166   
+Tarot_30A_Tail 				EQU 167  
+Tarot_30A_Multi 				EQU 168  
+SkyIII_30A_Main				EQU 169   
+SkyIII_30A_Tail 				EQU 170  
+SkyIII_30A_Multi 				EQU 171  
 
 
 ;**** **** **** **** ****
@@ -493,7 +503,7 @@ SkyIII_30A_Multi 				EQU 165
 ;BESCNO EQU Turnigy_KForce_120A_HV_v2_Tail 
 ;BESCNO EQU Turnigy_KForce_120A_HV_v2_Multi
 ;BESCNO EQU Skywalker_20A_Main
-;BESCNO EQU Skywalker_20A_Tail 
+;BESCNO EQU Skywalker_20A_Tail
 ;BESCNO EQU Skywalker_20A_Multi
 ;BESCNO EQU Skywalker_40A_Main 
 ;BESCNO EQU Skywalker_40A_Tail 
@@ -560,7 +570,13 @@ SkyIII_30A_Multi 				EQU 165
 ;BESCNO EQU Polaris_Thunder_100A_Multi
 ;BESCNO EQU Platinum_Pro_30A_Main
 ;BESCNO EQU Platinum_Pro_30A_Tail
-;BESCNO EQU Platinum_Pro_30A_Multi 
+;BESCNO EQU Platinum_Pro_30A_Multi
+;BESCNO EQU Platinum_Pro_150A_Main
+;BESCNO EQU Platinum_Pro_150A_Tail
+;BESCNO EQU Platinum_Pro_150A_Multi
+;BESCNO EQU Platinum_50Av3_Main
+;BESCNO EQU Platinum_50Av3_Tail
+;BESCNO EQU Platinum_50Av3_Multi 
 ;BESCNO EQU EAZY_3Av2_Main
 ;BESCNO EQU EAZY_3Av2_Tail
 ;BESCNO EQU EAZY_3Av2_Multi
@@ -1354,19 +1370,49 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Platinum_Pro_30A.inc)	; Select Platinum Pro 30A pinout
 ENDIF
 
+IF BESCNO == Platinum_Pro_150A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Platinum_Pro_150A.inc)	; Select Platinum Pro 150A pinout
+ENDIF
+
+IF BESCNO == Platinum_Pro_150A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Platinum_Pro_150A.inc)	; Select Platinum Pro 150A pinout
+ENDIF
+
+IF BESCNO == Platinum_Pro_150A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Platinum_Pro_150A.inc)	; Select Platinum Pro 150A pinout
+ENDIF
+
+IF BESCNO == Platinum_50Av3_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Platinum_50Av3.inc)		; Select Platinum 50A v3 pinout
+ENDIF
+
+IF BESCNO == Platinum_50Av3_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Platinum_50Av3.inc)		; Select Platinum 50A v3 pinout
+ENDIF
+
+IF BESCNO == Platinum_50Av3_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Platinum_50Av3.inc)		; Select Platinum 50A v3 pinout
+ENDIF
+
 IF BESCNO == EAZY_3Av2_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
-$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Eazy 3A v2 pinout
 ENDIF
 
 IF BESCNO == EAZY_3Av2_Tail
 MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
-$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Eazy 3A v2 pinout
 ENDIF
 
 IF BESCNO == EAZY_3Av2_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
-$include (EAZY_3Av2.inc)			; Select Platinum Pro 30A pinout
+$include (EAZY_3Av2.inc)			; Select Eazy 3A v2 pinout
 ENDIF
 
 IF BESCNO == Tarot_30A_Main
@@ -1441,7 +1487,7 @@ DEFAULT_PGM_TAIL_STARTUP_RPM		EQU 3 	; 1=0.67		2=0.8 		3=1.00 		4=1.25 		5=1.5
 DEFAULT_PGM_TAIL_STARTUP_ACCEL	EQU 5 	; 1=0.4 		2=0.7 		3=1.0 		4=1.5 		5=2.3
 DEFAULT_PGM_TAIL_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 DEFAULT_PGM_TAIL_THROTTLE_RATE	EQU 13	; 1=2		2=3			3=4			4=6 			5=8	 	6=12 	7=16	  8=24  9=32  10=48  11=64  12=128 13=255
-DEFAULT_PGM_TAIL_DAMPING_FORCE	EQU 5 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
+DEFAULT_PGM_TAIL_DAMPING_FORCE	EQU 6 	; 1=VeryLow 	2=Low 		3=MediumLow 	4=MediumHigh 	5=High	6=Highest
 IF DAMPED_MODE_ENABLE == 1
 DEFAULT_PGM_TAIL_PWM_FREQ	 	EQU 3 	; 1=High 		2=Low 		3=DampedLight 
 ELSE
@@ -1482,7 +1528,7 @@ DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_PPM_MIN_THROTTLE		EQU 37	; 4*37+1000=1148
 DEFAULT_PGM_PPM_MAX_THROTTLE		EQU 208	; 4*208+1000=1832
 DEFAULT_PGM_PPM_CENTER_THROTTLE	EQU 122	; 4*122+1000=1488 (used in bidirectional mode)
-DEFAULT_PGM_BEC_VOLTAGE_HIGH		EQU 0	; 0=Low		1= High
+DEFAULT_PGM_BEC_VOLTAGE_HIGH		EQU 0	; 0=Low		1+= High or higher	
 DEFAULT_PGM_ENABLE_TEMP_PROT	 	EQU 1 	; 1=Enabled 	0=Disabled
 
 ;**** **** **** **** ****
@@ -1622,6 +1668,7 @@ RCP_PWM_FREQ_12KHZ			EQU 	4		; RC pulse pwm frequency is 12kHz
 PGM_DIR_REV				EQU 	5		; Programmed direction. 0=normal, 1=reversed
 PGM_RCP_PWM_POL			EQU	6		; Programmed RC pulse pwm polarity. 0=positive, 1=negative
 FULL_THROTTLE_RANGE			EQU 	7		; When set full throttle range is used (1000-2000us) and stored calibration values are ignored
+
 
 ;**** **** **** **** ****
 ; RAM definitions
@@ -1765,7 +1812,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	12		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	18		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -3387,7 +3434,7 @@ mult_s16_by_u8_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ; First governor routine - calculate governor target
-IF MODE <= 1	; Main or tail
+IF MODE == 0	; Main
 calc_governor_target:
 	mov	Temp1, #Pgm_Gov_Mode			; Governor mode?
 	cjne	@Temp1, #4, governor_speed_check	; Yes
@@ -3525,6 +3572,10 @@ calc_governor_store_target:
 	mov	Gov_Target_L, Temp1
 	mov	Gov_Target_H, Temp2
 calc_governor_target_exit:
+	ret						
+ENDIF
+IF MODE == 1	; Tail
+calc_governor_target:
 	ret						
 ENDIF
 IF MODE == 2	; Multi
@@ -4913,47 +4964,28 @@ wait_for_comp_out_not_timed_out:
 IF COMP1_USED==1			
 	mov	CPT1MD, #0				; Set fast response (100ns) as default		
 ENDIF
-	; Select number of comparator readings based upon current rotation speed
-	mov 	A, Comm_Period4x_H			; Load rotation period
-	clr	C
-	rrc	A						; Divide by 4
-	clr	C
-	rrc	A
-	mov	Temp1, A
-	inc	Temp1					; Add one to be sure it is always larger than zero
-	jz	comp_wait_on_comp_able		; If minimum number of readings - jump directly to reading
+	; Set number of comparator readings
+	mov	Temp1, #1
+	jnb	Flags0.DEMAG_ENABLED, comp_wait_demag_checked	; If demag disabled - branch
 
-	clr	C
-	mov	A, Temp1					; Limit to a max of 6
-	subb	A, #6
+	clr	C						; Set number of readings higher for lower speeds
+	mov 	A, Comm_Period4x_H			
+	subb	A, #03h
 	jc	($+4)
 
-	mov	Temp1, #6
-
-	jnb	Flags2.PGM_PWM_HIGH_FREQ, comp_wait_set_response_time	; Jump if pwm frequency is low
+	mov	Temp1, #2
 
 	clr	C
-	mov	A, Temp1					; Limit to a max of 3
-	subb	A, #3
+	mov 	A, Comm_Period4x_H			
+	subb	A, #06h
 	jc	($+4)
 
 	mov	Temp1, #3
 
-comp_wait_set_response_time:
-	clr	C
-	mov	A, Comm_Period4x_H			; Is Comm_Period4x_H less than 1ms?
-	subb	A, #8
-	jc	comp_wait_on_comp_able		; Yes - jump
+comp_wait_demag_checked:
+	jnb	Flags1.DIRECT_STARTUP_PHASE, comp_wait_on_comp_able	; Set many samples during direct startup
 
-	mov	CPT0MD, #2				; Set medium response (300ns)
-IF COMP1_USED==1			
-	mov	CPT1MD, #2				; Set medium response (300ns)
-ENDIF
-	clr	C
-	mov	A, Comm_Period4x_H			; Is Comm_Period4x_H less than 2ms?
-	subb	A, #16
-	jc	comp_wait_on_comp_able		; Yes - jump
-
+	mov	Temp1, #6
 	mov	CPT0MD, #3				; Set slow response (1000ns) 	
 IF COMP1_USED==1			
 	mov	CPT1MD, #3				; Set slow response (1000ns) 	
@@ -4986,6 +5018,7 @@ pwm_wait_startup:
 	jnb	Flags1.DIRECT_STARTUP_PHASE, pwm_wait	; Set a long delay from pwm on/off events during direct startup
 
 	mov	Temp2, #120
+
 pwm_wait:						
 	clr	C
 	mov	A, TL1
@@ -4993,10 +5026,23 @@ pwm_wait:
 	jc	comp_wait_on_comp_able		; Re-evaluate pwm cycle
 
 	inc	Comparator_Read_Cnt			; Increment comparator read count
-	Read_Comp_Out 					; Read comparator output
-	cpl	A
+	mov	Temp4, #5					; Read comparator multiple times to filter out HF noise
+	mov	Temp5, #5
+	mov	Temp6, #0					; Count number of ok comparator readings
+read_comp_loop:
+	Read_Comp_Out					; Read comparator output
 	anl	A, #40h
-	cjne	A, Bit_Access, comp_read_ok	; If comparator output is correct - proceed
+	cjne	A, Bit_Access, ($+4)
+
+	inc	Temp6					; Increment OK count
+
+	djnz	Temp4, read_comp_loop		; Decrement readings count
+
+	clr	C
+	inc	Temp6
+	mov	A, Temp6
+	subb	A, Temp5
+	jnc	comp_read_ok
 
 	jb	Flags0.DEMAG_DETECTED, ($+5)	
 	ajmp	wait_for_comp_out_start		; If comparator output is not correct, and timeout already extended - go back and restart
@@ -5144,6 +5190,7 @@ wait_for_comm_wait:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 comm1comm2:	
+	Set_RPM_Out
 	clr 	EA					; Disable all interrupts
 	All_pFETs_off				; All pfets off
 	jnb	Flags2.PGM_PWMOFF_DAMPED, comm12_nondamp
@@ -5170,6 +5217,7 @@ ENDIF
 	jmp	comm_exit
 
 comm2comm3:	
+	Clear_RPM_Out
 	clr 	EA					; Disable all interrupts
 	CnFET_off					; Cn off
 	jnb	Flags2.PGM_PWMOFF_DAMPED, comm23_nondamp
@@ -5678,11 +5726,15 @@ decode_damping_done:
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
 	clr	Flags2.PGM_PWMOFF_DAMPED
+IF DAMPED_MODE_ENABLE == 1
 	cjne	Temp8, #3, ($+5)
 	setb	Flags2.PGM_PWMOFF_DAMPED
+ENDIF
 	clr	Flags1.CURR_PWMOFF_DAMPED	; Set non damped status as start
+IF DAMPED_MODE_ENABLE == 1
 	cjne	Temp8, #3, ($+5)
 	setb	Flags1.CURR_PWMOFF_DAMPED	; Set damped status as start if damped
+ENDIF
 	; Load programmed direction
 	mov	Temp1, #Pgm_Direction	
 IF MODE >= 1	; Tail or multi
@@ -5875,13 +5927,28 @@ decode_demag_done:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 set_bec_voltage:
 	; Set bec voltage
-IF DUAL_BEC_VOLTAGE == 1
+IF HIGH_BEC_VOLTAGE == 1
 	Set_BEC_Lo			; Set default to low
 	mov	Temp1, #Pgm_BEC_Voltage_High		
 	mov	A, @Temp1				
 	jz	set_bec_voltage_exit	
 
 	Set_BEC_Hi			; Set to high
+
+set_bec_voltage_exit:
+ENDIF
+IF HIGH_BEC_VOLTAGE == 2
+	Set_BEC_0				; Set default to low
+	mov	Temp1, #Pgm_BEC_Voltage_High		
+	mov	A, @Temp1				
+	cjne	A, #1, set_bec_voltage_2	
+
+	Set_BEC_1				; Set to level 1
+
+set_bec_voltage_2:
+	cjne	A, #2, set_bec_voltage_exit	
+
+	Set_BEC_2				; Set to level 2
 
 set_bec_voltage_exit:
 ENDIF
@@ -6091,10 +6158,10 @@ ENDIF
 	mov	EIE1, #90h		; Enable timer3 and PCA0 interrupts
 	; Initialize comparator
 	mov	CPT0CN, #80h		; Comparator enabled, no hysteresis
-	mov	CPT0MD, #03h		; Comparator response time 1us
+	mov	CPT0MD, #00h		; Comparator response time 100ns
 IF COMP1_USED == 1			
 	mov	CPT1CN, #80h		; Comparator enabled, no hysteresis
-	mov	CPT1MD, #03h		; Comparator response time 1us
+	mov	CPT1MD, #00h		; Comparator response time 100ns
 ENDIF
 	; Initialize ADC
 	Initialize_Adc			; Initialize ADC operation
@@ -6504,7 +6571,9 @@ direct_method_start:
 	mov	Pwm_Limit_Low_Rpm, Requested_Pwm
 	setb	EA
 	clr	Flags1.SETTLE_PHASE		
-	mov	Current_Pwm_Limited, #1		; Set low pwm again after calling set_startup_pwm
+	mov	Requested_Pwm, #1			; Set low pwm again after calling set_startup_pwm
+	mov	Current_Pwm, #1
+	mov	Current_Pwm_Limited, #1	
 	mov	Spoolup_Limit_Cnt, Auto_Bailout_Armed
 	mov	Spoolup_Limit_Skip, #1			
 	; Begin startup sequence
@@ -6671,7 +6740,7 @@ stepper_rot_exit:
 damped_transition:
 	; Transition from nondamped to damped if applicable
 	call	decode_parameters		; Set programmed parameters
-	call	comm6comm1
+	call	switch_power_off		; Switch off power to turn off any damping transistors (for stepped start)
 	mov	Adc_Conversion_Cnt, #0	; Make sure a voltage reading is done next time
 	Set_Adc_Ip_Volt			; Set adc measurement to voltage
 

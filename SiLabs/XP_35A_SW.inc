@@ -50,7 +50,7 @@ PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
-DUAL_BEC_VOLTAGE		EQU	0	; Set to 1 if dual BEC voltage is supported
+HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	6	; Wait delay from nfets off to pfets on
@@ -300,4 +300,8 @@ MACRO Read_Adc_Result
 	mov	Temp2, ADC0H
 ENDM
 MACRO Stop_Adc
+ENDM
+MACRO Set_RPM_Out
+ENDM
+MACRO Clear_RPM_Out
 ENDM

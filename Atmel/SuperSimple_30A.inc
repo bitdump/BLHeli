@@ -48,7 +48,7 @@ Eep_ESC_Layout:		.DB	"#SuperS_30A#    "	; ESC layout tag
 Eep_ESC_MCU:			.DB	"#BLHELI#Am8L#   "	; Project and MCU tag (16 Bytes)
 
 .EQU	CLK_8M				=	0	; Set to 0 for 16MHz clock, and 1 if 8MHz clock
-.EQU	DUAL_BEC_VOLTAGE		=	0	; Set to 1 if dual BEC voltage is supported
+.EQU	HIGH_BEC_VOLTAGE		=	0	; Set to 1 or more if high BEC voltage is supported
 .EQU	DAMPED_MODE_ENABLE		=	0	; Set to 1 if fully damped mode is supported
 .EQU	NFETON_DELAY			=	30	; Wait delay from pfets off to nfets on
 .EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
@@ -429,4 +429,9 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8L#   "	; Project and MCU tag (16 Bytes)
 
 .MACRO xcall
 	rcall @0
+.ENDMACRO
+
+.MACRO Set_RPM_Out
+.ENDMACRO
+.MACRO Clear_RPM_Out
 .ENDMACRO
