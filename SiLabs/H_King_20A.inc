@@ -304,6 +304,8 @@ ENDM
 MACRO Stop_Adc
 ENDM
 MACRO Set_RPM_Out
+	setb    P2.DebugPin
 ENDM
 MACRO Clear_RPM_Out
+	clr     P2.DebugPin
 ENDM
