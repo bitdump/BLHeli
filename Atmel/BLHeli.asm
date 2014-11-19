@@ -84,6 +84,9 @@
 ;           Improved startup for Atmel
 ;           Added support for multiple high BEC voltages
 ;           Added support for RPM output
+; - Rev12.2 Improved running smoothness, particularly for damped light
+;           Avoiding lockup at full throttle when input signal is noisy
+;           Avoiding detection of 1-wire programming signal as valid throttle signal
 ;
 ;
 ;**** **** **** **** ****
@@ -127,7 +130,7 @@
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file);
 ;#define BLUESERIES_12A_MAIN 
 ;#define BLUESERIES_12A_TAIL
-;#define BLUESERIES_12A_MULTI
+;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
 ;#define BLUESERIES_20A_MULTI
@@ -170,6 +173,9 @@
 ;#define SUPERSIMPLE_40A_MAIN
 ;#define SUPERSIMPLE_40A_TAIL
 ;#define SUPERSIMPLE_40A_MULTI
+;#define MULTISTAR_10Av2_MAIN			
+;#define MULTISTAR_10Av2_TAIL
+;#define MULTISTAR_10Av2_MULTI
 ;#define MULTISTAR_15A_MAIN			; Inverted input
 ;#define MULTISTAR_15A_TAIL
 ;#define MULTISTAR_15A_MULTI
@@ -223,7 +229,7 @@
 ;#define AFRO_30A_MULTI
 ;#define SUNRISE_BLHELI_SLIM_20A_MAIN	
 ;#define SUNRISE_BLHELI_SLIM_20A_TAIL
-;#define SUNRISE_BLHELI_SLIM_20A_MULTI 
+;#define SUNRISE_BLHELI_SLIM_20A_MULTI
 ;#define SUNRISE_BLHELI_SLIM_30A_MAIN	
 ;#define SUNRISE_BLHELI_SLIM_30A_TAIL
 ;#define SUNRISE_BLHELI_SLIM_30A_MULTI
@@ -455,6 +461,21 @@
 #if defined(SUPERSIMPLE_40A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "SuperSimple_40A.inc"	; Select SuperSimple 40A pinout
+#endif
+
+#if defined(MULTISTAR_10Av2_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Multistar_10Av2.inc"	; Select Multistar 10A v2 pinout
+#endif
+
+#if defined(MULTISTAR_10Av2_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Multistar_10Av2.inc"	; Select Multistar 10A v2 pinout
+#endif
+
+#if defined(MULTISTAR_10Av2_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Multistar_10Av2.inc"	; Select Multistar 10A v2 pinout
 #endif
 
 #if defined(MULTISTAR_15A_MAIN)
@@ -836,7 +857,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -857,7 +878,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -879,7 +900,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	6	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	5	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -975,6 +996,7 @@ Governor_Req_Pwm:			.BYTE	1		; Governor requested pwm (sets governor target)
 Current_Pwm:				.BYTE	1		; Current pwm
 Rcp_Prev_Edge_L:			.BYTE	1		; RC pulse previous edge timer3 timestamp (lo byte)
 Rcp_Prev_Edge_H:			.BYTE	1		; RC pulse previous edge timer3 timestamp (hi byte)
+Rcp_Outside_Range_Cnt:		.BYTE	1		; RC pulse outside range counter (incrementing) 
 Rcp_Timeout_Cnt:			.BYTE	1		; RC pulse timeout counter (decrementing) 
 Rcp_Skip_Cnt:				.BYTE	1		; RC pulse skip counter (decrementing) 
 Rcp_Edge_Cnt:				.BYTE	1		; RC pulse edge counter 
@@ -1109,7 +1131,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	12		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	1		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	2		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	18		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1337,10 +1359,6 @@ t2_int_pwm_on_low_pwm_not_zero:
 
 
 t2_int_pwm_off:
-	sbrs	Flags1, STARTUP_PHASE
-	rjmp	t2_int_pwm_off_start_checked
-	All_nFETs_Off YL				; Switch off all nfets early during start, for a smooth start
-t2_int_pwm_off_start_checked:
 	; Pwm off cycle
 	mov	YL, Current_Pwm_Limited
 	sec	
@@ -2036,7 +2054,7 @@ t0h_int_pwm_ret:
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; RC pulse interrupt routine
+; RC pulse processing interrupt routine
 ;
 ; No assumptions
 ; Can come from int0 or icp
@@ -2113,18 +2131,25 @@ rcp_int_second_meas_pwm_freq:
 	ldi	XL, 2					; Set default period tolerance requirement (MSB)
 	mov	I_Temp7, XL
 	mov	I_Temp3, Zero				; (LSB)
+	; Check if pulse is too short
+	cpi	I_Temp1, low(140)			; If pulse below 70us, not accepted
+	cpc	I_Temp2, Zero
+	brcc	rcp_int_check_12kHz
+
+	sts	Rcp_Period_Diff_Accepted, Zero	; Set not accepted 
+	rjmp	rcp_int_store_data
+
+rcp_int_check_12kHz:
 	; Check if pwm frequency is 12kHz
 	cpi	I_Temp1, low(200)			; If below 100us, 12kHz pwm is assumed
-	ldi	XL, high(200)
-	cpc	I_Temp2, XL
+	cpc	I_Temp2, Zero
 	brcc	rcp_int_check_8kHz
 
 	ldi	XL, (1<<RCP_PWM_FREQ_12KHZ)
 	mov	I_Temp4, XL
-	mov	I_Temp7, Zero				; Set period tolerance requirement
-	ldi	XL, 10					; (LSB)
+	ldi	XL, 10					; Set period tolerance requirement (LSB)
 	mov	I_Temp3, XL
-	rjmp	rcp_int_restore_edge
+	rjmp	rcp_int_restore_edge_set_msb
 
 rcp_int_check_8kHz:
 	; Check if pwm frequency is 8kHz
@@ -2135,10 +2160,9 @@ rcp_int_check_8kHz:
 
 	ldi	XL, (1<<RCP_PWM_FREQ_8KHZ)
 	mov	I_Temp4, XL
-	mov	I_Temp7, Zero				; Set period tolerance requirement
-	ldi	XL, 15					; (LSB)
+	ldi	XL, 15					; Set period tolerance requirement (LSB)
 	mov	I_Temp3, XL
-	rjmp	rcp_int_restore_edge
+	rjmp	rcp_int_restore_edge_set_msb
 
 rcp_int_check_4kHz:
 	; Check if pwm frequency is 4kHz
@@ -2149,10 +2173,9 @@ rcp_int_check_4kHz:
 
 	ldi	XL, (1<<RCP_PWM_FREQ_4KHZ)
 	mov	I_Temp4, XL
-	mov	I_Temp7, Zero				; Set period tolerance requirement
-	ldi	XL, 30					; (LSB)
+	ldi	XL, 30					; Set period tolerance requirement (LSB)
 	mov	I_Temp3, XL
-	rjmp	rcp_int_restore_edge
+	rjmp	rcp_int_restore_edge_set_msb
 
 rcp_int_check_2kHz:
 	; Check if pwm frequency is 2kHz
@@ -2163,10 +2186,9 @@ rcp_int_check_2kHz:
 
 	ldi	XL, (1<<RCP_PWM_FREQ_2KHZ)
 	mov	I_Temp4, XL
-	mov	I_Temp7, Zero				; Set period tolerance requirement
-	ldi	XL, 60					; (LSB)
+	ldi	XL, 60					; Set period tolerance requirement (LSB)
 	mov	I_Temp3, XL
-	rjmp	rcp_int_restore_edge
+	rjmp	rcp_int_restore_edge_set_msb
 
 rcp_int_check_1kHz:
 	; Check if pwm frequency is 1kHz
@@ -2177,10 +2199,11 @@ rcp_int_check_1kHz:
 
 	ldi	XL, (1<<RCP_PWM_FREQ_1KHZ)
 	mov	I_Temp4, XL
-	mov	I_Temp7, Zero				; Set period tolerance requirement
-	ldi	XL, 120					; (LSB)
+	ldi	XL, 120					; Set period tolerance requirement (LSB)
 	mov	I_Temp3, XL
 
+rcp_int_restore_edge_set_msb:
+	mov	I_Temp7, Zero				; Set period tolerance requirement (MSB)
 rcp_int_restore_edge:
 	; Calculate difference between this period and previous period
 	mov	I_Temp5, I_Temp1
@@ -2262,7 +2285,7 @@ rcp_int_fall:
 	sbci	XL, 2
 	brcs	PC+2
 
-	rjmp	rcp_int_set_timeout				; Yes - ignore pulse
+	rjmp	pca_int_ppm_outside_range		; Yes - ignore pulse
 
 	; Check if below 800us (in order to ignore false pulses)
 	tst	I_Temp6
@@ -2272,9 +2295,27 @@ rcp_int_fall:
 	subi	XL, 200
 	brcc	rcp_int_ppm_check_full_range		; No - branch
 
-	rjmp	rcp_int_set_timeout				; Yes - ignore pulse
+pca_int_ppm_outside_range:
+	lds	XL, Rcp_Outside_Range_Cnt
+	inc	XL
+	sts	Rcp_Outside_Range_Cnt, XL
+	cpi	XL, 10						; Allow a given number of outside pulses
+	brcc	PC+2
+	rjmp	rcp_int_set_timeout				; If below limit - ignore pulse
+
+	sts	New_Rcp, Zero					; Set pulse length to zero
+	sbr	Flags2, (1<<RCP_UPDATED)	 		; Set updated flag
+	rjmp	rcp_int_set_timeout			
 
 rcp_int_ppm_check_full_range:
+	; Decrement outside range counter
+	lds	XL, Rcp_Outside_Range_Cnt
+	tst	XL
+	breq	PC+4
+
+	dec	XL
+	sts	Rcp_Outside_Range_Cnt, XL
+
 	; Calculate "1000us" plus throttle minimum
 	ldi	XL, 0						; Set 1000us as default minimum
 	mov	I_Temp7, XL
@@ -3257,11 +3298,16 @@ set_pwm_limit_low_rpm:
 
 	sbr	Flags0, (1<<DEMAG_ENABLED)		; Enable demag
 	lds	XH, Comm_Period4x_H
-	cpi	XH, 0x08						; ~39063 eRPM
+	cpi	XH, 0x0A						; ~31250 eRPM
 	brcs	PC+2							; If speed above - branch
+
+	mov	XH, Current_Pwm_Limited
+	cpi	XH, 0x40						; Do not disable if pwm above 25%
+	brcc	set_pwm_demag_done
 
 	cbr	Flags0, (1<<DEMAG_ENABLED)		; Disable demag
 
+set_pwm_demag_done:
 	lds	XH, Comm_Period4x_H
 	breq	set_pwm_limit_low_rpm_exit		; Avoid divide by zero
 
@@ -3696,14 +3742,13 @@ calc_next_comm_timing:			; Entry point for run phase
 	mov	Temp7, XH
 	ldi	XH, 2				; Divide new commutation time 2 times as default
 	mov	Temp8, XH
-	lds	XH, Comm_Period4x_H
-	cpi	XH, 0x04
+	cpi	Temp4, 0x04
 	brcs	PC+3
 
 	dec	Temp7				; Reduce averaging time constant for low speeds
 	dec	Temp8
 
-	cpi	XH, 0x08
+	cpi	Temp4, 0x08
 	brcs	PC+3
 
 	dec	Temp7				; Reduce averaging time constant more for even lower speeds
@@ -3820,37 +3865,30 @@ calc_new_wait_times:
 	cpi	XH, 3				; 104k eRPM
 	brcc	calc_new_wait_per_low
 
-	inc	Temp7				; Increase by 2
+	inc	Temp7				; Increase
 	inc	Temp7
 
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+3
+	rjmp	PC+4
 
-	inc	Temp7				; Increase by 4
+	inc	Temp7				; Increase more
+	inc	Temp7
 	inc	Temp7
 
 calc_new_wait_per_low:
 	cpi	XH, 2				; 156k eRPM
 	brcc	calc_new_wait_per_high
 
-	inc	Temp7				; Increase by 2 more
+	inc	Temp7				; Increase more
 	inc	Temp7
 
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
 	rjmp	PC+3
 
-	inc	Temp7				; Increase by 4
+	inc	Temp7				; Increase more
 	inc	Temp7
 
 calc_new_wait_per_high:
-	sbrs	Flags1, STARTUP_PHASE	; Set timing for start
-	rjmp	calc_new_wait_dir_start_set	
-
-	ldi	XH, 3				; Set medium timing
-	mov	Temp8, XH
-	mov	Temp7, Zero			; Set no comm time reduction
-
-calc_new_wait_dir_start_set:
 	; Load current commutation timing
 	lds	Temp2, Comm_Period4x_H	; Load Comm_Period4x
 	lds	Temp1, Comm_Period4x_L	
@@ -4007,26 +4045,31 @@ wait_for_comp_out_start:
 wait_for_comp_out_not_timed_out:
 	; Set number of comparator readings
 	ldi	Temp1, 1
-	sbrs	Flags0, DEMAG_ENABLED		; If demag disabled - branch
-	rjmp	comp_wait_demag_checked	
+	ldi	Temp4, 2
 
 	lds 	XH, Comm_Period4x_H			; Set number of readings higher for lower speeds
-	cpi	XH, 0x03
+	cpi	XH, 0x05
 	brcs	PC+2
 
 	ldi	Temp1, 2
 
 	lds 	XH, Comm_Period4x_H			
-	cpi	XH, 0x06
+	cpi	XH, 0x0A
 	brcs	PC+2
 
 	ldi	Temp1, 3
 
-comp_wait_demag_checked:
+	lds 	XH, Comm_Period4x_H			
+	cpi	XH, 0x0F
+	brcs	PC+2
+
+	ldi	Temp4, 3
+
 	sbrs	Flags1, STARTUP_PHASE 		; Set many samples during startup
 	rjmp	comp_wait_on_comp_able
 
-	ldi	Temp1, 6
+	ldi	Temp1, 8
+	ldi	Temp4, 4
 
 comp_wait_on_comp_able:
 	sbrc	Flags0, OC1A_PENDING			; Has zero cross scan timeout elapsed?
@@ -4040,33 +4083,28 @@ comp_wait_on_comp_able:
 	ret								; Yes - return
 
 comp_wait_on_comp_able_not_timed_out:
-	ldi	Temp2, COMP_PWM_HIGH_ON_DELAY		; Wait time after pwm has been switched on (motor wire electrical settling)
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ
-	ldi	Temp2, COMP_PWM_LOW_ON_DELAY
 	sei								; Enable interrupts
 	nop								; Allocate only just enough time to capture interrupt
 	nop
 	cli								; Disable interrupts
-	sbrc	Flags0, PWM_ON					; If pwm on - proceed
-	rjmp	pwm_wait_startup	
+	lds	Temp2, Comm_Period4x_H			; Reduce required distance to pwm transition for higher speeds
+	cpi	Temp2, 0x07
+	brcs	PC+2
 
-	ldi	Temp2, COMP_PWM_HIGH_OFF_DELAY	; Wait time after pwm has been switched off (motor wire electrical settling)
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ
-	ldi	Temp2, COMP_PWM_LOW_OFF_DELAY	
+	ldi	Temp2, 0x07
 
-pwm_wait_startup:						
-	sbrs	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during startup
-	rjmp	pwm_wait	
-
+	inc	Temp2
+	sbrs	Flags0, PWM_ON					; More delay for pwm off
+	lsl	Temp2
+	sbrc	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during direct startup
 	ldi	Temp2, 120
 
-pwm_wait:						
 .IF CLK_8M == 1
 	lsr	Temp2
 .ENDIF
 	Read_TCNT2 XH
-	lds	Temp4, Pwm_Prev_Edge
-	sub	XH, Temp4
+	lds	Temp5, Pwm_Prev_Edge
+	sub	XH, Temp5
 	sbc	XH, Temp2
 	brcs	comp_wait_on_comp_able			; Re-evaluate pwm cycle
 
@@ -4074,24 +4112,17 @@ pwm_wait:
 	inc	XH
 	sts	Comparator_Read_Cnt, XH
 	ldi	XH, 5
-	mov	Temp4, XH						; Read comparator multiple times to filter out HF noise
-	mov	Temp5, XH
-	mov	Temp6, Zero					; Count number of ok comparator readings
+	mov	Temp5, Temp4
 read_comp_loop:
 	Read_Comp_Out XH					; Read comparator output
 	andi	XH, (1<<ACO)
 	cp	XH, Temp3
-	breq	PC+2
-
-	inc	Temp6						; Increment OK count
-
-	dec	Temp4						; Decrement readings count
+	breq	comp_read_wrong
+	dec	Temp5
 	brne	read_comp_loop
+	rjmp	comp_read_ok
 
-	inc	Temp6
-	cp	Temp6, Temp5
-	brcc	comp_read_ok
-
+comp_read_wrong:
 	sbrs	Flags0, DEMAG_DETECTED
 	rjmp	wait_for_comp_out_start			; If comparator output is not correct, and timeout already extended - go back and restart
 
@@ -4262,10 +4293,11 @@ comm1comm2:
 	ldi	XH, NFETON_DELAY		; Delay
 	dec	XH
 	brne	PC-1
+	rjmp	comm12_prech_done		; Do not do precharge when running damped
 comm12_nondamp:
 .IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
 	lds	XH, Comm_Period4x_H
-	andi	XH, 0xFC				; Check if comm period is less than 4
+	andi	XH, 0xF8				; Check if comm period is less than 8
 	breq	comm12_prech_done
 	AnFET_on				
 	ldi	XH, HIGH_DRIVER_PRECHG_TIME
@@ -4275,8 +4307,8 @@ comm12_nondamp:
 	ldi	XH, PFETON_DELAY
 	dec	XH
 	brne	PC-1
-comm12_prech_done:
 .ENDIF
+comm12_prech_done:
 	ApFET_on					; Ap on
 	ldi	XH, 2
 	sts	Comm_Phase, XH
@@ -4322,10 +4354,11 @@ comm3comm4:
 	ldi	XH, NFETON_DELAY		; Delay
 	dec	XH
 	brne	PC-1
+	rjmp	comm34_prech_done		; Do not do precharge when running damped
 comm34_nondamp:
 .IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
 	lds	XH, Comm_Period4x_H
-	andi	XH, 0xFC				; Check if comm period is less than 4
+	andi	XH, 0xF8				; Check if comm period is less than 8
 	breq	comm34_prech_done
 	CnFET_on				
 	ldi	XH, HIGH_DRIVER_PRECHG_TIME
@@ -4335,8 +4368,8 @@ comm34_nondamp:
 	ldi	XH, PFETON_DELAY
 	dec	XH
 	brne	PC-1
-comm34_prech_done:
 .ENDIF
+comm34_prech_done:
 	CpFET_on					; Cp on
 	ldi	XH, 4
 	sts	Comm_Phase, XH
@@ -4381,10 +4414,11 @@ comm5comm6:
 	ldi	XH, NFETON_DELAY		; Delay
 	dec	XH
 	brne	PC-1
+	rjmp	comm56_prech_done		; Do not do precharge when running damped
 comm56_nondamp:
 .IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
 	lds	XH, Comm_Period4x_H
-	andi	XH, 0xFC				; Check if comm period is less than 4
+	andi	XH, 0xF8				; Check if comm period is less than 8
 	breq	comm56_prech_done
 	BnFET_on				
 	ldi	XH, HIGH_DRIVER_PRECHG_TIME
@@ -4394,8 +4428,8 @@ comm56_nondamp:
 	ldi	XH, PFETON_DELAY
 	dec	XH
 	brne	PC-1
-comm56_prech_done:
 .ENDIF
+comm56_prech_done:
 	BpFET_on					; Bp on
 	ldi	XH, 6
 	sts	Comm_Phase, XH
@@ -4572,7 +4606,6 @@ set_default_parameters:
 	ldi	Temp1, 0xFF
 	st	X+, Temp1		
 	st	X+, Temp1	
-	ldi	Temp1, 0xFF
 	st	X+, Temp1	
 	st	X+, Temp1		
 	st	X+, Temp1	
@@ -4637,7 +4670,6 @@ set_default_parameters:
 	ldi	Temp1, 0xFF
 	st	X+, Temp1		
 	st	X+, Temp1		
-	ldi	Temp1, 0xFF
 	st	X+, Temp1	
 	st	X+, Temp1		
 	st	X+, Temp1		
@@ -4755,8 +4787,7 @@ decode_params_dir_set:
 	lds	XH, Pgm_Input_Pol	
 	sbrc	XH, 1
 	sbr	Flags3, (1<<PGM_RCP_PWM_POL)
-	mov	XH, Temp3			
-	cpi	XH, 2
+	cpi	Temp3, 2
 	breq	decode_pwm_freq_low
 
 	sbr	Flags2, (1<<PGM_PWM_HIGH_FREQ)
@@ -4767,6 +4798,24 @@ decode_pwm_freq_low:
 
 decode_pwm_freq_end:
 	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Load flash table entry
+;
+; Assumptions: Z must be loaded with table address, Temp1 must be 
+;    set to table entry number, result is delivered in XH
+;
+; Loads the content of a flash table entry
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+load_flash_table_entry:
+	dec	Temp1
+	add	ZL, Temp1
+	adc	ZH, Zero
+	lpm	XH, Z
+ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -4783,18 +4832,13 @@ decode_governor_gains:
 	ldi	ZL, low(GOV_GAIN_TABLE<<1)
 	ldi	ZH, high(GOV_GAIN_TABLE<<1)
 	lds	Temp1, Pgm_Gov_P_Gain	; Decode governor P gain	
-	dec	Temp1
-	add	ZL, Temp1
-	adc	ZH, Zero
-	lpm	XH, Z
+	xcall load_flash_table_entry
 	sts	Pgm_Gov_P_Gain_Decoded, XH	
+	ldi	ZL, low(GOV_GAIN_TABLE<<1)
+	ldi	ZH, high(GOV_GAIN_TABLE<<1)
 	lds	Temp1, Pgm_Gov_I_Gain	; Decode governor I gain	
-	dec	Temp1
-	add	ZL, Temp1
-	adc	ZH, Zero
-	lpm	XH, Z
+	xcall load_flash_table_entry
 	sts	Pgm_Gov_I_Gain_Decoded, XH	
-	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4812,12 +4856,8 @@ decode_throttle_rate:
 	ldi	ZL, low(THROTTLE_RATE_TABLE<<1)
 	ldi	ZH, high(THROTTLE_RATE_TABLE<<1)
 	lds	Temp1, Pgm_Throttle_Rate
-	dec	Temp1
-	add	ZL, Temp1
-	adc	ZH, Zero
-	lpm	XH, Z
+	xcall load_flash_table_entry
 	sts	Pgm_Throttle_Rate_Decoded, XH	
-	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -4835,12 +4875,8 @@ decode_startup_power:
 	ldi	ZL, low(STARTUP_POWER_TABLE<<1)
 	ldi	ZH, high(STARTUP_POWER_TABLE<<1)
 	lds	Temp1, Pgm_Startup_Pwr
-	dec	Temp1
-	add	ZL, Temp1
-	adc	ZH, Zero
-	lpm	XH, Z
+	xcall load_flash_table_entry
 	sts	Pgm_Startup_Pwr_Decoded, XH	
-	xcall switch_power_off		; Reset Z register
 	ret
 
 
@@ -5112,15 +5148,15 @@ clear_ram:
 	; Wait for receiver to initialize
 .IF MODE <= 1	; Main or tail
 	xcall wait1s
-.ENDIF
 	xcall wait200ms
 	xcall wait200ms
 	xcall wait100ms
+.ENDIF
 	; Initialize interrupts and registers
-	Initialize_Interrupts XH			; Set all interrupt enable bits
-	; Initialize comparator
+	Initialize_Interrupts XH			; Set all
 	Comp_Init XH					; Initialize comparator
-	; Initialize ADC
+	; Initialize ADC interrupt enable bits
+	; Initialize comparator
 	Initialize_Adc	XH				; Initialize ADC operation
 	xcall wait1ms
 	sei							; Enable all interrupts
@@ -5140,16 +5176,18 @@ clear_ram:
 measure_pwm_freq_init:	
 	sbr	Flags0, (1<<RCP_MEAS_PWM_FREQ)	; Set measure pwm frequency flag
 measure_pwm_freq_start:	
-	ldi	Temp3, 5						; Number of pulses to measure
+	ldi	Temp3, 25						; Number of pulses to measure
 measure_pwm_freq_loop:	
 	; Check if period diff was accepted
 	lds	XH, Rcp_Period_Diff_Accepted
 	tst	XH
 	brne	PC+2
 
-	ldi	Temp3, 5						; Reset number of pulses to measure
+	ldi	Temp3, 25						; Reset number of pulses to measure
 
-	xcall wait3ms						; Wait for next pulse (NB: Uses Temp1/2!) 
+	sbrs	Flags2, RCP_UPDATED				; Is there an updated RC pulse available?
+	rjmp	PC-1							; Wait for next pulse
+	cbr	Flags2, (1<<RCP_UPDATED)	 		; Flag that pulse has been evaluated
 	lds	XH, New_Rcp					; Load value
 	cpi	XH, RCP_VALIDATE				; Higher than validate level?
 	brcs	measure_pwm_freq_start			; No - start over
@@ -5440,8 +5478,13 @@ wait_for_power_on_no_beep:
 	rjmp	measure_pwm_freq_init			; If ppm and pulses missing - go back to measure pwm frequency
 
 wait_for_power_on_ppm_not_missing:
+	ldi	Temp1, RCP_STOP
+	mov	XH, Flags3			; Check pwm frequency flags
+	andi	XH, ((1<<RCP_PWM_FREQ_1KHZ)+(1<<RCP_PWM_FREQ_2KHZ)+(1<<RCP_PWM_FREQ_4KHZ)+(1<<RCP_PWM_FREQ_8KHZ)+(1<<RCP_PWM_FREQ_12KHZ))
+	breq	PC+2
+	ldi	Temp1, (RCP_STOP+5) 	; Higher than stop (for pwm)
 	lds	XH, New_Rcp			; Load new RC pulse value
-	cpi	XH, (RCP_STOP+5) 		; Higher than stop (plus some hysteresis)?
+	cp	XH, Temp1
 	brcc	PC+2
 	rjmp	wait_for_power_on_loop	; No - start over
 

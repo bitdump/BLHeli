@@ -52,10 +52,6 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8L#   "	; Project and MCU tag (16 Bytes)
 .EQU	DAMPED_MODE_ENABLE		=	1	; Set to 1 if fully damped mode is supported
 .EQU	NFETON_DELAY			=	5	; Wait delay from pfets off to nfets on
 .EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
-.EQU	COMP_PWM_HIGH_ON_DELAY	=	10	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
-.EQU	COMP_PWM_HIGH_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
-.EQU	COMP_PWM_LOW_ON_DELAY	=	10	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
-.EQU	COMP_PWM_LOW_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 .EQU	HIGH_DRIVER_PRECHG_TIME	=	0	; Time between commutations used to precharge the high side driver (for all nfet ESCs)
 .EQU	ADC_LIMIT_L			= 	101	; 4.3k/47k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 4.3k/47k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)

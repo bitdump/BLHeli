@@ -54,10 +54,6 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .EQU	DAMPED_MODE_ENABLE		=	1	; Set to 1 if fully damped mode is supported
 .EQU	NFETON_DELAY			=	5	; Wait delay from pfets off to nfets on
 .EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
-.EQU	COMP_PWM_HIGH_ON_DELAY	=	10	; Wait delay from pwm on until comparator can be read (for high pwm frequency)
-.EQU	COMP_PWM_HIGH_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for high pwm frequency)
-.EQU	COMP_PWM_LOW_ON_DELAY	=	10	; Wait delay from pwm on until comparator can be read (for low pwm frequency)
-.EQU	COMP_PWM_LOW_OFF_DELAY	=	20	; Wait delay from pwm off until comparator can be read (for low pwm frequency)
 .EQU	HIGH_DRIVER_PRECHG_TIME	=	6	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
 .EQU	ADC_LIMIT_L			= 	186	; 3k3/18k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 3k3/18k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
@@ -268,8 +264,7 @@ set_comp_phase_muxa:
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
    	ldi  @0, Mux_A 		; Set comparator multiplexer to phase A
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
   	out  ADMUX, @0
 set_comp_phase_a_exit:
 .ENDMACRO
@@ -278,8 +273,7 @@ set_comp_phase_a_exit:
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
    	ldi  @0, Mux_B  		; Set comparator multiplexer to phase B
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
   	out  ADMUX, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_C
@@ -290,8 +284,7 @@ set_comp_phase_a_exit:
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
    	ldi  @0, Mux_A 		; Set comparator multiplexer to phase A
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
   	out  ADMUX, @0
 	rjmp	set_comp_phase_c_exit
 
@@ -388,8 +381,7 @@ set_comp_phase_c_exit:
 	ldi	@0, Volt_Ip
 	sbrc	Flags1, ADC_READ_TEMP
 	ldi	@0, Temp_Ip
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
 	out	ADMUX, @0			; Set ADMUX register (2.56V reference, selected input)
  	in  	@0, ADCSRA	
   	sbr  @0, (1<<ADEN) 		; Enable ADC	
