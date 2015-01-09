@@ -197,6 +197,9 @@
 ;#define MYSTERY_30A_MAIN			
 ;#define MYSTERY_30A_TAIL
 ;#define MYSTERY_30A_MULTI
+;#define MYSTERY_40A_MAIN
+;#define MYSTERY_40A_TAIL
+;#define MYSTERY_40A_MULTI
 ;#define SUNRISE_HIMULTI_20A_MAIN		; Inverted input
 ;#define SUNRISE_HIMULTI_20A_TAIL
 ;#define SUNRISE_HIMULTI_20A_MULTI
@@ -581,6 +584,21 @@
 #if defined(MYSTERY_30A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "Mystery_30A.inc"		; Select Mystery 30A pinout
+#endif
+
+#if defined(MYSTERY_40A_MAIN)
+.EQU	MODE	=	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Mystery_40A.inc"		; Select Mystery 40A pinout
+#endif
+
+#if defined(MYSTERY_40A_TAIL)
+.EQU	MODE	=	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Mystery_40A.inc"		; Select Mystery 40A pinout
+#endif
+
+#if defined(MYSTERY_40A_MULTI)
+.EQU	MODE	=	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Mystery_40A.inc"		; Select Mystery 40A pinout
 #endif
 
 #if defined(SUNRISE_HIMULTI_20A_MAIN)
