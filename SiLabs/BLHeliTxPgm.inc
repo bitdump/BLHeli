@@ -330,46 +330,26 @@ store_main_func_5:
 
 store_main_func_6:
 	cjne	Temp4, #6, store_main_func_7
-	mov	Temp2, #Pgm_Startup_Method
+	mov	Temp2, #Pgm_Startup_Pwr
 
 store_main_func_7:
 	cjne	Temp4, #7, store_main_func_8
-	mov	Temp2, #Pgm_Startup_Pwr
+	mov	Temp2, #Pgm_Comm_Timing
 
 store_main_func_8:
 	cjne	Temp4, #8, store_main_func_9
-	mov	Temp2, #Pgm_Startup_Rpm
+	mov	Temp2, #Pgm_Pwm_Freq
 
 store_main_func_9:
 	cjne	Temp4, #9, store_main_func_10
-	mov	Temp2, #Pgm_Startup_Accel
+	mov	Temp2, #Pgm_Demag_Comp
 
 store_main_func_10:
 	cjne	Temp4, #10, store_main_func_11
-	mov	Temp2, #Pgm_Comm_Timing
-
-store_main_func_11:
-	cjne	Temp4, #11, store_main_func_12
-	mov	Temp2, #Pgm_Throttle_Rate
-
-store_main_func_12:
-	cjne	Temp4, #12, store_main_func_13
-	mov	Temp2, #Pgm_Damping_Force
-
-store_main_func_13:
-	cjne	Temp4, #13, store_main_func_14
-	mov	Temp2, #Pgm_Pwm_Freq
-
-store_main_func_14:
-	cjne	Temp4, #14, store_main_func_15
-	mov	Temp2, #Pgm_Demag_Comp
-
-store_main_func_15:
-	cjne	Temp4, #15, store_main_func_16
 	mov	Temp2, #Pgm_Direction
 
-store_main_func_16:
-	cjne	Temp4, #16, store_in_ram_exit
+store_main_func_11:
+	cjne	Temp4, #11, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
 ENDIF
 IF MODE == 1
@@ -383,46 +363,26 @@ store_tail_func_2:
 
 store_tail_func_3:
 	cjne	Temp4, #3, store_tail_func_4
-	mov	Temp2, #Pgm_Startup_Method
+	mov	Temp2, #Pgm_Startup_Pwr
 
 store_tail_func_4:
 	cjne	Temp4, #4, store_tail_func_5
-	mov	Temp2, #Pgm_Startup_Pwr
+	mov	Temp2, #Pgm_Comm_Timing
 
 store_tail_func_5:
 	cjne	Temp4, #5, store_tail_func_6
-	mov	Temp2, #Pgm_Startup_Rpm
+	mov	Temp2, #Pgm_Pwm_Freq
 
 store_tail_func_6:
 	cjne	Temp4, #6, store_tail_func_7
-	mov	Temp2, #Pgm_Startup_Accel
+	mov	Temp2, #Pgm_Demag_Comp
 
 store_tail_func_7:
 	cjne	Temp4, #7, store_tail_func_8
-	mov	Temp2, #Pgm_Comm_Timing
-
-store_tail_func_8:
-	cjne	Temp4, #8, store_tail_func_9
-	mov	Temp2, #Pgm_Throttle_Rate
-
-store_tail_func_9:
-	cjne	Temp4, #9, store_tail_func_10
-	mov	Temp2, #Pgm_Damping_Force
-
-store_tail_func_10:
-	cjne	Temp4, #10, store_tail_func_11
-	mov	Temp2, #Pgm_Pwm_Freq
-
-store_tail_func_11:
-	cjne	Temp4, #11, store_tail_func_12
-	mov	Temp2, #Pgm_Demag_Comp
-
-store_tail_func_12:
-	cjne	Temp4, #12, store_tail_func_13
 	mov	Temp2, #Pgm_Direction
 
-store_tail_func_13:
-	cjne	Temp4, #13, store_in_ram_exit
+store_tail_func_8:
+	cjne	Temp4, #8, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
 ENDIF
 IF MODE == 2 
@@ -448,46 +408,26 @@ store_multi_func_5:
 
 store_multi_func_6:
 	cjne	Temp4, #6, store_multi_func_7
-	mov	Temp2, #Pgm_Startup_Method
+	mov	Temp2, #Pgm_Startup_Pwr
 
 store_multi_func_7:
 	cjne	Temp4, #7, store_multi_func_8
-	mov	Temp2, #Pgm_Startup_Pwr
+	mov	Temp2, #Pgm_Comm_Timing
 
 store_multi_func_8:
 	cjne	Temp4, #8, store_multi_func_9
-	mov	Temp2, #Pgm_Startup_Rpm
+	mov	Temp2, #Pgm_Pwm_Freq
 
 store_multi_func_9:
 	cjne	Temp4, #9, store_multi_func_10
-	mov	Temp2, #Pgm_Startup_Accel
+	mov	Temp2, #Pgm_Demag_Comp
 
 store_multi_func_10:
 	cjne	Temp4, #10, store_multi_func_11
-	mov	Temp2, #Pgm_Comm_Timing
-
-store_multi_func_11:
-	cjne	Temp4, #11, store_multi_func_12
-	mov	Temp2, #Pgm_Throttle_Rate
-
-store_multi_func_12:
-	cjne	Temp4, #12, store_multi_func_13
-	mov	Temp2, #Pgm_Damping_Force
-
-store_multi_func_13:
-	cjne	Temp4, #13, store_multi_func_14
-	mov	Temp2, #Pgm_Pwm_Freq
-
-store_multi_func_14:
-	cjne	Temp4, #14, store_multi_func_15
-	mov	Temp2, #Pgm_Demag_Comp
-
-store_multi_func_15:
-	cjne	Temp4, #15, store_multi_func_16
 	mov	Temp2, #Pgm_Direction
 
-store_multi_func_16:
-	cjne	Temp4, #16, store_in_ram_exit
+store_multi_func_11:
+	cjne	Temp4, #11, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
 ENDIF
 
@@ -692,17 +632,17 @@ function_next:					; Yes - Next function value
 IF MODE == 0
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #17				; Main has 16 functions	
+	subb	A, #12				; Main has 11 functions	
 ENDIF
 IF MODE == 1
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #14				; Tail has 13 functions	
+	subb	A, #9				; Tail has 8 functions	
 ENDIF
 IF MODE == 2 
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #17				; Multi has 16 functions	
+	subb	A, #12				; Multi has 11 functions	
 ENDIF
 	jnc 	program_by_tx_exit		; Last function value?
 	jmp	paraval_no_entry		; No - go back

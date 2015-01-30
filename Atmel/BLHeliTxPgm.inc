@@ -319,25 +319,17 @@ store_new_value_in_ram:
 
 	cpi	Temp4, 8
 	brne	PC+3
-	sts	Pgm_Throttle_Rate, Temp1
+	sts	Pgm_Pwm_Freq, Temp1
 
 	cpi	Temp4, 9
 	brne	PC+3
-	sts	Pgm_Damping_Force, Temp1
+	sts	Pgm_Demag_Comp, Temp1
 
 	cpi	Temp4, 10
 	brne	PC+3
-	sts	Pgm_Pwm_Freq, Temp1
-
-	cpi	Temp4, 11
-	brne	PC+3
-	sts	Pgm_Demag_Comp, Temp1
-
-	cpi	Temp4, 12
-	brne	PC+3
 	sts	Pgm_Direction, Temp1
 
-	cpi	Temp4, 13
+	cpi	Temp4, 11
 	brne	PC+3
 	sts	Pgm_Input_Pol, Temp1
 .ENDIF
@@ -360,25 +352,17 @@ store_new_value_in_ram:
 
 	cpi	Temp4, 5
 	brne	PC+3
-	sts	Pgm_Throttle_Rate, Temp1
+	sts	Pgm_Pwm_Freq, Temp1
 
 	cpi	Temp4, 6
 	brne	PC+3
-	sts	Pgm_Damping_Force, Temp1
+	sts	Pgm_Demag_Comp, Temp1
 
 	cpi	Temp4, 7
 	brne	PC+3
-	sts	Pgm_Pwm_Freq, Temp1
-
-	cpi	Temp4, 8
-	brne	PC+3
-	sts	Pgm_Demag_Comp, Temp1
-
-	cpi	Temp4, 9
-	brne	PC+3
 	sts	Pgm_Direction, Temp1
 
-	cpi	Temp4, 10
+	cpi	Temp4, 8
 	brne	PC+3
 	sts	Pgm_Input_Pol, Temp1
 .ENDIF
@@ -413,25 +397,17 @@ store_new_value_in_ram:
 
 	cpi	Temp4, 8
 	brne	PC+3
-	sts	Pgm_Throttle_Rate, Temp1
+	sts	Pgm_Pwm_Freq, Temp1
 
 	cpi	Temp4, 9
 	brne	PC+3
-	sts	Pgm_Damping_Force, Temp1
+	sts	Pgm_Demag_Comp, Temp1
 
 	cpi	Temp4, 10
 	brne	PC+3
-	sts	Pgm_Pwm_Freq, Temp1
-
-	cpi	Temp4, 11
-	brne	PC+3
-	sts	Pgm_Demag_Comp, Temp1
-
-	cpi	Temp4, 12
-	brne	PC+3
 	sts	Pgm_Direction, Temp1
 
-	cpi	Temp4, 13
+	cpi	Temp4, 11
 	brne	PC+3
 	sts	Pgm_Input_Pol, Temp1
 .ENDIF
@@ -638,15 +614,15 @@ function_next:					; Yes - Next function value
 	sts	Tx_Pgm_Func_No, XH
 .IF MODE == 0
 	lds	XH, Tx_Pgm_Func_No		
-	cpi	XH, 14				; Main has 13 functions	
+	cpi	XH, 12				; Main has 11 functions	
 .ENDIF
 .IF MODE == 1
 	lds	XH, Tx_Pgm_Func_No		
-	cpi	XH, 11				; Tail has 10 functions	
+	cpi	XH, 9				; Tail has 8 functions	
 .ENDIF
 .IF MODE == 2
 	lds	XH, Tx_Pgm_Func_No		
-	cpi	XH, 14				; Multi has 13 functions	
+	cpi	XH, 12				; Multi has 11 functions	
 .ENDIF
 	brcc	program_by_tx_exit		; Last function value?
 	rjmp	paraval_no_entry		; No - go back

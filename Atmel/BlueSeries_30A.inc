@@ -49,7 +49,6 @@ Eep_ESC_Layout:		.DB	"#BlueSer_30A#   "	; ESC layout tag
 .ORG 0x50
 Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
-.EQU	CLK_8M				=	0	; Set to 0 for 16MHz clock, and 1 if 8MHz clock
 .EQU	HIGH_BEC_VOLTAGE		=	0	; Set to 1 or more if high BEC voltage is supported
 .EQU	DAMPED_MODE_ENABLE		=	1	; Set to 1 if fully damped mode is supported
 .EQU	NFETON_DELAY			=	5	; Wait delay from pfets off to nfets on
@@ -139,6 +138,16 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .MACRO T1oca_Clear_Int_Flag
 	ldi	@0, (1<<OCF1A)			; Clear oc1a flag
 	out	TIFR, @0
+.ENDMACRO		
+.MACRO T1oca_Int_Disable
+	in	@0, TIMSK				; Disable oc1a interrupts
+	cbr	@0, (1<<OCIE1A)	
+	out	TIMSK, @0
+.ENDMACRO		
+.MACRO T1oca_Int_Enable
+	in	@0, TIMSK				; Enable oc1a interrupts
+	sbr	@0, (1<<OCIE1A)	
+	out	TIMSK, @0
 .ENDMACRO		
 
 
