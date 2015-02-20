@@ -91,6 +91,8 @@
 ;           Temperature protection default set to off
 ;           Added support for OneShot125
 ;           Improved commutation timing accuracy
+; - Rev13.1 Removed startup ramp for MULTI
+;           Improved startup for some odd ESCs
 ;
 ;
 ;**** **** **** **** ****
@@ -189,6 +191,9 @@
 ;#define MULTISTAR_20A_NFET_MAIN		; Inverted input
 ;#define MULTISTAR_20A_NFET_TAIL
 ;#define MULTISTAR_20A_NFET_MULTI
+;#define MULTISTAR_20Av2_MAIN			
+;#define MULTISTAR_20Av2_TAIL
+;#define MULTISTAR_20Av2_MULTI
 ;#define MULTISTAR_30A_MAIN			; Inverted input
 ;#define MULTISTAR_30A_TAIL
 ;#define MULTISTAR_30A_MULTI
@@ -240,6 +245,9 @@
 ;#define SUNRISE_BLHELI_SLIM_30A_MAIN	
 ;#define SUNRISE_BLHELI_SLIM_30A_TAIL
 ;#define SUNRISE_BLHELI_SLIM_30A_MULTI
+;#define DYS_SN20A_MAIN				; ICP1 as input		
+;#define DYS_SN20A_TAIL
+;#define DYS_SN20A_MULTI
 
 
 
@@ -530,6 +538,21 @@
 .INCLUDE "Multistar_20A_NFET.inc"	; Select Multistar 20A NFET pinout
 #endif
 
+#if defined(MULTISTAR_20Av2_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Multistar_20Av2.inc"	; Select Multistar 20A v2 pinout
+#endif
+
+#if defined(MULTISTAR_20Av2_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Multistar_20Av2.inc"	; Select Multistar 20A v2 pinout
+#endif
+
+#if defined(MULTISTAR_20Av2_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Multistar_20Av2.inc"	; Select Multistar 20A v2 pinout
+#endif
+
 #if defined(MULTISTAR_30A_MAIN)
 .EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
 .INCLUDE "Multistar_30A.inc"		; Select Multistar 30A pinout
@@ -783,6 +806,21 @@
 #if defined(SUNRISE_BLHELI_SLIM_30A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "Sunrise_BLHeli_Slim_30A.inc"	; Select Sunrise BLHeli slim 30A pinout
+#endif
+
+#if defined(DYS_SN20A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "DYS_SN20A.inc"			; Select DYS SN20A pinout
+#endif
+
+#if defined(DYS_SN20A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "DYS_SN20A.inc"			; Select DYS SN20A pinout
+#endif
+
+#if defined(DYS_SN20A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "DYS_SN20A.inc"			; Select DYS SN20A pinout
 #endif
 
 
@@ -1145,7 +1183,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	13		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	0		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	1		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	19		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1984,20 +2022,6 @@ t0h_int_rcp_bailout_arm:
 	sts	Spoolup_Limit_Cnt, XL
 
 t0h_int_rcp_exit:
-.ENDIF
-.IF MODE == 2	; Multi
-	lds	XL, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 0.8 seconds spoolup
-	subi	XL, 0xF6						; Subtract -10
-	brcs	t0h_int_rcp_no_limit			; If below 255 - branch
-
-	ldi	I_Temp2, 0xFF
-	sts	Pwm_Limit_Spoolup, I_Temp2
-	rjmp	t0h_int_rcp_limit_set
-
-t0h_int_rcp_no_limit:
-	sts	Pwm_Limit_Spoolup, XL
-
-t0h_int_rcp_limit_set:
 .ENDIF
 	cli							; Disable interrupts
 	T0_Int_Enable XL				; Enable timer0 interrupts
@@ -3801,6 +3825,7 @@ calc_new_wait_times:
 	rjmp	PC+3
 
 	inc	Temp7				; Increase more
+	inc	Temp7
 
 	lds	XH, Comm_Period4x_H		; More reduction for higher rpms
 	cpi	XH, 3				; 104k eRPM
@@ -4009,8 +4034,8 @@ wait_for_comp_out_not_timed_out:
 	sbrs	Flags1, STARTUP_PHASE 		; Set many samples during startup
 	rjmp	comp_wait_on_comp_able
 
-	ldi	Temp1, 8
-	ldi	Temp4, 4
+	ldi	Temp1, 15
+	ldi	Temp4, 1
 
 comp_wait_on_comp_able:
 	sbrc	Flags0, OC1A_PENDING			; Has zero cross scan timeout elapsed?
@@ -4038,7 +4063,7 @@ comp_wait_on_comp_able_not_timed_out:
 	sbrs	Flags0, PWM_ON					; More delay for pwm off
 	lsl	Temp2
 	sbrc	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during direct startup
-	ldi	Temp2, 120
+	ldi	Temp2, 100
 
 	Read_TCNT2 XH
 	lds	Temp5, Pwm_Prev_Edge
@@ -5679,18 +5704,12 @@ run6:
 	sts	Pwm_Limit_Spoolup, XH	
 .ENDIF
 .IF MODE == 2	; Multi
-	lds	XH, Pgm_Direction			; Check if bidirectional operation
-	cpi	XH, 3
-	brne	start_pwm_lim_set
-
 	lds	XH, Pwm_Spoolup_Beg
 	sts	Pwm_Limit, XH
 	ldi	XH, 0xFF
 	sts	Pwm_Limit_Spoolup, XH	
 	ldi	XH, 0x20
 	sts	Pwm_Limit_Low_Rpm, XH
-
-start_pwm_lim_set:
 .ENDIF
 	rjmp	normal_run_checks
 
@@ -5718,6 +5737,10 @@ normal_run_checks:
 	brne	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	cbr	Flags1, (1<<INITIAL_RUN_PHASE); Clear initial run phase flag
+.IF MODE == 2	; Multi
+	ldi	XH, 0xFF					; Allow full power
+	sts	Pwm_Limit, XH
+.ENDIF
 	rjmp damped_transition			; Do damped transition if counter is zero
 
 normal_run_check_startup_rot:

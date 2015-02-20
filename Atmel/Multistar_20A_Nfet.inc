@@ -49,7 +49,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
 .EQU	HIGH_BEC_VOLTAGE		=	0	; Set to 1 or more if high BEC voltage is supported
 .EQU	DAMPED_MODE_ENABLE		=	1	; Set to 1 if fully damped mode is supported
-.EQU	NFETON_DELAY			=	30	; Wait delay from pfets off to nfets on
+.EQU	NFETON_DELAY			=	5	; Wait delay from pfets off to nfets on
 .EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
 .EQU	HIGH_DRIVER_PRECHG_TIME	=	6	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
 .EQU	ADC_LIMIT_L			= 	109	; 4.7k/47k divider. Power supply measurement ADC value for which motor power is limited (low byte)

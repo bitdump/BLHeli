@@ -197,6 +197,8 @@ $NOMOD51
 ;           Removed throttle change rate and damping force parameters
 ;           Added support for OneShot125
 ;           Improved commutation timing accuracy
+; - Rev13.1 Removed startup ramp for MULTI
+;           Improved startup for some odd ESCs
 ;
 ;
 ;**** **** **** **** ****
@@ -1832,7 +1834,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	13		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	19		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2598,19 +2600,6 @@ t2h_int_rcp_bailout_arm:
 	mov	Spoolup_Limit_Cnt, #255			
 
 t2h_int_rcp_exit:
-ENDIF
-IF MODE == 2	; Multi
-	mov	A, Pwm_Limit_Spoolup			; Increment spoolup pwm, for a 0.8 seconds spoolup
-	add	A, #10
-	jnc	t2h_int_rcp_no_limit			; If below 255 - branch
-
-	mov	Pwm_Limit_Spoolup, #0FFh
-	ajmp	t2h_int_rcp_limit_set
-
-t2h_int_rcp_no_limit:
-	mov	Pwm_Limit_Spoolup, A
-
-t2h_int_rcp_limit_set:
 ENDIF
 	pop	ACC			; Restore preserved registers
 	pop	PSW
@@ -4888,8 +4877,8 @@ ENDIF
 
 	jnb	Flags1.STARTUP_PHASE, comp_wait_on_comp_able	; Set many samples during startup
 
-	mov	Temp1, #8
-	mov	Temp3, #4
+	mov	Temp1, #15
+	mov	Temp3, #1
 	mov	CPT0MD, #3				; Set slow response (1000ns) 	
 IF COMP1_USED==1			
 	mov	CPT1MD, #3				; Set slow response (1000ns) 	
@@ -4931,7 +4920,7 @@ comp_wait_on_comp_able_not_timed_out:
 	mov	Temp2, A
 	jnb	Flags1.STARTUP_PHASE, ($+5)		; Set a long delay from pwm on/off events during startup
 
-	mov	Temp2, #120
+	mov	Temp2, #100
 
 	clr	C
 	mov	A, TL1
@@ -6502,15 +6491,9 @@ IF MODE == 1	; Tail
 	mov	Pwm_Limit_Spoolup, #0FFh	
 ENDIF
 IF MODE == 2	; Multi
-	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
-	mov	A, @Temp1				
-	cjne	A, #3, direct_start_pwm_lim_set
-
 	mov	Pwm_Limit, Pwm_Spoolup_Beg
 	mov	Pwm_Limit_Spoolup, #0FFh	
 	mov	Pwm_Limit_Low_Rpm, #20h
-
-direct_start_pwm_lim_set:
 ENDIF
 	jmp	normal_run_checks
 
@@ -6537,6 +6520,9 @@ normal_run_checks:
 	jnz 	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
+IF MODE == 2	; Multi
+	mov	Pwm_Limit, #0FFh
+ENDIF
 	jmp damped_transition			; Do damped transition if counter is zero
 
 normal_run_check_startup_rot:
