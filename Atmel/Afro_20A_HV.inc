@@ -161,14 +161,14 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .EQU	Volt_Ip		= 7	; i
 .EQU	Temp_Ip		= 6	; i
 ;.EQU			= 5	; i
-;.EQU			= 4	; i
-;.EQU			= 3	; i
-;.EQU			= 2	; i 
+.EQU	RPM_OUT_PIN		= 4	; o
+.EQU	LED_RED		= 3	; o
+.EQU	LED_GREEN	= 2	; o 
 .EQU	Mux_B		= 1	; i
 .EQU	Mux_A		= 0	; i 
 
-.equ	INIT_PC		= 0x00
-.equ	DIR_PC		= 0x00
+.equ	INIT_PC		= 0x00 + (1<<LED_RED)
+.equ	DIR_PC		= (1<<LED_GREEN)+ (1<<LED_RED) + (1<<RPM_OUT_PIN)
 
 
 .MACRO AnFET_on
@@ -462,6 +462,8 @@ set_comp_phase_c_exit:
 .ENDMACRO
 
 .MACRO Set_RPM_Out
+	cbi	PORTC, RPM_OUT_PIN
 .ENDMACRO
 .MACRO Clear_RPM_Out
+	sbi	PORTC, RPM_OUT_PIN
 .ENDMACRO
