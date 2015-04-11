@@ -93,6 +93,10 @@
 ;           Improved commutation timing accuracy
 ; - Rev13.1 Removed startup ramp for MULTI
 ;           Improved startup for some odd ESCs
+; - Rev13.2 Still tweaking startup to make it more reliable and faster for all ESC/motor combos
+;           Increased deadband for bidirectional operation
+;           Relaxed signal detection criteria
+;           Miscellaneous other changes
 ;
 ;
 ;**** **** **** **** ****
@@ -139,10 +143,10 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI 
+;#define BLUESERIES_20A_MULTI
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
-;#define BLUESERIES_30A_MULTI
+;#define BLUESERIES_30A_MULTI 
 ;#define BLUESERIES_40A_MAIN
 ;#define BLUESERIES_40A_TAIL
 ;#define BLUESERIES_40A_MULTI
@@ -247,7 +251,7 @@
 ;#define SUNRISE_BLHELI_SLIM_30A_MULTI
 ;#define DYS_SN20A_MAIN				; ICP1 as input		
 ;#define DYS_SN20A_TAIL
-;#define DYS_SN20A_MULTI
+;#define DYS_SN20A_MULTI 
 
 
 
@@ -909,7 +913,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	0	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -930,7 +934,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	0	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -952,7 +956,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	0	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1052,7 +1056,6 @@ Rcp_Prev_Edge_H:			.BYTE	1		; RC pulse previous edge timer3 timestamp (hi byte)
 Rcp_Outside_Range_Cnt:		.BYTE	1		; RC pulse outside range counter (incrementing) 
 Rcp_Timeout_Cnt:			.BYTE	1		; RC pulse timeout counter (decrementing) 
 Rcp_Skip_Cnt:				.BYTE	1		; RC pulse skip counter (decrementing) 
-Rcp_Edge_Cnt:				.BYTE	1		; RC pulse edge counter 
 
 Initial_Arm:				.BYTE	1		; Variable that is set during the first arm sequence after power on
 
@@ -1183,7 +1186,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	13		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	1		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	2		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	19		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1371,6 +1374,7 @@ t2_int:	; Used for pwm control
 t2_int_pwm_on_execute:
 	ijmp							; Jump to pwm on routines. Z should be set to one of the pwm_nfet_on labels
 
+.IF MODE == 1				; Tail
 t2_int_pwm_on_low_pwm:
 	; Skip pwm on cycles for very low pwm
 	lds	YL, Pwm_On_Cnt				; Increment event counter
@@ -1383,6 +1387,9 @@ t2_int_pwm_on_low_pwm:
 	lds	YH, Pwm_On_Cnt				; Check if on cycle is to be skipped
 	sub	YL, YH
 	brcs	t2_int_pwm_on_execute
+
+	sbrc	Flags1, STARTUP_PHASE
+	rjmp	t2_int_pwm_on_execute
 
 	ldi	YL, 120					; Write start point for timer
 	sec	
@@ -1400,7 +1407,7 @@ t2_int_pwm_on_low_pwm:
 
 t2_int_pwm_on_low_pwm_not_zero:
 	rjmp	t2_int_pwm_on_exit_no_timer_update
-
+.ENDIF
 
 t2_int_pwm_off:
 	; Pwm off cycle
@@ -1713,6 +1720,7 @@ t0_int_rcp_update_start:
 
 	lds	XL, New_Rcp				; Load new pulse value
 	mov	I_Temp1, XL
+	sbrs	Flags0, RCP_MEAS_PWM_FREQ	; If measure RCP pwm frequency flag set - do not clear flag
 	cbr	Flags2, (1<<RCP_UPDATED)	 	; Flag that pulse has been evaluated
 	; Use a gain of 1.0625x for pwm input if not governor mode
 	sbrc	Flags2, RCP_PPM		
@@ -1785,6 +1793,15 @@ t0_int_pwm_update:
 	rjmp	t0_int_current_pwm_update
 
 	lds	XL, Requested_Pwm			; Limit pwm during start
+.IF MODE == 2	; Multi
+	ldi	I_Temp2, 8
+	add	XL, I_Temp2				; Add an extra power boost during start
+	sts	Requested_Pwm, XL
+	brcc	PC+3
+
+	ldi	XL, 0xFF
+	sts	Requested_Pwm, XL
+.ENDIF
 	lds	I_Temp2, Pwm_Limit
 	cp	XL, I_Temp2
 	brcs	t0_int_current_pwm_update
@@ -1944,7 +1961,7 @@ t0h_int_rcp_gov_pwm_done:
 	dec	XL							; Decrement		
 	sts	Spoolup_Limit_Skip, XL			; Store skip count
 	breq	PC+2
-	rjmp	t0h_int_rcp_exit				; Jump if skip count is not reached
+	rjmp	t0h_int_exit					; Jump if skip count is not reached
 
 	ldi	XL, 1						; Reset skip count. Default is fast spoolup
 	sts	Spoolup_Limit_Skip, XL			
@@ -1952,7 +1969,7 @@ t0h_int_rcp_gov_pwm_done:
 
 	lds	XL, Main_Spoolup_Time_3x			; No spoolup until 3*N*32ms (Spoolup_Limit_Cnt in I_Temp2)
 	cp	I_Temp2, XL		
-	brcs	t0h_int_rcp_exit
+	brcs	t0h_int_exit
 
 	lds	XL, Main_Spoolup_Time_10x		; Slow spoolup until 10*N*32ms (Spoolup_Limit_Cnt in I_Temp2)
 	cp	I_Temp2, XL		
@@ -1999,7 +2016,7 @@ t0h_int_rcp_set_limit:
 									; 30=Ok
 									; 100=Fail on small governor settling overshoot on low headspeeds
 									; 200=Fail on governor settling overshoot
-	rjmp	t0h_int_rcp_exit				; Exit
+	rjmp	t0h_int_exit					; Exit
 
 t0h_int_rcp_inc_limit:
 	lds	XL, Pwm_Limit_Spoolup			; Increment spoolup pwm
@@ -2015,14 +2032,14 @@ t0h_int_rcp_no_limit:
 t0h_int_rcp_bailout_arm:
 	lds	XL, Pwm_Limit_Spoolup
 	cpi	XL, 0xFF
-	brne	t0h_int_rcp_exit
+	brne	t0h_int_exit
 
 	ldi	XL, 0xFF
 	sts	Auto_Bailout_Armed, XL			; Arm bailout
 	sts	Spoolup_Limit_Cnt, XL
 
-t0h_int_rcp_exit:
 .ENDIF
+t0h_int_exit:
 	cli							; Disable interrupts
 	T0_Int_Enable XL				; Enable timer0 interrupts
 	sbrs	Flags2, RCP_INT_NESTED_ENABLED; Restore rcp interrupt state
@@ -2225,6 +2242,8 @@ rcp_int_store_data:
 	; Store pre previous edge
 	sts	Rcp_PrePrev_Edge_L, I_Temp1
 	sts	Rcp_PrePrev_Edge_H, I_Temp2
+	ldi	Temp1, RCP_VALIDATE
+	rjmp	rcp_int_limited
 
 rcp_int_fall:
 	; RC pulse edge was second, calculate new pulse length
@@ -2329,7 +2348,7 @@ rcp_int_ppm_calculate:
 	mov	I_Temp8, Zero
 	adc	I_Temp8, Zero
 	sub	I_Temp5, I_Temp7				; Subtract minimum
-	sbc	I_Temp6, I_Temp8				
+	sbc	I_Temp6, I_Temp8
 	in	I_Temp1, SREG
 	andi	I_Temp1, (1<<SREG_C)	
 .IF MODE >= 1	; Tail or multi
@@ -2394,7 +2413,7 @@ rcp_int_ppm_neg_checked:
 
 	lsl	I_Temp5						; Multiply value by 2
 	rol	I_Temp6
-	ldi	XL, 5						; Subtract deadband
+	ldi	XL, 10						; Subtract deadband
 	sub	I_Temp5, XL					
 	sbc	I_Temp6, Zero
 	brcc	rcp_int_ppm_bidir_done
@@ -3286,7 +3305,7 @@ set_pwm_limit_low_rpm:
 	sbr	Flags0, (1<<DEMAG_ENABLED)		; Enable demag
 	lds	XH, Comm_Period4x_H
 	cpi	XH, 0x0A						; ~31250 eRPM
-	brcs	PC+2							; If speed above - branch
+	brcs	set_pwm_demag_done				; If speed above - branch
 
 	mov	XH, Current_Pwm_Limited
 	cpi	XH, 0x40						; Do not disable if pwm above 25%
@@ -3296,6 +3315,7 @@ set_pwm_limit_low_rpm:
 
 set_pwm_demag_done:
 	lds	XH, Comm_Period4x_H
+	tst	XH
 	breq	set_pwm_limit_low_rpm_exit		; Avoid divide by zero
 
 	ldi	Temp1, 255					; Divide 255 by Comm_Period4x_H
@@ -3684,7 +3704,7 @@ startup_pwm_set_pwm:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 initialize_all_timings: 
 	sts	Comm_Period4x_L, Zero		; Set commutation period registers
-	ldi	XH, 0x08
+	ldi	XH, 0x7F
 	sts	Comm_Period4x_H, XH
 	ret
 
@@ -3821,11 +3841,11 @@ calc_new_wait_times:
 	mov	Temp8, XH				; Store timing in Temp8
 	ldi	XH, (COMM_TIME_RED<<1)	
 	mov	Temp7, XH
+	dec	Temp7			
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+3
+	rjmp	PC+2
 
 	inc	Temp7				; Increase more
-	inc	Temp7
 
 	lds	XH, Comm_Period4x_H		; More reduction for higher rpms
 	cpi	XH, 3				; 104k eRPM
@@ -3835,10 +3855,9 @@ calc_new_wait_times:
 	inc	Temp7
 
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+3
+	rjmp	calc_new_wait_per_low
 
 	inc	Temp7				; Increase more
-	inc	Temp7
 
 calc_new_wait_per_low:
 	cpi	XH, 2				; 156k eRPM
@@ -3848,10 +3867,9 @@ calc_new_wait_per_low:
 	inc	Temp7
 
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+3
+	rjmp	calc_new_wait_per_high
 
 	inc	Temp7				; Increase more
-	inc	Temp7
 
 calc_new_wait_per_high:
 	; Load current commutation timing
@@ -3954,6 +3972,15 @@ wait_before_zc_scan:
 
 	lds	Temp3, Comm_Period4x_L		; Set long timeout when starting
 	lds	Temp4, Comm_Period4x_H
+	; Break deadlock cyclic patterns during startup
+	lds	XH, Startup_Ok_Cnt
+	cpi	XH, 8
+	brcc	wait_before_zc_random_done
+
+	sbrs	Temp3, 0					; Use LSB as a random number
+	lds	Temp4, Wt_Zc_Timeout_H
+
+wait_before_zc_random_done:
 	cli							; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp1
 	Read_TCNT1H Temp2
@@ -4010,8 +4037,8 @@ wait_for_comp_out_start:
 
 wait_for_comp_out_not_timed_out:
 	; Set number of comparator readings
-	ldi	Temp1, 1
-	ldi	Temp4, 2
+	ldi	Temp1, 1		; Number of OK readings required
+	ldi	Temp4, 2		; Number of fast consecutive readings
 
 	lds 	XH, Comm_Period4x_H			; Set number of readings higher for lower speeds
 	cpi	XH, 0x05
@@ -4030,11 +4057,13 @@ wait_for_comp_out_not_timed_out:
 	brcs	PC+2
 
 	ldi	Temp4, 3
+	sbrc	Flags1, INITIAL_RUN_PHASE	; Set less samples during initial run phase		
+	ldi	Temp4, 1
 
 	sbrs	Flags1, STARTUP_PHASE 		; Set many samples during startup
 	rjmp	comp_wait_on_comp_able
 
-	ldi	Temp1, 15
+	ldi	Temp1, 30
 	ldi	Temp4, 1
 
 comp_wait_on_comp_able:
@@ -4063,11 +4092,15 @@ comp_wait_on_comp_able_not_timed_out:
 	sbrs	Flags0, PWM_ON					; More delay for pwm off
 	lsl	Temp2
 	sbrc	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during direct startup
-	ldi	Temp2, 100
+	ldi	Temp2, 130
+	sbrc	Flags1, INITIAL_RUN_PHASE		
+	ldi	Temp2, 20
+
 
 	Read_TCNT2 XH
 	lds	Temp5, Pwm_Prev_Edge
 	sub	XH, Temp5
+	brcs	comp_wait_on_comp_able			; Re-evaluate pwm cycle if timer has wrapped 
 	sbc	XH, Temp2
 	brcs	comp_wait_on_comp_able			; Re-evaluate pwm cycle
 
@@ -5022,6 +5055,38 @@ reset:
 	out	PORTD, XH
 	ldi	XH, DIR_PD
 	out	DDRD, XH
+	; Set default programmed parameters
+	xcall set_default_parameters
+	; Read all programmed parameters
+	xcall read_all_eeprom_parameters
+	; Set beep strength
+	lds	Temp1, Pgm_Beep_Strength
+	sts	Beep_Strength, Temp1
+	; Initializing beep
+	cli					; Disable interrupts explicitly
+	xcall wait200ms	
+	xcall beep_f1
+	xcall wait30ms
+	xcall beep_f2
+	xcall wait30ms
+	xcall beep_f3
+	xcall wait30ms
+.IF MODE <= 1	; Main or tail
+	; Wait for receiver to initialize
+	xcall wait1s
+	xcall wait200ms
+	xcall wait200ms
+	xcall wait100ms
+.ENDIF
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; No signal entry point
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+init_no_signal:
+	; Disable interrupts explicitly
+	cli					
 	; Clear registers r0 through r25
 	clr	Zero
 	ldi	XL, low(0)		; Register number
@@ -5040,9 +5105,9 @@ clear_ram:
 	brne	clear_ram
 	; Check if input signal is high for more than 10ms
 	ldi	Temp1, 100
-	input_high_check_1:
+input_high_check_1:
 	ldi	Temp2, 200
-	input_high_check_2:
+input_high_check_2:
 	Read_Rcp_Int XL		; Read RCP input
 	sbrs	XL, Rcp_In		; Is it high?
 	rjmp	bootloader_done	; No - run normally
@@ -5050,30 +5115,46 @@ clear_ram:
 	brne	input_high_check_2
 	dec	Temp1
 	brne	input_high_check_1
-	; Jump to SimonK bootloader if present
-	ldi	ZL, 0x02
+	; Jump to bootloader if present
+	ldi	ZL, 0x00
 .IF THIRDBOOTSTART == 0xe00
-	ldi    ZH, 0x1C
+	ldi	ZH, 0x1C
 .ENDIF
 .IF THIRDBOOTSTART == 0x1e00
-	ldi    ZH, 0x3C
+	ldi	ZH, 0x3C
 .ENDIF
-	lpm	XH, Z			; Check for first bytes of bootloader
-	cpi	XH, 0xFF
-	brne	bootloader_done
-	dec	ZL
-	lpm	XH, Z
-	cpi	XH, 0xE0
-	brne	bootloader_done
-	dec	ZL
-	lpm	XH, Z
+	lpm	XH, Z+			; Check for first bytes of SimonK bootloader
 	cpi	XH, 0xE4
+	brne	SK_bootloader_done
+	lpm	XH, Z+
+	cpi	XH, 0xE0
+	brne	SK_bootloader_done
+	lpm	XH, Z+
+	cpi	XH, 0xFF
+	brne	SK_bootloader_done
+
+	rjmp	jmp_to_bootloader
+
+SK_bootloader_done:
+	ldi	ZL, 0x00
+	inc	ZH				; BLHeli bootloader is smaller
+	inc	ZH
+	lpm	XH, Z+			; Check for first bytes of BLHeli bootloader
+	cpi	XH, 0xF8
+	brne	bootloader_done
+	lpm	XH, Z+
+	cpi	XH, 0x94
+	brne	bootloader_done
+	lpm	XH, Z+
+	cpi	XH, 0xAA
 	brne	bootloader_done
 
+jmp_to_bootloader:
+	clr	ZL
 	lsr	ZH
-	ror	ZL
 	ijmp					; Jump to bootloader
 	
+
 bootloader_done:
 	; Set default programmed parameters
 	xcall set_default_parameters
@@ -5107,22 +5188,6 @@ bootloader_done:
 	; Timer2: clk/8 for pwm
 	ldi	XH, (1<<CS21)
 	Set_Timer2_CS2 XH
-	; Initializing beep
-	cli					; Disable interrupts explicitly
-	xcall wait200ms	
-	xcall beep_f1
-	xcall wait30ms
-	xcall beep_f2
-	xcall wait30ms
-	xcall beep_f3
-	xcall wait30ms
-	; Wait for receiver to initialize
-.IF MODE <= 1	; Main or tail
-	xcall wait1s
-	xcall wait200ms
-	xcall wait200ms
-	xcall wait100ms
-.ENDIF
 	; Initialize interrupts and registers
 	Initialize_Interrupts XH			; Set all
 	Comp_Init XH					; Initialize comparator
@@ -5146,18 +5211,25 @@ bootloader_done:
 	; Measure PWM frequency
 measure_pwm_freq_init:	
 	sbr	Flags0, (1<<RCP_MEAS_PWM_FREQ)	; Set measure pwm frequency flag
+	ldi	Temp4, 3						; Number of attempts before going back to detect input signal
 measure_pwm_freq_start:	
-	ldi	Temp3, 25						; Number of pulses to measure
+	ldi	Temp3, 12						; Number of pulses to measure
 measure_pwm_freq_loop:	
 	; Check if period diff was accepted
 	lds	XH, Rcp_Period_Diff_Accepted
 	tst	XH
+	brne	measure_pwm_freq_wait
+
+	ldi	Temp3, 12						; Reset number of pulses to measure
+	dec	Temp4
 	brne	PC+2
+	rjmp	init_no_signal
 
-	ldi	Temp3, 25						; Reset number of pulses to measure
+measure_pwm_freq_wait:
+	xcall wait30ms						; Wait 30ms for new pulse
+	sbrs	Flags2, RCP_UPDATED				; Is there an updated RC pulse available - proceed
+	rjmp	init_no_signal					; Go back to detect input signal
 
-	sbrs	Flags2, RCP_UPDATED				; Is there an updated RC pulse available?
-	rjmp	PC-1							; Wait for next pulse
 	cbr	Flags2, (1<<RCP_UPDATED)	 		; Flag that pulse has been evaluated
 	lds	XH, New_Rcp					; Load value
 	cpi	XH, RCP_VALIDATE				; Higher than validate level?
@@ -5457,7 +5529,7 @@ wait_for_power_on_no_beep:
 	sbrs	Flags2, RCP_PPM		
 	rjmp	wait_for_power_on_ppm_not_missing	; If flag is not set (PWM) - branch
 
-	rjmp	measure_pwm_freq_init			; If ppm and pulses missing - go back to measure pwm frequency
+	rjmp	init_no_signal					; If ppm and pulses missing - go back to detect input signal
 
 wait_for_power_on_ppm_not_missing:
 	ldi	Temp1, RCP_STOP
@@ -5482,7 +5554,7 @@ wait_for_power_on_check_timeout:
 	tst	XH
 	brne	PC+2					; If it is not zero - proceed
 
-	rjmp	measure_pwm_freq_init	; If it is zero (pulses missing) - go back to measure pwm frequency
+	rjmp	init_no_signal			; If it is zero (pulses missing) - go back to detect input signal
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -5563,8 +5635,8 @@ read_initial_temp:
 	sts	Startup_Ok_Cnt, Zero		; Reset ok counter
 	xcall comm5comm6				; Initialize commutation
 	xcall comm6comm1				
-	xcall calc_next_comm_timing		; Set virtual commutation point
 	xcall initialize_all_timings		; Initialize timing
+	xcall calc_next_comm_timing		; Set virtual commutation point
 	xcall calc_new_wait_times		; Calculate new wait times
 	rjmp	run1
 
@@ -5689,8 +5761,8 @@ run6:
 	ldi	XH, 1
 	sts	Spoolup_Limit_Skip, XH			
 	; Check startup ok counter
-	ldi	Temp2, 100				; Set nominal startup parameters
-	ldi	Temp3, 20
+	ldi	Temp2, 50					; Set nominal startup parameters
+	ldi	Temp3, 10
 	lds	XH, Startup_Ok_Cnt			; Load ok counter
 	cp	XH, Temp2					; Is counter above requirement?
 	brcs	start_check_rcp			; No - proceed
@@ -5821,7 +5893,7 @@ run_to_wait_for_power_on:
 	tst	XH
 	brne	run_to_next_state_main		; If it is not zero - branch
 
-	rjmp	measure_pwm_freq_init		; If it is zero (pulses missing) - go back to measure pwm frequency
+	rjmp	init_no_signal				; If it is zero (pulses missing) - go back to detect input signal
 
 run_to_next_state_main:
 	lds	XH, Pgm_Main_Rearm_Start
@@ -5841,7 +5913,7 @@ jmp_wait_for_power_on:
 	tst	XH
 	brne	jmp_wait_for_power_on		; If it is not zero - go back to wait for poweron
 
-	rjmp	measure_pwm_freq_init		; If it is zero (pulses missing) - go back to measure pwm frequency
+	rjmp	init_no_signal				; If it is zero (pulses missing) - go back to detect input signal
 
 jmp_wait_for_power_on:
 	rjmp	wait_for_power_on			; Go back to wait for power on

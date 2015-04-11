@@ -45,6 +45,7 @@ Eep_ESC_Layout:		DB	"#Platinum50Av3# "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F390#   "	; Project and MCU tag (16 Bytes)
 
+MCU_50MHZ				EQU	1	; Set to 1 if MCU can run at 50MHz
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
@@ -68,6 +69,17 @@ DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 
 DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 
+;**** **** **** **** ****
+; Bootloader definitions
+;**** **** **** **** ****
+RTX_PORT		  		EQU 	P0		; Receive/Transmit port
+RTX_MDOUT				EQU	P0MDOUT	; Set to 1 for PUSHPULL				
+RTX_MDIN				EQU	P0MDIN	; Set to 1 for DIGITAL				
+RTX_PIN				EQU 	6		; RTX pin
+
+SIGNATURE_001			EQU	0f3h		; Device signature
+SIGNATURE_002			EQU	090h
+
 
 ;*********************
 ; PORT 0 definitions *
@@ -89,6 +101,18 @@ P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 MACRO Get_Rcp_Capture_Values
 	mov	Temp1, PCA0CPL0			; Get PCA capture values
 	mov	Temp2, PCA0CPH0
+IF MCU_50MHZ == 1
+	mov	A, Clock_Set_At_50MHz
+	jz	Get_Rcp_End
+	clr	C
+	mov	A, Temp2
+	rrc	A
+	mov	Temp2, A
+	mov	A, Temp1
+	rrc	A
+	mov	Temp1, A
+Get_Rcp_End:
+ENDIF
 ENDM
 MACRO Read_Rcp_Int
 	mov	A, P0
@@ -278,7 +302,11 @@ ENDM
 
 MACRO Initialize_Adc
 	mov	REF0CN, #0Eh		; Set vdd (3.3V) as reference. Enable temp sensor and bias
+IF MCU_50MHZ == 0
 	mov	ADC0CF, #58h		; ADC clock 2MHz
+ELSE
+	mov	ADC0CF, #0C0h		; ADC clock 2MHz
+ENDIF
 	mov	AMX0P, #(8+Adc_Ip)	; Select positive input
 	mov	AMX0N, #11h		; Select negative input as ground
 	mov	ADC0CN, #80h		; ADC enabled
@@ -320,3 +348,13 @@ MACRO Clear_RPM_Out
 	clr	P0.Rpm_Out
 ENDM
 
+MACRO Set_MCU_Clk_25MHz
+	mov	FLSCL, #80h		; Set flash timing for 25MHz
+	mov	CLKSEL, #0		; Set clock to 25MHz
+	mov	Clock_Set_At_50MHz, #0
+ENDM
+MACRO Set_MCU_Clk_50MHz
+	mov	FLSCL, #90h		; Set flash timing for 50MHz
+	mov	CLKSEL, #3		; Set clock to 50MHz
+	mov	Clock_Set_At_50MHz, #1
+ENDM

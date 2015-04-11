@@ -13,7 +13,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=REV13_1
+SET Revision=REV13_2
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 
@@ -141,6 +141,12 @@ SET BESCNAME=EMAX_20A
 call:compile
 SET BESCNAME=EMAX_40A
 call:compile
+SET BESCNAME=XRotor_10A
+call:compile
+SET BESCNAME=XRotor_20A
+call:compile
+SET BESCNAME=XRotor_40A
+call:compile
 
 goto :end
 
@@ -165,7 +171,7 @@ goto :eof
 @ECHO ********************************************************************  >> MakeHex_Result.txt
 %RaisonancePath%\Ride\bin\ma51.exe "BLHeli.asm" SET(BESCNO=%BESCNO%) OBJECT(Output\%BESCNAME%_%Revision%.OBJ) DEBUG EP QUIET PIN(%SilabsPath%\MCU\Inc;%RaisonancePath%\Ride\inc;%RaisonancePath%\Ride\inc\51) >> MakeHex_Result.txt
 %RaisonancePath%\Ride\bin\lx51.exe "Output\%BESCNAME%_%Revision%.OBJ"  TO(Output\%BESCNAME%_%Revision%.OMF) RS(256) PL(68) PW(78) OUTPUTSUMMARY LIBPATH(%RaisonancePath%\Ride\lib\51) >> MakeHex_Result.txt
-%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCNAME%_%Revision%.OMF" >> MakeHex_Result.txt >> MakeHex_Result.txt
+%RaisonancePath%\Ride\bin\oh51.exe "Output\%BESCNAME%_%Revision%.OMF" >> MakeHex_Result.txt 
 copy "Output\%BESCNAME%_%Revision%.HEX" "Output\Hex\%BESC%_%Revision%.HEX" > nul
 del "Output\%BESCNAME%_%Revision%.HEX" > nul
 @ECHO. >> MakeHex_Result.txt

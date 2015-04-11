@@ -45,6 +45,7 @@ Eep_ESC_Layout:		DB	"#PolarisTdr12A# "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
+MCU_50MHZ				EQU	0	; Set to 1 if MCU can run at 50MHz
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
@@ -67,6 +68,17 @@ DEFAULT_PGM_MAIN_SPOOLUP_TIME		EQU 7	; Main motor spoolup time
 DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+
+;**** **** **** **** ****
+; Bootloader definitions
+;**** **** **** **** ****
+RTX_PORT		  		EQU 	P0		; Receive/Transmit port
+RTX_MDOUT				EQU	P0MDOUT	; Set to 1 for PUSHPULL				
+RTX_MDIN				EQU	P0MDIN	; Set to 1 for DIGITAL				
+RTX_PIN				EQU 	7		; RTX pin
+
+SIGNATURE_001			EQU	0f3h		; Device signature
+SIGNATURE_002			EQU	030h
 
 
 ;*********************
@@ -297,4 +309,8 @@ ENDM
 MACRO Set_RPM_Out
 ENDM
 MACRO Clear_RPM_Out
+ENDM
+MACRO Set_MCU_Clk_25MHz
+ENDM
+MACRO Set_MCU_Clk_50MHz
 ENDM

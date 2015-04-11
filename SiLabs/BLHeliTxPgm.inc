@@ -157,10 +157,6 @@ write_eeprom_block2:
 	ret	
 
 
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-CSEG AT 1C00h		; Last code segment. Take care that there is enough space!
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
@@ -570,7 +566,7 @@ func_paraval_wait:
 	subb	A, #RCP_MAX			; Below max?
 	jc	function_next			; Yes - branch
 
-	ajmp	func_paraval_cont_wait	; No - branch
+	ljmp	func_paraval_cont_wait	; No - branch
 
 func_paraval_store:
 	call	store_new_value_in_ram		; Yes - store new value in RAM
