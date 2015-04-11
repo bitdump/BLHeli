@@ -34,7 +34,7 @@
 $include (c8051f390.inc)
 
 ;**** **** **** **** ****
-; Uses internal calibrated oscillator set to 24Mhz
+; Uses internal calibrated oscillator set to 50Mhz
 ;**** **** **** **** ****
 
 ;**** **** **** **** ****
