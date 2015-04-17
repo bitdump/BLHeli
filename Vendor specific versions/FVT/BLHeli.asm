@@ -2139,7 +2139,7 @@ beep_onoff:
 	djnz	ACC, $		
 	; Turn off nfet
 	AnFET_off			; AnFET off
-	mov	A, #150		; 25Ás off
+	mov	A, #150		; 25µs off
 	djnz	ACC, $		
 	djnz	Temp2, beep_onoff
 	; Copy variable
