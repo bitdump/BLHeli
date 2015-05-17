@@ -436,7 +436,9 @@ XRotor_20A_Multi 				EQU 183
 XRotor_40A_Main				EQU 184   
 XRotor_40A_Tail 				EQU 185  
 XRotor_40A_Multi 				EQU 186  
-
+MDRX62H_Main					EQU 187   
+MDRX62H_Tail					EQU 188  
+MDRX62H_Multi					EQU 189 
 
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file)
@@ -626,6 +628,9 @@ XRotor_40A_Multi 				EQU 186
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
 ;BESCNO EQU XRotor_40A_Multi
+;BESCNO EQU MDRX62H_Main
+;BESCNO EQU MDRX62H_Tail
+;BESCNO EQU MDRX62H_Multi
 
 
 ;**** **** **** **** ****
@@ -1560,7 +1565,20 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (XRotor_40A.inc)		; Select XRotor 40A pinout
 ENDIF
 
+IF BESCNO == MDRX62H_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (MDRX62H.inc)			; Select MDRX62H pinout
+ENDIF
 
+IF BESCNO == MDRX62H_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (MDRX62H.inc)			; Select MDRX62H pinout
+ENDIF
+
+IF BESCNO == MDRX62H_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (MDRX62H.inc)			; Select MDRX62H pinout
+ENDIF
 
 ;**** **** **** **** ****
 ; TX programming defaults
