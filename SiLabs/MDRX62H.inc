@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; XP 3A hardware definition file
+; MDRX62H hardware definition file
 ;
 ;**** **** **** **** ****
 
@@ -41,7 +41,7 @@ $include (c8051f330.inc)
 ; Constant definitions
 ;**** **** **** **** ****
 CSEG AT 1A40h
-Eep_ESC_Layout:		DB	"#MDRX62H#          "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#MDRX62H#       "	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 

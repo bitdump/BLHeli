@@ -147,6 +147,8 @@ SET BESCNAME=XRotor_20A
 call:compile
 SET BESCNAME=XRotor_40A
 call:compile
+SET BESCNAME=MDRX62H
+call:compile
 
 goto :end
 
