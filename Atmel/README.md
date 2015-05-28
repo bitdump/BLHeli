@@ -13,11 +13,11 @@ Features
 
 Supported Hardware
 --------------------
-- Lots of different ESCs. See the doc "BLHeli supported Atmel ESCs.pdf" for details.
+- Lots of different ESCs. See the doc "[BLHeli supported Atmel ESCs.pdf](BLHeli supported Atmel ESCs.pdf)" for details.
 
 Operation and use
 --------------------
-- See the doc "BLHeli manual Atmel RevN.x.pdf".
+- See the doc "[BLHeli manual Atmel Rev13.x.pdf](BLHeli manual Atmel Rev13.x.pdf)".
 
 Coding tools
 --------------------
