@@ -1,7 +1,7 @@
 This tree contains the BLHeli assembly code for sensorless brushless motor electronic speed control (ESC) boards.
 It is designed specifically for use with Eflite mCP X, but may also be used on other helicopters, multicopters or planes.
 
-This tree contains AVR assembly code for Atmel MCU based ESCs. 
+This tree contains SiLabs assembly code for SiLabs MCU based ESCs. 
 
 Features
 --------------------
@@ -13,18 +13,18 @@ Features
 
 Supported Hardware
 --------------------
-- Lots of different ESCs. See the doc "BLHeli supported Atmel ESCs.pdf" for details.
+- Lots of different ESCs. See the doc "[BLHeli supported SiLabs ESCs.pdf](BLHeli supported SiLabs ESCs.pdf)" for details.
 
 Operation and use
 --------------------
-- See the doc "BLHeli manual Atmel RevN.x.pdf".
+- See the doc "[BLHeli manual SiLabs Rev13.x.pdf](BLHeli manual SiLabs Rev13.x.pdf)".
 
 Coding tools
 --------------------
-The software is written, compiled and debugged in the AVR Studio 4 IDE.
+The software is written and debugged in the SiLabs IDE.
+Compilation is done using Raisonance Ride7 and Rkit-51 toolchain.
 
 For more information, check out this thread:
 
-http://www.rcgroups.com/forums/showthread.php?t=2136895
-
+http://www.helifreak.com/showthread.php?t=390517
 
