@@ -13,11 +13,11 @@ Features
 
 Supported Hardware
 --------------------
-- Lots of different ESCs. See the doc "BLHeli supported SiLabs ESCs.pdf" for details.
+- Lots of different ESCs. See the doc "[BLHeli supported SiLabs ESCs.pdf](BLHeli supported SiLabs ESCs.pdf)" for details.
 
 Operation and use
 --------------------
-- See the doc "BLHeli manual SiLabs RevN.x.pdf".
+- See the doc "[BLHeli manual SiLabs RevN.x.pdf](BLHeli manual SiLabs RevN.x.pdf)".
 
 Coding tools
 --------------------
