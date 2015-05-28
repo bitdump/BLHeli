@@ -17,7 +17,7 @@ Supported Hardware
 
 Operation and use
 --------------------
-- See the doc "[BLHeli manual SiLabs RevN.x.pdf](BLHeli manual SiLabs RevN.x.pdf)".
+- See the doc "[BLHeli manual SiLabs RevN.x.pdf](BLHeli manual Atmel Rev13.x.pdf)".
 
 Coding tools
 --------------------
