@@ -60,6 +60,9 @@ init:clr	EA
 	orl	RTX_MDIN, #(1 SHL RTX_PIN)		; Set digital
 	anl	RTX_MDOUT, #NOT(1 SHL RTX_PIN)	; Disable pushpull
 	setb	RTX_PORT.RTX_PIN		; Set data high
+;stsk
+; Set number of connect attempts before exiting bootloader
+mov	Cmdh, #250
 
 	; Identifier scanning
 abd:	mov	Xl, #(low(BOOT_DELAY / 6)+1)
@@ -97,9 +100,14 @@ id4:	acall getx				; Read character
 	inc	DPTR
 	clr	C
 	subb	A, Paral				; Compare with read character
-	jz	($+4)
-	ajmp	abd
+;stsk
+;	jz	($+4)
+;	ajmp	abd
+jz	id5
+djnz	Cmdh, abd				; Retry if not last connect attempt
+ajmp	exit
 
+id5:
 	djnz	Parah, id1
 
 	acall getw				; Read CRC
@@ -158,6 +166,8 @@ mai2:acall getw				; Get CRC
 	mov	A, Cmdl
 	jz	rst
 exit:mov	Bit_Access, #0			; Clear variable used by flash lock detect
+;stsk
+mov	Bit_Access_Int, #0FFh	; Set variable to indicate that program execution came from bootloader
 	ljmp	0000h
 rst:	ajmp	init
 
@@ -359,11 +369,7 @@ wait1:djnz Cntl, wait1
 
 BOOT_SIGN:	DB	"BLHeli"	
 
-IF WAIT_START_ON_RX_HIGH
-BOOT_MSG:		DB	"471a"		; Interface-MCU_BootlaoderRevision
-ELSE
-BOOT_MSG:		DB	"4712"		; Interface-MCU_BootlaoderRevision
-ENDIF 
+BOOT_MSG:		DB	"471c"		; Interface-MCU_BootlaoderRevision
 					
 BOOT_INFO:	DB	SIGNATURE_001, SIGNATURE_002, BOOT_VERSION, BOOT_PAGES
 
