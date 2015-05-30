@@ -6107,12 +6107,17 @@ ELSE
 ENDIF
 	; Set clock frequency
 	orl	OSCICN, #03h		; Set clock divider to 1
-	mov	A, OSCICL				
-	add	A, #04h			; 24.5MHz to 25MHz (~0.5% per step)
-	jb	ACC.7, reset_cal_done	; Is carry (7bit) set? - skip next instruction
+;stskxx ;4712 rem: fix for bootloader operation
+	mov    A, Bit_Access_Int ; Set to 0xFF upon bootloader exit
+	cpl    A
+	jz    reset_cal_done
+ 
+	mov    A, OSCICL               
+	add    A, #04h            ; 24.5MHz to 24MHz (~0.5% per step)
+	jb    ACC.7, reset_cal_done    ; Is carry (7bit) set? - skip next instruction
 
-	mov	OSCICL, A
-
+	mov    OSCICL, A
+ 
 reset_cal_done:
 	; Switch power off
 	call	switch_power_off
