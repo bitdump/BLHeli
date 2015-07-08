@@ -48,8 +48,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 .EQU	HIGH_BEC_VOLTAGE		=	0	; Set to 1 or more if high BEC voltage is supported
 .EQU	DAMPED_MODE_ENABLE		=	0	; Set to 1 if fully damped mode is supported
 .EQU	NFETON_DELAY			=	65	; Wait delay from pfets off to nfets on
-.EQU	PFETON_DELAY			=	1	; Wait delay from nfets off to pfets on
-.EQU	HIGH_DRIVER_PRECHG_TIME	=	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
+.EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
 .EQU	ADC_LIMIT_L			= 	231	; 2k/22k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 2k/22k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
 .EQU	TEMP_LIMIT			= 	0	; No temp sensor. Temperature measurement ADC value for which main motor power is limited
@@ -167,40 +166,22 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 
 
 .MACRO AnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+5
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, AnFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, CnFET
 .ENDMACRO
 .MACRO AnFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, AnFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, CnFET
 .ENDMACRO
 .MACRO BnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+2
 	sbi	PORTB, BnFET
 .ENDMACRO
 .MACRO BnFET_off
 	cbi	PORTB, BnFET
 .ENDMACRO
 .MACRO CnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+5
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, CnFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, AnFET
 .ENDMACRO
 .MACRO CnFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, CnFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, AnFET
 .ENDMACRO
 .MACRO All_nFETs_Off
 	cbi	PORTB, AnFET
@@ -209,16 +190,10 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 .ENDMACRO
 
 .MACRO ApFET_on
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, ApFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, CpFET
 .ENDMACRO
 .MACRO ApFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, ApFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, CpFET
 .ENDMACRO
 .MACRO BpFET_on
 	sbi	PORTB, BpFET
@@ -227,16 +202,10 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 	cbi	PORTB, BpFET
 .ENDMACRO
 .MACRO CpFET_on
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, CpFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, ApFET
 .ENDMACRO
 .MACRO CpFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, CpFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, ApFET
 .ENDMACRO
 .MACRO All_pFETs_On
 	sbi	PORTB, ApFET
@@ -248,6 +217,15 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 	cbi	PORTB, BpFET
 	cbi	PORTB, CpFET
 .ENDMACRO
+.MACRO Damping_FET_On	
+	lds	@0, DampingFET	
+	sbrc	@0, 0
+	sbi	PORTB, ApFET		
+	sbrc	@0, 1
+	sbi	PORTB, BpFET		
+	sbrc	@0, 2
+	sbi	PORTB, CpFET		
+.ENDM
 
 .MACRO Comp_Init
   	lds  @0, ADCSRB		; Set Analog Comparator Multiplexer Enable
@@ -255,10 +233,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
    	sts  ADCSRB, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_A
-	sbrs	Flags3, PGM_DIR_REV
    	ldi  @0, Mux_A 		; Set comparator multiplexer to phase A
- 	sbrc	Flags3, PGM_DIR_REV
-   	ldi  @0, Mux_C 
 	ori  @0, (1<<REFS1)+(1<<REFS0)		
   	sts  ADMUX, @0
 .ENDMACRO
@@ -268,10 +243,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
   	sts  ADMUX, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_C
-	sbrs	Flags3, PGM_DIR_REV
    	ldi  @0, Mux_C  		; Set comparator multiplexer to phase C
- 	sbrc	Flags3, PGM_DIR_REV
-   	ldi  @0, Mux_A  	
 	ori  @0, (1<<REFS1)+(1<<REFS0)		
   	sts  ADMUX, @0
 .ENDMACRO

@@ -105,7 +105,7 @@ read_eeprom_block1:
 	dec	Temp4
 	brne	read_eeprom_block1
 
-	ldi	Temp4, 21	; 21 parameters 
+	ldi	Temp4, 24	; 24 parameters 
 	ldi	XL, low(Pgm_Enable_TX_Program)
 	ldi	XH, high(Pgm_Enable_TX_Program)
 	ldi	ZL, low(Eep_Enable_TX_Program)
@@ -177,7 +177,7 @@ write_eeprom_block1:
 	dec	Temp4
 	brne	write_eeprom_block1
 
-	ldi	Temp4, 21	; 21 parameters 
+	ldi	Temp4, 24	; 24 parameters 
 	ldi	XL, low(Pgm_Enable_TX_Program)
 	ldi	XH, high(Pgm_Enable_TX_Program)
 	ldi	ZL, low(Eep_Enable_TX_Program)
@@ -356,13 +356,17 @@ store_new_value_in_ram:
 
 	cpi	Temp4, 6
 	brne	PC+3
-	sts	Pgm_Demag_Comp, Temp1
+	sts	Pgm_Pwm_Dither, Temp1
 
 	cpi	Temp4, 7
 	brne	PC+3
-	sts	Pgm_Direction, Temp1
+	sts	Pgm_Demag_Comp, Temp1
 
 	cpi	Temp4, 8
+	brne	PC+3
+	sts	Pgm_Direction, Temp1
+
+	cpi	Temp4, 9
 	brne	PC+3
 	sts	Pgm_Input_Pol, Temp1
 .ENDIF
@@ -385,19 +389,19 @@ store_new_value_in_ram:
 
 	cpi	Temp4, 5
 	brne	PC+3
-	sts	Pgm_Low_Voltage_Lim, Temp1
+	sts	Pgm_Startup_Pwr, Temp1
 
 	cpi	Temp4, 6
 	brne	PC+3
-	sts	Pgm_Startup_Pwr, Temp1
+	sts	Pgm_Comm_Timing, Temp1
 
 	cpi	Temp4, 7
 	brne	PC+3
-	sts	Pgm_Comm_Timing, Temp1
+	sts	Pgm_Pwm_Freq, Temp1
 
 	cpi	Temp4, 8
 	brne	PC+3
-	sts	Pgm_Pwm_Freq, Temp1
+	sts	Pgm_Pwm_Dither, Temp1
 
 	cpi	Temp4, 9
 	brne	PC+3
@@ -618,7 +622,7 @@ function_next:					; Yes - Next function value
 .ENDIF
 .IF MODE == 1
 	lds	XH, Tx_Pgm_Func_No		
-	cpi	XH, 9				; Tail has 8 functions	
+	cpi	XH, 10				; Tail has 9 functions	
 .ENDIF
 .IF MODE == 2
 	lds	XH, Tx_Pgm_Func_No		

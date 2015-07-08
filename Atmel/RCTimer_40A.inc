@@ -47,9 +47,8 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
 .EQU	HIGH_BEC_VOLTAGE		=	0	; Set to 1 or more if high BEC voltage is supported
 .EQU	DAMPED_MODE_ENABLE		=	1	; Set to 1 if fully damped mode is supported
-.EQU	NFETON_DELAY			=	5	; Wait delay from pfets off to nfets on
-.EQU	PFETON_DELAY			=	5	; Wait delay from nfets off to pfets on
-.EQU	HIGH_DRIVER_PRECHG_TIME	=	0	; Time between commutations used to precharge the high side driver (for all nfet ESCs)
+.EQU	NFETON_DELAY			=	7	; Wait delay from pfets off to nfets on
+.EQU	PFETON_DELAY			=	9	; Wait delay from nfets off to pfets on
 .EQU	ADC_LIMIT_L			= 	109	; 1k/10k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 1k/10k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
 .EQU	TEMP_LIMIT			= 	250	; 10k/68kNTC. Temperature measurement ADC value for which main motor power is limited
@@ -164,40 +163,22 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
 
 .MACRO AnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+5
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, AnFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, CnFET
 .ENDMACRO
 .MACRO AnFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, AnFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, CnFET
 .ENDMACRO
 .MACRO BnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+2
 	sbi	PORTB, BnFET
 .ENDMACRO
 .MACRO BnFET_off
 	cbi	PORTB, BnFET
 .ENDMACRO
 .MACRO CnFET_on
-	tst	Current_Pwm_Limited
-	breq	PC+5
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTB, CnFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTB, AnFET
 .ENDMACRO
 .MACRO CnFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTB, CnFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTB, AnFET
 .ENDMACRO
 .MACRO All_nFETs_Off
 	cbi	PORTB, AnFET
@@ -206,16 +187,10 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .ENDMACRO
 
 .MACRO ApFET_on
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTD, ApFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTD, CpFET
 .ENDMACRO
 .MACRO ApFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTD, ApFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTD, CpFET
 .ENDMACRO
 .MACRO BpFET_on
 	sbi	PORTD, BpFET
@@ -224,16 +199,10 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	cbi	PORTD, BpFET
 .ENDMACRO
 .MACRO CpFET_on
-	sbrs	Flags3, PGM_DIR_REV
 	sbi	PORTD, CpFET
-	sbrc	Flags3, PGM_DIR_REV
-	sbi	PORTD, ApFET
 .ENDMACRO
 .MACRO CpFET_off
-	sbrs	Flags3, PGM_DIR_REV
 	cbi	PORTD, CpFET
-	sbrc	Flags3, PGM_DIR_REV
-	cbi	PORTD, ApFET
 .ENDMACRO
 .MACRO All_pFETs_On
 	sbi	PORTD, ApFET
@@ -245,6 +214,15 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	cbi	PORTD, BpFET
 	cbi	PORTD, CpFET
 .ENDMACRO
+.MACRO Damping_FET_On	
+	lds	@0, DampingFET	
+	sbrc	@0, 0
+	sbi	PORTD, ApFET		
+	sbrc	@0, 1
+	sbi	PORTD, BpFET		
+	sbrc	@0, 2
+	sbi	PORTD, CpFET		
+.ENDM
 
 .MACRO Comp_Init
    	in	@0, SFIOR			; Set Analog Comparator Multiplexer Enable
@@ -252,23 +230,9 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
    	out  SFIOR, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_A
-	sbrs	Flags3, PGM_DIR_REV
-	rjmp	set_comp_phase_ain1
-
-   	in	@0, SFIOR			; Set Analog Comparator Multiplexer Enable
-   	sbr  @0, (1<<ACME) 	
-   	out  SFIOR, @0
-   	ldi  @0, Mux_C  		; Set comparator multiplexer to phase C
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
-  	out  ADMUX, @0
-	rjmp	set_comp_phase_a_exit
-
-set_comp_phase_ain1:
    	in	@0, SFIOR			; Set Analog Comparator Multiplexer Disable
    	cbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
-set_comp_phase_a_exit:
 .ENDMACRO
 .MACRO Set_Comp_Phase_B
    	in	@0, SFIOR			; Set Analog Comparator Multiplexer Enable
@@ -280,15 +244,6 @@ set_comp_phase_a_exit:
   	out  ADMUX, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_C
-	sbrs	Flags3, PGM_DIR_REV
-	rjmp	set_comp_phase_muxc
-
-   	in	@0, SFIOR			; Set Analog Comparator Multiplexer Disable
-   	cbr  @0, (1<<ACME) 	
-   	out  SFIOR, @0
-	rjmp	set_comp_phase_c_exit
-   	
-set_comp_phase_muxc:
 	in	@0, SFIOR			; Set Analog Comparator Multiplexer Enable
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
@@ -296,7 +251,6 @@ set_comp_phase_muxc:
   	sbr  @0, (1<<REFS1) 		
   	sbr  @0, (1<<REFS0) 		
   	out  ADMUX, @0
-set_comp_phase_c_exit:
 .ENDMACRO
 .MACRO Read_Comp_Out
 	in	@0, ACSR			; Read comparator output

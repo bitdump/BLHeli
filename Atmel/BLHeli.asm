@@ -97,6 +97,18 @@
 ;           Increased deadband for bidirectional operation
 ;           Relaxed signal detection criteria
 ;           Miscellaneous other changes
+; - Rev14.0 Improved running at high RPMs and increased max RPM limit
+;           Improved reliability of 3D (bidirectional) mode and startup
+;           Avoid being locked in bootloader (implemented in Suite 13202)
+;           Smoother running and greatly reduced step to full power in damped light mode
+;           Removed low voltage limiting for MULTI
+;           Added pwm dither parameter
+;           Added setting for enable/disable of low RPM power protection
+;           Added setting for enable/disable of PWM input
+;           Better AFW and damping for some ESCs (that have a slow high side driver)
+;           Miscellaneous other changes
+;
+;
 ;
 ;
 ;**** **** **** **** ****
@@ -143,13 +155,13 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI
+;#define BLUESERIES_20A_MULTI 
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI 
 ;#define BLUESERIES_40A_MAIN
 ;#define BLUESERIES_40A_TAIL
-;#define BLUESERIES_40A_MULTI
+;#define BLUESERIES_40A_MULTI 
 ;#define BLUESERIES_60A_MAIN
 ;#define BLUESERIES_60A_TAIL
 ;#define BLUESERIES_60A_MULTI
@@ -221,7 +233,7 @@
 ;#define SUNRISE_HIMULTI_30A_MULTI
 ;#define SUNRISE_HIMULTI_40A_MAIN		; Inverted input
 ;#define SUNRISE_HIMULTI_40A_TAIL
-;#define SUNRISE_HIMULTI_40A_MULTI
+;#define SUNRISE_HIMULTI_40A_MULTI 
 ;#define RCTIMER_40A_MAIN			
 ;#define RCTIMER_40A_TAIL
 ;#define RCTIMER_40A_MULTI
@@ -236,7 +248,7 @@
 ;#define AFRO_12A_MULTI
 ;#define AFRO_20A_MAIN				; ICP1 as input		
 ;#define AFRO_20A_TAIL
-;#define AFRO_20A_MULTI
+;#define AFRO_20A_MULTI 
 ;#define AFRO_20A_HV_MAIN			; ICP1 as input		
 ;#define AFRO_20A_HV_TAIL
 ;#define AFRO_20A_HV_MULTI
@@ -855,6 +867,7 @@
 .EQU	DEFAULT_PGM_MAIN_BEEP_STRENGTH	= 120; Beep strength
 .EQU	DEFAULT_PGM_MAIN_BEACON_STRENGTH	= 200; Beacon strength
 .EQU	DEFAULT_PGM_MAIN_BEACON_DELAY		= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
+
 ; Tail
 .EQU	DEFAULT_PGM_TAIL_GAIN 			= 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 .EQU	DEFAULT_PGM_TAIL_IDLE_SPEED 		= 4 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
@@ -870,12 +883,13 @@
 .EQU	DEFAULT_PGM_TAIL_BEEP_STRENGTH	= 250; Beep strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_STRENGTH	= 250; Beacon strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_DELAY		= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
+.EQU	DEFAULT_PGM_TAIL_PWM_DITHER		= 3 	; 1=1		2=3			3=7			4=15			5=31
+
 ; Multi
 .EQU	DEFAULT_PGM_MULTI_P_GAIN 		= 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 .EQU	DEFAULT_PGM_MULTI_I_GAIN 		= 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
 .EQU	DEFAULT_PGM_MULTI_GOVERNOR_MODE 	= 4 	; 1=HiRange	2=MidRange	3=LoRange		4=Off
 .EQU	DEFAULT_PGM_MULTI_GAIN 			= 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
-.EQU	DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM	= 1 	; 1=Off		2=3.0V/c		3=3.1V/c		4=3.2V/c		5=3.3V/c	6=3.4V/c
 .EQU	DEFAULT_PGM_MULTI_COMM_TIMING		= 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 .IF DAMPED_MODE_ENABLE == 1
 .EQU	DEFAULT_PGM_MULTI_PWM_FREQ	 	= 1 	; 1=High 		2=Low 		3=DampedLight 
@@ -888,6 +902,8 @@
 .EQU	DEFAULT_PGM_MULTI_BEEP_STRENGTH	= 40	; Beep strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_STRENGTH	= 80	; Beacon strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_DELAY	= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
+.EQU	DEFAULT_PGM_MULTI_PWM_DITHER		= 3 	; 1=1		2=3			3=7			4=15			5=31
+
 ; Common
 .EQU	DEFAULT_PGM_ENABLE_TX_PROGRAM 	= 1 	; 1=Enabled 	0=Disabled
 .EQU	DEFAULT_PGM_PPM_MIN_THROTTLE		= 37	; 4*37+1000=1148
@@ -895,6 +911,8 @@
 .EQU	DEFAULT_PGM_PPM_CENTER_THROTTLE	= 122; 4*122+1000=1488 (used in bidirectional mode)
 .EQU	DEFAULT_PGM_BEC_VOLTAGE_HIGH		= 0	; 0=Low		1= High
 .EQU	DEFAULT_PGM_ENABLE_TEMP_PROT	 	= 0 	; 1=Enabled 	0=Disabled
+.EQU	DEFAULT_PGM_ENABLE_POWER_PROT 	= 1 	; 1=Enabled 	0=Disabled
+.EQU	DEFAULT_PGM_ENABLE_PWM_INPUT	 	= 0 	; 1=Enabled 	0=Disabled
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -909,11 +927,11 @@
 .EQU	RCP_MAX			= 	255	; This is maximum RC pulse length
 .EQU	RCP_VALIDATE		= 	2	; Require minimum this pulse length to validate RC pulse
 .EQU	RCP_STOP			= 	1	; Stop motor at or below this pulse length
-.EQU	RCP_STOP_LIMIT		= 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+.EQU	RCP_STOP_LIMIT		= 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -934,7 +952,7 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -952,11 +970,11 @@
 .EQU	RCP_MAX			= 	255	; This is maximum RC pulse length
 .EQU	RCP_VALIDATE		= 	2	; Require minimum this pulse length to validate RC pulse
 .EQU	RCP_STOP			= 	1	; Stop motor at or below this pulse length
-.EQU	RCP_STOP_LIMIT		= 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+.EQU	RCP_STOP_LIMIT		= 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	1	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
+.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1006,7 +1024,7 @@
 .EQU	STARTUP_PHASE			= 	1		; Set when in startup phase
 .EQU	INITIAL_RUN_PHASE		=	2		; Set when in initial run phase, before synchronized run is achieved
 .EQU	ADC_READ_TEMP			= 	3		; Set when ADC input shall be set to read temperature
-;.EQU					= 	4
+.EQU	COMP_TIMED_OUT			= 	4		; Set when comparator reading timed out
 ;.EQU					= 	5
 ;.EQU					= 	6
 ;.EQU					= 	7
@@ -1051,6 +1069,7 @@ Timer0_Int_Cnt:			.BYTE	1		; Timer0 interrupt counter
 Requested_Pwm:				.BYTE	1		; Requested pwm (from RC pulse value)
 Governor_Req_Pwm:			.BYTE	1		; Governor requested pwm (sets governor target)
 Current_Pwm:				.BYTE	1		; Current pwm
+Current_Pwm_Lim_Dith:		.BYTE	1		; Current pwm that is limited and dithered (applied to the motor output)
 Rcp_Prev_Edge_L:			.BYTE	1		; RC pulse previous edge timer3 timestamp (lo byte)
 Rcp_Prev_Edge_H:			.BYTE	1		; RC pulse previous edge timer3 timestamp (hi byte)
 Rcp_Outside_Range_Cnt:		.BYTE	1		; RC pulse outside range counter (incrementing) 
@@ -1062,16 +1081,19 @@ Initial_Arm:				.BYTE	1		; Variable that is set during the first arm sequence af
 Power_On_Wait_Cnt_L: 		.BYTE	1		; Power on wait counter (lo byte)
 Power_On_Wait_Cnt_H: 		.BYTE	1		; Power on wait counter (hi byte)
 
-Startup_Rot_Cnt:			.BYTE	1		; Startup phase rotations counter
-Startup_Ok_Cnt:			.BYTE	1		; Startup phase ok comparator waits counter (incrementing)
+Startup_Cnt:				.BYTE	1		; Startup phase commutations counter (incrementing)
+Initial_Run_Rot_Cnt:		.BYTE	1		; Initial run rotations counter (incrementing)
 Demag_Detected_Metric:		.BYTE	1		; Metric used to gauge demag event frequency
 Demag_Pwr_Off_Thresh:		.BYTE	1		; Metric threshold above which power is cut
 Low_Rpm_Pwr_Slope:			.BYTE	1		; Sets the slope of power increase for low rpms
 
-Prev_Comm_L:				.BYTE	1		; Previous commutation timer3 timestamp (lo byte)
-Prev_Comm_H:				.BYTE	1		; Previous commutation timer3 timestamp (hi byte)
+Prev_Comm_L:				.BYTE	1		; Previous commutation timer timestamp (lo byte)
+Prev_Comm_H:				.BYTE	1		; Previous commutation timer timestamp (hi byte)
+Prev_Prev_Comm_L:			.BYTE	1		; Pre-previous commutation timer timestamp (lo byte)
+Prev_Prev_Comm_H:			.BYTE	1		; Pre-previous commutation timer timestamp (hi byte)
 Comm_Period4x_L:			.BYTE	1		; Timer3 counts between the last 4 commutations (lo byte)
 Comm_Period4x_H:			.BYTE	1		; Timer3 counts between the last 4 commutations (hi byte)
+Comm_Diff:				.BYTE	1		; Timer3 count difference between the last two commutations
 Comm_Phase:				.BYTE	1		; Current commutation phase
 Comparator_Read_Cnt: 		.BYTE	1		; Number of comparator reads done
 
@@ -1114,8 +1136,10 @@ Pwm_Limit_Spoolup:			.BYTE	1		; Maximum allowed pwm during spoolup of main
 Pwm_Limit_Low_Rpm:			.BYTE	1		; Maximum allowed pwm for low rpms
 Pwm_Spoolup_Beg:			.BYTE	1		; Pwm to begin main spoolup with
 Pwm_Motor_Idle:			.BYTE	1		; Motor idle speed pwm
-Pwm_On_Cnt:				.BYTE	1		; Pwm on event counter (used to increase pwm off time for low pwm)
 Pwm_Prev_Edge:				.BYTE	1		; Timestamp from timer 2 when pwm toggles on or off
+Pwm_Dither_Decoded:			.BYTE	1		; Decoded pwm dither value
+Pwm_Dither_Excess_Power:		.BYTE	1		; Excess power (above max) from pwm dither
+Random:					.BYTE	1		; Random number from LFSR 
 
 Spoolup_Limit_Cnt:			.BYTE	1		; Interrupt count for spoolup limit
 Spoolup_Limit_Skip:			.BYTE	1		; Interrupt skips for spoolup limit increment (1=no skips, 2=skip one etc)
@@ -1137,6 +1161,8 @@ Beep_Strength:				.BYTE	1		; Strength of beeps
 Tx_Pgm_Func_No:			.BYTE	1		; Function number when doing programming by tx
 Tx_Pgm_Paraval_No:			.BYTE	1		; Parameter value number when doing programming by tx
 Tx_Pgm_Beep_No:			.BYTE	1		; Beep number when doing programming by tx
+DampingFET:				.BYTE	1		; Port position of fet used for damping
+Brake_Cnt:				.BYTE	1		; Number of rotations for braking
 
 ; The variables below must be in this sequence
 Pgm_Gov_P_Gain:			.BYTE	1		; Programmed governor P gain
@@ -1172,6 +1198,9 @@ Pgm_BEC_Voltage_High:		.BYTE	1		; Programmed BEC voltage
 Pgm_Ppm_Center_Throttle:		.BYTE	1		; Programmed throttle center (in bidirectional mode)
 Pgm_Main_Spoolup_Time:		.BYTE	1		; Programmed main spoolup time
 Pgm_Enable_Temp_Prot:		.BYTE	1		; Programmed temperature protection enable
+Pgm_Enable_Power_Prot:		.BYTE	1		; Programmed low rpm power protection enable
+Pgm_Enable_Pwm_Input:		.BYTE	1		; Programmed PWM input signal enable
+Pgm_Pwm_Dither:			.BYTE	1		; Programmed output PWM dither
 
 ; The sequence of the variables below is no longer of importance
 Pgm_Gov_P_Gain_Decoded:		.BYTE	1		; Programmed governor decoded P gain
@@ -1185,9 +1214,9 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ESEG				; Eeprom segment
 .ORG 0				
 
-.EQU	EEPROM_FW_MAIN_REVISION		=	13		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	2		; Sub revision of the firmware
-.EQU	EEPROM_LAYOUT_REVISION		=	19		; Revision of the EEPROM layout
+.EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	0		; Sub revision of the firmware
+.EQU	EEPROM_LAYOUT_REVISION		=	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		.DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -1224,9 +1253,12 @@ Eep_Pgm_Beacon_Delay:		.DB	DEFAULT_PGM_MAIN_BEACON_DELAY		; EEPROM copy of progr
 _Eep_Pgm_Throttle_Rate:		.DB	0xFF							
 Eep_Pgm_Demag_Comp:			.DB	DEFAULT_PGM_MAIN_DEMAG_COMP		; EEPROM copy of programmed demag compensation
 Eep_Pgm_BEC_Voltage_High:	.DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of programmed BEC voltage
-_Eep_Pgm_Ppm_Center_Throttle:	.DB	0xFF							; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
+_Eep_Pgm_Ppm_Center_Throttle:	.DB	0xFF							
 Eep_Pgm_Main_Spoolup_Time:	.DB	DEFAULT_PGM_MAIN_SPOOLUP_TIME		; EEPROM copy of programmed main spoolup time
 Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
+Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
+Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
+_Eep_Pgm_Pwm_Dither:		.DB	0xFF	
 .ENDIF
 
 .IF MODE == 1
@@ -1263,13 +1295,16 @@ Eep_Pgm_BEC_Voltage_High:	.DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of pro
 Eep_Pgm_Ppm_Center_Throttle:	.DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
 _Eep_Pgm_Main_Spoolup_Time:	.DB	0xFF
 Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
+Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
+Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
+Eep_Pgm_Pwm_Dither:			.DB	DEFAULT_PGM_TAIL_PWM_DITHER		; EEPROM copy of programmed output PWM dither
 .ENDIF
 
 .IF MODE == 2
 Eep_Pgm_Gov_P_Gain:			.DB	DEFAULT_PGM_MULTI_P_GAIN			; EEPROM copy of programmed closed loop P gain
 Eep_Pgm_Gov_I_Gain:			.DB	DEFAULT_PGM_MULTI_I_GAIN			; EEPROM copy of programmed closed loop I gain
 Eep_Pgm_Gov_Mode:			.DB	DEFAULT_PGM_MULTI_GOVERNOR_MODE	; EEPROM copy of programmed closed loop mode
-Eep_Pgm_Low_Voltage_Lim:		.DB	DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM	; EEPROM copy of programmed low voltage limit
+_Eep_Pgm_Low_Voltage_Lim:	.DB	0xFF
 Eep_Pgm_Motor_Gain:			.DB	DEFAULT_PGM_MULTI_GAIN			; EEPROM copy of programmed tail gain
 _Eep_Pgm_Motor_Idle:		.DB	0xFF							; EEPROM copy of programmed tail idle speed
 Eep_Pgm_Startup_Pwr:		.DB	DEFAULT_PGM_MULTI_STARTUP_PWR		; EEPROM copy of programmed startup power
@@ -1299,6 +1334,9 @@ Eep_Pgm_BEC_Voltage_High:	.DB	DEFAULT_PGM_BEC_VOLTAGE_HIGH		; EEPROM copy of pro
 Eep_Pgm_Ppm_Center_Throttle:	.DB	DEFAULT_PGM_PPM_CENTER_THROTTLE	; EEPROM copy of programmed center throttle (final value is 4x+1000=1488)
 _Eep_Pgm_Main_Spoolup_Time:	.DB	0xFF
 Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of programmed temperature protection enable
+Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
+Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
+Eep_Pgm_Pwm_Dither:			.DB	DEFAULT_PGM_MULTI_PWM_DITHER		; EEPROM copy of programmed output PWM dither
 .ENDIF
 
 
@@ -1318,6 +1356,7 @@ Interrupt_Table_Definition		; ATmega interrupts
 ; Table definitions
 GOV_GAIN_TABLE:   		.DB 	0x02, 0x03, 0x04, 0x06, 0x08, 0x0C, 0x10, 0x18, 0x20, 0x30, 0x40, 0x60, 0x80, 0 ; Padded zero for an even number
 STARTUP_POWER_TABLE:  	.DB 	0x04, 0x06, 0x08, 0x0C, 0x10, 0x18, 0x20, 0x30, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0 ; Padded zero for an even number
+PWM_DITHER_TABLE:  		.DB 	0x00, 0x07, 0x0F, 0x1F, 0x3F, 0 ; Padded zero for an even number
 .IF MODE == 0
   .IF DAMPED_MODE_ENABLE == 1
 TX_PGM_PARAMS_MAIN:  	.DB 	13, 13, 4, 3, 6, 13, 5, 3, 3, 2, 2, 0 ; Padded zero for an even number
@@ -1328,19 +1367,19 @@ TX_PGM_PARAMS_MAIN:  	.DB 	13, 13, 4, 3, 6, 13, 5, 2, 3, 2, 2, 0 ; Padded zero f
 .ENDIF
 .IF MODE == 1
   .IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_TAIL:  	.DB 	5, 5, 13, 5, 3, 3, 3, 2
+TX_PGM_PARAMS_TAIL:  	.DB 	5, 5, 13, 5, 3, 5, 3, 3, 2, 0 ; Padded zero for an even number
   .ENDIF
   .IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_TAIL:  	.DB 	5, 5, 13, 5, 2, 3, 3, 2
+TX_PGM_PARAMS_TAIL:  	.DB 	5, 5, 13, 5, 2, 5, 3, 3, 2, 0 ; Padded zero for an even number
   .ENDIF
 .ENDIF
 .IF MODE == 2
   .IF DAMPED_MODE_ENABLE == 1
-TX_PGM_PARAMS_MULTI:  	.DB 	13, 13, 4, 5, 6, 13, 5, 3, 3, 3, 2, 0 ; Padded zero for an even number
-  .ENDIF
+TX_PGM_PARAMS_MULTI:  	.DB 	13, 13, 4, 5, 13, 5, 3, 5, 3, 3, 2, 0 ; Padded zero for an even number
+ .ENDIF
   .IF DAMPED_MODE_ENABLE == 0
-TX_PGM_PARAMS_MULTI:  	.DB 	13, 13, 4, 5, 6, 13, 5, 2, 3, 3, 2, 0 ; Padded zero for an even number
-  .ENDIF
+TX_PGM_PARAMS_MULTI:  	.DB 	13, 13, 4, 5, 13, 5, 2, 5, 3, 3, 2, 0 ; Padded zero for an even number
+ .ENDIF
 .ENDIF
 
 
@@ -1359,230 +1398,12 @@ t2_int:	; Used for pwm control
 	sbrc	Flags0, PWM_ON				; Is pwm on?
 	rjmp	t2_int_pwm_off
 
-	; Do not execute pwm when stopped
-	sbrs	Flags1, MOTOR_SPINNING
-	rjmp	t2_int_pwm_on_exit
-	; Do not execute pwm on during demag recovery
-	sbrc	Flags0, DEMAG_CUT_POWER
-	rjmp	t2_int_pwm_on_exit_pfets_off
-	; Pwm on cycle. 
-.IF MODE == 1				; Tail
-	sbrs	Current_Pwm_Limited, 7		; Jump for low pwm (<50%)
-	rjmp	t2_int_pwm_on_low_pwm
-.ENDIF
+	; Pwm on cycle
+	tst	Current_Pwm_Limited
+	breq	t2_int_pwm_on_exit
 
 t2_int_pwm_on_execute:
 	ijmp							; Jump to pwm on routines. Z should be set to one of the pwm_nfet_on labels
-
-.IF MODE == 1				; Tail
-t2_int_pwm_on_low_pwm:
-	; Skip pwm on cycles for very low pwm
-	lds	YL, Pwm_On_Cnt				; Increment event counter
-	inc	YL
-	sts	Pwm_On_Cnt, YL
-	ldi	YL, 5					; Only skip for very low pwm
-	sub	YL, Current_Pwm_Limited		; Check skipping shall be done (for low pwm only)
-	brcs	t2_int_pwm_on_execute
-
-	lds	YH, Pwm_On_Cnt				; Check if on cycle is to be skipped
-	sub	YL, YH
-	brcs	t2_int_pwm_on_execute
-
-	sbrc	Flags1, STARTUP_PHASE
-	rjmp	t2_int_pwm_on_execute
-
-	ldi	YL, 120					; Write start point for timer
-	sec	
-	sbrc	Flags2, PGM_PWM_HIGH_FREQ	
-	ror	YL
-	Set_TCNT2 YL					
-	mov	YL, Current_Pwm_Limited
-	tst	YL
-	brne	t2_int_pwm_on_low_pwm_not_zero
-
-	ldi	YL, 0					; Write start point for timer (long time for zero pwm)
-	sbrc	Flags2, PGM_PWM_HIGH_FREQ	
-	ldi	YL, 0x80
-	Set_TCNT2 YL					
-
-t2_int_pwm_on_low_pwm_not_zero:
-	rjmp	t2_int_pwm_on_exit_no_timer_update
-.ENDIF
-
-t2_int_pwm_off:
-	; Pwm off cycle
-	mov	YL, Current_Pwm_Limited
-	sec	
-	sbrc	Flags2, PGM_PWM_HIGH_FREQ	; Use half the time when pwm frequency is high
-	ror	YL
-	Set_TCNT2 YL					; Load new timer setting
-	sts	Pwm_Prev_Edge, YL			; Set timestamp
-	; Clear pwm on flag
-	cbr	Flags0, (1<<PWM_ON)
-	; Set full PWM (on all the time) if current PWM near max. This will give full power, but at the cost of a small "jump" in power
-	mov	YL, Current_Pwm_Limited		; Load current pwm
-	cpi	YL, 0xFF					; Full pwm?
-	brne	PC+2						; No - branch
-	rjmp	t2_int_pwm_off_fullpower_exit	; Yes - exit
-
-	; Do not execute pwm when stopped
-	sbrs	Flags1, MOTOR_SPINNING
-	rjmp	t2_int_pwm_off_exit_nfets_off
-
-.IF DAMPED_MODE_ENABLE == 1
-	; If damped operation, set pFETs on in pwm_off
-	sbrc	Flags2, PGM_PWMOFF_DAMPED	; Damped operation?
-	rjmp	t2_int_pwm_off_damped
-.ENDIF
-
-	; Separate exit commands here for minimum delay
-	All_nFETs_Off YL		 		; Switch off all nfets
-	out	SREG, II_Sreg
-	reti
-
-t2_int_pwm_off_damped:
-	All_nFETs_Off YL				; Switch off all nfets
-	ldi	YL, PFETON_DELAY
-	dec	YL
-	brne	PC-1
-	lds	YL, Comm_Phase				; Turn on pfets according to commutation phase
-	dec	YL
-	sbrc	YL, 2
-	rjmp	t2_int_pwm_off_comm_5_6
-	sbrc	YL, 1
-	rjmp	t2_int_pwm_off_comm_3_4
-
-	CpFET_On			; Comm phase 1 or 2 - turn on C
-	rjmp	t2_int_pwm_off_exit
-
-t2_int_pwm_off_comm_3_4:
-	BpFET_On			; Comm phase 3 or 4 - turn on B
-	rjmp	t2_int_pwm_off_exit
-
-t2_int_pwm_off_comm_5_6:
-	ApFET_On			; Comm phase 5 or 6 - turn on A
-	rjmp	t2_int_pwm_off_exit
-
-t2_int_pwm_off_exit_nfets_off:; Exit from pwm off cycle
-	All_nFETs_Off YL	; Switch off all nfets
-	out	SREG, II_Sreg
-	reti
-
-t2_int_pwm_off_fullpower_exit:	
-	sts	Pwm_Prev_Edge, Zero	; Set timestamp to zero
-t2_int_pwm_off_exit:	
-	out	SREG, II_Sreg
-	reti
-
-
-pwm_nofet_on:	; Dummy pwm on cycle
-	rjmp	t2_int_pwm_on_exit
-
-pwm_afet_on:	; Pwm on cycle afet on (bfet off)
-	AnFET_on	
-	BnFET_off
-	rjmp	t2_int_pwm_on_exit
-
-pwm_bfet_on:	; Pwm on cycle bfet on (cfet off)
-	BnFET_on
-	CnFET_off
-	rjmp	t2_int_pwm_on_exit
-
-pwm_cfet_on:	; Pwm on cycle cfet on (afet off)
-	CnFET_on
-	AnFET_off
-	rjmp	t2_int_pwm_on_exit
-
-pwm_anfet_bpfet_on:	; Pwm on cycle anfet on (bnfet off) and bpfet on (used in damped state 6)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	ApFET_off
-	CpFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	AnFET_on								; Switch nFETs
-	BnFET_off 							
-	rjmp	t2_int_pwm_on_exit
-
-pwm_anfet_cpfet_on:	; Pwm on cycle anfet on (bnfet off) and cpfet on (used in damped state 5)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	ApFET_off
-	BpFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	AnFET_on								; Switch nFETs
-	BnFET_off								
-	rjmp	t2_int_pwm_on_exit
-
-pwm_bnfet_cpfet_on:	; Pwm on cycle bnfet on (cnfet off) and cpfet on (used in damped state 4)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	BpFET_off
-	ApFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	BnFET_on								; Switch nFETs
-	CnFET_off								
-	rjmp	t2_int_pwm_on_exit
-
-pwm_bnfet_apfet_on:	; Pwm on cycle bnfet on (cnfet off) and apfet on (used in damped state 3)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	BpFET_off
-	CpFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	BnFET_on								; Switch nFETs
-	CnFET_off								
-	rjmp	t2_int_pwm_on_exit
-
-pwm_cnfet_apfet_on:	; Pwm on cycle cnfet on (anfet off) and apfet on (used in damped state 2)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	CpFET_off
-	BpFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	CnFET_on								; Switch nFETs
-	AnFET_off								
-	rjmp	t2_int_pwm_on_exit
-
-pwm_cnfet_bpfet_on:	; Pwm on cycle cnfet on (anfet off) and bpfet on (used in damped state 1)
-	; Delay from pFETs are turned off (only in damped mode) until nFET is turned on (pFETs are slow)
-	CpFET_off
-	ApFET_off
-	ldi	YL, PFETON_DELAY					; Set full delay
-	dec	YL
-	brne	PC-1
-	CnFET_on								; Switch nFETs
-	AnFET_off								
-	rjmp	t2_int_pwm_on_exit
-
-t2_int_pwm_on_exit_pfets_off:
-	sbrs	Flags2, PGM_PWMOFF_DAMPED	; If not damped operation - branch
-	rjmp t2_int_pwm_on_exit
-	lds	YL, Comm_Phase				; Turn off pfets according to commutation phase
-	sbrc	YL, 2
-	rjmp	t2_int_pfets_off_comm_4_5_6
-	sbrc	YL, 1
-	rjmp	t2_int_pfets_off_comm_2_3
-
-t2_int_pfets_off_comm_1_6:
-	ApFET_Off			; Comm phase 1 and 6 - turn off A and C
-	CpFET_Off			
-	rjmp	t2_int_pwm_on_exit
-
-t2_int_pfets_off_comm_4_5_6:
-	sbrc	YL, 1
-	rjmp t2_int_pfets_off_comm_1_6
-	ApFET_Off			; Comm phase 4 and 5 - turn off A and B
-	BpFET_Off			
-	rjmp	t2_int_pwm_on_exit
-
-t2_int_pfets_off_comm_2_3:
-	BpFET_Off			; Comm phase 2 and 3 - turn off B and C
-	CpFET_Off			
 
 t2_int_pwm_on_exit:
 	; Set timer for coming on cycle length
@@ -1594,14 +1415,136 @@ t2_int_pwm_on_exit:
 	Set_TCNT2 YL					; Write start point for timer
 	; Set other variables
 	sts	Pwm_Prev_Edge, YL			; Set timestamp
-.IF MODE == 1				; Tail
-	sts	Pwm_On_Cnt, Zero			; Reset pwm on event counter
-.ENDIF
 	sbr	Flags0, (1<<PWM_ON)			; Set pwm on flag
-t2_int_pwm_on_exit_no_timer_update:
 	; Exit interrupt
 	out	SREG, II_Sreg
 	reti
+
+
+	; Pwm off cycle
+t2_int_pwm_off:
+	lds	YL, Current_Pwm_Lim_Dith
+	sec	
+	sbrc	Flags2, PGM_PWM_HIGH_FREQ	; Use half the time when pwm frequency is high
+	ror	YL
+	Set_TCNT2 YL					; Load new timer setting
+	sts	Pwm_Prev_Edge, YL			; Set timestamp
+	; Clear pwm on flag
+	cbr	Flags0, (1<<PWM_ON)
+	; Set full PWM (on all the time) if current PWM near max. This will give full power, but at the cost of a small "jump" in power
+	lds	YL, Current_Pwm_Lim_Dith		; Load current pwm dithered
+	cpi	YL, 0xFF					; Full pwm?
+	brne	PC+2						; No - branch
+	rjmp	t2_int_pwm_off_fullpower_exit	; Yes - exit
+
+.IF DAMPED_MODE_ENABLE == 1
+	; Do not execute damped pwm when stopped
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_off_exit_nfets_off
+
+	; If damped operation, set pFETs on in pwm_off
+	sbrc	Flags2, PGM_PWMOFF_DAMPED	; Damped operation?
+	rjmp	t2_int_pwm_off_damped
+.ENDIF
+
+t2_int_pwm_off_exit_nfets_off:
+	; Separate exit commands here for minimum delay
+	out	SREG, II_Sreg
+	All_nFETs_Off 			 		; Switch off all nfets
+	reti
+
+t2_int_pwm_off_damped:
+.IF PFETON_DELAY < 128
+	All_nFETs_Off 					; Switch off all nfets
+.IF PFETON_DELAY != 0
+	ldi	YL, PFETON_DELAY
+	dec	YL
+	brne	PC-1
+.ENDIF
+	Damping_FET_on YL				; Damping fet on
+.ENDIF
+.IF PFETON_DELAY >= 128				; "Negative", 1's complement
+	Damping_FET_on YL				; Damping fet on
+	ldi	YL, PFETON_DELAY
+	com	YL
+	dec	YL
+	brne	PC-1
+	All_nFETs_Off 					; Switch off all nfets
+.ENDIF
+t2_int_pwm_off_fullpower_exit:	
+	sts	Pwm_Prev_Edge, Zero	; Set timestamp to zero
+	out	SREG, II_Sreg
+	reti
+
+
+pwm_nofet:	; Dummy pwm on cycle
+	rjmp	t2_int_pwm_on_exit
+
+pwm_afet	:	; Pwm on cycle afet on 
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+	AnFET_on	
+	rjmp	t2_int_pwm_on_exit
+
+pwm_bfet:		; Pwm on cycle bfet on
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+	BnFET_on
+	rjmp	t2_int_pwm_on_exit
+
+pwm_cfet:		; Pwm on cycle cfet on
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+	CnFET_on
+	rjmp	t2_int_pwm_on_exit
+
+pwm_afet_damped:	
+	ApFET_off
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+.IF NFETON_DELAY != 0
+	ldi	YL, NFETON_DELAY					; Set delay
+	dec	YL
+	brne	PC-1
+.ENDIF
+	AnFET_on								; Switch nFET
+	rjmp	t2_int_pwm_on_exit
+
+pwm_bfet_damped:	
+	BpFET_off
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+.IF NFETON_DELAY != 0
+	ldi	YL, NFETON_DELAY					; Set delay
+	dec	YL
+	brne	PC-1
+.ENDIF
+	BnFET_on								; Switch nFET
+	rjmp	t2_int_pwm_on_exit
+
+pwm_cfet_damped:	
+	CpFET_off
+	sbrs	Flags1, MOTOR_SPINNING
+	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_on_exit
+.IF NFETON_DELAY != 0
+	ldi	YL, NFETON_DELAY					; Set delay
+	dec	YL
+	brne	PC-1
+.ENDIF
+	CnFET_on								; Switch nFET
+	rjmp	t2_int_pwm_on_exit
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -1694,6 +1637,9 @@ t0_int_ppm_timeout_set:
 	sbr	Flags2, (1<<RCP_UPDATED)	 	; Set updated flag
 
 t0_int_skip_start:
+	sbrc	Flags2, RCP_PPM		
+	rjmp	t0_int_rcp_update_start		; If flag is set (PPM) - branch
+
 	; Check RC pulse skip counter
 	lds	XL, Rcp_Skip_Cnt			
 	tst	XL
@@ -1706,9 +1652,6 @@ t0_int_skip_start:
 	rjmp	t0_int_rcp_update_start
 
 t0_int_skip_end:
-	sbrc	Flags2, RCP_PPM		
-	rjmp	t0_int_rcp_update_start		; If flag is set (PPM) - branch
-
 	; Skip counter has reached zero, start looking for RC pulses again
 	sbr	Flags2, (1<<RCP_INT_NESTED_ENABLED)	; Set flag to enabled
 	Rcp_Clear_Int_Flag XL			; Clear interrupt flag
@@ -1788,27 +1731,24 @@ t0_int_pwm_min_run:
 t0_int_pwm_update: 
 	; Update requested_pwm
 	sts	Requested_Pwm, I_Temp1		; Set requested pwm
+.IF MODE >= 1	; Tail or multi
 	; Limit pwm during start
-	sbrs	Flags1, STARTUP_PHASE
-	rjmp	t0_int_current_pwm_update
+	mov	XL, Flags1
+	andi	XL, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
+	breq	t0_int_current_pwm_update		
 
 	lds	XL, Requested_Pwm			; Limit pwm during start
-.IF MODE == 2	; Multi
-	ldi	I_Temp2, 8
-	add	XL, I_Temp2				; Add an extra power boost during start
+	lds	I_Temp2, Startup_Cnt		; Add an extra power boost during start
+	lsr	I_Temp2
+	lsr	I_Temp2
+	add	XL, I_Temp2
 	sts	Requested_Pwm, XL
-	brcc	PC+3
+	brcc	PC+4
 
 	ldi	XL, 0xFF
 	sts	Requested_Pwm, XL
-.ENDIF
-	lds	I_Temp2, Pwm_Limit
-	cp	XL, I_Temp2
-	brcs	t0_int_current_pwm_update
-
-	sts	Requested_Pwm, I_Temp2
-
 t0_int_current_pwm_update: 
+.ENDIF
 .IF MODE == 0 || MODE == 2	; Main or multi
 	lds	I_Temp1, Pgm_Gov_Mode		; Governor mode?
 	cpi	I_Temp1, 4
@@ -1837,6 +1777,53 @@ t0_int_current_pwm_done:
 .ENDIF
 
 	mov	Current_Pwm_Limited, I_Temp1
+	; Dither
+	lds	XL, Pwm_Dither_Decoded		; Load pwm dither
+	tst	XL
+	brne	PC+2						; If active - branch
+	rjmp	t0_int_current_pwm_no_dither
+
+	mov	I_Temp2, I_Temp1
+	sub	I_Temp2, XL				; Calculate pwm minus dither value
+	brcc	t0_int_current_pwm_full_dither; If pwm more than dither value, then do full dither
+
+	mov	XL, I_Temp1				; Set dither level to current pwm
+	ldi	I_Temp2, 0				; Set pwm minus dither
+
+t0_int_current_pwm_full_dither:
+	mov	I_Temp4, XL				; Store dither value in I_Temp4
+	clc
+	rol	XL						; Shift left once
+	mov	I_Temp3, XL
+	lds	XL, Random				; Load random number
+	com	XL						; Invert to create proper DC bias in random code
+	and	I_Temp3, XL				; And with double dither value
+	add	I_Temp3, I_Temp2			; Add pwm minus dither
+	brcs	t0_int_current_pwm_dither_max_excess_power	; If dither cause power above max - branch and increase excess 
+
+	lds	XL, Pwm_Dither_Excess_Power	; Get excess power
+	cp	XL, Zero					; Decrement excess power
+	breq	PC+2
+	dec	XL
+	add	I_Temp3, XL				; Add excess power from previous cycles
+	sts	Pwm_Dither_Excess_Power, XL
+	brcs	t0_int_current_pwm_dither_max_power; If dither cause power above max - branch
+
+	mov	I_Temp1, I_Temp3
+	rjmp	t0_int_current_pwm_no_dither
+
+t0_int_current_pwm_dither_max_excess_power:
+	lds	XL, Pwm_Dither_Excess_Power
+	cp	I_Temp4, XL 				; Limit excess power to one above in order to always reach max power
+	brcs	PC+2
+	inc	XL
+	sts	Pwm_Dither_Excess_Power, XL
+
+t0_int_current_pwm_dither_max_power:
+	ldi	I_Temp1, 255				; Set power to max
+
+t0_int_current_pwm_no_dither:
+	sts	Current_Pwm_Lim_Dith, I_Temp1
 .ENDIF
 t0_int_pwm_exit:	
 	; Set demag enabled if pwm is above limit
@@ -2004,9 +1991,10 @@ t0h_int_rcp_set_limit:
 
 	sts	Pwm_Limit_Spoolup, I_Temp5		; Set limit to what current pwm is
 	inc	I_Temp2						; Check if spoolup limit count is 255
-	breq	PC+4							; If it is, then this is a "bailout" ramp
+	breq	PC+3							; If it is, then this is a "bailout" ramp
 
 	lds	XL, Main_Spoolup_Time_3x			; Stay in an early part of the spoolup sequence (unless "bailout" ramp)
+
 	sts	Spoolup_Limit_Cnt, XL
 	ldi	XL, 1						; Set skip count
 	sts	Spoolup_Limit_Skip, XL
@@ -2128,7 +2116,7 @@ rcp_int_second_meas_pwm_freq:
 	lds	I_Temp4, Rcp_PrePrev_Edge_H
 	sbc	I_Temp2, I_Temp4
 	clr	I_Temp4
-	ldi	XL, 2					; Set default period tolerance requirement (MSB)
+	ldi	XL, 8					; Set default period tolerance requirement (MSB)
 	mov	I_Temp7, XL
 	mov	I_Temp3, Zero				; (LSB)
 	; Check if pulse is too short
@@ -2335,8 +2323,8 @@ rcp_int_ppm_check_full_range:
 
 	lds	I_Temp7, Pgm_Ppm_Min_Throttle		; Min throttle value is in 4us units
 .IF MODE >= 1	; Tail or multi
-	lds	XL, Pgm_Direction				; Check if bidirectional operation
-	cpi	XL, 3
+	lds	I_Temp2, Pgm_Direction			; Check if bidirectional operation (store in I_Temp2)
+	cpi	I_Temp2, 3
 	brne	PC+3							; No - branch
 
 	lds	I_Temp7, Pgm_Ppm_Center_Throttle	; Center throttle value is in 4us units
@@ -2352,8 +2340,7 @@ rcp_int_ppm_calculate:
 	in	I_Temp1, SREG
 	andi	I_Temp1, (1<<SREG_C)	
 .IF MODE >= 1	; Tail or multi
-	lds	XL, Pgm_Direction				; Check if bidirectional operation
-	cpi	XL, 3
+	cpi	I_Temp2, 3					; Check if bidirectional operation
 	brne	rcp_int_ppm_bidir_dir_set		; No - branch
 
 	tst	I_Temp1
@@ -2374,22 +2361,23 @@ rcp_int_ppm_bidir_fwd:
 	cli								; Direction change, turn off all fets
 	cbr	Flags3, (1<<PGM_DIR_REV)
 rcp_int_ppm_bidir_dir_change:
-	All_nFETs_Off
-	All_pFETs_Off
-	sbrc	Flags1, STARTUP_PHASE			; Do not brake when in startup
-	rjmp	PC+2
+	sbrc	Flags0, DIR_CHANGE_BRAKE
+	rjmp	rcp_int_ppm_bidir_dir_change_powered_off
 
+	xcall switch_power_off
+	sts	Brake_Cnt, Zero
+
+rcp_int_ppm_bidir_dir_change_powered_off:
 	sbr	Flags0, (1<<DIR_CHANGE_BRAKE)		; Set brake flag
 
-	sei
 rcp_int_ppm_bidir_dir_set:
+	sei
 .ENDIF
 	tst	I_Temp1
 	breq	rcp_int_ppm_neg_checked			; If result is positive - branch
 
 .IF MODE >= 1	; Tail or multi
-	lds	XL, Pgm_Direction				; Check if bidirectional operation
-	cpi	XL, 3
+	cpi	I_Temp2, 3					; Check if bidirectional operation
 	brne	rcp_int_ppm_unidir_neg			; No - branch
 
 	ldi	XL, 0xFF						; Change sign - invert and subtract minus one
@@ -2407,8 +2395,7 @@ rcp_int_ppm_unidir_neg:
 
 rcp_int_ppm_neg_checked:
 .IF MODE >= 1	; Tail or multi
-	lds	XL, Pgm_Direction				; Check if bidirectional operation
-	cpi	XL, 3
+	cpi	I_Temp2, 3					; Check if bidirectional operation
 	brne	rcp_int_ppm_bidir_done			; No - branch
 
 	lsl	I_Temp5						; Multiply value by 2
@@ -2512,12 +2499,10 @@ rcp_int_ppm_timeout_set:
 	cbr	Flags2, (1<<RCP_INT_NESTED_ENABLED)	; Set flag to disabled
 
 rcp_int_exit:	; Exit interrupt routine	
-	ldi	XL, RCP_SKIP_RATE			; Load number of skips
-	sts	Rcp_Skip_Cnt, XL
-	sbrs	Flags2, RCP_PPM		
-	rjmp	PC+4						; If flag is not set (PWM) - branch
+	sbrc	Flags2, RCP_PPM			; If flag is set (PPM) - branch
+	rjmp	PC+4						
 
-	ldi	XL, 10					; Load number of skips
+	ldi	XL, RCP_SKIP_RATE			; Load number of skips
 	sts	Rcp_Skip_Cnt, XL
 
 	cli							; Disable interrupts
@@ -2604,9 +2589,6 @@ beep_f4:	; Entry point 4, load beeper frequency 4 settings
 	rjmp	beep
 
 beep:	; Beep loop start
-	mov	Temp5, Current_Pwm_Limited	; Store value
-	ldi	XH, 1					; Set to a nonzero value
-	mov	Current_Pwm_Limited, XH
 	ldi	Temp2, 2					; Must be an even number (or direction will change)
 beep_onoff:
 	sbrc	Flags3, PGM_DIR_REV			; Toggle between using A fet and C fet
@@ -2649,7 +2631,6 @@ beep_off:		; Fets off loop
 	dec	Temp4
 	brne	beep
 	BpFET_off			; BpFET off
-	mov	Current_Pwm_Limited, Temp5	; Restore value
 	ret
 
 
@@ -2995,10 +2976,6 @@ calc_governor_target_exit:
 
 ; Second governor routine - calculate governor proportional error
 calc_governor_prop_error:
-	; Exit if governor is inactive
-	sbrs	Flags0, GOV_ACTIVE		
-	rjmp	calc_governor_prop_error_exit
-
 .IF MODE <= 1	; Main or tail
 	; Load comm period and divide by 2
 	lds	Temp2, Comm_Period4x_H
@@ -3055,10 +3032,6 @@ calc_governor_prop_error_exit:
 
 ; Third governor routine - calculate governor integral error
 calc_governor_int_error:
-	; Exit if governor is inactive
-	sbrs	Flags0, GOV_ACTIVE		
-	rjmp	calc_governor_int_error_exit
-
 	; Add proportional to integral
 	lds	Temp1, Gov_Proportional_L
 	lds	XH, Gov_Integral_L
@@ -3131,10 +3104,6 @@ calc_governor_int_error_exit:
 
 ; Fourth governor routine - calculate governor proportional correction
 calc_governor_prop_correction:
-	; Exit if governor is inactive
-	sbrs	Flags0, GOV_ACTIVE		
-	rjmp	calc_governor_prop_corr_exit
-
 	; Load proportional gain
 	lds	Temp3, Pgm_Gov_P_Gain_Decoded; Load proportional gain and store in Temp3
 	; Load proportional
@@ -3210,10 +3179,6 @@ calc_governor_prop_corr_exit:
 
 ; Fifth governor routine - calculate governor integral correction
 calc_governor_int_correction:
-	; Exit if governor is inactive
-	sbrs	Flags0, GOV_ACTIVE		
-	rjmp	calc_governor_int_corr_exit
-
 	; Load integral gain
 	lds	Temp3, Pgm_Gov_I_Gain_Decoded	; Load integral gain and store in Temp3
 	; Load integral
@@ -3314,6 +3279,10 @@ set_pwm_limit_low_rpm:
 	cbr	Flags0, (1<<DEMAG_ENABLED)		; Disable demag
 
 set_pwm_demag_done:
+	lds	XH, Pgm_Enable_Power_Prot		; Check if low RPM power protection is enabled
+	tst	XH
+	breq	set_pwm_limit_low_rpm_exit		; Exit if disabled
+
 	lds	XH, Comm_Period4x_H
 	tst	XH
 	breq	set_pwm_limit_low_rpm_exit		; Avoid divide by zero
@@ -3353,11 +3322,11 @@ set_pwm_limit_low_rpm_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 measure_lipo_cells:
-.IF MODE == 1	; Tail
-	; If tail, then exit
+.IF MODE >= 1	; Tail or multi
+	; If not supported, then exit
 	rjmp	measure_lipo_exit
 .ENDIF
-measure_lipo_start:
+.IF MODE == 0	; Main
 	; Set commutation to BpFET on
 	xcall comm5comm6			
 	; Start adc
@@ -3379,6 +3348,10 @@ measure_lipo_wait_adc:
 	; Set limit step
 	ldi	Temp3, ADC_LIMIT_L
 	sts	Lipo_Adc_Limit_L, Temp3
+	tst	Temp3
+	brne	PC+2		
+	rjmp	measure_lipo_exit		; Exit if disabled
+
 	ldi	Temp4, ADC_LIMIT_H
 	sts	Lipo_Adc_Limit_H, Temp4
 	mov	Temp6, Temp4			; Divide 3.0V value by 2
@@ -3456,6 +3429,7 @@ measure_lipo_update:
 	; Set ADC limit
 	sts	Lipo_Adc_Limit_L, Temp7
 	sts	Lipo_Adc_Limit_H, Temp8
+.ENDIF
 measure_lipo_exit:
 	ret
 
@@ -3546,7 +3520,7 @@ temp_check_exit:
 	ret
 
 check_voltage_start:
-.IF (MODE == 0) || (MODE == 2)	; Main or multi
+.IF MODE == 0	; Main 
 	; Check if low voltage limiting is enabled
 	cpi	Temp3, 1					; Is low voltage limit disabled?
 	breq	check_voltage_good			; Yes - voltage declared good
@@ -3556,6 +3530,10 @@ check_voltage_start:
 	ldi	XH, 3
 	cpc	Temp2, XH
 	brcc	check_voltage_good			; ADC saturated, can not make judgement
+
+	ldi	XH, ADC_LIMIT_L			; Is low voltage limit zero (ESC does not support it)?
+	tst	XH
+	breq	check_voltage_good			; Yes - voltage declared good
 
 	; Check voltage against limit
 	lds	XH, Lipo_Adc_Limit_L
@@ -3581,17 +3559,6 @@ check_voltage_good:
 
 	inc	XH						; Increment limit
 	sts	Pwm_Limit, XH
-.IF MODE == 2	; Multi
-	lds	XH, Pgm_Direction			; Check if bidirectional operation
-	cpi	XH, 3
-	brne	check_voltage_lim
-
-	lds  XH, Pwm_Limit
-	subi	XH, 0xFC					; Subtract -4
-	brcc	check_voltage_lim			; If limit max - branch
-
-	sts	Pwm_Limit, XH				; Increment limit two steps more
-.ENDIF
 
 check_voltage_lim:
 	lds	Temp1, Pwm_Limit			; Set limit
@@ -3616,27 +3583,8 @@ check_voltage_spoolup_lim:
 	sts	Pwm_Limit, XH
 	
 check_voltage_exit:
-.IF MODE == 0	; Main 
 	mov	Current_Pwm_Limited, Temp1
-.ENDIF
-.IF MODE == 2	; Multi
-	; Set current pwm limited if closed loop mode
-	lds	XH, Pgm_Gov_Mode			; Governor mode?
-	cpi	XH, 4
-	brne check_voltage_set_pwm		; Yes - branch
-	rjmp	check_voltage_pwm_done
-
-check_voltage_set_pwm:
-	; Limit pwm for low rpms
-	lds	XH, Pwm_Limit_Low_Rpm		; Check against limit
-	cp	Temp1, XH
-	brcs	PC+2						; If current pwm below limit - branch
-
-	mov	Temp1, XH					; Limit pwm
-
-	mov  Current_Pwm_Limited, Temp1
-check_voltage_pwm_done:
-.ENDIF
+	sts	Current_Pwm_Lim_Dith, Temp1
 .ENDIF
 .IF MODE == 1	; Tail
 	; Increase pwm limit
@@ -3647,6 +3595,34 @@ check_voltage_pwm_done:
 	sts	Pwm_Limit, XH				; Increment limit
 
 check_voltage_lim:
+.ENDIF
+.IF MODE == 2	; Multi
+	; Set current pwm limited if closed loop mode
+	lds	XH, Pgm_Gov_Mode			; Governor mode?
+	cpi	XH, 4
+	brne check_voltage_set_pwm_gov	; Yes - branch
+
+	lds  Temp2, Pwm_Limit
+	ldi	XH, 16
+	add	Temp2, XH
+	brcc	PC+2						; If not max - branch
+
+	ldi	Temp2, 255
+
+	sts	Pwm_Limit, Temp2			; Increment limit 
+	rjmp	check_voltage_pwm_done
+
+check_voltage_set_pwm_gov:
+	; Limit pwm for low rpms
+	lds	XH, Pwm_Limit_Low_Rpm		; Check against limit
+	cp	Temp1, XH
+	brcs	PC+2						; If current pwm below limit - branch
+
+	mov	Temp1, XH					; Limit pwm
+
+	mov  Current_Pwm_Limited, Temp1
+	sts	Current_Pwm_Lim_Dith, Temp1
+check_voltage_pwm_done:
 .ENDIF
 	; Set adc mux for next conversion
 	lds	XH, Adc_Conversion_Cnt		; Is next conversion for temperature?
@@ -3689,22 +3665,23 @@ startup_pwm_set_pwm:
 	sts	Requested_Pwm, Temp1			; Update requested pwm
 	sts	Current_Pwm, Temp1				; Update current pwm
 	mov	Current_Pwm_Limited, Temp1		; Update limited version of current pwm
+	sts	Current_Pwm_Lim_Dith, Temp1
 	sts	Pwm_Spoolup_Beg, Temp1			; Update spoolup beginning pwm
 	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Initialize all timings routine
+; Initialize timing routine
 ;
 ; No assumptions
 ;
 ; Part of initialization before motor start
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-initialize_all_timings: 
+initialize_timing: 
 	sts	Comm_Period4x_L, Zero		; Set commutation period registers
-	ldi	XH, 0x7F
+	ldi	XH, 0xF0			
 	sts	Comm_Period4x_H, XH
 	ret
 
@@ -3732,6 +3709,31 @@ calc_next_comm_timing:			; Entry point for run phase
 	sts	Prev_Comm_H, Temp2
 	sub	Temp1, Temp3			; Calculate the new commutation time
 	sbc	Temp2, Temp4
+	sbrs	Flags1, STARTUP_PHASE	
+	rjmp	calc_next_comm_startup_done	
+
+	lds	Temp5, Prev_Prev_Comm_L
+	lds	Temp6, Prev_Prev_Comm_H
+	sts	Prev_Prev_Comm_L, Temp3
+	sts	Prev_Prev_Comm_H, Temp4
+	sub	Temp4, Temp6			; Calculate previous commutation time (hi byte only)
+	sub	Temp2, Temp4			; Calculate the difference between the two previous commutation times (hi bytes only)
+	sts	Comm_Diff, Temp2
+	lds	Temp1, Prev_Comm_L		; Reload this commutation time
+	lds	Temp2, Prev_Comm_H
+	sub	Temp1, Temp5			; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
+	sbc	Temp2, Temp6
+	lds	Temp4, Comm_Period4x_H	; Average with previous and save
+	lds	Temp3, Comm_Period4x_L
+	lsr	Temp4			
+	ror	Temp3
+	add	Temp1, Temp3
+	adc	Temp2, Temp4
+	sts	Comm_Period4x_L, Temp1
+	sts	Comm_Period4x_H, Temp2
+	rjmp	calc_new_wait_times_setup
+
+calc_next_comm_startup_done:
 	; Calculate new commutation time
 	lds	Temp3, Comm_Period4x_L	; Comm_Period4x(-l-h) holds the time of 4 commutations
 	lds	Temp4, Comm_Period4x_H
@@ -3776,55 +3778,26 @@ calc_next_comm_new_period_div_done:
 	adc	Temp4, Temp2
 	sts	Comm_Period4x_L, Temp3	; Store Comm_Period4x_X
 	sts	Comm_Period4x_H, Temp4
-	brcs	calc_next_comm_slow		; If period larger than 0xffff - go to slow case
+	brcc	calc_new_wait_times_setup; If period larger than 0xffff - go to slow case
 
-	ret
-
-calc_next_comm_slow:
 	ldi	XH, 0xFF
 	sts	Comm_Period4x_L, XH		; Set commutation period registers to very slow timing (0xffff)
 	sts	Comm_Period4x_H, XH
-	ret
 
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Wait advance timing routine
-;
-; No assumptions
-;
-; Waits for the advance timing to elapse and sets up the next zero cross wait
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-wait_advance_timing:	
-	sbrc	Flags0, OC1A_PENDING 
-	rjmp	wait_advance_timing
-
-	; Setup next wait time
-	lds	XH, Wt_ZC_Timeout_L
-	sts	Next_Wt_L, XH
-	lds	XH, Wt_ZC_Timeout_H
-	sts	Next_Wt_H, XH
-	sbr	Flags0, (1<<OC1A_PENDING)
-	T1oca_Int_Enable XH				; Enable timer1 OCA interrupt
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Calculate new wait times routine
-;
-; No assumptions
-;
-; Calculates new wait times
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-calc_new_wait_times:	
+calc_new_wait_times_setup:	
 	; Load programmed commutation timing
-	lds	XH, Pgm_Comm_Timing	; Store in XH
+	sbrs	Flags1, STARTUP_PHASE	; Set dedicated timing during startup
+	rjmp	calc_new_wait_per_startup_done
+
+	ldi	XH, 3
+	mov	Temp8, XH
+	rjmp	calc_new_wait_per_demag_done
+
+calc_new_wait_per_startup_done:
+	lds	XH, Pgm_Comm_Timing		; Store in XH
 	lds	Temp1, Demag_Detected_Metric; Check demag metric
 	cpi	Temp1, 130
-	brcs	PC+2
+	brcs	calc_new_wait_per_demag_done
 
 	inc	XH					; Increase timing
 
@@ -3839,9 +3812,9 @@ calc_new_wait_times:
 	ldi	XH, 5				; Set timing to max
 
 	mov	Temp8, XH				; Store timing in Temp8
+calc_new_wait_per_demag_done:
 	ldi	XH, (COMM_TIME_RED<<1)	
 	mov	Temp7, XH
-	dec	Temp7			
 	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
 	rjmp	PC+2
 
@@ -3890,13 +3863,50 @@ divide_wait_times:
 	subi	XH, (COMM_TIME_MIN<<1)
 	mov	XH, Temp2				
 	sbc	XH, Zero
-	brcc	adjust_timing			; Check that result is still above minumum
+	brcc	calc_new_wait_times_exit	; Check that result is still above minumum
 
 load_min_time:
 	ldi	Temp1, (COMM_TIME_MIN<<1)
 	ldi	Temp2, 0
 
-adjust_timing:
+calc_new_wait_times_exit:	
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Wait advance timing routine
+;
+; No assumptions
+; NOTE: Be VERY careful if using temp registers. They are passed over this routine
+;
+; Waits for the advance timing to elapse and sets up the next zero cross wait
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+wait_advance_timing:	
+	sbrc	Flags0, OC1A_PENDING 
+	rjmp	wait_advance_timing
+
+	; Setup next wait time
+	lds	XH, Wt_ZC_Timeout_L
+	sts	Next_Wt_L, XH
+	lds	XH, Wt_ZC_Timeout_H
+	sts	Next_Wt_H, XH
+	sbr	Flags0, (1<<OC1A_PENDING)
+	T1oca_Int_Enable XH				; Enable timer1 OCA interrupt
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Calculate new wait times routine
+;
+; No assumptions
+;
+; Calculates new wait times
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+calc_new_wait_times:	
 	mov	Temp4, Temp2			; Copy values
 	mov	Temp3, Temp1
 	mov	Temp6, Temp2
@@ -3947,6 +3957,24 @@ store_times_decrease:
 	sts	Wt_Advance_H, Temp4
 	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
 	sts	Wt_Zc_Scan_H, Temp6
+	sbrs	Flags1, STARTUP_PHASE 			
+	rjmp	store_times_exit
+
+	lds	XH, Startup_Cnt			
+	cpi	XH, 3
+	brcs	store_times_exit
+
+	lds	Temp1, Wt_Comm_H		; Compensate commutation wait for comparator offset
+	lds	Temp2, Comm_Diff
+	asr	Temp2
+	add	Temp1, Temp2
+	brcs	store_times_exit
+	brmi	store_times_exit
+
+	sts	Wt_Comm_L, Zero
+	sts	Wt_Comm_H, Temp1 
+
+store_times_exit:
 	ret
 
 
@@ -3961,26 +3989,30 @@ store_times_decrease:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_before_zc_scan:	
+	; Calculate random number
+	lds	Temp1, Random
+	lsl	Temp1
+	brcc	wait_before_zc_scan_rand
+
+	ldi	XH, 0x6B					; Sequence length of 35, when initialized to 1
+	eor	Temp1, XH
+
+wait_before_zc_scan_rand:          
+	sts	Random, Temp1
+wait_before_zc_scan_wait:          
 	sbrc	Flags0, OC1A_PENDING 
-	rjmp	wait_before_zc_scan
+	rjmp	wait_before_zc_scan_wait
 
 	sbr	Flags0, (1<<OC1A_PENDING)
 	T1oca_Int_Enable XH				; Enable timer1 OCA interrupt
 	mov	XH, Flags1
 	andi	XH, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
-	breq	wait_before_zc_exit
+	breq	wait_before_zc_scan_exit
 
 	lds	Temp3, Comm_Period4x_L		; Set long timeout when starting
 	lds	Temp4, Comm_Period4x_H
-	; Break deadlock cyclic patterns during startup
-	lds	XH, Startup_Ok_Cnt
-	cpi	XH, 8
-	brcc	wait_before_zc_random_done
-
-	sbrs	Temp3, 0					; Use LSB as a random number
-	lds	Temp4, Wt_Zc_Timeout_H
-
-wait_before_zc_random_done:
+	lsr	Temp4
+	ror	Temp3
 	cli							; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp1
 	Read_TCNT1H Temp2
@@ -3993,7 +4025,7 @@ wait_before_zc_random_done:
 	T1oca_Int_Enable XH				; Enable interrupt
 	sei
 
-wait_before_zc_exit:
+wait_before_zc_scan_exit:          
 	ret
 
 
@@ -4019,6 +4051,12 @@ wait_for_comp_out_high:
 	ldi	Temp3, (1<<ACO)			; Desired comparator output
 
 wait_for_comp_out_start:
+	sbrs	Flags0, DIR_CHANGE_BRAKE		; Is it a direction change?
+	rjmp	wait_for_comp_brake_done
+
+	ApFET_off						; Switch off one fet, so that comparator can be used
+
+wait_for_comp_brake_done:
 	mov	XH, Flags1				; Clear demag detected flag if start phases
 	andi	XH, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
 	breq	PC+2
@@ -4026,45 +4064,28 @@ wait_for_comp_out_start:
 	cbr	Flags0, (1<<DEMAG_DETECTED)
 
 	sei							; Enable interrupts
-	sbrc	Flags0, OC1A_PENDING		; Has zero cross scan timeout elapsed?
-	rjmp	wait_for_comp_out_not_timed_out	; No - branch
-
-	lds	XH, Comparator_Read_Cnt		; Check that comparator has been read
-	tst	XH
-	breq	wait_for_comp_out_not_timed_out	; If not read - branch
-
-	ret							; Return
-
-wait_for_comp_out_not_timed_out:
 	; Set number of comparator readings
-	ldi	Temp1, 1		; Number of OK readings required
-	ldi	Temp4, 2		; Number of fast consecutive readings
+	ldi	Temp1, 1					; Number of OK readings required
 
 	lds 	XH, Comm_Period4x_H			; Set number of readings higher for lower speeds
-	cpi	XH, 0x05
-	brcs	PC+2
+	subi	XH, 0x05
+	brcs	comp_wait_on_comp_able
 
 	ldi	Temp1, 2
 
-	lds 	XH, Comm_Period4x_H			
-	cpi	XH, 0x0A
-	brcs	PC+2
+	subi	XH, 0x05
+	brcs	comp_wait_no_of_readings
 
 	ldi	Temp1, 3
 
-	lds 	XH, Comm_Period4x_H			
-	cpi	XH, 0x0F
-	brcs	PC+2
+	subi	XH, 0x05
+	brcs	comp_wait_no_of_readings
 
-	ldi	Temp4, 3
-	sbrc	Flags1, INITIAL_RUN_PHASE	; Set less samples during initial run phase		
-	ldi	Temp4, 1
+	ldi	Temp1, 6
 
-	sbrs	Flags1, STARTUP_PHASE 		; Set many samples during startup
-	rjmp	comp_wait_on_comp_able
-
-	ldi	Temp1, 30
-	ldi	Temp4, 1
+comp_wait_no_of_readings:
+	sbrc	Flags1, STARTUP_PHASE 			; Set many samples during startup
+	ldi	Temp1, 10
 
 comp_wait_on_comp_able:
 	sbrc	Flags0, OC1A_PENDING			; Has zero cross scan timeout elapsed?
@@ -4075,6 +4096,7 @@ comp_wait_on_comp_able:
 	breq	comp_wait_on_comp_able_not_timed_out	; If not read - branch
 
 	sei								; Enable interrupts
+	sbr	Flags1, (1<<COMP_TIMED_OUT)
 	ret								; Yes - return
 
 comp_wait_on_comp_able_not_timed_out:
@@ -4088,14 +4110,15 @@ comp_wait_on_comp_able_not_timed_out:
 
 	ldi	Temp2, 0x07
 
-	inc	Temp2
+	ldi	XH, 5
+	add	Temp2, XH
 	sbrs	Flags0, PWM_ON					; More delay for pwm off
 	lsl	Temp2
+
 	sbrc	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during direct startup
 	ldi	Temp2, 130
 	sbrc	Flags1, INITIAL_RUN_PHASE		
-	ldi	Temp2, 20
-
+	ldi	Temp2, 65
 
 	Read_TCNT2 XH
 	lds	Temp5, Pwm_Prev_Edge
@@ -4107,18 +4130,38 @@ comp_wait_on_comp_able_not_timed_out:
 	lds	XH, Comparator_Read_Cnt			; Increment comparator read count
 	inc	XH
 	sts	Comparator_Read_Cnt, XH
-	ldi	XH, 5
-	mov	Temp5, Temp4
-read_comp_loop:
 	Read_Comp_Out XH					; Read comparator output
+	sbrc	Flags1, STARTUP_PHASE			
+	rjmp	comp_read_done
+
+	ldi	XH, 4						; 1 is stutter, 2 is quite fine, 3 is fine, 10 is fine on DYS SN20A
+	dec	XH
+	brne	PC-1
+	Read_Comp_Out XH					; Another reading reduces comparator noise on some ESCs (for some reason...)				
+
+comp_read_done:
 	andi	XH, (1<<ACO)
 	cp	XH, Temp3
 	breq	comp_read_wrong
-	dec	Temp5
-	brne	read_comp_loop
 	rjmp	comp_read_ok
 
 comp_read_wrong:
+	sbrs	Flags1, STARTUP_PHASE 		
+	rjmp	comp_read_wrong_not_startup
+
+	inc	Temp1						; Increment number of OK readings required
+	cpi	Temp1, 10						; If above initial requirement - go back and restart
+	brcs	PC+2
+	rjmp	wait_for_comp_out_start
+
+	lds	XH, Startup_Cnt				; For the first commutations - go back and restart
+	cpi	XH, 6
+	brcc	PC+2
+	rjmp	wait_for_comp_out_start
+
+	rjmp	comp_wait_on_comp_able			; If below initial requirement - continue to look for good ones
+
+comp_read_wrong_not_startup:
 	sbrs	Flags0, DEMAG_DETECTED
 	rjmp	wait_for_comp_out_start			; If comparator output is not correct, and timeout already extended - go back and restart
 
@@ -4137,6 +4180,11 @@ comp_read_wrong:
 	rjmp	wait_for_comp_out_start			; If comparator output is not correct - go back and restart
 
 comp_read_ok:
+	lds	XH, Startup_Cnt				; Force a timeout for the first commutations			
+	cpi	XH, 2
+	brcc	PC+2
+	rjmp	wait_for_comp_out_start
+
 	sbrc	Flags0, DEMAG_DETECTED			; Do not accept correct comparator output if it is demag
 	rjmp	wait_for_comp_out_start
 
@@ -4144,7 +4192,7 @@ comp_read_ok:
 	breq	PC+2
 	rjmp	comp_wait_on_comp_able
 
-	sei								; Enable interrupts
+	cbr	Flags1, (1<<COMP_TIMED_OUT)
 	ret							
 
 
@@ -4158,24 +4206,46 @@ comp_read_ok:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 evaluate_comparator_integrity:
-	sbrs	Flags1, STARTUP_PHASE
-	rjmp	eval_comp_check_timeout
+	sbrs	Flags0, DIR_CHANGE_BRAKE			; Is it a direction change?
+	rjmp	eval_comp_brake_done
 
-	lds	XH, Startup_Ok_Cnt				; Increment ok counter
+	All_pFETs_off						; Turn off braking fets
+.IF NFETON_DELAY != 0
+	ldi	XH, NFETON_DELAY		
+	dec	XH
+	brne	PC-1
+.ENDIF
+	AnFET_on							; Turn on nfets (for high side driver charging)
+	BnFET_on
+	CnFET_on
+	ldi	XH, 20		
+	dec	XH
+	brne	PC-1
+	All_nFETs_off						; Turn off nfets again
+.IF PFETON_DELAY < 128
+.IF PFETON_DELAY != 0
+	ldi	XH, PFETON_DELAY		
+	dec	XH	
+	brne	PC-1
+.ENDIF
+.ENDIF
+	All_pFETs_on						; Turn on braking
+
+eval_comp_brake_done:
+	mov	XH, Flags1					; Check if startup or intial run				
+	andi	XH, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
+	breq	eval_comp_check_timeout
+
+	lds	XH, Startup_Cnt				; Increment counter
+	sbrs	Flags1, INITIAL_RUN_PHASE		; Do not increment beyond startup phase
 	inc	XH
-	sts	Startup_Ok_Cnt, XH
-	sbrc	Flags0, OC1A_PENDING
-	rjmp	eval_comp_exit
-
-	sts	Startup_Ok_Cnt, Zero			; Reset ok counter
-	rjmp	eval_comp_exit
+	sts	Startup_Cnt, XH
+	rjmp	eval_comp_exit					; Do not exit run mode, even if comparator has timed out 
 
 eval_comp_check_timeout:
-	sbrc	Flags0, OC1A_PENDING			; Has timeout elapsed?
+	sbrs	Flags1, COMP_TIMED_OUT			; Has timeout elapsed?
 	rjmp	eval_comp_exit
 	sbrc	Flags0, DEMAG_DETECTED			; Do not exit run mode if it is a demag situation
-	rjmp eval_comp_exit
-	sbrc	Flags0, DIR_CHANGE_BRAKE			; Do not exit run mode if it is a direction change brake
 	rjmp eval_comp_exit
 
 	pop	XH							; Routine exit without "ret" command (dummy pops to increment stack pointer)
@@ -4263,7 +4333,7 @@ wait_for_comm:
 	brcs	wait_for_comm_wait					; Cut power if many consecutive demags. This will help retain sync during hard accelerations
 
 	sbr	Flags0, (1<<DEMAG_CUT_POWER)			; Turn off motor power
-	All_nFETs_off XH
+	All_nFETs_off
 
 wait_for_comm_wait:
 	sbrc	Flags0, OC1A_PENDING 
@@ -4289,194 +4359,372 @@ wait_for_comm_wait:
 ; Damped routines uses all pfets on when in pwm off to dampen the motor
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
+; Comm phase 1 to comm phase 2
 comm1comm2:	
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
 	Set_RPM_Out
-	cli						; Disable all interrupts
-	All_pFETs_Off XH			; Turn off all pfets
-	sbrs	Flags2, PGM_PWMOFF_DAMPED
-	rjmp	comm12_nondamp
-	ldi	ZL, low(pwm_cnfet_apfet_on)
-	ldi	ZH, high(pwm_cnfet_apfet_on)
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm12_prech_done		; Do not do precharge when running damped
-comm12_nondamp:
-.IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
-	lds	XH, Comm_Period4x_H
-	andi	XH, 0xF8				; Check if comm period is less than 8
-	breq	comm12_prech_done
-	AnFET_on				
-	ldi	XH, HIGH_DRIVER_PRECHG_TIME
-	dec	XH
-	brne	PC-1
-	AnFET_off				
-	ldi	XH, PFETON_DELAY
-	dec	XH
-	brne	PC-1
-.ENDIF
-comm12_prech_done:
-	ApFET_on					; Ap on
 	ldi	XH, 2
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm12_rev
+
+	cli						; Disable all interrupts
 	sts	Comm_Phase, XH
+	BpFET_off 				; Turn off pfet
+	ApFET_on					; Turn on pfet
+	sei
 	rjmp	comm_exit
 
-comm2comm3:	
-	Clear_RPM_Out
+comm12_rev:
 	cli						; Disable all interrupts
-	CnFET_off					; Cn off
+	sts	Comm_Phase, XH
+	BpFET_off 				; Turn off pfet
+	CpFET_on					; Turn on pfet (reverse)
+	sei
+	rjmp	comm_exit
+
+; Comm phase 2 to comm phase 3
+comm2comm3:	
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
+	Clear_RPM_Out
+	ldi	XH, 3
 	sbrs	Flags2, PGM_PWMOFF_DAMPED
 	rjmp	comm23_nondamp
-	ldi	ZL, low(pwm_bnfet_apfet_on)
-	ldi	ZH, high(pwm_bnfet_apfet_on)
-	BpFET_off				
-	CpFET_off				
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm23_nfet
-comm23_nondamp:
-	ldi	ZL, low(pwm_bfet_on)
-	ldi	ZH, high(pwm_bfet_on)
-comm23_nfet:
+
+	; Comm2Comm3 Damped
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm23_damp_rev
+	
+	ldi	Temp1, 2				; Damping on BFET
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_bfet_damped)
+	ldi	ZH, high(pwm_bfet_damped)
+	sts	DampingFET, Temp1
+	CnFET_off					; Turn off fets
+	CpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm23_cp
-	BnFET_on					; Yes - Bn on
-comm23_cp:
-	ldi	XH, 3
-	sts	Comm_Phase, XH
+	rjmp	comm23_nfet_off		; Yes - branch
+	BnFET_on					; Pwm on - turn on nfet
+	rjmp	comm23_fets_done
+comm23_nfet_off:
+	BpFET_on					; Pwm off - switch damping fets	
+comm23_fets_done:
+	sei
 	rjmp	comm_exit
 
+	; Comm2Comm3 Damped reverse
+comm23_damp_rev:
+	ldi	Temp1, 2				; Damping on BFET
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_bfet_damped)	; (reverse)
+	ldi	ZH, high(pwm_bfet_damped)
+	sts	DampingFET, Temp1
+	AnFET_off					; Turn off fets (reverse)
+	ApFET_off						
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm23_nfet_off_rev		; Yes - branch
+	BnFET_on					; Pwm on - turn on nfet
+	rjmp	comm23_fets_done_rev
+comm23_nfet_off_rev:
+	BpFET_on					; Pwm off - switch damping fets	
+comm23_fets_done_rev:
+	sei
+	rjmp	comm_exit
+
+	; Comm2Comm3 Non-damped
+comm23_nondamp:
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm23_nondamp_rev
+
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_bfet)
+	ldi	ZH, high(pwm_bfet)
+	CnFET_off					; Turn off nfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm23_nfet_done
+comm23_nfet:
+	BnFET_on					; Yes - Turn on nfet
+comm23_nfet_done:
+	sei
+	rjmp	comm_exit
+
+	; Comm2Comm3 Non-damped reverse
+comm23_nondamp_rev:
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_bfet)
+	ldi	ZH, high(pwm_bfet)
+	AnFET_off					; Turn off nfet (reverse)
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm23_nfet_done_rev
+	BnFET_on					; Yes - Turn on nfet
+comm23_nfet_done_rev:
+	sei
+	rjmp	comm_exit
+
+; Comm phase 3 to comm phase 4
 comm3comm4:	
-	cli						; Disable all interrupts
-	All_pFETs_Off XH			; Turn off all pfets
-	sbrs	Flags2, PGM_PWMOFF_DAMPED
-	rjmp	comm34_nondamp
-	ldi	ZL, low(pwm_bnfet_cpfet_on)
-	ldi	ZH, high(pwm_bnfet_cpfet_on)
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm34_prech_done		; Do not do precharge when running damped
-comm34_nondamp:
-.IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
-	lds	XH, Comm_Period4x_H
-	andi	XH, 0xF8				; Check if comm period is less than 8
-	breq	comm34_prech_done
-	CnFET_on				
-	ldi	XH, HIGH_DRIVER_PRECHG_TIME
-	dec	XH
-	brne	PC-1
-	CnFET_off				
-	ldi	XH, PFETON_DELAY
-	dec	XH
-	brne	PC-1
-.ENDIF
-comm34_prech_done:
-	CpFET_on					; Cp on
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
+	Set_RPM_Out
 	ldi	XH, 4
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm34_rev
+
+	cli						; Disable all interrupts
 	sts	Comm_Phase, XH
+	ApFET_off 				; Turn off pfet
+	CpFET_on					; Turn on pfet
+	sei
 	rjmp	comm_exit
 
-comm4comm5:	
+comm34_rev:
 	cli						; Disable all interrupts
-	BnFET_off					; Bn off
+	sts	Comm_Phase, XH
+	CpFET_off 				; Turn off pfet (reverse)
+	ApFET_on					; Turn on pfet (reverse)
+	sei
+	rjmp	comm_exit
+
+; Comm phase 4 to comm phase 5
+comm4comm5:	
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
+	Clear_RPM_Out
+	ldi	XH, 5
 	sbrs	Flags2, PGM_PWMOFF_DAMPED
 	rjmp	comm45_nondamp
-	ldi	ZL, low(pwm_anfet_cpfet_on)
-	ldi	ZH, high(pwm_anfet_cpfet_on)
-	ApFET_off				
-	BpFET_off				
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm45_nfet
-comm45_nondamp:
-	ldi	ZL, low(pwm_afet_on)
-	ldi	ZH, high(pwm_afet_on)
-comm45_nfet:
+
+	; Comm4Comm5 Damped
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm45_damp_rev
+
+	ldi	Temp1, 1				; Damping on AFET
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_afet_damped)
+	ldi	ZH, high(pwm_afet_damped)
+	sts	DampingFET, Temp1
+	BnFET_off					; Turn off fets
+	BpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm45_cp
-	AnFET_on					; Yes - An on
-comm45_cp:
-	ldi	XH, 5
-	sts	Comm_Phase, XH
+	rjmp	comm45_nfet_off		; Yes - branch
+	AnFET_on					; Pwm on - turn on nfet
+	rjmp	comm45_fets_done
+comm45_nfet_off:
+	ApFET_on					; Pwm off - switch damping fets	
+comm45_fets_done:
+	sei
 	rjmp	comm_exit
 
+	; Comm4Comm5 Damped reverse
+comm45_damp_rev:
+	ldi	Temp1, 4				; Damping on CFET
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_cfet_damped)	; (reverse)
+	ldi	ZH, high(pwm_cfet_damped)
+	sts	DampingFET, Temp1
+	BnFET_off					; Turn off fets
+	BpFET_off						
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm45_nfet_off_rev		; Yes - branch
+	CnFET_on					; Pwm on - turn on nfet (reverse)
+	rjmp	comm45_fets_done_rev
+comm45_nfet_off_rev:
+	CpFET_on					; Pwm off - switch damping fets (reverse)	
+comm45_fets_done_rev:
+	sei
+	rjmp	comm_exit
+
+	; Comm4Comm5 Non-damped
+comm45_nondamp:
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm45_nondamp_rev
+
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_afet)
+	ldi	ZH, high(pwm_afet)
+	BnFET_off					; Turn off nfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm45_nfet_done
+	AnFET_on					; Yes - Turn on nfet
+comm45_nfet_done:
+	sei
+	rjmp	comm_exit
+
+	; Comm4Comm5 Non-damped reverse
+comm45_nondamp_rev:
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_cfet)		;  (reverse)
+	ldi	ZH, high(pwm_cfet)
+	BnFET_off					; Turn off nfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm45_nfet_done_rev
+	CnFET_on					; Yes - Turn on nfet (reverse)
+comm45_nfet_done_rev:
+	sei
+	rjmp	comm_exit
+
+; Comm phase 5 to comm phase 6
 comm5comm6:	
-	cli						; Disable all interrupts
-	All_pFETs_Off XH			; Turn off all pfets
-	sbrs	Flags2, PGM_PWMOFF_DAMPED
-	rjmp	comm56_nondamp
-	ldi	ZL, low(pwm_anfet_bpfet_on)
-	ldi	ZH, high(pwm_anfet_bpfet_on)
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm56_prech_done		; Do not do precharge when running damped
-comm56_nondamp:
-.IF HIGH_DRIVER_PRECHG_TIME != 0	; Precharge high side gate driver
-	lds	XH, Comm_Period4x_H
-	andi	XH, 0xF8				; Check if comm period is less than 8
-	breq	comm56_prech_done
-	BnFET_on				
-	ldi	XH, HIGH_DRIVER_PRECHG_TIME
-	dec	XH
-	brne	PC-1
-	BnFET_off				
-	ldi	XH, PFETON_DELAY
-	dec	XH
-	brne	PC-1
-.ENDIF
-comm56_prech_done:
-	BpFET_on					; Bp on
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
+	Set_RPM_Out
 	ldi	XH, 6
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm56_rev
+
+	cli						; Disable all interrupts
 	sts	Comm_Phase, XH
+	CpFET_off 				; Turn off pfet
+	BpFET_on					; Turn on pfet
+	sei
 	rjmp	comm_exit
 
-comm6comm1:	
+comm56_rev:
 	cli						; Disable all interrupts
-	AnFET_off					; An off
+	sts	Comm_Phase, XH
+	ApFET_off 				; Turn off pfet (reverse)
+	BpFET_on					; Turn on pfet
+	sei
+	rjmp	comm_exit
+
+; Comm phase 6 to comm phase 1
+comm6comm1:	
+	sbrc	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
+	rjmp	comm_exit
+	Clear_RPM_Out
+	ldi	XH, 1
 	sbrs	Flags2, PGM_PWMOFF_DAMPED
 	rjmp	comm61_nondamp
-comm61_damp:
-	ldi	ZL, low(pwm_cnfet_bpfet_on)
-	ldi	ZH, high(pwm_cnfet_bpfet_on)
-	ApFET_off				
-	CpFET_off				
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	rjmp	comm61_nfet
-comm61_nondamp:
-	ldi	ZL, low(pwm_cfet_on)
-	ldi	ZH, high(pwm_cfet_on)
-comm61_nfet:
-	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm61_cp
-	CnFET_on					; Yes - Cn on
-comm61_cp:
-	ldi	XH, 1
+
+	; Comm6Comm1 Damped
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm61_damp_rev
+
+	ldi	Temp1, 4				; Damping on CFET
+	cli						; Disable all interrupts
 	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_cfet_damped)
+	ldi	ZH, high(pwm_cfet_damped)
+	sts	DampingFET, Temp1
+	AnFET_off					; Turn off fets
+	ApFET_off						
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm61_nfet_off		; Yes - branch
+	CnFET_on					; Pwm on - turn on nfet
+	rjmp	comm61_fets_done
+comm61_nfet_off:
+	CpFET_on					; Pwm off - switch damping fets	
+comm61_fets_done:
+	sei
+	rjmp	comm_exit
+
+	; Comm6Comm1 Damped reverse
+comm61_damp_rev:
+	ldi	Temp1, 1				; Damping on AFET
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_afet_damped)	; (reverse)
+	ldi	ZH, high(pwm_afet_damped)
+	sts	DampingFET, Temp1
+	CnFET_off					; Turn off fets (reverse)
+	CpFET_off						
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm61_nfet_off_rev		; Yes - branch
+	AnFET_on					; Pwm on - turn on nfet (reverse)
+	rjmp	comm61_fets_done_rev
+comm61_nfet_off_rev:
+	ApFET_on					; Pwm off - switch damping fets (reverse)	
+comm61_fets_done_rev:
+	sei
+	rjmp	comm_exit
+
+	; Comm6Comm1 Non-damped
+comm61_nondamp:
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	comm61_nondamp_rev
+
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_cfet)
+	ldi	ZH, high(pwm_cfet)
+	AnFET_off					; Turn off nfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm61_nfet_done
+	CnFET_on					; Yes - Turn on nfet
+comm61_nfet_done:
+	sei
+	rjmp	comm_exit
+
+	; Comm6Comm1 Non-damped reverse
+comm61_nondamp_rev:
+	cli						; Disable all interrupts
+	sts	Comm_Phase, XH
+	ldi	ZL, low(pwm_afet)		; (reverse)
+	ldi	ZH, high(pwm_afet)
+	CnFET_off					; Turn off nfet (reverse)
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm61_nfet_done_rev
+	AnFET_on					; Yes - Turn on nfet (reverse)
+comm61_nfet_done_rev:
+	sei
 
 comm_exit:
-.IF MODE >= 1	; Tail or multi
-	sbrs	Flags0, DIR_CHANGE_BRAKE	; Is it a direction change?
-	rjmp	comm_dir_change_done
-
-	xcall	switch_power_off	; Switch off power
-	ldi	XH, NFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	ldi	XH, PFETON_DELAY		; Delay
-	dec	XH
-	brne	PC-1
-	All_pFETs_on XH			; All pfets on - Break
-
-comm_dir_change_done:
-.ENDIF
 	cbr	Flags0, (1<<DEMAG_CUT_POWER)	; Clear demag power cut flag
-	sei						; Enable all interrupts
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Set comparator phase
+;
+; No assumptions
+;
+; Sets up comparator muxes
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+set_comparator_phase:
+	sbrs	Flags0, DIR_CHANGE_BRAKE		; Is it a direction change?
+	rjmp	set_comparator_phase_brake_done
+
+	Set_Comp_Phase_A XH			
+	ret
+
+set_comparator_phase_brake_done:
+	lds	Temp1, Comm_Phase				
+	sbrc	Temp1, 2
+	subi	Temp1, 3
+	cpi	Temp1, 1
+	brne	set_comp_phase_not1
+
+	sbrs	Flags3, PGM_DIR_REV
+	Set_Comp_Phase_A XH			
+	sbrc	Flags3, PGM_DIR_REV
+	Set_Comp_Phase_C XH			
+	rjmp	set_comp_phase_exit
+
+set_comp_phase_not1:
+	cpi	Temp1, 2
+	brne	set_comp_phase_3
+
+	Set_Comp_Phase_B XH				
+	rjmp	set_comp_phase_exit
+
+set_comp_phase_3:
+	sbrs	Flags3, PGM_DIR_REV
+	Set_Comp_Phase_C XH			
+	sbrc	Flags3, PGM_DIR_REV
+	Set_Comp_Phase_A XH			
+
+set_comp_phase_exit:
 	ret
 
 
@@ -4490,11 +4738,12 @@ comm_dir_change_done:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 switch_power_off:
-	ldi	Temp3, low(pwm_nofet_on)	; Set Z register to desired pwm_nfet_on label
-	ldi	Temp4, high(pwm_nofet_on)
+	ldi	Temp3, low(pwm_nofet)	; Set Z register to pwm_nofet
+	ldi	Temp4, high(pwm_nofet)
 	movw	ZL, Temp3				; Set Z register in one instruction
-	All_nFETs_Off XH			; Turn off all nfets
-	All_pFETs_Off XH			; Turn off all pfets
+	sts	DampingFET, Zero
+	All_nFETs_Off				; Turn off all nfets
+	All_pFETs_Off				; Turn off all pfets
 	cbr	Flags0, (1<<PWM_ON)		; Set pwm cycle to pwm off
 	ret			
 
@@ -4574,6 +4823,12 @@ set_default_parameters:
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_ENABLE_TEMP_PROT
 	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_POWER_PROT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_PWM_INPUT
+	st	X+, Temp1
+	ldi	Temp1, 0xFF
+	st	X+, Temp1
 .ENDIF
 .IF MODE == 1	; Tail
 	ldi	XL, low(Pgm_Gov_P_Gain)
@@ -4635,6 +4890,12 @@ set_default_parameters:
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_ENABLE_TEMP_PROT
 	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_POWER_PROT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_PWM_INPUT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_TAIL_PWM_DITHER
+	st	X+, Temp1
 .ENDIF
 .IF MODE == 2	; Multi
 	ldi	XL, low(Pgm_Gov_P_Gain)
@@ -4645,7 +4906,7 @@ set_default_parameters:
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_MULTI_GOVERNOR_MODE
 	st	X+, Temp1
-	ldi	Temp1, DEFAULT_PGM_MULTI_LOW_VOLTAGE_LIM
+	ldi	Temp1, 0xFF
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_MULTI_GAIN
 	st	X+, Temp1
@@ -4698,6 +4959,12 @@ set_default_parameters:
 	ldi	Temp1, 0xFF	
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_ENABLE_TEMP_PROT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_POWER_PROT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_ENABLE_PWM_INPUT
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_MULTI_PWM_DITHER
 	st	X+, Temp1
 .ENDIF
 	ret
@@ -4769,14 +5036,14 @@ ret
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
-; Decode governor gain
+; Decode settings
 ;
 ; No assumptions
 ;
-; Decodes governor gains
+; Decodes various settings
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-decode_governor_gains:
+decode_settings:
 	; Decode governor gains
 	ldi	ZL, low(GOV_GAIN_TABLE<<1)
 	ldi	ZH, high(GOV_GAIN_TABLE<<1)
@@ -4788,38 +5055,12 @@ decode_governor_gains:
 	lds	Temp1, Pgm_Gov_I_Gain	; Decode governor I gain	
 	xcall load_flash_table_entry
 	sts	Pgm_Gov_I_Gain_Decoded, XH	
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Decode startup power
-;
-; No assumptions
-;
-; Decodes startup power
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-decode_startup_power:
 	; Decode startup power
 	ldi	ZL, low(STARTUP_POWER_TABLE<<1)
 	ldi	ZH, high(STARTUP_POWER_TABLE<<1)
 	lds	Temp1, Pgm_Startup_Pwr
 	xcall load_flash_table_entry
 	sts	Pgm_Startup_Pwr_Decoded, XH	
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Decode main spoolup time
-;
-; No assumptions
-;
-; Decodes main spoolup time
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-decode_main_spoolup_time:
 .IF MODE == 0	; Main
 	; Decode spoolup time
 	lds	Temp1, Pgm_Main_Spoolup_Time		
@@ -4847,19 +5088,6 @@ decode_main_spoolup_time:
 	add	XH, Temp1		; Now 15x
 	sts	Main_Spoolup_Time_15x, XH
 .ENDIF
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Decode demag compensation
-;
-; No assumptions
-;
-; Decodes demag comp
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-decode_demag_comp:
 	; Decode demag compensation
 	lds	XH, Pgm_Demag_Comp
 	ldi	Temp1, 255				; Set defaults
@@ -4880,6 +5108,12 @@ decode_demag_high:
 decode_demag_done:
 	sts	Demag_Pwr_Off_Thresh, Temp1	; Set variables
 	sts	Low_Rpm_Pwr_Slope, Temp2
+	; Decode pwm dither
+	ldi	ZL, low(PWM_DITHER_TABLE<<1)	
+	ldi	ZH, high(PWM_DITHER_TABLE<<1)
+	lds	Temp1, Pgm_Pwm_Dither
+	xcall load_flash_table_entry
+	sts	Pwm_Dither_Decoded, XH	
 	ret
 
 
@@ -5103,10 +5337,10 @@ clear_ram:
 	st	X+, Zero
 	dec	Temp1
 	brne	clear_ram
-	; Check if input signal is high for more than 10ms
-	ldi	Temp1, 100
+	; Check if input signal is high for more than 30ms
+	ldi	Temp1, 250
 input_high_check_1:
-	ldi	Temp2, 200
+	ldi	Temp2, 250
 input_high_check_2:
 	Read_Rcp_Int XL		; Read RCP input
 	sbrs	XL, Rcp_In		; Is it high?
@@ -5156,20 +5390,17 @@ jmp_to_bootloader:
 	
 
 bootloader_done:
+	; Initialize LFSR
+	ldi	XH, 1
+	sts	Random, XH
 	; Set default programmed parameters
 	xcall set_default_parameters
 	; Read all programmed parameters
 	xcall read_all_eeprom_parameters
 	; Decode parameters
 	xcall decode_parameters
-	; Decode governor gains
-	xcall decode_governor_gains
-	; Decode startup power
-	xcall decode_startup_power
-	; Decode main spoolup time
-	xcall decode_main_spoolup_time
-	; Decode demag compensation
-	xcall decode_demag_comp
+	; Decode settings
+	xcall decode_settings
 	; Set BEC voltage
 	xcall set_bec_voltage
 	; Find throttle gain from stored min and max settings
@@ -5252,6 +5483,16 @@ measure_pwm_freq_wait:
 	Rcp_Int_First XH					; Enable interrupt and set to first edge
 	Rcp_Clear_Int_Flag XH				; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)			; Set first edge flag
+	lds	XH, Pgm_Enable_PWM_Input			; Check if PWM input is enabled
+	tst	XH
+	brne	test_for_oneshot				; If it is - proceed
+
+	sbr	Flags2, (1<<RCP_PPM)			; Set PPM flag		
+	mov	XH, Flags3					; Clear pwm frequency flags
+	andi	XH, !((1<<RCP_PWM_FREQ_1KHZ)+(1<<RCP_PWM_FREQ_2KHZ)+(1<<RCP_PWM_FREQ_4KHZ)+(1<<RCP_PWM_FREQ_8KHZ)+(1<<RCP_PWM_FREQ_12KHZ))
+	mov	Flags3, XH
+
+test_for_oneshot:
 	; Test whether signal is OnShot125
 	cbr	Flags2, (1<<RCP_PPM_ONESHOT125)	; Clear OneShot125 flag
 	sts	Rcp_Outside_Range_Cnt, Zero		; Reset out of range counter
@@ -5569,9 +5810,12 @@ init_start:
 	sts	Governor_Req_Pwm, Zero	; Set governor requested pwm to zero
 	sts	Current_Pwm, Zero		; Set current pwm to zero
 	mov	Current_Pwm_Limited, Zero; Set limited current pwm to zero
+	sts	Current_Pwm_Lim_Dith, Zero
+	sts	Pwm_Dither_Excess_Power, Zero
 	sei
-	lds	XH, Pgm_Motor_Idle
-	sts	Pwm_Motor_Idle, XH		; Set idle pwm to programmed value			
+	lds	XH, Pgm_Motor_Idle		; Set idle pwm to programmed value
+	lsl	XH
+	sts	Pwm_Motor_Idle, XH					
 	sts	Gov_Target_L, Zero		; Set target to zero
 	sts	Gov_Target_H, Zero
 	sts	Gov_Integral_L, Zero	; Set integral to zero
@@ -5581,7 +5825,6 @@ init_start:
 	ldi	Flags0, 0				; Clear flags0
 	ldi	Flags1, 0				; Clear flags1
 	sts	Demag_Detected_Metric, Zero	; Clear demag metric
-	xcall initialize_all_timings	; Initialize timing
 	;**** **** **** **** ****
 	; Motor start beginning
 	;**** **** **** **** **** 
@@ -5626,18 +5869,24 @@ read_initial_temp:
 	sts	Requested_Pwm, XH
 	sts	Current_Pwm, XH
 	mov	Current_Pwm_Limited, XH
+	sts	Current_Pwm_Lim_Dith, XH
 	sts	Spoolup_Limit_Skip, XH			
 	lds	XH, Auto_Bailout_Armed
 	sts	Spoolup_Limit_Cnt, XH
 	; Begin startup sequence
 	sbr	Flags1, (1<<MOTOR_SPINNING)	; Set motor spinning flag
 	sbr	Flags1, (1<<STARTUP_PHASE)	; Set startup phase flag
-	sts	Startup_Ok_Cnt, Zero		; Reset ok counter
+	sts	Startup_Cnt, Zero			; Reset counter
 	xcall comm5comm6				; Initialize commutation
 	xcall comm6comm1				
-	xcall initialize_all_timings		; Initialize timing
 	xcall calc_next_comm_timing		; Set virtual commutation point
+	xcall calc_next_comm_timing	
+	xcall initialize_timing			; Initialize timing
+	xcall calc_next_comm_timing	
 	xcall calc_new_wait_times		; Calculate new wait times
+	xcall initialize_timing			; Initialize timing
+	xcall set_comparator_phase
+	xcall wait_before_zc_scan		; Set up comparator timeout
 	rjmp	run1
 
 
@@ -5649,33 +5898,34 @@ read_initial_temp:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 damped_transition:
 	; Transition from nondamped to damped if applicable
-	xcall switch_power_off		; Switch off power while changing pwm mode
+	cli
 	xcall decode_parameters		; Set programmed parameters
+	sei
 	sts	Adc_Conversion_Cnt, Zero	; Make sure a voltage reading is done next time
 	Set_Adc_Ip_Volt			; Set adc measurement to voltage
 
 ; Run 1 = B(p-on) + C(n-pwm) - comparator A evaluated
 ; Out_cA changes from low to high
 run1:
-	Set_Comp_Phase_A XH			; Set comparator to phase A
 	xcall wait_for_comp_out_high	; Wait zero cross wait and wait for high
-	xcall evaluate_comparator_integrity	; Check whether comparator reading has been normal
 	xcall setup_comm_wait		; Setup wait time from zero cross to commutation
+	xcall evaluate_comparator_integrity	; Check whether comparator reading has been normal
 	xcall calc_governor_target	; Calculate governor target
 	xcall wait_for_comm			; Wait from zero cross to commutation
 	xcall comm1comm2			; Commutate
 	xcall calc_next_comm_timing	; Calculate next timing and start advance timing wait
 	xcall wait_advance_timing	; Wait advance timing and start zero cross wait
 	xcall calc_new_wait_times
+	xcall set_comparator_phase	; Set comparator phase
 	xcall wait_before_zc_scan	; Wait zero cross wait and start zero cross timeout
 
 ; Run 2 = A(p-on) + C(n-pwm) - comparator B evaluated
 ; Out_cB changes from high to low
 run2:
-	Set_Comp_Phase_B XH			
 	xcall wait_for_comp_out_low
-	xcall evaluate_comparator_integrity
 	xcall setup_comm_wait	
+	xcall evaluate_comparator_integrity
+	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_prop_error
 	xcall set_pwm_limit_low_rpm
 	xcall wait_for_comm
@@ -5683,67 +5933,71 @@ run2:
 	xcall calc_next_comm_timing
 	xcall wait_advance_timing
 	xcall calc_new_wait_times
+	xcall set_comparator_phase
 	xcall wait_before_zc_scan	
 
 ; Run 3 = A(p-on) + B(n-pwm) - comparator C evaluated
 ; Out_cC changes from low to high
 run3:
-	Set_Comp_Phase_C XH		
 	xcall wait_for_comp_out_high
-	xcall evaluate_comparator_integrity
 	xcall setup_comm_wait	
+	xcall evaluate_comparator_integrity
+	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_int_error
 	xcall wait_for_comm
 	xcall comm3comm4
 	xcall calc_next_comm_timing
 	xcall wait_advance_timing
 	xcall calc_new_wait_times
+	xcall set_comparator_phase
 	xcall wait_before_zc_scan	
 
 ; Run 4 = C(p-on) + B(n-pwm) - comparator A evaluated
 ; Out_cA changes from high to low
 run4:
-	Set_Comp_Phase_A XH		
 	xcall wait_for_comp_out_low
-	xcall evaluate_comparator_integrity
 	xcall setup_comm_wait	
+	xcall evaluate_comparator_integrity
+	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_prop_correction
 	xcall wait_for_comm
 	xcall comm4comm5
 	xcall calc_next_comm_timing
 	xcall wait_advance_timing
 	xcall calc_new_wait_times
+	xcall set_comparator_phase
 	xcall wait_before_zc_scan	
 
 ; Run 5 = C(p-on) + A(n-pwm) - comparator B evaluated
 ; Out_cB changes from low to high
 run5:
-	Set_Comp_Phase_B XH			
 	xcall wait_for_comp_out_high
-	xcall evaluate_comparator_integrity
 	xcall setup_comm_wait	
+	xcall evaluate_comparator_integrity
+	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_int_correction
 	xcall wait_for_comm
 	xcall comm5comm6
 	xcall calc_next_comm_timing
 	xcall wait_advance_timing
 	xcall calc_new_wait_times
+	xcall set_comparator_phase
 	xcall wait_before_zc_scan	
 
 ; Run 6 = B(p-on) + A(n-pwm) - comparator C evaluated
 ; Out_cC changes from high to low
 run6:
-	Set_Comp_Phase_C XH			
 	xcall wait_for_comp_out_low
 	Start_Adc XH
-	xcall evaluate_comparator_integrity
 	xcall setup_comm_wait	
+	xcall evaluate_comparator_integrity
 	xcall wait_for_comm
 	xcall comm6comm1
 	xcall calc_next_comm_timing
 	xcall wait_advance_timing
 	xcall calc_new_wait_times
 	xcall check_temp_voltage_and_limit_power
+	xcall set_comparator_phase
 	xcall wait_before_zc_scan	
 
 	; Check if it is startup
@@ -5760,16 +6014,16 @@ run6:
 	sts	Spoolup_Limit_Cnt, XH
 	ldi	XH, 1
 	sts	Spoolup_Limit_Skip, XH			
-	; Check startup ok counter
-	ldi	Temp2, 50					; Set nominal startup parameters
-	ldi	Temp3, 10
-	lds	XH, Startup_Ok_Cnt			; Load ok counter
+	; Check startup counter
+	ldi	Temp2, 24					; Set nominal startup parameters
+	ldi	Temp3, 12
+	lds	XH, Startup_Cnt			; Load counter
 	cp	XH, Temp2					; Is counter above requirement?
 	brcs	start_check_rcp			; No - proceed
 
 	cbr	Flags1, (1<<STARTUP_PHASE)	; Clear startup phase flag
-	sbr	Flags1, (1<<INITIAL_RUN_PHASE)	; Set initial run phase flag
-	sts	Startup_Rot_Cnt, Temp3		; Set startup rotation count
+	sbr	Flags1, (1<<INITIAL_RUN_PHASE); Set initial run phase flag
+	sts	Initial_Run_Rot_Cnt, Temp3	; Set initial run rotation count
 .IF MODE == 1	; Tail
 	ldi	XH, 0xFF
 	sts	Pwm_Limit, XH				; Allow full power
@@ -5778,10 +6032,9 @@ run6:
 .IF MODE == 2	; Multi
 	lds	XH, Pwm_Spoolup_Beg
 	sts	Pwm_Limit, XH
+	sts	Pwm_Limit_Low_Rpm, XH
 	ldi	XH, 0xFF
 	sts	Pwm_Limit_Spoolup, XH	
-	ldi	XH, 0x20
-	sts	Pwm_Limit_Low_Rpm, XH
 .ENDIF
 	rjmp	normal_run_checks
 
@@ -5802,21 +6055,17 @@ normal_run_checks:
 	sbrc	Flags0, DIR_CHANGE_BRAKE		; If a direction change - branch
 	rjmp	initial_run_phase_done
 
-	; Decrement startup rotaton count
-	lds	XH, Startup_Rot_Cnt
+	; Decrement startup rotation count
+	lds	XH, Initial_Run_Rot_Cnt
 	dec	XH
 	; Check number of nondamped rotations
 	brne	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	cbr	Flags1, (1<<INITIAL_RUN_PHASE); Clear initial run phase flag
-.IF MODE == 2	; Multi
-	ldi	XH, 0xFF					; Allow full power
-	sts	Pwm_Limit, XH
-.ENDIF
 	rjmp damped_transition			; Do damped transition if counter is zero
 
 normal_run_check_startup_rot:
-	sts	Startup_Rot_Cnt, XH			; Not zero - store counter
+	sts	Initial_Run_Rot_Cnt, XH		; Not zero - store counter
 	lds	XH, New_Rcp				; Load new pulse value
 	cpi	XH, RCP_STOP				; Check if pulse is below stop value
 	brcs	PC+2
@@ -5856,19 +6105,32 @@ run6_check_rcp_timeout:
 	breq	run_to_wait_for_power_on		; If it is zero - go back to wait for poweron
 
 run6_check_speed:
-	lds	XH, Comm_Period4x_H			; Is Comm_Period4x more than 32ms (~1220 eRPM)?
 	ldi	Temp1, 0xF0				; Default minimum speed
 	sbrs	Flags0, DIR_CHANGE_BRAKE		; Is it a direction change?
-	rjmp	PC+2
+	rjmp	run6_brake_done
 
-	ldi	Temp1, 0x60				; Bidirectional minimum speed
+	lds	XH, Brake_Cnt				; "Timeout" on braking (in case comparator noise keeps motor "running")
+	inc	XH
+	sts	Brake_Cnt, XH
+	cpi	XH, 150 
+	brcc	run_to_wait_for_power_on
+	ldi	Temp1, 0x50				; Bidirectional braking termination speed 
 
+run6_brake_done:
+	lds	XH, Comm_Period4x_H			; Is Comm_Period4x more than 32ms (~1220 eRPM)?
 	cp	XH, Temp1
 	brcc	run_to_wait_for_power_on		; Yes - go back to motor start
 	rjmp	run1						; Go back to run 1
 
 
 run_to_wait_for_power_on:	
+	sbrs	Flags0, DIR_CHANGE_BRAKE		; Is it a direction change?
+	rjmp	run_to_wait_for_power_on_brake_done
+
+	All_pFETs_on
+	xcall wait30ms					; Additional braking for motor to stop
+	
+run_to_wait_for_power_on_brake_done:
 	cli
 	xcall switch_power_off
 	lds	Temp7, Pgm_Pwm_Freq			; Store setting in Temp7
@@ -5880,6 +6142,7 @@ run_to_wait_for_power_on:
 	sts	Governor_Req_Pwm, Zero		; Set governor requested pwm to zero
 	sts	Current_Pwm, Zero			; Set current pwm to zero
 	mov	Current_Pwm_Limited, Zero	; Set limited current pwm to zero
+	sts	Current_Pwm_Lim_Dith, Zero	
 	sts	Pwm_Motor_Idle, Zero		; Set motor idle to zero
 	cbr	Flags1, (1<<MOTOR_SPINNING)	; Clear motor spinning flag
 	sei
