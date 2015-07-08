@@ -34,7 +34,7 @@
 $include (c8051f390.inc)
 
 ;**** **** **** **** ****
-; Uses internal calibrated oscillator set to 24Mhz
+; Uses internal calibrated oscillator set to 24/48Mhz
 ;**** **** **** **** ****
 
 ;**** **** **** **** ****
@@ -45,7 +45,7 @@ Eep_ESC_Layout:		DB	"#PlatinumPro30A#"	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F390#   "	; Project and MCU tag (16 Bytes)
 
-MCU_50MHZ				EQU	1	; Set to 1 if MCU can run at 50MHz
+MCU_48MHZ				EQU	1	; Set to 1 if MCU can run at 48MHz
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
@@ -53,9 +53,8 @@ LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K	EQU	1FFFh	; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
-NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
-PFETON_DELAY			EQU	6	; Wait delay from nfets off to pfets on
-HIGH_DRIVER_PRECHG_TIME	EQU	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
+NFETON_DELAY			EQU	8	; Wait delay from pfets off to nfets on
+PFETON_DELAY			EQU	10	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	114	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
@@ -75,6 +74,7 @@ DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 
 RTX_PORT		  		EQU 	P0		; Receive/Transmit port
 RTX_MDOUT				EQU	P0MDOUT	; Set to 1 for PUSHPULL				
 RTX_MDIN				EQU	P0MDIN	; Set to 1 for DIGITAL				
+RTX_SKIP				EQU	P0SKIP	; Set to 1 for SKIP				
 RTX_PIN				EQU 	5		; RTX pin
 
 SIGNATURE_001			EQU	0f3h		; Device signature
@@ -101,8 +101,8 @@ P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 MACRO Get_Rcp_Capture_Values
 	mov	Temp1, PCA0CPL0			; Get PCA capture values
 	mov	Temp2, PCA0CPH0
-IF MCU_50MHZ == 1
-	mov	A, Clock_Set_At_50MHz
+IF MCU_48MHZ == 1
+	mov	A, Clock_Set_At_48MHz
 	jz	Get_Rcp_End
 	clr	C
 	mov	A, Temp2
@@ -162,69 +162,33 @@ P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL B
 P1_SKIP		EQU	(1 SHL Adc_Ip)
 
 MACRO AnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+12)
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CnFET
 ENDM
 MACRO AnFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.AnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CnFET
-ENDM
-MACRO CnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+12)
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.AnFET
-ENDM
-MACRO CnFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
 ENDM
 MACRO BnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+4)
 	setb	P1.BnFET
 ENDM
 MACRO BnFET_off
 	clr	P1.BnFET
 ENDM
+MACRO CnFET_on
+	setb	P1.CnFET
+ENDM
+MACRO CnFET_off
+	clr	P1.CnFET
+ENDM
 MACRO All_nFETs_Off
 	clr	P1.AnFET
-	clr	P1.CnFET
 	clr	P1.BnFET
+	clr	P1.CnFET
 ENDM
 
 MACRO ApFET_on
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
 ENDM
 MACRO ApFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.ApFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CpFET
-ENDM
-MACRO CpFET_on
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.ApFET
-ENDM
-MACRO CpFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CpFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
 ENDM
 MACRO BpFET_on
@@ -233,31 +197,35 @@ ENDM
 MACRO BpFET_off
 	clr	P1.BpFET
 ENDM
-MACRO All_pFETs_Off
-	clr	P1.ApFET
+MACRO CpFET_on
+	setb	P1.CpFET
+ENDM
+MACRO CpFET_off
 	clr	P1.CpFET
-	clr	P1.BpFET
 ENDM
 MACRO All_pFETs_On
 	setb	P1.ApFET
-	setb	P1.CpFET
 	setb	P1.BpFET
+	setb	P1.CpFET
+ENDM
+MACRO All_pFETs_Off
+	clr	P1.ApFET
+	clr	P1.BpFET
+	clr	P1.CpFET
+ENDM
+MACRO Damping_FET_On
+	mov	A, DampingFET
+	orl	P1, A
 ENDM
 
 MACRO Set_Comp_Phase_A
-	jb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #81h	; Set comparator multiplexer to phase A
-	jnb	Flags3.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #89h
-ENDM
-MACRO Set_Comp_Phase_C
-	jb	Flags3.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #89h	; Set comparator multiplexer to phase C
-	jnb	Flags3.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #81h
 ENDM
 MACRO Set_Comp_Phase_B
 	mov	CPT0MX, #80h	; Set comparator multiplexer to phase B
+ENDM
+MACRO Set_Comp_Phase_C
+	mov	CPT0MX, #89h	; Set comparator multiplexer to phase C
 ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
@@ -333,13 +301,13 @@ MACRO Set_RPM_Out
 ENDM
 MACRO Clear_RPM_Out
 ENDM
-MACRO Set_MCU_Clk_25MHz
-	mov	FLSCL, #80h		; Set flash timing for 25MHz
-	mov	CLKSEL, #0		; Set clock to 25MHz
-	mov	Clock_Set_At_50MHz, #0
+MACRO Set_MCU_Clk_24MHz
+	mov	FLSCL, #80h		; Set flash timing for 24MHz
+	mov	CLKSEL, #0		; Set clock to 24MHz
+	mov	Clock_Set_At_48MHz, #0
 ENDM
-MACRO Set_MCU_Clk_50MHz
-	mov	FLSCL, #90h		; Set flash timing for 50MHz
-	mov	CLKSEL, #3		; Set clock to 50MHz
-	mov	Clock_Set_At_50MHz, #1
+MACRO Set_MCU_Clk_48MHz
+	mov	FLSCL, #90h		; Set flash timing for 48MHz
+	mov	CLKSEL, #3		; Set clock to 48MHz
+	mov	Clock_Set_At_48MHz, #1
 ENDM

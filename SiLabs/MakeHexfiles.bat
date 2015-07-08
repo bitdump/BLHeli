@@ -13,7 +13,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=REV13_2
+SET Revision=REV14_0
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 
@@ -148,6 +148,8 @@ call:compile
 SET BESCNAME=XRotor_40A
 call:compile
 SET BESCNAME=MDRX62H
+call:compile
+SET BESCNAME=RotorGeeks_20A
 call:compile
 
 goto :end

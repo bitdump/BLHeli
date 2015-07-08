@@ -90,7 +90,7 @@ read_eeprom_block1:
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #21	; 21 parameters 
+	mov	Temp4, #24	; 24 parameters 
 read_eeprom_block2:
 	call read_eeprom_byte
 	inc	DPTR				
@@ -144,7 +144,7 @@ write_eeprom_block1:
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #21	; 21 parameters 
+	mov	Temp4, #24	; 24 parameters 
 write_eeprom_block2:
 	call write_eeprom_byte
 	inc	DPTR						
@@ -371,14 +371,18 @@ store_tail_func_5:
 
 store_tail_func_6:
 	cjne	Temp4, #6, store_tail_func_7
-	mov	Temp2, #Pgm_Demag_Comp
+	mov	Temp2, #Pgm_Pwm_Dither
 
 store_tail_func_7:
 	cjne	Temp4, #7, store_tail_func_8
-	mov	Temp2, #Pgm_Direction
+	mov	Temp2, #Pgm_Demag_Comp
 
 store_tail_func_8:
-	cjne	Temp4, #8, store_in_ram_exit
+	cjne	Temp4, #8, store_tail_func_9
+	mov	Temp2, #Pgm_Direction
+
+store_tail_func_9:
+	cjne	Temp4, #9, store_in_ram_exit
 	mov	Temp2, #Pgm_Input_Pol
 ENDIF
 IF MODE == 2 
@@ -400,19 +404,19 @@ store_multi_func_4:
 
 store_multi_func_5:
 	cjne	Temp4, #5, store_multi_func_6
-	mov	Temp2, #Pgm_Low_Voltage_Lim
+	mov	Temp2, #Pgm_Startup_Pwr
 
 store_multi_func_6:
 	cjne	Temp4, #6, store_multi_func_7
-	mov	Temp2, #Pgm_Startup_Pwr
+	mov	Temp2, #Pgm_Comm_Timing
 
 store_multi_func_7:
 	cjne	Temp4, #7, store_multi_func_8
-	mov	Temp2, #Pgm_Comm_Timing
+	mov	Temp2, #Pgm_Pwm_Freq
 
 store_multi_func_8:
 	cjne	Temp4, #8, store_multi_func_9
-	mov	Temp2, #Pgm_Pwm_Freq
+	mov	Temp2, #Pgm_Pwm_Dither
 
 store_multi_func_9:
 	cjne	Temp4, #9, store_multi_func_10
@@ -633,7 +637,7 @@ ENDIF
 IF MODE == 1
 	clr	C
 	mov	A, Tx_Pgm_Func_No		
-	subb	A, #9				; Tail has 8 functions	
+	subb	A, #10				; Tail has 9 functions	
 ENDIF
 IF MODE == 2 
 	clr	C

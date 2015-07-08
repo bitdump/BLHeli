@@ -44,11 +44,22 @@ init:clr	EA
 	; Select register bank 0 for main program routines
 	clr	PSW.3				; Select register bank 0 for main program routines	
 	; Disable the WDT.
+IF SIGNATURE_001 == 0f3h		
 	anl	PCA0MD, #NOT(40h)		; Clear watchdog enable bit
+ENDIF
+IF SIGNATURE_001 == 0f8h		
+	mov	WDTCN, #0DEh			; Disable watchdog
+	mov	WDTCN, #0ADh		
+ENDIF
 	; Initialize stack
 	mov	SP, #0c0h				; Stack = 64 upper bytes of RAM
 	; Initialize clock
-	orl	OSCICN, #03h			; Set clock divider to 1
+IF SIGNATURE_001 == 0f3h		
+	orl	OSCICN, #03h			; Set clock divider to 1 (not supported on 'f850)
+ENDIF
+IF SIGNATURE_001 == 0f8h		
+	mov	CLKSEL, #00h			; Set clock divider to 1 (not supported on 'f3xx)
+ENDIF
 	; Initialize VDD monitor
 	orl	VDM0CN, #080h    		; Enable the VDD monitor
 	mov	Baudl, #38h  			; Wait 100us
@@ -56,10 +67,18 @@ init:clr	EA
 	acall waitf
 	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                              
 	; Initialize ports
+IF SIGNATURE_001 == 0f3h		
 	mov	XBR1, #40h;			; Enable crossbar
+ENDIF
+IF SIGNATURE_001 == 0f8h		
+	mov	XBR2, #40h;			; Enable crossbar
+ENDIF
 	orl	RTX_MDIN, #(1 SHL RTX_PIN)		; Set digital
 	anl	RTX_MDOUT, #NOT(1 SHL RTX_PIN)	; Disable pushpull
+	mov	RTX_SKIP, #0
 	setb	RTX_PORT.RTX_PIN		; Set data high
+	; Set number of connect attempts before exiting bootloader
+	mov	Cmdh, #250
 
 	; Identifier scanning
 abd:	mov	Xl, #(low(BOOT_DELAY / 6)+1)
@@ -97,9 +116,11 @@ id4:	acall getx				; Read character
 	inc	DPTR
 	clr	C
 	subb	A, Paral				; Compare with read character
-	jz	($+4)
-	ajmp	abd
+	jz	id5
+	djnz	Cmdh, abd				; Retry if not last connect attempt
+	ajmp	exit
 
+id5:
 	djnz	Parah, id1
 
 	acall getw				; Read CRC
@@ -158,6 +179,7 @@ mai2:acall getw				; Get CRC
 	mov	A, Cmdl
 	jz	rst
 exit:mov	Bit_Access, #0			; Clear variable used by flash lock detect
+	mov	Bit_Access_Int, #0FFh	; Set variable to indicate that program execution came from bootloader
 	ljmp	0000h
 rst:	ajmp	init
 
@@ -172,7 +194,9 @@ set4:djnz	Xl, set5
 
 set5:acall getc				; Receive data
 	mov	A, Paral
+IF SIGNATURE_001 == 0f3h		
 	mov	EMI0CN, Xh
+ENDIF
 	movx	@Xl, A				; Store data in XRAM
 	ajmp	set4
 
@@ -216,7 +240,10 @@ pro4:djnz	Xl, pro5
 	djnz	Xh, pro5
 	ajmp	pro6
 
-pro5:mov	EMI0CN, Xh
+pro5:
+IF SIGNATURE_001 == 0f3h		
+	mov	EMI0CN, Xh
+ENDIF
 	movx	A, @Xl				; Read from XRAM		
 	mov	FLKEY, #0A5h			; First key code
 	mov	FLKEY, #0F1h			; Second key code

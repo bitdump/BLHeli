@@ -45,7 +45,7 @@ Eep_ESC_Layout:		DB	"#Supermicro3p5A#"	; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI#F330#   "	; Project and MCU tag (16 Bytes)
 
-MCU_50MHZ				EQU	0	; Set to 1 if MCU can run at 50MHz
+MCU_48MHZ				EQU	0	; Set to 1 if MCU can run at 48MHz
 ONE_S_CAPABLE			EQU	1	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
@@ -55,7 +55,6 @@ HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
 NFETON_DELAY			EQU	5	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
-HIGH_DRIVER_PRECHG_TIME	EQU	0	; Time between commutations use to precharge the high side driver (for all nfet ESCs)
 ADC_LIMIT_L			EQU 	128	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	2	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
@@ -75,6 +74,7 @@ DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125
 RTX_PORT		  		EQU 	P0		; Receive/Transmit port
 RTX_MDOUT				EQU	P0MDOUT	; Set to 1 for PUSHPULL				
 RTX_MDIN				EQU	P0MDIN	; Set to 1 for DIGITAL				
+RTX_SKIP				EQU	P0SKIP	; Set to 1 for SKIP				
 RTX_PIN				EQU 	6		; RTX pin
 
 SIGNATURE_001			EQU	0f3h		; Device signature
@@ -150,40 +150,22 @@ P1_PUSHPULL	EQU	(1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL B
 P1_SKIP		EQU	(1 SHL Adc_Ip)
 
 MACRO AnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+12)
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.AnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CnFET
 ENDM
 MACRO AnFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.AnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CnFET
 ENDM
 MACRO BnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+4)
 	setb	P1.BnFET
 ENDM
 MACRO BnFET_off
 	clr	P1.BnFET
 ENDM
 MACRO CnFET_on
-	mov	A, Current_Pwm_Limited
-	jz	($+12)
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.CnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.AnFET
 ENDM
 MACRO CnFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CnFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.AnFET
 ENDM
 MACRO All_nFETs_Off
 	clr	P1.AnFET
@@ -192,16 +174,10 @@ MACRO All_nFETs_Off
 ENDM
 
 MACRO ApFET_on
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.ApFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.CpFET
 ENDM
 MACRO ApFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	setb	P1.ApFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
 ENDM
 MACRO BpFET_on
 	clr	P1.BpFET
@@ -210,20 +186,9 @@ MACRO BpFET_off
 	setb	P1.BpFET
 ENDM
 MACRO CpFET_on
-	jb	Flags3.PGM_DIR_REV, ($+5)
 	clr	P1.CpFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	clr	P1.ApFET
 ENDM
 MACRO CpFET_off
-	jb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.CpFET
-	jnb	Flags3.PGM_DIR_REV, ($+5)
-	setb	P1.ApFET
-ENDM
-MACRO All_pFETs_Off
-	setb	P1.ApFET
-	setb	P1.BpFET
 	setb	P1.CpFET
 ENDM
 MACRO All_pFETs_On
@@ -231,21 +196,25 @@ MACRO All_pFETs_On
 	clr	P1.BpFET
 	clr	P1.CpFET
 ENDM
+MACRO All_pFETs_Off
+	setb	P1.ApFET
+	setb	P1.BpFET
+	setb	P1.CpFET
+ENDM
+MACRO Damping_FET_On
+	mov	A, DampingFET
+	cpl	A
+	anl	P1, A
+ENDM
 
 MACRO Set_Comp_Phase_A
-	jb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #21h	; Set comparator multiplexer to phase A
-	jnb	Flags3.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #01h
 ENDM
 MACRO Set_Comp_Phase_B
 	mov	CPT0MX, #11h	; Set comparator multiplexer to phase B
 ENDM
 MACRO Set_Comp_Phase_C
-	jb	Flags3.PGM_DIR_REV, ($+6)
 	mov	CPT0MX, #01h	; Set comparator multiplexer to phase C
-	jnb	Flags3.PGM_DIR_REV, ($+6)
-	mov	CPT0MX, #21h
 ENDM
 MACRO Read_Comp_Out
 	mov	A, CPT0CN		; Read comparator output
@@ -310,7 +279,7 @@ MACRO Set_RPM_Out
 ENDM
 MACRO Clear_RPM_Out
 ENDM
-MACRO Set_MCU_Clk_25MHz
+MACRO Set_MCU_Clk_24MHz
 ENDM
-MACRO Set_MCU_Clk_50MHz
+MACRO Set_MCU_Clk_48MHz
 ENDM
