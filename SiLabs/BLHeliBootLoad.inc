@@ -386,11 +386,7 @@ wait1:djnz Cntl, wait1
 
 BOOT_SIGN:	DB	"BLHeli"	
 
-IF WAIT_START_ON_RX_HIGH
-BOOT_MSG:		DB	"471a"		; Interface-MCU_BootlaoderRevision
-ELSE
-BOOT_MSG:		DB	"4712"		; Interface-MCU_BootlaoderRevision
-ENDIF 
-					
+BOOT_MSG:		DB	"471c"		; Interface-MCU_BootlaoderRevision
+
 BOOT_INFO:	DB	SIGNATURE_001, SIGNATURE_002, BOOT_VERSION, BOOT_PAGES
 
