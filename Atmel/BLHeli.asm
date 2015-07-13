@@ -110,7 +110,6 @@
 ;
 ;
 ;
-;
 ;**** **** **** **** ****
 ; 8K Bytes of In-System Self-Programmable Flash
 ; 1K Bytes Internal SRAM
@@ -248,7 +247,7 @@
 ;#define AFRO_12A_MULTI
 ;#define AFRO_20A_MAIN				; ICP1 as input		
 ;#define AFRO_20A_TAIL
-;#define AFRO_20A_MULTI 
+;#define AFRO_20A_MULTI
 ;#define AFRO_20A_HV_MAIN			; ICP1 as input		
 ;#define AFRO_20A_HV_TAIL
 ;#define AFRO_20A_HV_MULTI
@@ -4705,10 +4704,10 @@ set_comparator_phase_brake_done:
 	cpi	Temp1, 1
 	brne	set_comp_phase_not1
 
-	sbrs	Flags3, PGM_DIR_REV
-	Set_Comp_Phase_A XH			
 	sbrc	Flags3, PGM_DIR_REV
-	Set_Comp_Phase_C XH			
+	rjmp	set_comp_phase_to_C
+set_comp_phase_to_A:
+	Set_Comp_Phase_A XH			
 	rjmp	set_comp_phase_exit
 
 set_comp_phase_not1:
@@ -4719,10 +4718,10 @@ set_comp_phase_not1:
 	rjmp	set_comp_phase_exit
 
 set_comp_phase_3:
-	sbrs	Flags3, PGM_DIR_REV
-	Set_Comp_Phase_C XH			
 	sbrc	Flags3, PGM_DIR_REV
-	Set_Comp_Phase_A XH			
+	rjmp	set_comp_phase_to_A
+set_comp_phase_to_C:
+	Set_Comp_Phase_C XH			
 
 set_comp_phase_exit:
 	ret
