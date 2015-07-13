@@ -151,6 +151,8 @@ SET BESCNAME=MDRX62H
 call:compile
 SET BESCNAME=RotorGeeks_20A
 call:compile
+SET BESCNAME=Flycolor_Fairy_30A
+call:compile
 
 goto :end
 
