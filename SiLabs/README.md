@@ -9,7 +9,7 @@ Features
 - Main motor operation has governor functionality and multicopter motor operation has closed loop functionality.
 - Motor operation can be damped for fast motor retardation.
 - Many parameters can be programmed, either from PC applications for setup and configuration, or from the TX.
-- Supports 1kHz, 2kHz, 4kHz, 8kHz or 12kHz positive or negative pwm as input signal, as well as regular 1-2ms PPM signal.
+- Supports 1kHz, 2kHz, 4kHz, 8kHz or 12kHz positive or negative pwm as input signal, as well as regular 1-2ms PPM and OneShot125 signal.
 
 Supported Hardware
 --------------------
