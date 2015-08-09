@@ -218,7 +218,6 @@ $NOMOD51
 ;           Miscellaneous other changes
 ;
 ;
-;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
 ; 768 Bytes Internal SRAM
@@ -453,9 +452,15 @@ MDRX62H_Multi 					EQU 189
 RotorGeeks_20A_Main				EQU 190   
 RotorGeeks_20A_Tail 			EQU 191  
 RotorGeeks_20A_Multi 			EQU 192  
-Flycolor_Fairy_30A_Main			EQU 193   
-Flycolor_Fairy_30A_Tail 			EQU 194  
-Flycolor_Fairy_30A_Multi 		EQU 195  
+Flycolor_Fairy_6A_Main			EQU 193   
+Flycolor_Fairy_6A_Tail 			EQU 194  
+Flycolor_Fairy_6A_Multi 			EQU 195  
+Flycolor_Fairy_30A_Main			EQU 196   
+Flycolor_Fairy_30A_Tail 			EQU 197  
+Flycolor_Fairy_30A_Multi 		EQU 198  
+FVT_Littlebee_20A_Main			EQU 199  
+FVT_Littlebee_20A_Tail			EQU 200  
+FVT_Littlebee_20A_Multi			EQU 201  
 
 
 ;**** **** **** **** ****
@@ -505,7 +510,7 @@ Flycolor_Fairy_30A_Multi 		EQU 195
 ;BESCNO EQU Turnigy_Plush_30A_Main 
 ;BESCNO EQU Turnigy_Plush_30A_Tail 
 ;BESCNO EQU Turnigy_Plush_30A_Multi
-;BESCNO EQU Turnigy_Plush_40A_Main  
+;BESCNO EQU Turnigy_Plush_40A_Main 
 ;BESCNO EQU Turnigy_Plush_40A_Tail 
 ;BESCNO EQU Turnigy_Plush_40A_Multi
 ;BESCNO EQU Turnigy_Plush_60A_Main
@@ -642,7 +647,7 @@ Flycolor_Fairy_30A_Multi 		EQU 195
 ;BESCNO EQU XRotor_10A_Multi 
 ;BESCNO EQU XRotor_20A_Main
 ;BESCNO EQU XRotor_20A_Tail
-;BESCNO EQU XRotor_20A_Multi
+;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
 ;BESCNO EQU XRotor_40A_Multi
@@ -652,9 +657,15 @@ Flycolor_Fairy_30A_Multi 		EQU 195
 ;BESCNO EQU RotorGeeks_20A_Main
 ;BESCNO EQU RotorGeeks_20A_Tail
 ;BESCNO EQU RotorGeeks_20A_Multi
+;BESCNO EQU Flycolor_Fairy_6A_Main
+;BESCNO EQU Flycolor_Fairy_6A_Tail
+;BESCNO EQU Flycolor_Fairy_6A_Multi
 ;BESCNO EQU Flycolor_Fairy_30A_Main
 ;BESCNO EQU Flycolor_Fairy_30A_Tail
-;BESCNO EQU Flycolor_Fairy_30A_Multi 
+;BESCNO EQU Flycolor_Fairy_30A_Multi
+;BESCNO EQU FVT_Littlebee_20A_Main
+;BESCNO EQU FVT_Littlebee_20A_Tail
+;BESCNO EQU FVT_Littlebee_20A_Multi
 
 
 ;**** **** **** **** ****
@@ -1619,6 +1630,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (RotorGeeks_20A.inc)		; Select RotorGeeks 20A pinout
 ENDIF
 
+IF BESCNO == Flycolor_Fairy_6A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Flycolor_Fairy_6A.inc)	; Select Flycolor Fairy 6A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Fairy_6A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Flycolor_Fairy_6A.inc)	; Select Flycolor Fairy 6A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Fairy_6A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Flycolor_Fairy_6A.inc)	; Select Flycolor Fairy 6A pinout
+ENDIF
+
 IF BESCNO == Flycolor_Fairy_30A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Flycolor_Fairy_30A.inc)	; Select Flycolor Fairy 30A pinout
@@ -1634,6 +1660,25 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Flycolor_Fairy_30A.inc)	; Select Flycolor Fairy 30A pinout
 ENDIF
 
+IF BESCNO == FVT_Littlebee_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
+ENDIF
+
+
+; Not generally released ESCs
+;MODE 	EQU 	2				; Choose mode
+;$include (Nixie.inc)			; Select Nixie pinout
 
 
 ;**** **** **** **** ****
@@ -2754,7 +2799,6 @@ t2h_int_rcp_gov_pwm_done:
 
 	mov	Spoolup_Limit_Skip, #1			; Reset skip count. Default is fast spoolup
 	mov	Temp1, #5						; Default fast increase
-
 	clr	C
 	mov	A, Spoolup_Limit_Cnt
 	subb	A, Main_Spoolup_Time_3x			; No spoolup until 3*N*32ms
