@@ -1,0 +1,2343 @@
+Revision: REV14_1 
+Path for Atmel assembler: C:\Atmel\avrassembler 
+Start compile ..... 
+ 
+********************************************************************  
+BLUESERIES_12A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(281): Including file 'BlueSeries_12A.inc'
+BlueSeries_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c66   7224     46   7270    8192  88.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_12A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(286): Including file 'BlueSeries_12A.inc'
+BlueSeries_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a04   6616     44   6660    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_12A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(291): Including file 'BlueSeries_12A.inc'
+BlueSeries_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abe   6800     46   6846    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(296): Including file 'BlueSeries_20A.inc'
+BlueSeries_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c66   7224     46   7270    8192  88.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(301): Including file 'BlueSeries_20A.inc'
+BlueSeries_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a04   6616     44   6660    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(306): Including file 'BlueSeries_20A.inc'
+BlueSeries_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abe   6800     46   6846    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(311): Including file 'BlueSeries_30A.inc'
+BlueSeries_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c66   7224     46   7270    8192  88.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(316): Including file 'BlueSeries_30A.inc'
+BlueSeries_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a04   6616     44   6660    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(321): Including file 'BlueSeries_30A.inc'
+BlueSeries_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abe   6800     46   6846    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(326): Including file 'BlueSeries_40A.inc'
+BlueSeries_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c5c   7214     46   7260    8192  88.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(331): Including file 'BlueSeries_40A.inc'
+BlueSeries_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0019ea   6590     44   6634    8192  81.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(336): Including file 'BlueSeries_40A.inc'
+BlueSeries_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001aa4   6774     46   6820    8192  83.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_60A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(341): Including file 'BlueSeries_60A.inc'
+BlueSeries_60A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c6a   7228     46   7274    8192  88.8%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_60A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(346): Including file 'BlueSeries_60A.inc'
+BlueSeries_60A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a08   6620     44   6664    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_60A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(351): Including file 'BlueSeries_60A.inc'
+BlueSeries_60A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ac2   6804     46   6850    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_70A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(356): Including file 'BlueSeries_70A.inc'
+BlueSeries_70A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c6a   7228     46   7274    8192  88.8%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_70A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(361): Including file 'BlueSeries_70A.inc'
+BlueSeries_70A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a08   6620     44   6664    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+BLUESERIES_70A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(366): Including file 'BlueSeries_70A.inc'
+BlueSeries_70A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ac2   6804     46   6850    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_6A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(371): Including file 'HK_UBEC_6A.inc'
+HK_UBEC_6A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c5c   7214     46   7260    8192  88.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_6A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(376): Including file 'HK_UBEC_6A.inc'
+HK_UBEC_6A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0019ea   6590     44   6634    8192  81.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_6A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(381): Including file 'HK_UBEC_6A.inc'
+HK_UBEC_6A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001aa4   6774     46   6820    8192  83.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_10A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(386): Including file 'HK_UBEC_10A.inc'
+HK_UBEC_10A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c5c   7214     46   7260    8192  88.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_10A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(391): Including file 'HK_UBEC_10A.inc'
+HK_UBEC_10A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0019ea   6590     44   6634    8192  81.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_10A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(396): Including file 'HK_UBEC_10A.inc'
+HK_UBEC_10A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001aa4   6774     46   6820    8192  83.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(401): Including file 'HK_UBEC_20A.inc'
+HK_UBEC_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c66   7224     46   7270    8192  88.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(406): Including file 'HK_UBEC_20A.inc'
+HK_UBEC_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a04   6616     44   6660    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(411): Including file 'HK_UBEC_20A.inc'
+HK_UBEC_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abe   6800     46   6846    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(416): Including file 'HK_UBEC_30A.inc'
+HK_UBEC_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c66   7224     46   7270    8192  88.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(421): Including file 'HK_UBEC_30A.inc'
+HK_UBEC_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a04   6616     44   6660    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(426): Including file 'HK_UBEC_30A.inc'
+HK_UBEC_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abe   6800     46   6846    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(431): Including file 'HK_UBEC_40A.inc'
+HK_UBEC_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c6a   7228     46   7274    8192  88.8%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(436): Including file 'HK_UBEC_40A.inc'
+HK_UBEC_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a08   6620     44   6664    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+HK_UBEC_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(441): Including file 'HK_UBEC_40A.inc'
+HK_UBEC_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ac2   6804     46   6850    8192  83.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_18A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(446): Including file 'SuperSimple_18A.inc'
+SuperSimple_18A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_18A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(451): Including file 'SuperSimple_18A.inc'
+SuperSimple_18A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_18A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(456): Including file 'SuperSimple_18A.inc'
+SuperSimple_18A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(461): Including file 'SuperSimple_20A.inc'
+SuperSimple_20A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(466): Including file 'SuperSimple_20A.inc'
+SuperSimple_20A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(471): Including file 'SuperSimple_20A.inc'
+SuperSimple_20A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(476): Including file 'SuperSimple_30A.inc'
+SuperSimple_30A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(481): Including file 'SuperSimple_30A.inc'
+SuperSimple_30A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(486): Including file 'SuperSimple_30A.inc'
+SuperSimple_30A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(491): Including file 'SuperSimple_40A.inc'
+SuperSimple_40A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(496): Including file 'SuperSimple_40A.inc'
+SuperSimple_40A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUPERSIMPLE_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(501): Including file 'SuperSimple_40A.inc'
+SuperSimple_40A.inc(35): Including file 'm8def.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_10Av2_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(506): Including file 'Multistar_10Av2.inc'
+Multistar_10Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_10Av2_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(511): Including file 'Multistar_10Av2.inc'
+Multistar_10Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_10Av2_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(516): Including file 'Multistar_10Av2.inc'
+Multistar_10Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_15A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(521): Including file 'Multistar_15A.inc'
+Multistar_15A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_15A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(526): Including file 'Multistar_15A.inc'
+Multistar_15A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_15A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(531): Including file 'Multistar_15A.inc'
+Multistar_15A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(536): Including file 'Multistar_20A.inc'
+Multistar_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(541): Including file 'Multistar_20A.inc'
+Multistar_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(546): Including file 'Multistar_20A.inc'
+Multistar_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_NFET_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(551): Including file 'Multistar_20A_NFET.inc'
+Multistar_20A_NFET.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c86   7256     46   7302    8192  89.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_NFET_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(556): Including file 'Multistar_20A_NFET.inc'
+Multistar_20A_NFET.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20A_NFET_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(561): Including file 'Multistar_20A_NFET.inc'
+Multistar_20A_NFET.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20Av2_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(566): Including file 'Multistar_20Av2.inc'
+Multistar_20Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c86   7256     46   7302    8192  89.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20Av2_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(571): Including file 'Multistar_20Av2.inc'
+Multistar_20Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_20Av2_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(576): Including file 'Multistar_20Av2.inc'
+Multistar_20Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(581): Including file 'Multistar_30A.inc'
+Multistar_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7c   7246     46   7292    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(586): Including file 'Multistar_30A.inc'
+Multistar_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a02   6614     44   6658    8192  81.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(591): Including file 'Multistar_30A.inc'
+Multistar_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001abc   6798     46   6844    8192  83.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_40Av2_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(596): Including file 'Multistar_40Av2.inc'
+Multistar_40Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_40Av2_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(601): Including file 'Multistar_40Av2.inc'
+Multistar_40Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_40Av2_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(606): Including file 'Multistar_40Av2.inc'
+Multistar_40Av2.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_45A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(611): Including file 'Multistar_45A.inc'
+Multistar_45A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_45A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(616): Including file 'Multistar_45A.inc'
+Multistar_45A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MULTISTAR_45A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(621): Including file 'Multistar_45A.inc'
+Multistar_45A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_12A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(626): Including file 'Mystery_12A.inc'
+Mystery_12A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c5c   7214     46   7260    8192  88.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_12A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(631): Including file 'Mystery_12A.inc'
+Mystery_12A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0019ea   6590     44   6634    8192  81.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_12A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(636): Including file 'Mystery_12A.inc'
+Mystery_12A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001aa4   6774     46   6820    8192  83.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(641): Including file 'Mystery_30A.inc'
+Mystery_30A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c5c   7214     46   7260    8192  88.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(646): Including file 'Mystery_30A.inc'
+Mystery_30A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x0019ea   6590     44   6634    8192  81.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(651): Including file 'Mystery_30A.inc'
+Mystery_30A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001aa4   6774     46   6820    8192  83.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(656): Including file 'Mystery_40A.inc'
+Mystery_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c76   7240     46   7286    8192  88.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(661): Including file 'Mystery_40A.inc'
+Mystery_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a14   6632     44   6676    8192  81.5%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+MYSTERY_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(666): Including file 'Mystery_40A.inc'
+Mystery_40A.inc(36): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ace   6816     46   6862    8192  83.8%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(671): Including file 'Sunrise_HiMulti_20A.inc'
+Sunrise_HiMulti_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(676): Including file 'Sunrise_HiMulti_20A.inc'
+Sunrise_HiMulti_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(681): Including file 'Sunrise_HiMulti_20A.inc'
+Sunrise_HiMulti_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(686): Including file 'Sunrise_HiMulti_30A.inc'
+Sunrise_HiMulti_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(691): Including file 'Sunrise_HiMulti_30A.inc'
+Sunrise_HiMulti_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(696): Including file 'Sunrise_HiMulti_30A.inc'
+Sunrise_HiMulti_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(701): Including file 'Sunrise_HiMulti_40A.inc'
+Sunrise_HiMulti_40A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c8a   7260     46   7306    8192  89.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(706): Including file 'Sunrise_HiMulti_40A.inc'
+Sunrise_HiMulti_40A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a20   6644     44   6688    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_HIMULTI_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(711): Including file 'Sunrise_HiMulti_40A.inc'
+Sunrise_HiMulti_40A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ada   6828     46   6874    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_40A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(716): Including file 'RCTimer_40A.inc'
+RCTimer_40A.inc(33): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c92   7268     46   7314    8192  89.3%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_40A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(721): Including file 'RCTimer_40A.inc'
+RCTimer_40A.inc(33): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a28   6652     44   6696    8192  81.7%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_40A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(726): Including file 'RCTimer_40A.inc'
+RCTimer_40A.inc(33): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ae2   6836     46   6882    8192  84.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_NFS_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(731): Including file 'RCTimer_NFS_30A.inc'
+RCTimer_NFS_30A.inc(39): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7e   7248     46   7294    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_NFS_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(736): Including file 'RCTimer_NFS_30A.inc'
+RCTimer_NFS_30A.inc(39): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+RCTIMER_NFS_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(741): Including file 'RCTimer_NFS_30A.inc'
+RCTimer_NFS_30A.inc(39): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+YEP_7A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(746): Including file 'YEP_7A.inc'
+YEP_7A.inc(33): Including file 'm168PAdef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega168PA" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001f50   7970     46   8016   16384  48.9%
+[.dseg] 0x000100 0x00017d      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+YEP_7A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(751): Including file 'YEP_7A.inc'
+YEP_7A.inc(33): Including file 'm168PAdef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega168PA" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001cc0   7316     44   7360   16384  44.9%
+[.dseg] 0x000100 0x00017d      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+YEP_7A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(756): Including file 'YEP_7A.inc'
+YEP_7A.inc(33): Including file 'm168PAdef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega168PA" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001d74   7494     46   7540   16384  46.0%
+[.dseg] 0x000100 0x00017d      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_12A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(761): Including file 'AFRO_12A.inc'
+AFRO_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001cac   7294     46   7340    8192  89.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_12A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(766): Including file 'AFRO_12A.inc'
+AFRO_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a46   6682     44   6726    8192  82.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_12A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(771): Including file 'AFRO_12A.inc'
+AFRO_12A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001b00   6866     46   6912    8192  84.4%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(776): Including file 'AFRO_20A.inc'
+AFRO_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001cac   7294     46   7340    8192  89.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(781): Including file 'AFRO_20A.inc'
+AFRO_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a46   6682     44   6726    8192  82.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(786): Including file 'AFRO_20A.inc'
+AFRO_20A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001b00   6866     46   6912    8192  84.4%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_HV_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(791): Including file 'AFRO_20A_HV.inc'
+AFRO_20A_HV.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001cb0   7298     46   7344    8192  89.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_HV_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(796): Including file 'AFRO_20A_HV.inc'
+AFRO_20A_HV.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a4a   6686     44   6730    8192  82.2%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_20A_HV_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(801): Including file 'AFRO_20A_HV.inc'
+AFRO_20A_HV.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001b04   6870     46   6916    8192  84.4%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(806): Including file 'AFRO_30A.inc'
+AFRO_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001cac   7294     46   7340    8192  89.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(811): Including file 'AFRO_30A.inc'
+AFRO_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a46   6682     44   6726    8192  82.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+AFRO_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(816): Including file 'AFRO_30A.inc'
+AFRO_30A.inc(37): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001b00   6866     46   6912    8192  84.4%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(821): Including file 'Sunrise_BLHeli_Slim_20A.inc'
+Sunrise_BLHeli_Slim_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c86   7256     46   7302    8192  89.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(826): Including file 'Sunrise_BLHeli_Slim_20A.inc'
+Sunrise_BLHeli_Slim_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(831): Including file 'Sunrise_BLHeli_Slim_20A.inc'
+Sunrise_BLHeli_Slim_20A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_30A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(836): Including file 'Sunrise_BLHeli_Slim_30A.inc'
+Sunrise_BLHeli_Slim_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c86   7256     46   7302    8192  89.1%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_30A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(841): Including file 'Sunrise_BLHeli_Slim_30A.inc'
+Sunrise_BLHeli_Slim_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+SUNRISE_BLHELI_SLIM_30A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(846): Including file 'Sunrise_BLHeli_Slim_30A.inc'
+Sunrise_BLHeli_Slim_30A.inc(35): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+DYS_SN20A_MAIN  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(851): Including file 'DYS_SN20A.inc'
+DYS_SN20A.inc(38): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001c7e   7248     46   7294    8192  89.0%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+DYS_SN20A_TAIL  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(856): Including file 'DYS_SN20A.inc'
+DYS_SN20A.inc(38): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001a1c   6640     44   6684    8192  81.6%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 
+ 
+********************************************************************  
+DYS_SN20A_MULTI  
+********************************************************************  
+AVRASM: AVR macro assembler 2.1.52 (build 44 Jun 18 2012 15:46:37)
+Copyright (C) 1995-2012 ATMEL Corporation
+
+BLHeli.asm(861): Including file 'DYS_SN20A.inc'
+DYS_SN20A.inc(38): Including file 'm8Adef.inc'
+BLHeli.asm(6237): Including file 'BLHeliTxPgm.inc'
+
+"ATmega8A" memory use summary [bytes]:
+Segment   Begin    End      Code   Data   Used    Size   Use%
+---------------------------------------------------------------
+[.cseg] 0x000000 0x001ad6   6824     46   6870    8192  83.9%
+[.dseg] 0x000060 0x0000dd      0    125    125    1024  12.2%
+[.eseg] 0x000000 0x000070      0     88     88     512  17.2%
+
+Assembly complete, 0 errors. 0 warnings
+ 

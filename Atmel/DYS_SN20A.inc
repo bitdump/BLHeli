@@ -56,7 +56,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .EQU	PFETON_DELAY			=	250	; Wait delay from nfets off to pfets on
 .EQU	ADC_LIMIT_L			= 	108	; 47k/220k divider. Power supply measurement ADC value for which motor power is limited (low byte)
 .EQU	ADC_LIMIT_H			=	0	; 47k/220k divider. Power supply measurement ADC value for which motor power is limited (2 MSBs)
-.EQU	TEMP_LIMIT			= 	250	; 1k2/56kNTC. Temperature measurement ADC value for which main motor power is limited
+.EQU	TEMP_LIMIT			= 	250	; 1k2/56kNTC (Ideal limit should have been 626). Temperature measurement ADC value for which main motor power is limited
 .EQU	TEMP_LIMIT_STEP		=	1	; 1k2/56kNTC. Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****

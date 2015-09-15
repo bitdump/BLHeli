@@ -216,6 +216,12 @@ $NOMOD51
 ;           Added setting for enable/disable of PWM input
 ;           Better AFW and damping for some ESCs (that have a slow high side driver)
 ;           Miscellaneous other changes
+; - Rev14.1 Fixed max throttle calibration bug (for non-oneshot)
+;           Fixed some closed loop mode bugs
+;           Relaxed signal jitter requirement for looptimes below 1000
+;           Added skipping of damping fet switching near max power, for improved high end throttle linearity, using the concept of SimonK
+;           Improved sync hold at high rpms
+;           
 ;
 ;
 ;**** **** **** **** ****
@@ -437,30 +443,36 @@ EMAX_20A_Multi 				EQU 174
 EMAX_40A_Main					EQU 175   
 EMAX_40A_Tail 					EQU 176  
 EMAX_40A_Multi 				EQU 177  
-XRotor_10A_Main				EQU 178   
-XRotor_10A_Tail 				EQU 179  
-XRotor_10A_Multi 				EQU 180  
-XRotor_20A_Main				EQU 181   
-XRotor_20A_Tail 				EQU 182  
-XRotor_20A_Multi 				EQU 183  
-XRotor_40A_Main				EQU 184   
-XRotor_40A_Tail 				EQU 185  
-XRotor_40A_Multi 				EQU 186  
-MDRX62H_Main					EQU 187   
-MDRX62H_Tail 					EQU 188  
-MDRX62H_Multi 					EQU 189  
-RotorGeeks_20A_Main				EQU 190   
-RotorGeeks_20A_Tail 			EQU 191  
-RotorGeeks_20A_Multi 			EQU 192  
-Flycolor_Fairy_6A_Main			EQU 193   
-Flycolor_Fairy_6A_Tail 			EQU 194  
-Flycolor_Fairy_6A_Multi 			EQU 195  
-Flycolor_Fairy_30A_Main			EQU 196   
-Flycolor_Fairy_30A_Tail 			EQU 197  
-Flycolor_Fairy_30A_Multi 		EQU 198  
-FVT_Littlebee_20A_Main			EQU 199  
-FVT_Littlebee_20A_Tail			EQU 200  
-FVT_Littlebee_20A_Multi			EQU 201  
+EMAX_Nano_20A_Main				EQU 178   
+EMAX_Nano_20A_Tail 				EQU 179  
+EMAX_Nano_20A_Multi 			EQU 180  
+XRotor_10A_Main				EQU 181   
+XRotor_10A_Tail 				EQU 182  
+XRotor_10A_Multi 				EQU 183  
+XRotor_20A_Main				EQU 184   
+XRotor_20A_Tail 				EQU 185  
+XRotor_20A_Multi 				EQU 186  
+XRotor_40A_Main				EQU 187   
+XRotor_40A_Tail 				EQU 188  
+XRotor_40A_Multi 				EQU 189  
+MDRX62H_Main					EQU 190   
+MDRX62H_Tail 					EQU 191  
+MDRX62H_Multi 					EQU 192  
+RotorGeeks_20A_Main				EQU 193   
+RotorGeeks_20A_Tail 			EQU 194  
+RotorGeeks_20A_Multi 			EQU 195  
+Flycolor_Fairy_6A_Main			EQU 196   
+Flycolor_Fairy_6A_Tail 			EQU 197  
+Flycolor_Fairy_6A_Multi 			EQU 198  
+Flycolor_Fairy_30A_Main			EQU 199   
+Flycolor_Fairy_30A_Tail 			EQU 200  
+Flycolor_Fairy_30A_Multi 		EQU 201  
+FVT_Littlebee_20A_Main			EQU 202  
+FVT_Littlebee_20A_Tail			EQU 203  
+FVT_Littlebee_20A_Multi			EQU 204  
+Graupner_Ultra_20A_Main			EQU 205  
+Graupner_Ultra_20A_Tail			EQU 206  
+Graupner_Ultra_20A_Multi			EQU 207  
 
 
 ;**** **** **** **** ****
@@ -642,6 +654,9 @@ FVT_Littlebee_20A_Multi			EQU 201
 ;BESCNO EQU EMAX_40A_Main
 ;BESCNO EQU EMAX_40A_Tail
 ;BESCNO EQU EMAX_40A_Multi 
+;BESCNO EQU EMAX_Nano_20A_Main
+;BESCNO EQU EMAX_Nano_20A_Tail
+;BESCNO EQU EMAX_Nano_20A_Multi 
 ;BESCNO EQU XRotor_10A_Main
 ;BESCNO EQU XRotor_10A_Tail
 ;BESCNO EQU XRotor_10A_Multi 
@@ -650,13 +665,13 @@ FVT_Littlebee_20A_Multi			EQU 201
 ;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
-;BESCNO EQU XRotor_40A_Multi
+;BESCNO EQU XRotor_40A_Multi  
 ;BESCNO EQU MDRX62H_Main
 ;BESCNO EQU MDRX62H_Tail
 ;BESCNO EQU MDRX62H_Multi 
 ;BESCNO EQU RotorGeeks_20A_Main
 ;BESCNO EQU RotorGeeks_20A_Tail
-;BESCNO EQU RotorGeeks_20A_Multi
+;BESCNO EQU RotorGeeks_20A_Multi 
 ;BESCNO EQU Flycolor_Fairy_6A_Main
 ;BESCNO EQU Flycolor_Fairy_6A_Tail
 ;BESCNO EQU Flycolor_Fairy_6A_Multi
@@ -665,7 +680,10 @@ FVT_Littlebee_20A_Multi			EQU 201
 ;BESCNO EQU Flycolor_Fairy_30A_Multi
 ;BESCNO EQU FVT_Littlebee_20A_Main
 ;BESCNO EQU FVT_Littlebee_20A_Tail
-;BESCNO EQU FVT_Littlebee_20A_Multi
+;BESCNO EQU FVT_Littlebee_20A_Multi  
+;BESCNO EQU Graupner_Ultra_20A_Main
+;BESCNO EQU Graupner_Ultra_20A_Tail
+;BESCNO EQU Graupner_Ultra_20A_Multi 
 
 
 ;**** **** **** **** ****
@@ -1555,6 +1573,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (EMAX_40A.inc)			; Select EMAX 40A pinout
 ENDIF
 
+IF BESCNO == EMAX_Nano_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (EMAX_Nano_20A.inc)		; Select EMAX Nano 20A pinout
+ENDIF
+
+IF BESCNO == EMAX_Nano_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (EMAX_Nano_20A.inc)		; Select EMAX Nano 20A pinout
+ENDIF
+
+IF BESCNO == EMAX_Nano_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (EMAX_Nano_20A.inc)		; Select EMAX Nano 20A pinout
+ENDIF
+
 IF BESCNO == XRotor_10A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XRotor_10A.inc)		; Select XRotor 10A pinout
@@ -1675,6 +1708,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
 ENDIF
 
+IF BESCNO == Graupner_Ultra_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Graupner_Ultra_20A.inc)	; Select Graupner Ultra 20A pinout
+ENDIF
+
+IF BESCNO == Graupner_Ultra_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Graupner_Ultra_20A.inc)	; Select Graupner Ultra 20A pinout
+ENDIF
+
+IF BESCNO == Graupner_Ultra_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Graupner_Ultra_20A.inc)	; Select Graupner Ultra 20A pinout
+ENDIF
+
 
 ; Not generally released ESCs
 ;MODE 	EQU 	2				; Choose mode
@@ -1724,7 +1772,7 @@ DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
 DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-DEFAULT_PGM_TAIL_PWM_DITHER		EQU 3 	; 1=1		2=3			3=7			4=15			5=31
+DEFAULT_PGM_TAIL_PWM_DITHER		EQU 3 	; 1=Off		2=7			3=15			4=31			5=63
 
 ; MULTI
 DEFAULT_PGM_MULTI_P_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
@@ -1743,7 +1791,7 @@ DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
 DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-DEFAULT_PGM_MULTI_PWM_DITHER		EQU 3 	; 1=1		2=3			3=7			4=15			5=31
+DEFAULT_PGM_MULTI_PWM_DITHER		EQU 3 	; 1=Off		2=7			3=15			4=31			5=63
 
 ; COMMON
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
@@ -1767,7 +1815,7 @@ RCP_MIN			EQU 	0	; This is minimum RC pulse length
 RCP_MAX			EQU 	255	; This is maximum RC pulse length
 RCP_VALIDATE		EQU 	2	; Require minimum this pulse length to validate RC pulse
 RCP_STOP			EQU 	1	; Stop motor at or below this pulse length
-RCP_STOP_LIMIT		EQU 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 PWM_START			EQU	50 	; PWM used as max power during start
 
@@ -1809,7 +1857,7 @@ RCP_MIN			EQU 	0	; This is minimum RC pulse length
 RCP_MAX			EQU 	255	; This is maximum RC pulse length
 RCP_VALIDATE		EQU 	2	; Require minimum this pulse length to validate RC pulse
 RCP_STOP			EQU 	1	; Stop motor at or below this pulse length
-RCP_STOP_LIMIT		EQU 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 PWM_START			EQU	50 	; PWM used as max power during start
 
@@ -1866,8 +1914,8 @@ INITIAL_RUN_PHASE			EQU	2		; Set when in initial run phase, before synchronized 
 DIR_CHANGE_BRAKE			EQU 	3		; Set when braking before direction change
 COMP_TIMED_OUT				EQU 	4		; Set when comparator reading timed out
 GOV_ACTIVE				EQU 	5		; Set when governor is active (enabled when speed is above minimum)
-;						EQU 	6
-;						EQU 	7
+SKIP_DAMP_ON				EQU 	6 		; Set when turning damping fet on is skipped
+SKIP_DAMP_OFF				EQU 	7 		; Set when turning damping fet off is skipped
 
 Flags2:					DS	1		; State flags. NOT reset upon init_start
 RCP_UPDATED				EQU 	0		; New RC pulse length value available
@@ -2039,7 +2087,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2242,7 +2290,7 @@ t0_int_pwm_on_execute:
 t0_int_pwm_on_exit:
 	; Set timer for coming on cycle length
 	mov 	A, Current_Pwm_Limited		; Load current pwm
-		cpl	A						; cpl is 255-x
+	cpl	A						; cpl is 255-x
 IF MCU_48MHZ == 0
 	mov	TL0, A					; Write start point for timer
 ELSE
@@ -2321,16 +2369,20 @@ ENDIF
 t0_int_pwm_off_damped:
 IF PFETON_DELAY < 128
 	All_nFETs_Off 				; Switch off all nfets
+	jb	Flags1.SKIP_DAMP_ON, t0_int_pwm_off_damp_done 
 IF PFETON_DELAY NE 0
 	mov	A, #PFETON_DELAY
 	djnz	ACC, $	
 ENDIF
 	Damping_FET_on
+t0_int_pwm_off_damp_done:
 ENDIF
 IF PFETON_DELAY >= 128			; "Negative", 1's complement
+	jb	Flags1.SKIP_DAMP_ON, t0_int_pwm_off_damp_done
 	Damping_FET_on				; Damping fet on
 	mov	A, #PFETON_DELAY
 	cpl	A
+t0_int_pwm_off_damp_done:
 	All_nFETs_Off 				; Switch off all nfets
 ENDIF
 t0_int_pwm_off_fullpower_exit:	
@@ -2372,10 +2424,12 @@ pwm_afet_damped:
 	ApFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_afet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_afet_damped_exit 
+	jb	Flags1.SKIP_DAMP_OFF, pwm_afet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
 ENDIF
+pwm_afet_damped_done:
 	AnFET_on								; Switch nFET
 pwm_afet_damped_exit:
 	ajmp	t0_int_pwm_on_exit
@@ -2384,10 +2438,12 @@ pwm_bfet_damped:
 	BpFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_bfet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_bfet_damped_exit 
+	jb	Flags1.SKIP_DAMP_OFF, pwm_bfet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
 ENDIF
+pwm_bfet_damped_done:
 	BnFET_on								; Switch nFET
 pwm_bfet_damped_exit:
 	ajmp	t0_int_pwm_on_exit
@@ -2396,10 +2452,12 @@ pwm_cfet_damped:
 	CpFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_cfet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_cfet_damped_exit 
+	jb	Flags1.SKIP_DAMP_OFF, pwm_cfet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
 ENDIF
+pwm_cfet_damped_done:
 	CnFET_on								; Switch nFET
 pwm_cfet_damped_exit: 
 	ajmp	t0_int_pwm_on_exit
@@ -2495,7 +2553,7 @@ t2_int_skip_end:
 t2_int_rcp_update_start:
 	; Process updated RC pulse
 	jb	Flags2.RCP_UPDATED, ($+5)	; Is there an updated RC pulse available?
-	ajmp	t2_int_current_pwm_done		; No - update pwm limits and exit
+	ajmp	t2_int_current_pwm_update	; No - update pwm limits and exit
 
 	mov	Temp1, New_Rcp				; Load new pulse value
 	jb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; If measure RCP pwm frequency flag set - do not clear flag
@@ -2595,15 +2653,14 @@ IF MODE >= 1	; Tail or multi
 
 	mov	Requested_Pwm, #0FFh
 
-t2_int_current_pwm_update: 
 ENDIF
+t2_int_current_pwm_update: 
 IF MODE == 0 OR MODE == 2	; Main or multi
 	mov	Temp1, #Pgm_Gov_Mode		; Governor mode?
 	cjne	@Temp1, #4, t2_int_pwm_exit	; Yes - branch
 ENDIF
 
 	mov	Current_Pwm, Requested_Pwm	; Set equal as default
-t2_int_current_pwm_done:
 IF MODE >= 1	; Tail or multi
 	; Set current_pwm_limited
 	mov	Temp1, Current_Pwm			; Default not limited
@@ -2674,6 +2731,20 @@ t2_int_current_pwm_dither_max_power:
 
 t2_int_current_pwm_no_dither:
 	mov	Current_Pwm_Lim_Dith, Temp1
+IF DAMPED_MODE_ENABLE == 1
+	; Skip damping fet switching for high throttle
+	clr	Flags1.SKIP_DAMP_ON
+	clr	Flags1.SKIP_DAMP_OFF
+	clr	C
+	mov	A, Current_Pwm_Lim_Dith
+	subb	A, #245
+	jc	t2_int_pwm_exit
+	setb	Flags1.SKIP_DAMP_ON
+	clr	C
+	subb	A, #5
+	jc	t2_int_pwm_exit
+	setb	Flags1.SKIP_DAMP_OFF
+ENDIF
 ENDIF
 t2_int_pwm_exit:	
 	; Set demag enabled if pwm is above limit
@@ -3011,6 +3082,12 @@ pca_int_second_meas_pwm_freq:
 	ajmp	pca_int_store_data
 
 rcp_int_check_12kHz:
+	mov	Bit_Access_Int, Temp1
+	mov	Temp1, #Pgm_Enable_PWM_Input	; Check if PWM input is enabled
+	mov	A, @Temp1
+	mov	Temp1, Bit_Access_Int
+	jz	pca_int_restore_edge		; If it is not - branch
+
 	; Check if pwm frequency is 12kHz
 	clr	C
 	mov	A, Temp1
@@ -3230,14 +3307,14 @@ pca_int_ppm_check_full_range:
 	dec	Rcp_Outside_Range_Cnt
 
 	; Calculate "1000us" plus throttle minimum
-	mov	A, #0						; Set 1000us as default minimum
-	jb	Flags3.FULL_THROTTLE_RANGE, pca_int_ppm_calculate	; Check if full range is chosen
-
 IF MODE >= 1	; Tail or multi
 	mov	Temp1, #Pgm_Direction			; Check if bidirectional operation (store in Temp2)
 	mov	A, @Temp1				
 	mov	Temp2, A				
 ENDIF
+	mov	A, #0						; Set 1000us as default minimum
+	jb	Flags3.FULL_THROTTLE_RANGE, pca_int_ppm_calculate	; Check if full range is chosen
+
 	mov	Temp1, #Pgm_Ppm_Min_Throttle		; Min throttle value is in 4us units
 IF MODE >= 1	; Tail or multi
 	cjne	Temp2, #3, ($+5)
@@ -3884,7 +3961,7 @@ governor_activate:
 	mov	Temp2, #0C7h
 	mov	Temp3, Comm_Period4x_L		; Load comm period
 	mov	Temp4, Comm_Period4x_H		
-	; Set speed range. Bare Comm_Period4x corresponds to 400k eRPM, because it is 500n units
+	; Set speed range 
 	clr	C
 	mov	A, Temp4
 	rrc	A
@@ -4042,8 +4119,10 @@ governor_check_pwm:
 	subb	A, Pwm_Limit				; Is current pwm at or above pwm limit?
 	jnc	governor_int_max_pwm		; Yes - branch
 
-	mov	A, Current_Pwm				; Is current pwm at zero?
-	jz	governor_int_min_pwm		; Yes - branch
+	clr	C
+	mov	A, #1
+	subb	A, Current_Pwm				; Is current pwm at minimum?
+	jnc	governor_int_min_pwm		; Yes - branch
 
 	jmp	governor_store_int_error		; No - store integral error
 
@@ -4216,7 +4295,7 @@ governor_apply_int_corr:
 	jmp	governor_store_int_corr		; No - store correction
 
 governor_corr_int_min_pwm:
-	mov	Temp1, #0					; Load minimum pwm
+	mov	Temp1, #1					; Load minimum pwm
 	jmp	governor_store_int_corr
 
 governor_corr_neg_int:
@@ -4639,10 +4718,7 @@ IF MODE == 1	; Tail
 check_voltage_lim:
 ENDIF
 IF MODE == 2	; Multi
-	; Set current pwm limited if closed loop mode
-	mov	Temp2, #Pgm_Gov_Mode			; Governor mode?
-	cjne	@Temp2, #4, check_voltage_set_pwm_gov	; Yes - branch
-
+	; Increase pwm limit
 	mov  A, Pwm_Limit
 	add	A, #16			
 	jnc	($+4)					; If not max - branch
@@ -4650,9 +4726,20 @@ IF MODE == 2	; Multi
 	mov	A, #255
 
 	mov	Pwm_Limit, A				; Increment limit 
-	ajmp	check_voltage_pwm_done
+	; Set current pwm limited if closed loop mode
+	mov	Temp2, #Pgm_Gov_Mode		; Governor mode?
+	cjne	@Temp2, #4, ($+5)			
+	ajmp	check_voltage_pwm_done		; No - branch
 
-check_voltage_set_pwm_gov:
+	clr	C
+	mov	Temp1, Pwm_Limit			; Set limit
+	mov	A, Current_Pwm
+	subb	A, Temp1
+	jnc	check_voltage_low_rpm		; If current pwm above limit - branch and limit	
+
+	mov	Temp1, Current_Pwm			; Set current pwm (no limiting)
+
+check_voltage_low_rpm:
 	; Limit pwm for low rpms
 	clr	C
 	mov	A, Temp1					; Check against limit
@@ -4918,19 +5005,16 @@ calc_new_wait_per_demag_done:
 
 	inc	Temp7				; Increase more
 
+IF MCU_48MHZ == 0
 	clr	C
 	mov	A, Comm_Period4x_H		; More reduction for higher rpms
 	subb	A, #3				; 104k eRPM
 	jnc	calc_new_wait_per_low
 
 	inc	Temp7				; Increase
-	inc	Temp7
-
-	jnb	Flags2.PGM_PWMOFF_DAMPED, calc_new_wait_per_low	; More reduction for damped
-
-	inc	Temp7				; Increase more
 
 calc_new_wait_per_low:
+ENDIF
 	clr	C
 	mov	A, Comm_Period4x_H		; More reduction for higher rpms
 	subb	A, #2				; 156k eRPM
@@ -4938,10 +5022,6 @@ calc_new_wait_per_low:
 
 	inc	Temp7				; Increase more
 	inc	Temp7
-
-	jnb	Flags2.PGM_PWMOFF_DAMPED, calc_new_wait_per_high	; More reduction for damped
-
-	inc	Temp7				; Increase more
 
 calc_new_wait_per_high:
 	; Load current commutation timing
@@ -6298,7 +6378,7 @@ test_throttle_gain:
 	mul	AB
 	clr	C
 	mov	A, B
-	subb	A, #128
+	subb	A, #125
 	jc	test_throttle_gain
 	ret
 
@@ -6448,7 +6528,7 @@ IF PORT3_EXIST == 1
 	mov	P3MDIN, #P3_DIGITAL				
 ENDIF
 	; Initialize the XBAR and related functionality
-	Initialize_Xbar		
+	Initialize_Xbar
 	; Set default programmed parameters
 	call	set_default_parameters
 	; Read all programmed parameters
@@ -7188,7 +7268,10 @@ ENDIF
 	; Exit run loop after a given time
 	clr	C
 	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
-	subb	A, #RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
+	mov	Temp1, #RCP_STOP_LIMIT
+	jnb	Flags1.DIR_CHANGE_BRAKE, ($+5); Is it a direction change?
+	mov	Temp1, #5					; Yes - set a short timeout
+	subb	A, Temp1					; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
 run6_check_rcp_timeout:
@@ -7285,6 +7368,7 @@ $include (BLHeliTxPgm.inc)			; Include source code for programming the ESC with 
 $include (BLHeliBootLoad.inc)			; Include source code for bootloader
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
+
 
 
 

@@ -107,6 +107,11 @@
 ;           Added setting for enable/disable of PWM input
 ;           Better AFW and damping for some ESCs (that have a slow high side driver)
 ;           Miscellaneous other changes
+; - Rev14.1 Fixed max throttle calibration bug (for non-oneshot)
+;           Fixed some closed loop mode bugs
+;           Relaxed signal jitter requirement for looptimes below 1000
+;           Added skipping of damping fet switching near max power, for improved high end throttle linearity, using the concept of SimonK
+;           Improved sync hold at high rpms
 ;
 ;
 ;
@@ -212,6 +217,9 @@
 ;#define MULTISTAR_30A_MAIN			; Inverted input
 ;#define MULTISTAR_30A_TAIL
 ;#define MULTISTAR_30A_MULTI
+;#define MULTISTAR_40Av2_MAIN			
+;#define MULTISTAR_40Av2_TAIL
+;#define MULTISTAR_40Av2_MULTI
 ;#define MULTISTAR_45A_MAIN			; Inverted input
 ;#define MULTISTAR_45A_TAIL
 ;#define MULTISTAR_45A_MULTI
@@ -583,6 +591,21 @@
 .INCLUDE "Multistar_30A.inc"		; Select Multistar 30A pinout
 #endif
 
+#if defined(MULTISTAR_40Av2_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Multistar_40Av2.inc"	; Select Multistar 40A v2 pinout
+#endif
+
+#if defined(MULTISTAR_40Av2_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Multistar_40Av2.inc"	; Select Multistar 40A v2 pinout
+#endif
+
+#if defined(MULTISTAR_40Av2_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Multistar_40Av2.inc"	; Select Multistar 40A v2 pinout
+#endif
+
 #if defined(MULTISTAR_45A_MAIN)
 .EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
 .INCLUDE "Multistar_45A.inc"		; Select Multistar 45A pinout
@@ -882,7 +905,7 @@
 .EQU	DEFAULT_PGM_TAIL_BEEP_STRENGTH	= 250; Beep strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_STRENGTH	= 250; Beacon strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_DELAY		= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-.EQU	DEFAULT_PGM_TAIL_PWM_DITHER		= 3 	; 1=1		2=3			3=7			4=15			5=31
+.EQU	DEFAULT_PGM_TAIL_PWM_DITHER		= 3 	; 1=Off		2=7			3=15			4=31			5=63
 
 ; Multi
 .EQU	DEFAULT_PGM_MULTI_P_GAIN 		= 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
@@ -901,7 +924,7 @@
 .EQU	DEFAULT_PGM_MULTI_BEEP_STRENGTH	= 40	; Beep strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_STRENGTH	= 80	; Beacon strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_DELAY	= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-.EQU	DEFAULT_PGM_MULTI_PWM_DITHER		= 3 	; 1=1		2=3			3=7			4=15			5=31
+.EQU	DEFAULT_PGM_MULTI_PWM_DITHER		= 3 	; 1=Off		2=7			3=15			4=31			5=63
 
 ; Common
 .EQU	DEFAULT_PGM_ENABLE_TX_PROGRAM 	= 1 	; 1=Enabled 	0=Disabled
@@ -926,7 +949,7 @@
 .EQU	RCP_MAX			= 	255	; This is maximum RC pulse length
 .EQU	RCP_VALIDATE		= 	2	; Require minimum this pulse length to validate RC pulse
 .EQU	RCP_STOP			= 	1	; Stop motor at or below this pulse length
-.EQU	RCP_STOP_LIMIT		= 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+.EQU	RCP_STOP_LIMIT		= 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
@@ -969,7 +992,7 @@
 .EQU	RCP_MAX			= 	255	; This is maximum RC pulse length
 .EQU	RCP_VALIDATE		= 	2	; Require minimum this pulse length to validate RC pulse
 .EQU	RCP_STOP			= 	1	; Stop motor at or below this pulse length
-.EQU	RCP_STOP_LIMIT		= 	5	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
+.EQU	RCP_STOP_LIMIT		= 	250	; Stop motor if this many timer2H overflows (~32ms) are below stop limit
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
@@ -1024,8 +1047,8 @@
 .EQU	INITIAL_RUN_PHASE		=	2		; Set when in initial run phase, before synchronized run is achieved
 .EQU	ADC_READ_TEMP			= 	3		; Set when ADC input shall be set to read temperature
 .EQU	COMP_TIMED_OUT			= 	4		; Set when comparator reading timed out
-;.EQU					= 	5
-;.EQU					= 	6
+.EQU	SKIP_DAMP_ON			= 	5 		; Set when turning damping fet on is skipped
+.EQU	SKIP_DAMP_OFF			= 	6 		; Set when turning damping fet off is skipped
 ;.EQU					= 	7
 
 
@@ -1214,7 +1237,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	0		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	1		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1455,19 +1478,25 @@ t2_int_pwm_off_exit_nfets_off:
 t2_int_pwm_off_damped:
 .IF PFETON_DELAY < 128
 	All_nFETs_Off 					; Switch off all nfets
+	sbrc	Flags1, SKIP_DAMP_ON
+	rjmp	t2_int_pwm_off_damp_done 
 .IF PFETON_DELAY != 0
 	ldi	YL, PFETON_DELAY
 	dec	YL
 	brne	PC-1
 .ENDIF
 	Damping_FET_on YL				; Damping fet on
+t2_int_pwm_off_damp_done:
 .ENDIF
 .IF PFETON_DELAY >= 128				; "Negative", 1's complement
+	sbrc	Flags1, SKIP_DAMP_ON
+	rjmp	t2_int_pwm_off_damp_done 
 	Damping_FET_on YL				; Damping fet on
 	ldi	YL, PFETON_DELAY
 	com	YL
 	dec	YL
 	brne	PC-1
+t2_int_pwm_off_damp_done:
 	All_nFETs_Off 					; Switch off all nfets
 .ENDIF
 t2_int_pwm_off_fullpower_exit:	
@@ -1509,11 +1538,14 @@ pwm_afet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags1, SKIP_DAMP_OFF
+	rjmp	pwm_afet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
 	brne	PC-1
 .ENDIF
+pwm_afet_damped_done:
 	AnFET_on								; Switch nFET
 	rjmp	t2_int_pwm_on_exit
 
@@ -1523,11 +1555,14 @@ pwm_bfet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags1, SKIP_DAMP_OFF
+	rjmp	pwm_bfet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
 	brne	PC-1
 .ENDIF
+pwm_bfet_damped_done:
 	BnFET_on								; Switch nFET
 	rjmp	t2_int_pwm_on_exit
 
@@ -1537,11 +1572,14 @@ pwm_cfet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
+	sbrc	Flags1, SKIP_DAMP_OFF
+	rjmp	pwm_cfet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
 	brne	PC-1
 .ENDIF
+pwm_cfet_damped_done:
 	CnFET_on								; Switch nFET
 	rjmp	t2_int_pwm_on_exit
 
@@ -1658,7 +1696,7 @@ t0_int_skip_end:
 t0_int_rcp_update_start:
 	; Process updated RC pulse
 	sbrs	Flags2, RCP_UPDATED			; Is there an updated RC pulse available?
-	rjmp	t0_int_current_pwm_done		; No - exit
+	rjmp	t0_int_current_pwm_update	; No - update pwm limits and exit
 
 	lds	XL, New_Rcp				; Load new pulse value
 	mov	I_Temp1, XL
@@ -1746,17 +1784,18 @@ t0_int_pwm_update:
 
 	ldi	XL, 0xFF
 	sts	Requested_Pwm, XL
-t0_int_current_pwm_update: 
+
 .ENDIF
+t0_int_current_pwm_update: 
 .IF MODE == 0 || MODE == 2	; Main or multi
 	lds	I_Temp1, Pgm_Gov_Mode		; Governor mode?
 	cpi	I_Temp1, 4
-	brne	t0_int_pwm_exit			; Yes - branch
+	breq	PC+2			
+	rjmp	t0_int_pwm_exit			; Yes - branch
 .ENDIF
 
 	lds	XL, Requested_Pwm			; Set equal as default
 	sts	Current_Pwm, XL	
-t0_int_current_pwm_done:
 .IF MODE >= 1	; Tail or multi
 	; Set current_pwm_limited
 	lds	I_Temp1, Current_Pwm		; Default not limited
@@ -1823,6 +1862,17 @@ t0_int_current_pwm_dither_max_power:
 
 t0_int_current_pwm_no_dither:
 	sts	Current_Pwm_Lim_Dith, I_Temp1
+.IF DAMPED_MODE_ENABLE == 1
+	; Skip damping fet switching for high throttle
+	cbr	Flags1, (1<<SKIP_DAMP_ON)
+	cbr	Flags1, (1<<SKIP_DAMP_OFF)
+	subi	I_Temp1, 245
+	brcs	t0_int_pwm_exit
+	sbr	Flags1, (1<<SKIP_DAMP_ON)
+	subi	I_Temp1, 5
+	brcs	t0_int_pwm_exit
+	sbr	Flags1, (1<<SKIP_DAMP_OFF)
+.ENDIF
 .ENDIF
 t0_int_pwm_exit:	
 	; Set demag enabled if pwm is above limit
@@ -2127,6 +2177,10 @@ rcp_int_second_meas_pwm_freq:
 	rjmp	rcp_int_store_data
 
 rcp_int_check_12kHz:
+	lds	XL, Pgm_Enable_PWM_Input		; Check if PWM input is enabled
+	tst	XL
+	breq	rcp_int_restore_edge		; If it is not - branch
+
 	; Check if pwm frequency is 12kHz
 	cpi	I_Temp1, low(200)			; If below 100us, 12kHz pwm is assumed
 	cpc	I_Temp2, Zero
@@ -2317,12 +2371,12 @@ rcp_int_ppm_check_full_range:
 	; Calculate "1000us" plus throttle minimum
 	ldi	XL, 0						; Set 1000us as default minimum
 	mov	I_Temp7, XL
+	lds	I_Temp2, Pgm_Direction			; Check if bidirectional operation (store in I_Temp2)
 	sbrc	Flags3, FULL_THROTTLE_RANGE		; Check if full range is chosen
 	rjmp	rcp_int_ppm_calculate			; Yes - branch
 
 	lds	I_Temp7, Pgm_Ppm_Min_Throttle		; Min throttle value is in 4us units
 .IF MODE >= 1	; Tail or multi
-	lds	I_Temp2, Pgm_Direction			; Check if bidirectional operation (store in I_Temp2)
 	cpi	I_Temp2, 3
 	brne	PC+3							; No - branch
 
@@ -2946,7 +3000,7 @@ governor_activate:
 	ldi	Temp2, 0xC7
 	lds	Temp3, Comm_Period4x_L		; Load comm period
 	lds	Temp4, Comm_Period4x_H		
-	; Set speed range. Bare Comm_Period4x corresponds to 400k rpm, because it is 500n units
+	; Set speed range 
 	lsr	Temp4
 	ror	Temp3					; 200k eRPM range here
 	; Check range
@@ -3075,8 +3129,8 @@ governor_check_pwm:
 	cp	Temp4, XH			
 	brcc	governor_int_max_pwm		; Yes - branch
 
-	tst	Temp4					; Is current pwm at zero?
-	breq	governor_int_min_pwm		; Yes - branch
+	cpi	Temp4, 2					; Is current pwm at minimum?
+	brcs	governor_int_min_pwm		; Yes - branch
 
 	rjmp	governor_store_int_error		; No - store integral error
 
@@ -3227,7 +3281,7 @@ governor_apply_int_corr:
 	rjmp	governor_store_int_corr		; No - store correction
 
 governor_corr_int_min_pwm:
-	ldi	Temp1, 0					; Load minimum pwm
+	ldi	Temp1, 1					; Load minimum pwm
 	rjmp	governor_store_int_corr
 
 governor_corr_neg_int:
@@ -3596,11 +3650,7 @@ check_voltage_exit:
 check_voltage_lim:
 .ENDIF
 .IF MODE == 2	; Multi
-	; Set current pwm limited if closed loop mode
-	lds	XH, Pgm_Gov_Mode			; Governor mode?
-	cpi	XH, 4
-	brne check_voltage_set_pwm_gov	; Yes - branch
-
+	; Increase pwm limit
 	lds  Temp2, Pwm_Limit
 	ldi	XH, 16
 	add	Temp2, XH
@@ -3609,9 +3659,19 @@ check_voltage_lim:
 	ldi	Temp2, 255
 
 	sts	Pwm_Limit, Temp2			; Increment limit 
-	rjmp	check_voltage_pwm_done
+	; Set current pwm limited if closed loop mode
+	lds	XH, Pgm_Gov_Mode			; Governor mode?
+	cpi	XH, 4
+	breq check_voltage_pwm_done		; No - branch
 
-check_voltage_set_pwm_gov:
+	lds	Temp1, Pwm_Limit			; Set limit
+	lds	XH, Current_Pwm
+	sub	XH, Temp1
+	brcc	check_voltage_low_rpm		; If current pwm above limit - branch and limit	
+
+	lds	Temp1, Current_Pwm			; Set current pwm (no limiting)
+
+check_voltage_low_rpm:
 	; Limit pwm for low rpms
 	lds	XH, Pwm_Limit_Low_Rpm		; Check against limit
 	cp	Temp1, XH
@@ -3824,12 +3884,6 @@ calc_new_wait_per_demag_done:
 	brcc	calc_new_wait_per_low
 
 	inc	Temp7				; Increase
-	inc	Temp7
-
-	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	calc_new_wait_per_low
-
-	inc	Temp7				; Increase more
 
 calc_new_wait_per_low:
 	cpi	XH, 2				; 156k eRPM
@@ -3837,11 +3891,6 @@ calc_new_wait_per_low:
 
 	inc	Temp7				; Increase more
 	inc	Temp7
-
-	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	calc_new_wait_per_high
-
-	inc	Temp7				; Increase more
 
 calc_new_wait_per_high:
 	; Load current commutation timing
@@ -4130,10 +4179,9 @@ comp_wait_on_comp_able_not_timed_out:
 	inc	XH
 	sts	Comparator_Read_Cnt, XH
 	Read_Comp_Out XH					; Read comparator output
+	ldi	XH, 1
 	sbrc	Flags1, STARTUP_PHASE			
-	rjmp	comp_read_done
-
-	ldi	XH, 4						; 1 is stutter, 2 is quite fine, 3 is fine, 10 is fine on DYS SN20A
+	ldi	XH, 2						; More delay between readings for startup
 	dec	XH
 	brne	PC-1
 	Read_Comp_Out XH					; Another reading reduces comparator noise on some ESCs (for some reason...)				
@@ -5195,7 +5243,7 @@ test_throttle_gain:
 	inc	Temp1
 	mul	Temp5, Temp1		; Temp5 has difference, Temp1 has gain
 	mov	XH, Mul_Res_H		
-	subi	XH, 128
+	subi	XH, 125
 	brcs	test_throttle_gain
 	sts	Ppm_Throttle_Gain, Temp1	; Store gain
 	ret
@@ -6092,7 +6140,10 @@ run6_check_rcp_stop_count:
 .ENDIF
 	; Exit run loop after a given time
 	lds	XH, Rcp_Stop_Cnt			; Load stop RC pulse counter value
-	cpi	XH, RCP_STOP_LIMIT			; Is number of stop RC pulses above limit?
+	ldi	Temp1, RCP_STOP_LIMIT
+	sbrc	Flags0, DIR_CHANGE_BRAKE		; Is it a direction change?
+	ldi	Temp1, 5					; Yes - set a short timeout
+	cp	XH, Temp1					; Is number of stop RC pulses above limit?
 	brcc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
 run6_check_rcp_timeout:

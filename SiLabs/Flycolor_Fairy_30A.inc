@@ -57,16 +57,16 @@ NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	245	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; ESC specific defaults
 ;**** **** **** **** ****
-DEFAULT_PGM_MAIN_SPOOLUP_TIME		EQU 7	; Main motor spoolup time
-DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
-DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
-DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 11 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MAIN_SPOOLUP_TIME		EQU 10	; Main motor spoolup time
+DEFAULT_PGM_MAIN_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_TAIL_STARTUP_PWR 		EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MULTI_STARTUP_PWR 	EQU 9 	; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188	7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
 
 ;**** **** **** **** ****
 ; Bootloader definitions
@@ -255,7 +255,7 @@ MACRO Initialize_Adc
 	mov	ADC0CF, #58h	; ADC clock 2MHz
 	mov	ADC0MX, #Adc_Ip; Select ADC input
 	mov	ADC0CN0, #80h	; ADC enabled 
-	mov	ADC0CN1, #01h	; Ccommon mode buffer enabled
+	mov	ADC0CN1, #01h	; Common mode buffer enabled
 ENDM
 MACRO Set_Adc_Ip_Volt
 	mov	ADC0MX, #Adc_Ip; Select ADC input
