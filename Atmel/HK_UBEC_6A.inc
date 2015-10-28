@@ -227,9 +227,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .ENDM
 
 .MACRO Comp_Init
-   	in	@0, SFIOR			; Set Analog Comparator Multiplexer Enable
-   	sbr  @0, (1<<ACME) 	
-   	out  SFIOR, @0
+	in	@0, SFIOR			; Toggle Analog Comparator Multiplexer Enable			
+	cbr  @0, (1<<ACME) 	
+	out  SFIOR, @0
+	Read_Comp_Out @0						
+	in	@0, SFIOR			
+	sbr  @0, (1<<ACME) 	
+	out  SFIOR, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_A
    	ldi  @0, Mux_A 		; Set comparator multiplexer to phase A

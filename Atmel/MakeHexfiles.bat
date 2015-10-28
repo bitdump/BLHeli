@@ -16,7 +16,7 @@ RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
 MKDIR Output\Eep
-SET Revision=REV14_1
+SET Revision=REV14_2
 SET AtmelPath=C:\Atmel\avrassembler
 rem SET AtmelPath="C:\Dev\Atmel\AVR Tools\AvrAssembler2"
 
@@ -101,6 +101,8 @@ call :compile
 SET NAME=SUNRISE_BLHELI_SLIM_30A
 call :compile
 SET NAME=DYS_SN20A
+call :compile
+SET NAME=TBS_CUBE_20A
 call :compile
 
 goto :end

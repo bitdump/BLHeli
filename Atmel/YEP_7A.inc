@@ -228,9 +228,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 .ENDM
 
 .MACRO Comp_Init
-  	lds  @0, ADCSRB		; Set Analog Comparator Multiplexer Enable
-   	sbr  @0, (1<<ACME) 	
-   	sts  ADCSRB, @0
+	lds  @0, ADCSRB		; Toggle Analog Comparator Multiplexer Enable			
+	cbr  @0, (1<<ACME) 	
+	sts  ADCSRB, @0
+	Read_Comp_Out @0						
+	lds  @0, ADCSRB			
+	sbr  @0, (1<<ACME) 	
+	sts  ADCSRB, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_A
    	ldi  @0, Mux_A 		; Set comparator multiplexer to phase A
@@ -354,8 +358,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 .ENDMACRO
 
 .MACRO Initialize_Adc
+	ldi	@0, Volt_Ip
+	sbr  @0, (1<<REFS1) 	
+	sbr  @0, (1<<REFS0) 		
+	sts	ADMUX, @0			; Set ADMUX register
   	lds  @0, ADCSRA		; Set ADCSRA register (1MHz clock)
   	sbr  @0, (1<<ADPS2) 	
+	sbr  @0, (1<<ADEN) 		; Enable ADC	
    	sts  ADCSRA, @0
 .ENDMACRO
 
