@@ -31,8 +31,8 @@
 ;
 ; The input signal can be positive 1kHz, 2kHz, 4kHz, 8kHz or 12kHz PWM (e.g. taken from the "resistor tap" on mCPx)
 ; And the input signal can be PPM (1-2ms) or OneShot125 (125-250us) at rates up to several hundred Hz.
-; The code adapts itself to the various input modes/frequencies
-; The code ESC can also be programmed to accept inverted input signal.
+; The code autodetects the various input modes/frequencies
+; The code can also be programmed to accept inverted input signal.
 ;
 ; The first lines of the software must be modified according to the chosen environment:
 ; Uncomment the selected ESC and main/tail/multi mode
@@ -117,6 +117,9 @@
 ;           Added stalled motor shutoff after about 10 seconds (for tail and multi code with PPM input)
 ;           Greatly increased maximum rpm limit, and added rpm limiting at 250k erpm
 ;           Improved bidirectional operation
+; - Rev14.3 Moved reset vector to be just before the settings segment, in order to better recover from partially failed flashing operation
+;           Shortened stall detect time to about 5sec, and prevented going into tx programming after a stall
+;           Optimizations of software timing and running reliability
 ;
 ;
 ;**** **** **** **** ****
@@ -169,7 +172,7 @@
 ;#define BLUESERIES_30A_MULTI 
 ;#define BLUESERIES_40A_MAIN
 ;#define BLUESERIES_40A_TAIL
-;#define BLUESERIES_40A_MULTI 
+;#define BLUESERIES_40A_MULTI
 ;#define BLUESERIES_60A_MAIN
 ;#define BLUESERIES_60A_TAIL
 ;#define BLUESERIES_60A_MULTI
@@ -256,7 +259,7 @@
 ;#define YEP_7A_MULTI 
 ;#define AFRO_12A_MAIN				; ICP1 as input		
 ;#define AFRO_12A_TAIL
-;#define AFRO_12A_MULTI
+;#define AFRO_12A_MULTI 
 ;#define AFRO_20A_MAIN				; ICP1 as input		
 ;#define AFRO_20A_TAIL
 ;#define AFRO_20A_MULTI 
@@ -884,6 +887,8 @@
 #endif
 
 
+
+
 ;**** **** **** **** ****
 ; TX programming defaults
 ;
@@ -975,7 +980,6 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -996,7 +1000,6 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1018,7 +1021,6 @@
 
 .EQU	PWM_START			= 	50 	; PWM used as max power during start
 
-.EQU	COMM_TIME_RED		= 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 .EQU	COMM_TIME_MIN		= 	1	; Minimum time (in us) for commutation wait
 
 .EQU	TEMP_CHECK_RATE	= 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1069,8 +1071,8 @@
 .EQU	ADC_READ_TEMP			= 	3		; Set when ADC input shall be set to read temperature
 .EQU	COMP_TIMED_OUT			= 	4		; Set when comparator reading timed out
 .EQU	SKIP_DAMP_ON			= 	5 		; Set when turning damping fet on is skipped
-.EQU	SKIP_DAMP_OFF			= 	6 		; Set when turning damping fet off is skipped
-.EQU	HIGH_RPM				= 	7		; Set when motor rpm is high (Comm_Period4x_H less than 2)
+.EQU	HIGH_RPM				= 	6		; Set when motor rpm is high (Comm_Period4x_H less than 2)
+;						= 	7
 
 .DEF	Flags2				=	R24		; State flags. NOT reset upon init_start
 .EQU	RCP_UPDATED			= 	0		; New RC pulse length value available
@@ -1251,7 +1253,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	2		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	3		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1513,10 +1515,17 @@ t2_int_pwm_off_damp_done:
 t2_int_pwm_off_damp_done:
 	All_nFETs_Off 					; Switch off all nfets
 .ENDIF
-t2_int_pwm_off_fullpower_exit:	
-	sts	Pwm_Prev_Edge, Zero	; Set timestamp to zero
+t2_int_pwm_off_exit:	
+	sts	Pwm_Prev_Edge, Zero			; Set timestamp to zero
 	out	SREG, II_Sreg
 	reti
+
+t2_int_pwm_off_fullpower_exit:
+	ldi	YL, 0
+	Set_TCNT2 YL					; Write start point for timer
+	T2_Clear_Int_Flag YL			; Clear interrupt flag
+	sbr	Flags0, (1<<PWM_ON)	
+	rjmp	t2_int_pwm_off_exit
 
 
 pwm_nofet:	; Dummy pwm on cycle
@@ -1552,8 +1561,6 @@ pwm_afet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
-	sbrc	Flags1, SKIP_DAMP_OFF
-	rjmp	pwm_afet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
@@ -1569,8 +1576,6 @@ pwm_bfet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
-	sbrc	Flags1, SKIP_DAMP_OFF
-	rjmp	pwm_bfet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
@@ -1586,8 +1591,6 @@ pwm_cfet_damped:
 	rjmp	t2_int_pwm_on_exit
 	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_on_exit
-	sbrc	Flags1, SKIP_DAMP_OFF
-	rjmp	pwm_cfet_damped_done 
 .IF NFETON_DELAY != 0
 	ldi	YL, NFETON_DELAY					; Set delay
 	dec	YL
@@ -1656,9 +1659,13 @@ t0_int_pulses_absent:
 	; Timeout counter has reached zero, pulses are absent
 	ldi	I_Temp1, RCP_MIN			; RCP_MIN as default
 	ldi	I_Temp2, RCP_MIN			
+	sbrc	Flags2, RCP_PPM		
+	rjmp	t0_int_pulses_absent_no_max	; If flag is set (PPM) - branch
+
 	Read_Rcp_Int XL				; Look at value of Rcp_In
 	sbrc	XL, Rcp_In				; Is it high?
 	ldi	I_Temp1, RCP_MAX			; Yes - set RCP_MAX
+t0_int_pulses_absent_no_max:
 	Rcp_Int_First XL				; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag XL			; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)		; Set first edge flag
@@ -1876,13 +1883,9 @@ t0_int_current_pwm_no_dither:
 .IF DAMPED_MODE_ENABLE == 1
 	; Skip damping fet switching for high throttle
 	cbr	Flags1, (1<<SKIP_DAMP_ON)
-	cbr	Flags1, (1<<SKIP_DAMP_OFF)
-	subi	I_Temp1, 245
+	subi	I_Temp1, 248
 	brcs	t0_int_pwm_exit
 	sbr	Flags1, (1<<SKIP_DAMP_ON)
-	subi	I_Temp1, 5
-	brcs	t0_int_pwm_exit
-	sbr	Flags1, (1<<SKIP_DAMP_OFF)
 .ENDIF
 .ENDIF
 t0_int_pwm_exit:	
@@ -2347,7 +2350,7 @@ rcp_int_fall_check_range:
 	sbci	XL, 2
 	brcs	PC+2
 
-	rjmp	pca_int_ppm_outside_range		; Yes - ignore pulse
+	rjmp	rcp_int_ppm_outside_range		; Yes - ignore pulse
 
 	; Check if below 800us (in order to ignore false pulses)
 	tst	I_Temp6
@@ -2357,7 +2360,7 @@ rcp_int_fall_check_range:
 	subi	XL, 200
 	brcc	rcp_int_ppm_check_full_range		; No - branch
 
-pca_int_ppm_outside_range:
+rcp_int_ppm_outside_range:
 	lds	XL, Rcp_Outside_Range_Cnt
 	inc	XL
 	sts	Rcp_Outside_Range_Cnt, XL
@@ -3904,27 +3907,9 @@ calc_new_wait_per_startup_done:
 
 calc_new_wait_per_demag_done:
 	mov	Temp8, XH				; Store timing in Temp8
-	ldi	XH, (COMM_TIME_RED<<1)	
+	; Set timing reduction
+	ldi	XH, 4 	
 	mov	Temp7, XH
-	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+2
-
-	inc	Temp7				; Increase more
-
-	lds	XH, Comm_Period4x_H		; More reduction for higher rpms
-	cpi	XH, 3				; 104k eRPM
-	brcc	calc_new_wait_per_low
-
-	inc	Temp7				; Increase
-
-calc_new_wait_per_low:
-	cpi	XH, 2				; 156k eRPM
-	brcc	calc_new_wait_per_high
-
-	inc	Temp7				; Increase more
-	inc	Temp7
-
-calc_new_wait_per_high:
 	; Load current commutation timing
 	lds	Temp2, Comm_Period4x_H	; Load Comm_Period4x
 	lds	Temp1, Comm_Period4x_L	
@@ -3978,13 +3963,7 @@ calc_next_comm_timing_fast:
 	
 	cbr	Flags1, (1<<HIGH_RPM) 	; Clear high rpm bit
 
-	ldi	Temp1, (COMM_TIME_RED<<1)	
-	sbrs	Flags2, PGM_PWMOFF_DAMPED; More reduction for damped
-	rjmp	PC+2
-
-	inc	Temp1				; Increase more
-
-	subi	Temp1, 0xFD			; Add 3
+	ldi	Temp1, 4				; Set timing reduction
 	lsr	Temp4				; Divide Comm_Period4x by 2 4 times
 	ror	Temp3
 	lsr	Temp4				
@@ -5387,7 +5366,7 @@ average_throttle_div:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-reset:
+pgm_start:
 	; Disable interrupts explicitly
 	cli
 	; Check fuse high bits
@@ -5396,7 +5375,7 @@ reset:
 	Prepare_Lock_Or_Fuse_Read XH
 	lpm	XH, Z
 	andi	XH, 0x80
-	breq	reset			; If RSTDISBL is programmed, then loop here
+	breq	pgm_start			; If RSTDISBL is programmed, then loop here
 
 	; Disable watchdog
 	Disable_Watchdog XH
@@ -5433,6 +5412,9 @@ reset:
 	; Set beep strength
 	lds	Temp1, Pgm_Beep_Strength
 	sts	Beep_Strength, Temp1
+	; Set initial arm variable
+	ldi	XH, 1
+	sts	Initial_Arm, XH
 	; Initializing beep
 	cli					; Disable interrupts explicitly
 	xcall wait200ms	
@@ -5566,13 +5548,11 @@ bootloader_done:
 	; Measure number of lipo cells
 	xcall Measure_Lipo_Cells			; Measure number of lipo cells
 	; Initialize RC pulse
+	Rcp_Int_First XH				; Enable interrupt and set to first edge
 	Rcp_Int_Enable XH	 			; Enable interrupt
 	Rcp_Clear_Int_Flag XH			; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)		; Set first edge flag
 	xcall wait200ms
-	; Set initial arm variable
-	ldi	XH, 1
-	sts	Initial_Arm, XH
 
 	; Measure PWM frequency
 measure_pwm_freq_init:	
@@ -6363,15 +6343,9 @@ jmp_wait_for_power_on:
 	rjmp	jmp_wait_for_power_on		; If flag is not set (PWM) - branch
 
 	lds	XH, Stall_Cnt
-	cpi	XH, 10
+	cpi	XH, 5
 	brcs	jmp_wait_for_power_on
 	rjmp	init_no_signal
-
-	lds	XH, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
-	tst	XH
-	brne	jmp_wait_for_power_on		; If it is not zero - go back to wait for poweron
-
-	rjmp	init_no_signal				; If it is zero (pulses missing) - go back to detect input signal
 
 jmp_wait_for_power_on:
 	rjmp	wait_for_power_on			; Go back to wait for power on
@@ -6382,6 +6356,11 @@ jmp_wait_for_power_on:
 .INCLUDE "BLHeliTxPgm.inc"			; Include source code for programming the ESC with the TX
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
+
+
+reset:
+rjmp	pgm_start
+
 
 
 

@@ -147,6 +147,11 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 	sbr	@0, (1<<OCIE1A)	
 	sts	TIMSK1, @0
 .ENDMACRO		
+.MACRO T2_Clear_Int_Flag
+	clr 	@0
+	sbr	@0, (1<<TOV2)			; Clear tov2 flag
+	out	TIFR2, @0		
+.ENDMACRO		
 
 
 ;*********************

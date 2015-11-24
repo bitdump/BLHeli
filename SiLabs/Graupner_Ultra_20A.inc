@@ -260,7 +260,7 @@ ENDM
 MACRO Initialize_Xbar
 	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
 	All_nFETs_off		; For unlocking of HIP2103/4 driver circuits
-	call wait1ms
+	call wait100ms
 	All_pFETs_on
 	call wait1ms
 	All_pFETs_off

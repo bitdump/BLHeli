@@ -32,8 +32,8 @@ $NOMOD51
 ;
 ; The input signal can be positive 1kHz, 2kHz, 4kHz, 8kHz or 12kHz PWM (e.g. taken from the "resistor tap" on mCPx)
 ; And the input signal can be PPM (1-2ms) or OneShot125 (125-250us) at rates up to several hundred Hz.
-; The code adapts itself to the various input modes/frequencies
-; The code ESC can also be programmed to accept inverted input signal.
+; The code autodetects the various input modes/frequencies
+; The code can also be programmed to accept inverted input signal.
 ;
 ; The first lines of the software must be modified according to the chosen environment:
 ; Uncomment the selected ESC and main/tail/multi mode
@@ -224,6 +224,11 @@ $NOMOD51
 ; - Rev14.2 Added stalled motor shutoff after about 10 seconds (for tail and multi code with PPM input)
 ;           Greatly increased maximum rpm limit, and added rpm limiting at 250k erpm (48MHz MCUs at 400k erpm)
 ;           Improved bidirectional operation
+; - Rev14.3 Moved reset vector to be just before the settings segment, in order to better recover from partially failed flashing operation
+;           Added 100ms intialization delay for the Graupner Ultra 20A ESC
+;           Shortened stall detect time to about 5sec, and prevented going into tx programming after a stall
+;           Optimizations of software timing and running reliability
+;
 ;           
 ;
 ;**** **** **** **** ****
@@ -475,6 +480,9 @@ FVT_Littlebee_20A_Multi			EQU 204
 Graupner_Ultra_20A_Main			EQU 205  
 Graupner_Ultra_20A_Tail			EQU 206  
 Graupner_Ultra_20A_Multi			EQU 207  
+F85_3A_Main					EQU 208  
+F85_3A_Tail					EQU 209  
+F85_3A_Multi					EQU 210  
 
 
 ;**** **** **** **** ****
@@ -568,7 +576,7 @@ Graupner_Ultra_20A_Multi			EQU 207
 ;BESCNO EQU Turnigy_KForce_120A_HV_v2_Multi
 ;BESCNO EQU Skywalker_20A_Main
 ;BESCNO EQU Skywalker_20A_Tail
-;BESCNO EQU Skywalker_20A_Multi
+;BESCNO EQU Skywalker_20A_Multi 
 ;BESCNO EQU Skywalker_40A_Main 
 ;BESCNO EQU Skywalker_40A_Tail 
 ;BESCNO EQU Skywalker_40A_Multi
@@ -634,7 +642,7 @@ Graupner_Ultra_20A_Multi			EQU 207
 ;BESCNO EQU Polaris_Thunder_100A_Multi
 ;BESCNO EQU Platinum_Pro_30A_Main
 ;BESCNO EQU Platinum_Pro_30A_Tail
-;BESCNO EQU Platinum_Pro_30A_Multi
+;BESCNO EQU Platinum_Pro_30A_Multi 
 ;BESCNO EQU Platinum_Pro_150A_Main
 ;BESCNO EQU Platinum_Pro_150A_Tail
 ;BESCNO EQU Platinum_Pro_150A_Multi
@@ -686,6 +694,9 @@ Graupner_Ultra_20A_Multi			EQU 207
 ;BESCNO EQU Graupner_Ultra_20A_Main
 ;BESCNO EQU Graupner_Ultra_20A_Tail
 ;BESCNO EQU Graupner_Ultra_20A_Multi 
+;BESCNO EQU F85_3A_Main
+;BESCNO EQU F85_3A_Tail
+;BESCNO EQU F85_3A_Multi
 
 
 ;**** **** **** **** ****
@@ -1725,10 +1736,20 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Graupner_Ultra_20A.inc)	; Select Graupner Ultra 20A pinout
 ENDIF
 
+IF BESCNO == F85_3A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (F85_3A.inc)			; Select F85 3A pinout
+ENDIF
 
-; Not generally released ESCs
-;MODE 	EQU 	2				; Choose mode
-;$include (Nixie.inc)			; Select Nixie pinout
+IF BESCNO == F85_3A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (F85_3A.inc)			; Select F85 3A pinout
+ENDIF
+
+IF BESCNO == F85_3A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (F85_3A.inc)			; Select F85 3A pinout
+ENDIF
 
 
 ;**** **** **** **** ****
@@ -1821,7 +1842,6 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 
 PWM_START			EQU	50 	; PWM used as max power during start
 
-COMM_TIME_RED		EQU 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1842,7 +1862,6 @@ RCP_STOP_LIMIT		EQU 	130	; Stop motor if this many timer2H overflows (~32ms) are
 
 PWM_START			EQU	50 	; PWM used as max power during start
 
-COMM_TIME_RED		EQU 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1863,7 +1882,6 @@ RCP_STOP_LIMIT		EQU 	250	; Stop motor if this many timer2H overflows (~32ms) are
 
 PWM_START			EQU	50 	; PWM used as max power during start
 
-COMM_TIME_RED		EQU 	2	; Fixed reduction (in us) for commutation wait (to account for fixed delays)
 COMM_TIME_MIN		EQU 	1	; Minimum time (in us) for commutation wait
 
 TEMP_CHECK_RATE	EQU 	8	; Number of adc conversions for each check of temperature (the other conversions are used for voltage)
@@ -1917,7 +1935,7 @@ DIR_CHANGE_BRAKE			EQU 	3		; Set when braking before direction change
 COMP_TIMED_OUT				EQU 	4		; Set when comparator reading timed out
 GOV_ACTIVE				EQU 	5		; Set when governor is active (enabled when speed is above minimum)
 SKIP_DAMP_ON				EQU 	6 		; Set when turning damping fet on is skipped
-SKIP_DAMP_OFF				EQU 	7 		; Set when turning damping fet off is skipped
+;						EQU 	7 		
 
 Flags2:					DS	1		; State flags. NOT reset upon init_start
 RCP_UPDATED				EQU 	0		; New RC pulse length value available
@@ -2087,7 +2105,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2385,7 +2403,7 @@ IF PFETON_DELAY >= 128			; "Negative", 1's complement
 t0_int_pwm_off_damp_done:
 	All_nFETs_Off 				; Switch off all nfets
 ENDIF
-t0_int_pwm_off_fullpower_exit:	
+t0_int_pwm_off_exit:	
 	mov	TL1, #0		; Reset timer1	
 IF MCU_48MHZ == 1
 	mov	TH1, #0		
@@ -2394,6 +2412,16 @@ ENDIF
 	pop	PSW
 	setb	EA			; Enable all interrupts
 	reti
+
+t0_int_pwm_off_fullpower_exit:
+	mov	TL0, #0		; Set long time till next interrupt
+IF MCU_48MHZ == 1
+	setb	Flags0.PWM_TIMER0_OVERFLOW
+	mov	Timer0_Overflow_Value, #0
+ENDIF
+	clr	TF0			; Clear interrupt flag
+	setb	Flags0.PWM_ON	
+	ajmp	t0_int_pwm_off_exit
 
 
 pwm_nofet:	; Dummy pwm on cycle
@@ -2424,7 +2452,6 @@ pwm_afet_damped:
 	ApFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_afet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_afet_damped_exit 
-	jb	Flags1.SKIP_DAMP_OFF, pwm_afet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
@@ -2438,7 +2465,6 @@ pwm_bfet_damped:
 	BpFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_bfet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_bfet_damped_exit 
-	jb	Flags1.SKIP_DAMP_OFF, pwm_bfet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
@@ -2452,7 +2478,6 @@ pwm_cfet_damped:
 	CpFET_off
 	jnb	Flags1.MOTOR_SPINNING, pwm_cfet_damped_exit
 	jb	Flags0.DEMAG_CUT_POWER, pwm_cfet_damped_exit 
-	jb	Flags1.SKIP_DAMP_OFF, pwm_cfet_damped_done 
 IF NFETON_DELAY NE 0
 	mov	A, #NFETON_DELAY					; Set delay
 	djnz ACC,	$
@@ -2508,9 +2533,13 @@ t2_int_pulses_absent:
 	; Timeout counter has reached zero, pulses are absent
 	mov	Temp1, #RCP_MIN			; RCP_MIN as default
 	mov	Temp2, #RCP_MIN			
+	jb	Flags2.RCP_PPM, t2_int_pulses_absent_no_max	; If flag is set (PPM) - branch
+
 	Read_Rcp_Int 					; Look at value of Rcp_In
 	jnb	ACC.Rcp_In, ($+5)			; Is it high?
 	mov	Temp1, #RCP_MAX			; Yes - set RCP_MAX
+
+t2_int_pulses_absent_no_max:
 	Rcp_Int_First 					; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags2.RCP_EDGE_NO			; Set first edge flag
@@ -2637,7 +2666,7 @@ t2_int_pwm_update:
 	; Update requested_pwm
 	mov	Requested_Pwm, Temp1		; Set requested pwm
 IF MODE >= 1	; Tail or multi
-	; Limit pwm during direct start
+	; Boost pwm during direct start
 	mov	A, Flags1
 	anl	A, #((1 SHL STARTUP_PHASE)+(1 SHL INITIAL_RUN_PHASE))
 	jz	t2_int_current_pwm_update
@@ -2734,16 +2763,11 @@ t2_int_current_pwm_no_dither:
 IF DAMPED_MODE_ENABLE == 1
 	; Skip damping fet switching for high throttle
 	clr	Flags1.SKIP_DAMP_ON
-	clr	Flags1.SKIP_DAMP_OFF
 	clr	C
 	mov	A, Current_Pwm_Lim_Dith
-	subb	A, #245
+	subb	A, #248
 	jc	t2_int_pwm_exit
 	setb	Flags1.SKIP_DAMP_ON
-	clr	C
-	subb	A, #5
-	jc	t2_int_pwm_exit
-	setb	Flags1.SKIP_DAMP_OFF
 ENDIF
 ENDIF
 t2_int_pwm_exit:	
@@ -2760,7 +2784,6 @@ t2_int_exit:
 	jb	TF2H, t2h_int		
 	pop	ACC			; Restore preserved registers
 	pop	PSW
-	clr	PSW.3		; Select register bank 0 for main program routines	
 	orl	EIE1, #10h	; Enable PCA0 interrupts
 	setb	ET2			; Enable timer2 interrupts
 	reti
@@ -2944,7 +2967,6 @@ ENDIF
 t2h_int_exit:
 	pop	ACC			; Restore preserved registers
 	pop	PSW
-	clr	PSW.3		; Select register bank 0 for main program routines	
 	orl	EIE1, #10h	; Enable PCA0 interrupts
 	setb	ET2			; Enable timer2 interrupts
 	reti
@@ -2958,8 +2980,8 @@ t2h_int_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 t3_int:	; Used for commutation timing
-	push	PSW				; Preserve registers through interrupt
 	clr 	EA				; Disable all interrupts
+	push	PSW				; Preserve registers through interrupt
 	anl	EIE1, #7Fh		; Disable timer3 interrupts
 	clr	Flags0.T3_PENDING 	; Flag that timer has wrapped
 	; Set up next wait
@@ -3059,12 +3081,12 @@ pca_int_second_meas_pwm_freq:
 	subb	A, #low(140)				; If pulse below 70us, not accepted
 	mov	A, Temp2
 	subb	A, #high(140)
-	jnc	rcp_int_check_12kHz
+	jnc	pca_int_check_12kHz
 
 	mov	Rcp_Period_Diff_Accepted, #0	; Set not accepted 
 	ajmp	pca_int_store_data
 
-rcp_int_check_12kHz:
+pca_int_check_12kHz:
 	mov	Bit_Access_Int, Temp1
 	mov	Temp1, #Pgm_Enable_PWM_Input	; Check if PWM input is enabled
 	mov	A, @Temp1
@@ -3207,15 +3229,15 @@ pca_int_fall:
 	ajmp	pca_int_pwm_divide				; Yes - branch forward
 
 	jb	Flags2.RCP_PPM_ONESHOT125, ($+5)
-	ajmp	rcp_int_fall_not_oneshot
+	ajmp	pca_int_fall_not_oneshot
 
 	mov	A, Temp2						; Oneshot125 - move to I_Temp5/6
 	mov	Temp6, A
 	mov	A, Temp1
 	mov	Temp5, A
-	ajmp	rcp_int_fall_check_range
+	ajmp	pca_int_fall_check_range
 
-rcp_int_fall_not_oneshot:
+pca_int_fall_not_oneshot:
 	mov	A, Temp2						; No - 2kHz. Divide by 2
 	clr	C
 	rrc	A
@@ -3245,7 +3267,7 @@ rcp_int_fall_not_oneshot:
 	mov	A, Temp1					
 	rrc	A
 	mov	Temp5, A
-rcp_int_fall_check_range:
+pca_int_fall_check_range:
 	; Skip range limitation if pwm frequency measurement
 	jb	Flags0.RCP_MEAS_PWM_FREQ, pca_int_ppm_check_full_range 		
 
@@ -3491,7 +3513,6 @@ pca_int_exit:	; Exit interrupt routine
 	pop	B			; Restore preserved registers
 	pop	ACC			
 	pop	PSW
-	clr	PSW.3		; Select register bank 0 for main program routines	
 	setb	ET2			; Enable timer2 interrupts
 	orl	EIE1, #10h	; Enable PCA0 interrupts
 	reti
@@ -5015,30 +5036,12 @@ calc_new_wait_per_startup_done:
 	mov	Temp8, #5				; Set timing to max
 
 calc_new_wait_per_demag_done:
-	mov	Temp7, #(COMM_TIME_RED SHL 1)
-	jnb	Flags2.PGM_PWMOFF_DAMPED, ($+4)	; More reduction for damped
-
-	inc	Temp7				; Increase more
-
+	; Set timing reduction
 IF MCU_48MHZ == 0
-	clr	C
-	mov	A, Comm_Period4x_H		; More reduction for higher rpms
-	subb	A, #3				; 104k eRPM
-	jnc	calc_new_wait_per_low
-
-	inc	Temp7				; Increase
-
-calc_new_wait_per_low:
+	mov	Temp7, #4
+ELSE
+	mov	Temp7, #1
 ENDIF
-	clr	C
-	mov	A, Comm_Period4x_H		; More reduction for higher rpms
-	subb	A, #2				; 156k eRPM
-	jnc	calc_new_wait_per_high
-
-	inc	Temp7				; Increase more
-	inc	Temp7
-
-calc_new_wait_per_high:
 	; Load current commutation timing
 	mov	A, Comm_Period4x_H		; Divide 4 times
 	swap	A
@@ -5120,14 +5123,11 @@ calc_next_comm_timing_fast:
 
 	clr	Flags0.HIGH_RPM 		; Clear high rpm bit 
 	
-	mov	Temp1, #(COMM_TIME_RED SHL 1)	
-	jnb	Flags2.PGM_PWMOFF_DAMPED, ($+4)	; More reduction for damped
-
-	inc	Temp1				; Increase more
-
-	mov	A, Temp1
-	add	A, #3				; Add 3
-	mov	Temp1, A
+IF MCU_48MHZ == 0
+	mov	Temp1, #4				; Set timing reduction
+ELSE
+	mov	Temp1, #1
+ENDIF
 	mov	A, Temp4				; Divide by 2 4 times
 	swap	A
 	mov	Temp7, A
@@ -6573,8 +6573,7 @@ average_throttle_div:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-
-reset:
+pgm_start:
 	; Check flash lock byte
 	mov	A, RSTSRC			
 	jb	ACC.6, ($+6)		; Check if flash access error was reset source 
@@ -6603,8 +6602,6 @@ ELSE
 ENDIF
 
 lock_byte_ok:
-	; Select register bank 0 for main program routines
-	clr	PSW.3			; Select register bank 0 for main program routines	
 	; Disable the WDT.
 IF SIGNATURE_001 == 0f3h		
 	anl	PCA0MD, #NOT(40h)	; Clear watchdog enable bit
@@ -6681,6 +6678,8 @@ ENDIF
 	; Set beep strength
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
+	; Set initial arm variable
+	mov	Initial_Arm, #1
 	; Initializing beep
 	clr	EA				; Disable interrupts explicitly
 	call wait200ms	
@@ -6774,13 +6773,12 @@ ENDIF
 	setb	EA				; Enable all interrupts
 	; Measure number of lipo cells
 	call Measure_Lipo_Cells			; Measure number of lipo cells
-	; Initialize rc pulse
+	; Initialize RC pulse
+	Rcp_Int_First 					; Enable interrupt and set to first edge
 	Rcp_Int_Enable		 			; Enable interrupt
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags2.RCP_EDGE_NO			; Set first edge flag
 	call wait200ms
-	; Set initial arm variable
-	mov	Initial_Arm, #1
 
 	; Measure PWM frequency
 measure_pwm_freq_init:	
@@ -6832,7 +6830,7 @@ measure_pwm_freq_wait:
 	mov	Flags3, A
 
 test_for_oneshot:	
-	; Test whether signal is OnShot125
+	; Test whether signal is OneShot125
 	clr	Flags2.RCP_PPM_ONESHOT125		; Clear OneShot125 flag
 	mov	Rcp_Outside_Range_Cnt, #0		; Reset out of range counter
 	call wait100ms						; Wait for new RC pulse
@@ -7540,17 +7538,14 @@ IF MODE >= 1	; Tail or multi
 
 	clr	C
 	mov	A, Stall_Cnt
-	subb	A, #10
+	subb	A, #5
 	jc	jmp_wait_for_power_on
 	jmp	init_no_signal
-
-	mov	A, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
-	jnz	jmp_wait_for_power_on		; If it is not zero - go back to wait for poweron
-	jmp	init_no_signal				; If it is zero (pulses missing) - go back to detect input signal
 
 jmp_wait_for_power_on:
 	jmp	wait_for_power_on			; Go back to wait for power on
 ENDIF
+
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
@@ -7560,13 +7555,10 @@ $include (BLHeliBootLoad.inc)			; Include source code for bootloader
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
 
+CSEG AT 19FDh
+reset:
+ljmp	pgm_start
 
-
-
-
-; TEST code size
-;CSEG AT 1E00h		; Last code segment. Take care that there is enough space!
-;nop
 
 
 

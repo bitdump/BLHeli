@@ -1,0 +1,10 @@
+MS-DOS MCS-51 CODE BANKING LINKER/LOCATOR LX51 V06.12.11.280 Demo period is over. Please register
+Copyright (c) Raisonance S.A.S. 1987-2011. All rights reserved.
+
+
+***WARNING 6 : DATA SPACE MEMORY OVERLAP
+		AT ADDRESS: 0020,(BLHELI,BLHELI)
+<Memory usage: code=6620,  internal data=187.0,  xdata/pdata=0>
+
+LINK/LOCATE RUN COMPLETE, 1 WARNING  FOUND.
+
