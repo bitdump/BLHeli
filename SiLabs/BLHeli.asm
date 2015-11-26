@@ -483,6 +483,9 @@ Graupner_Ultra_20A_Multi			EQU 207
 F85_3A_Main					EQU 208  
 F85_3A_Tail					EQU 209  
 F85_3A_Multi					EQU 210  
+ZTW_Spider_Pro_20A_Main			EQU 211  
+ZTW_Spider_Pro_20A_Tail			EQU 212  
+ZTW_Spider_Pro_20A_Multi			EQU 213  
 
 
 ;**** **** **** **** ****
@@ -697,6 +700,9 @@ F85_3A_Multi					EQU 210
 ;BESCNO EQU F85_3A_Main
 ;BESCNO EQU F85_3A_Tail
 ;BESCNO EQU F85_3A_Multi
+;BESCNO EQU ZTW_Spider_Pro_20A_Main
+;BESCNO EQU ZTW_Spider_Pro_20A_Tail
+;BESCNO EQU ZTW_Spider_Pro_20A_Multi
 
 
 ;**** **** **** **** ****
@@ -1751,6 +1757,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (F85_3A.inc)			; Select F85 3A pinout
 ENDIF
 
+IF BESCNO == ZTW_Spider_Pro_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (ZTW_Spider_Pro_20A.inc)	; Select ZTW Spider Pro 20A pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (ZTW_Spider_Pro_20A.inc)	; Select ZTW Spider Pro 20A pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (ZTW_Spider_Pro_20A.inc)	; Select ZTW Spider Pro 20A pinout
+ENDIF
+
 
 ;**** **** **** **** ****
 ; TX programming defaults
@@ -2538,8 +2559,6 @@ t2_int_pulses_absent:
 	Read_Rcp_Int 					; Look at value of Rcp_In
 	jnb	ACC.Rcp_In, ($+5)			; Is it high?
 	mov	Temp1, #RCP_MAX			; Yes - set RCP_MAX
-
-t2_int_pulses_absent_no_max:
 	Rcp_Int_First 					; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag 				; Clear interrupt flag
 	clr	Flags2.RCP_EDGE_NO			; Set first edge flag
@@ -2551,6 +2570,7 @@ t2_int_pulses_absent_no_max:
 	subb	A, Temp2					; Compare the two readings of Rcp_In
 	jnz 	t2_int_pulses_absent		; Go back if they are not equal
 
+t2_int_pulses_absent_no_max:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+6)	; Is measure RCP pwm frequency flag set?
 
 	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Yes - set timeout count to start value
@@ -6671,6 +6691,14 @@ IF PORT3_EXIST == 1
 ENDIF
 	; Initialize the XBAR and related functionality
 	Initialize_Xbar
+	; Clear RAM
+	clr	A				; Clear accumulator
+	mov	Temp1, A			; Clear Temp1
+clear_ram:	
+	mov	@Temp1, A			; Clear RAM
+	djnz Temp1, clear_ram	; Is A not zero? - jump
+	; Initialize LFSR
+	mov	Random, #1
 	; Set default programmed parameters
 	call	set_default_parameters
 	; Read all programmed parameters
@@ -6705,12 +6733,6 @@ ENDIF
 init_no_signal:
 	; Disable interrupts explicitly
 	clr	EA				
-	; Clear RAM
-	clr	A				; Clear accumulator
-	mov	Temp1, A			; Clear Temp1
-clear_ram:	
-	mov	@Temp1, A			; Clear RAM
-	djnz Temp1, clear_ram	; Is A not zero? - jump
 	; Check if input signal is high for more than 15ms
 	mov	Temp1, #250
 input_high_check_1:
@@ -6723,12 +6745,6 @@ input_high_check_2:
 	ljmp	1C00h			; Jump to bootloader
 
 bootloader_done:
-	; Initialize LFSR
-	mov	Random, #1
-	; Set default programmed parameters
-	call	set_default_parameters
-	; Read all programmed parameters
-	call read_all_eeprom_parameters
 	; Decode parameters
 	call	decode_parameters
 	; Decode settings

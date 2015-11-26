@@ -122,6 +122,7 @@
 ;           Optimizations of software timing and running reliability
 ;
 ;
+;
 ;**** **** **** **** ****
 ; 8K Bytes of In-System Self-Programmable Flash
 ; 1K Bytes Internal SRAM
@@ -885,7 +886,6 @@
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "TBS_CUBE_20A.inc"		; Select TBS CUBE 20A pinout
 #endif
-
 
 
 
@@ -1665,7 +1665,6 @@ t0_int_pulses_absent:
 	Read_Rcp_Int XL				; Look at value of Rcp_In
 	sbrc	XL, Rcp_In				; Is it high?
 	ldi	I_Temp1, RCP_MAX			; Yes - set RCP_MAX
-t0_int_pulses_absent_no_max:
 	Rcp_Int_First XL				; Set interrupt trig to first again
 	Rcp_Clear_Int_Flag XL			; Clear interrupt flag
 	cbr	Flags2, (1<<RCP_EDGE_NO)		; Set first edge flag
@@ -1676,6 +1675,7 @@ t0_int_pulses_absent_no_max:
 	cp	I_Temp1, I_Temp2
 	brne	t0_int_pulses_absent		; Go back if they are not equal
 
+t0_int_pulses_absent_no_max:
 	ldi	XL, RCP_TIMEOUT			; Load timeout count
 	sbrc	Flags0, RCP_MEAS_PWM_FREQ	; Is measure RCP pwm frequency flag set?
 
@@ -5403,6 +5403,25 @@ pgm_start:
 	out	PORTD, XH
 	ldi	XH, DIR_PD
 	out	DDRD, XH
+	; Clear registers r0 through r25
+	clr	Zero
+	ldi	XL, low(0)		; Register number
+	ldi	XH, low(0)		
+clear_regs:	
+	st	X+, Zero			; Clear register and post increment register number
+	cpi	XL, 26			; Check register number - last register?
+	brne	clear_regs		; If not last register, go back
+	; Clear RAM
+	ldi	XL, low(SRAM_START)
+	ldi	XH, high(SRAM_START)
+	ldi	Temp1, SRAM_BYTES
+clear_ram:	
+	st	X+, Zero
+	dec	Temp1
+	brne	clear_ram
+	; Initialize LFSR
+	ldi	XH, 1
+	sts	Random, XH
 	; Set default programmed parameters
 	xcall set_default_parameters
 	; Read all programmed parameters
@@ -5440,22 +5459,6 @@ pgm_start:
 init_no_signal:
 	; Disable interrupts explicitly
 	cli					
-	; Clear registers r0 through r25
-	clr	Zero
-	ldi	XL, low(0)		; Register number
-	ldi	XH, low(0)		
-clear_regs:	
-	st	X+, Zero			; Clear register and post increment register number
-	cpi	XL, 26			; Check register number - last register?
-	brne	clear_regs		; If not last register, go back
-	; Clear RAM
-	ldi	XL, low(SRAM_START)
-	ldi	XH, high(SRAM_START)
-	ldi	Temp1, SRAM_BYTES
-clear_ram:	
-	st	X+, Zero
-	dec	Temp1
-	brne	clear_ram
 	; Check if input signal is high for more than 30ms
 	ldi	Temp1, 250
 input_high_check_1:
@@ -5509,13 +5512,6 @@ jmp_to_bootloader:
 	
 
 bootloader_done:
-	; Initialize LFSR
-	ldi	XH, 1
-	sts	Random, XH
-	; Set default programmed parameters
-	xcall set_default_parameters
-	; Read all programmed parameters
-	xcall read_all_eeprom_parameters
 	; Decode parameters
 	xcall decode_parameters
 	; Decode settings

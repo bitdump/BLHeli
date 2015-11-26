@@ -163,6 +163,8 @@ SET BESCNAME=GRAUPNER_ULTRA_20A
 call:compile
 SET BESCNAME=F85_3A
 call:compile
+SET BESCNAME=ZTW_SPIDER_PRO_20A
+call:compile
 
 goto :end
 
