@@ -104,6 +104,8 @@ SET NAME=DYS_SN20A
 call :compile
 SET NAME=TBS_CUBE_20A
 call :compile
+SET NAME=ZTW_SPIDER_LITE_18Av2
+call :compile
 
 goto :end
 

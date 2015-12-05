@@ -282,6 +282,9 @@
 ;#define TBS_CUBE_20A_MAIN			; ICP1 as input		
 ;#define TBS_CUBE_20A_TAIL
 ;#define TBS_CUBE_20A_MULTI 
+;#define ZTW_SPIDER_LITE_18Av2_MAIN
+;#define ZTW_SPIDER_LITE_18Av2_TAIL
+;#define ZTW_SPIDER_LITE_18Av2_MULTI
 
 
 
@@ -885,6 +888,21 @@
 #if defined(TBS_CUBE_20A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "TBS_CUBE_20A.inc"		; Select TBS CUBE 20A pinout
+#endif
+
+#if defined(ZTW_SPIDER_LITE_18Av2_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "ZTW_Spider_Lite_18Av2.inc"	; Select ZTW Spider Lite 18Av2 pinout
+#endif
+
+#if defined(ZTW_SPIDER_LITE_18Av2_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "ZTW_Spider_Lite_18Av2.inc"	; Select ZTW Spider Lite 18Av2 pinout
+#endif
+
+#if defined(ZTW_SPIDER_LITE_18Av2_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "ZTW_Spider_Lite_18Av2.inc"	; Select ZTW Spider Lite 18Av2 pinout
 #endif
 
 
