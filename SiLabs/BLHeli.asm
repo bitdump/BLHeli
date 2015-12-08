@@ -477,15 +477,18 @@ Flycolor_Fairy_30A_Multi 		EQU 201
 FVT_Littlebee_20A_Main			EQU 202  
 FVT_Littlebee_20A_Tail			EQU 203  
 FVT_Littlebee_20A_Multi			EQU 204  
-Graupner_Ultra_20A_Main			EQU 205  
-Graupner_Ultra_20A_Tail			EQU 206  
-Graupner_Ultra_20A_Multi			EQU 207  
-F85_3A_Main					EQU 208  
-F85_3A_Tail					EQU 209  
-F85_3A_Multi					EQU 210  
-ZTW_Spider_Pro_20A_Main			EQU 211  
-ZTW_Spider_Pro_20A_Tail			EQU 212  
-ZTW_Spider_Pro_20A_Multi			EQU 213  
+FVT_Littlebee_30A_Main			EQU 205  
+FVT_Littlebee_30A_Tail			EQU 206  
+FVT_Littlebee_30A_Multi			EQU 207  
+Graupner_Ultra_20A_Main			EQU 208  
+Graupner_Ultra_20A_Tail			EQU 209  
+Graupner_Ultra_20A_Multi			EQU 210  
+F85_3A_Main					EQU 211  
+F85_3A_Tail					EQU 212  
+F85_3A_Multi					EQU 213  
+ZTW_Spider_Pro_20A_Main			EQU 214  
+ZTW_Spider_Pro_20A_Tail			EQU 215  
+ZTW_Spider_Pro_20A_Multi			EQU 216  
 
 
 ;**** **** **** **** ****
@@ -694,6 +697,9 @@ ZTW_Spider_Pro_20A_Multi			EQU 213
 ;BESCNO EQU FVT_Littlebee_20A_Main
 ;BESCNO EQU FVT_Littlebee_20A_Tail
 ;BESCNO EQU FVT_Littlebee_20A_Multi 
+;BESCNO EQU FVT_Littlebee_30A_Main
+;BESCNO EQU FVT_Littlebee_30A_Tail
+;BESCNO EQU FVT_Littlebee_30A_Multi 
 ;BESCNO EQU Graupner_Ultra_20A_Main
 ;BESCNO EQU Graupner_Ultra_20A_Tail
 ;BESCNO EQU Graupner_Ultra_20A_Multi 
@@ -1725,6 +1731,21 @@ ENDIF
 IF BESCNO == FVT_Littlebee_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (FVT_Littlebee_30A.inc)	; Select Favourite Littlebee 30A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (FVT_Littlebee_30A.inc)	; Select Favourite Littlebee 30A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (FVT_Littlebee_30A.inc)	; Select Favourite Littlebee 30A pinout
 ENDIF
 
 IF BESCNO == Graupner_Ultra_20A_Main
