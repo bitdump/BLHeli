@@ -167,6 +167,8 @@ SET BESCNAME=F85_3A
 call:compile
 SET BESCNAME=ZTW_SPIDER_PRO_20A
 call:compile
+SET BESCNAME=ZTW_SPIDER_PRO_20A_HV
+call:compile
 
 goto :end
 

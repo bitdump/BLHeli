@@ -489,6 +489,9 @@ F85_3A_Multi					EQU 213
 ZTW_Spider_Pro_20A_Main			EQU 214  
 ZTW_Spider_Pro_20A_Tail			EQU 215  
 ZTW_Spider_Pro_20A_Multi			EQU 216  
+ZTW_Spider_Pro_20A_HV_Main		EQU 217  
+ZTW_Spider_Pro_20A_HV_Tail		EQU 218  
+ZTW_Spider_Pro_20A_HV_Multi		EQU 219  
 
 
 ;**** **** **** **** ****
@@ -681,7 +684,7 @@ ZTW_Spider_Pro_20A_Multi			EQU 216
 ;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
-;BESCNO EQU XRotor_40A_Multi 
+;BESCNO EQU XRotor_40A_Multi
 ;BESCNO EQU MDRX62H_Main
 ;BESCNO EQU MDRX62H_Tail
 ;BESCNO EQU MDRX62H_Multi 
@@ -709,6 +712,9 @@ ZTW_Spider_Pro_20A_Multi			EQU 216
 ;BESCNO EQU ZTW_Spider_Pro_20A_Main
 ;BESCNO EQU ZTW_Spider_Pro_20A_Tail
 ;BESCNO EQU ZTW_Spider_Pro_20A_Multi
+;BESCNO EQU ZTW_Spider_Pro_20A_HV_Main
+;BESCNO EQU ZTW_Spider_Pro_20A_HV_Tail
+;BESCNO EQU ZTW_Spider_Pro_20A_HV_Multi
 
 
 ;**** **** **** **** ****
@@ -1791,6 +1797,21 @@ ENDIF
 IF BESCNO == ZTW_Spider_Pro_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (ZTW_Spider_Pro_20A.inc)	; Select ZTW Spider Pro 20A pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_HV_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_HV_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_HV_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
 ENDIF
 
 
