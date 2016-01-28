@@ -101,15 +101,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	out	GICR, @0
 .ENDMACRO
 .MACRO Rcp_Int_First
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
+	ldi	@0, (1<<ISC01)+(1<<ISC00); Default - set next int0 to rising
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
 	out	MCUCR, @0		
 .ENDMACRO
 .MACRO Rcp_Int_Second
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
+	ldi	@0, (1<<ISC01)			; Default - set next int0 to falling
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
 	out	MCUCR, @0		
@@ -250,8 +248,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
    	ldi  @0, Mux_B  		; Set comparator multiplexer to phase B
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
   	out  ADMUX, @0
 .ENDMACRO
 .MACRO Set_Comp_Phase_C
@@ -259,8 +256,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
    	sbr  @0, (1<<ACME) 	
    	out  SFIOR, @0
    	ldi  @0, Mux_C  		; Set comparator multiplexer to phase C
-  	sbr  @0, (1<<REFS1) 		
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
   	out  ADMUX, @0
 .ENDMACRO
 .MACRO Read_Comp_Out
@@ -335,8 +331,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
 .MACRO Initialize_Adc
 	ldi	@0, Volt_Ip
-	sbr  @0, (1<<REFS1) 	
-	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
 	out	ADMUX, @0			; Set ADMUX register
   	in  	@0, ADCSRA		; Set ADCSRA register (1MHz clock)
   	sbr  @0, (1<<ADPS2) 	
@@ -351,12 +346,10 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	sbr	Flags1, (1<<ADC_READ_TEMP)
 .ENDMACRO
 .MACRO Start_Adc
-	sbrs	Flags1, ADC_READ_TEMP
 	ldi	@0, Volt_Ip
 	sbrc	Flags1, ADC_READ_TEMP
 	ldi	@0, Temp_Ip
-  	sbr  @0, (1<<REFS1) 	
-  	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
 	out	ADMUX, @0			; Set ADMUX register (2.56V reference, selected input)
  	in  	@0, ADCSRA	
   	sbr  @0, (1<<ADEN) 		; Enable ADC	

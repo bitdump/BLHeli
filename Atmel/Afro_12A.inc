@@ -108,16 +108,14 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .ENDMACRO
 .MACRO Rcp_Int_First
 	in	@0, TCCR1B
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	sbr @0, (1<<ICES1)			; Yes - set icp1int to trig on rising edge
+	sbr @0, (1<<ICES1)			; Default - set icp1int to trig on rising edge
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	cbr @0, (1<<ICES1)			; Yes - set icp1int to trig on falling edge
 	out	TCCR1B, @0		
 .ENDMACRO
 .MACRO Rcp_Int_Second
 	in	@0, TCCR1B
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	cbr @0, (1<<ICES1)			; Yes - set icp1int to trig on falling edge
+	cbr @0, (1<<ICES1)			; Default - set icp1int to trig on falling edge
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	sbr @0, (1<<ICES1)			; Yes - set icp1int to trig on rising edge
 	out	TCCR1B, @0		
@@ -342,8 +340,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 
 .MACRO Initialize_Adc
 	ldi	@0, Volt_Ip
-	sbr  @0, (1<<REFS1) 	
-	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
 	out	ADMUX, @0			; Set ADMUX register
   	in  	@0, ADCSRA		; Set ADCSRA register (1MHz clock)
   	sbr  @0, (1<<ADPS2) 	
@@ -358,7 +355,6 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	sbr	Flags1, (1<<ADC_READ_TEMP)
 .ENDMACRO
 .MACRO Start_Adc
-	sbrs	Flags1, ADC_READ_TEMP
 	ldi	@0, Volt_Ip
 	sbrc	Flags1, ADC_READ_TEMP
 	ldi	@0, Temp_Ip

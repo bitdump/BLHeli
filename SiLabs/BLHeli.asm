@@ -228,15 +228,19 @@ $NOMOD51
 ;           Added 100ms intialization delay for the Graupner Ultra 20A ESC
 ;           Shortened stall detect time to about 5sec, and prevented going into tx programming after a stall
 ;           Optimizations of software timing and running reliability
+; - Rev14.4 Improved startup, particularly for larger motors
+;           Improved running at very high rpms
+;           Made damped light default for MULTI on ESCs that support it
+;           Miscellaneous other changes
 ;
 ;           
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
-; 768 Bytes Internal SRAM
+; Up to 768 Bytes Internal SRAM
 ;
 ;**** **** **** **** ****
-; Master clock is internal 24MHz oscillator
+; Master clock is internal 24MHz oscillator (or 48MHz, for which the times below are halved)
 ; Timer 0 (167/500ns counts) always counts up and is used for
 ; - PWM generation
 ; Timer 1 (167/500ns counts) always counts up and is used for
@@ -250,7 +254,7 @@ $NOMOD51
 ;
 ;**** **** **** **** ****
 ; Interrupt handling
-; The F330 does not disable interrupts when entering an interrupt routine.
+; The C8051 does not disable interrupts when entering an interrupt routine.
 ; Also some interrupt flags need to be cleared by software
 ; The code disables interrupts in interrupt routines, in order to avoid too nested interrupts
 ; - Interrupts are disabled during beeps, to avoid audible interference from interrupts
@@ -269,7 +273,7 @@ $NOMOD51
 ; - Scan for zero cross			22.5deg	, Nominal, with some motor variations
 ;
 ; Motor startup:
-; Startup is the only phase, before normal bemf commutation run begins.
+; There is a startup phase and an initial run phase, before normal bemf commutation run begins.
 ;
 ;**** **** **** **** ****
 ; List of enumerated supported ESCs and modes  (main, tail or multi)
@@ -489,9 +493,21 @@ F85_3A_Multi					EQU 213
 ZTW_Spider_Pro_20A_Main			EQU 214  
 ZTW_Spider_Pro_20A_Tail			EQU 215  
 ZTW_Spider_Pro_20A_Multi			EQU 216  
-ZTW_Spider_Pro_20A_HV_Main		EQU 217  
-ZTW_Spider_Pro_20A_HV_Tail		EQU 218  
-ZTW_Spider_Pro_20A_HV_Multi		EQU 219  
+ZTW_Spider_Pro_20A_Premium_Main	EQU 217  
+ZTW_Spider_Pro_20A_Premium_Tail	EQU 218  
+ZTW_Spider_Pro_20A_Premium_Multi	EQU 219  
+ZTW_Spider_Pro_20A_HV_Main		EQU 220  
+ZTW_Spider_Pro_20A_HV_Tail		EQU 221  
+ZTW_Spider_Pro_20A_HV_Multi		EQU 222  
+ZTW_Spider_Pro_30A_HV_Main		EQU 223  
+ZTW_Spider_Pro_30A_HV_Tail		EQU 224  
+ZTW_Spider_Pro_30A_HV_Multi		EQU 225  
+DYS_XM20A_Main					EQU 226  
+DYS_XM20A_Tail					EQU 227  
+DYS_XM20A_Multi				EQU 228  
+Oversky_MR_20A_Pro_Main			EQU 229  
+Oversky_MR_20A_Pro_Tail			EQU 230  
+Oversky_MR_20A_Pro_Multi			EQU 231  
 
 
 ;**** **** **** **** ****
@@ -684,7 +700,7 @@ ZTW_Spider_Pro_20A_HV_Multi		EQU 219
 ;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
-;BESCNO EQU XRotor_40A_Multi
+;BESCNO EQU XRotor_40A_Multi 
 ;BESCNO EQU MDRX62H_Main
 ;BESCNO EQU MDRX62H_Tail
 ;BESCNO EQU MDRX62H_Multi 
@@ -699,7 +715,7 @@ ZTW_Spider_Pro_20A_HV_Multi		EQU 219
 ;BESCNO EQU Flycolor_Fairy_30A_Multi
 ;BESCNO EQU FVT_Littlebee_20A_Main
 ;BESCNO EQU FVT_Littlebee_20A_Tail
-;BESCNO EQU FVT_Littlebee_20A_Multi 
+;BESCNO EQU FVT_Littlebee_20A_Multi  
 ;BESCNO EQU FVT_Littlebee_30A_Main
 ;BESCNO EQU FVT_Littlebee_30A_Tail
 ;BESCNO EQU FVT_Littlebee_30A_Multi 
@@ -711,10 +727,22 @@ ZTW_Spider_Pro_20A_HV_Multi		EQU 219
 ;BESCNO EQU F85_3A_Multi
 ;BESCNO EQU ZTW_Spider_Pro_20A_Main
 ;BESCNO EQU ZTW_Spider_Pro_20A_Tail
-;BESCNO EQU ZTW_Spider_Pro_20A_Multi
+;BESCNO EQU ZTW_Spider_Pro_20A_Multi 
+;BESCNO EQU ZTW_Spider_Pro_20A_Premium_Main
+;BESCNO EQU ZTW_Spider_Pro_20A_Premium_Tail
+;BESCNO EQU ZTW_Spider_Pro_20A_Premium_Multi
 ;BESCNO EQU ZTW_Spider_Pro_20A_HV_Main
 ;BESCNO EQU ZTW_Spider_Pro_20A_HV_Tail
-;BESCNO EQU ZTW_Spider_Pro_20A_HV_Multi
+;BESCNO EQU ZTW_Spider_Pro_20A_HV_Multi 
+;BESCNO EQU ZTW_Spider_Pro_30A_HV_Main
+;BESCNO EQU ZTW_Spider_Pro_30A_HV_Tail
+;BESCNO EQU ZTW_Spider_Pro_30A_HV_Multi 
+;BESCNO EQU DYS_XM20A_Main
+;BESCNO EQU DYS_XM20A_Tail
+;BESCNO EQU DYS_XM20A_Multi 
+;BESCNO EQU Oversky_MR_20A_Pro_Main
+;BESCNO EQU Oversky_MR_20A_Pro_Tail
+;BESCNO EQU Oversky_MR_20A_Pro_Multi
 
 
 ;**** **** **** **** ****
@@ -1799,19 +1827,79 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (ZTW_Spider_Pro_20A.inc)	; Select ZTW Spider Pro 20A pinout
 ENDIF
 
+IF BESCNO == ZTW_Spider_Pro_20A_Premium_Main
+MODE 	EQU 	0						; Choose mode. Set to 0 for main motor
+$include (ZTW_Spider_Pro_20A_Premium.inc)	; Select ZTW Spider Pro 20A Premium pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_Premium_Tail
+MODE 	EQU 	1						; Choose mode. Set to 1 for tail motor
+$include (ZTW_Spider_Pro_20A_Premium.inc)	; Select ZTW Spider Pro 20A Premium pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_20A_Premium_Multi
+MODE 	EQU 	2						; Choose mode. Set to 2 for multirotor
+$include (ZTW_Spider_Pro_20A_Premium.inc)	; Select ZTW Spider Pro 20A Premium pinout
+ENDIF
+
 IF BESCNO == ZTW_Spider_Pro_20A_HV_Main
-MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+MODE 	EQU 	0					; Choose mode. Set to 0 for main motor
 $include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
 ENDIF
 
 IF BESCNO == ZTW_Spider_Pro_20A_HV_Tail
-MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+MODE 	EQU 	1					; Choose mode. Set to 1 for tail motor
 $include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
 ENDIF
 
 IF BESCNO == ZTW_Spider_Pro_20A_HV_Multi
-MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+MODE 	EQU 	2					; Choose mode. Set to 2 for multirotor
 $include (ZTW_Spider_Pro_20A_HV.inc)	; Select ZTW Spider Pro 20A HV pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_30A_HV_Main
+MODE 	EQU 	0					; Choose mode. Set to 0 for main motor
+$include (ZTW_Spider_Pro_30A_HV.inc)	; Select ZTW Spider Pro 30A HV pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_30A_HV_Tail
+MODE 	EQU 	1					; Choose mode. Set to 1 for tail motor
+$include (ZTW_Spider_Pro_30A_HV.inc)	; Select ZTW Spider Pro 30A HV pinout
+ENDIF
+
+IF BESCNO == ZTW_Spider_Pro_30A_HV_Multi
+MODE 	EQU 	2					; Choose mode. Set to 2 for multirotor
+$include (ZTW_Spider_Pro_30A_HV.inc)	; Select ZTW Spider Pro 30A HV pinout
+ENDIF
+
+IF BESCNO == DYS_XM20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (DYS_XM20A.inc)			; Select DYS XM20A pinout
+ENDIF
+
+IF BESCNO == DYS_XM20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (DYS_XM20A.inc)			; Select DYS XM20A pinout
+ENDIF
+
+IF BESCNO == DYS_XM20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (DYS_XM20A.inc)			; Select DYS XM20A pinout
+ENDIF
+
+IF BESCNO == Oversky_MR_20A_Pro_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Oversky_MR_20A_Pro.inc)	; Select Oversky MR-20A Pro pinout
+ENDIF
+
+IF BESCNO == Oversky_MR_20A_Pro_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Oversky_MR_20A_Pro.inc)	; Select Oversky MR-20A Pro pinout
+ENDIF
+
+IF BESCNO == Oversky_MR_20A_Pro_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Oversky_MR_20A_Pro.inc)	; Select Oversky MR-20A Pro pinout
 ENDIF
 
 
@@ -1867,7 +1955,7 @@ DEFAULT_PGM_MULTI_GOVERNOR_MODE 	EQU 4 	; 1=HiRange	2=MidRange	3=LoRange		4=Off
 DEFAULT_PGM_MULTI_GAIN 			EQU 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 DEFAULT_PGM_MULTI_COMM_TIMING		EQU 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 IF DAMPED_MODE_ENABLE == 1
-DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low 		3=DampedLight 
+DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 3 	; 1=High 		2=Low 		3=DampedLight 
 ELSE
 DEFAULT_PGM_MULTI_PWM_FREQ	 	EQU 1 	; 1=High 		2=Low
 ENDIF
@@ -1977,8 +2065,8 @@ Current_Pwm_Lim_Dith:		DS	1		; Current pwm that is limited and dithered (applied
 Rcp_Prev_Edge_L:			DS	1		; RC pulse previous edge timer3 timestamp (lo byte)
 Rcp_Prev_Edge_H:			DS	1		; RC pulse previous edge timer3 timestamp (hi byte)
 Rcp_Outside_Range_Cnt:		DS	1		; RC pulse outside range counter (incrementing) 
-Rcp_Timeout_Cnt:			DS	1		; RC pulse timeout counter (decrementing) 
-Rcp_Skip_Cnt:				DS	1		; RC pulse skip counter (decrementing) 
+Rcp_Timeout_Cntd:			DS	1		; RC pulse timeout counter (decrementing) 
+Rcp_Skip_Cntd:				DS	1		; RC pulse skip counter (decrementing) 
 
 Flags0:					DS	1    	; State flags. Reset upon init_start
 T3_PENDING				EQU 	0		; Timer3 pending flag
@@ -2031,14 +2119,17 @@ Power_On_Wait_Cnt_L: 		DS	1		; Power on wait counter (lo byte)
 Power_On_Wait_Cnt_H: 		DS	1		; Power on wait counter (hi byte)
 
 Startup_Cnt:				DS	1		; Startup phase commutations counter (incrementing)
+Startup_Zc_Timeout_Cntd:		DS	1		; Startup zero cross timeout counter (decrementing)
 Initial_Run_Rot_Cnt:		DS	1		; Initial run rotations counter (incrementing)
 Stall_Cnt:				DS	1		; Counts start/run attempts that resulted in stall. Reset upon a proper stop
 Demag_Detected_Metric:		DS	1		; Metric used to gauge demag event frequency
 Demag_Pwr_Off_Thresh:		DS	1		; Metric threshold above which power is cut
 Low_Rpm_Pwr_Slope:			DS	1		; Sets the slope of power increase for low rpms
 
+Timer2_X:					DS	1		; Timer 2 extended byte
 Prev_Comm_L:				DS	1		; Previous commutation timer3 timestamp (lo byte)
 Prev_Comm_H:				DS	1		; Previous commutation timer3 timestamp (hi byte)
+Prev_Comm_X:				DS	1		; Previous commutation timer3 timestamp (ext byte)
 Prev_Prev_Comm_L:			DS	1		; Pre-previous commutation timer3 timestamp (lo byte)
 Prev_Prev_Comm_H:			DS	1		; Pre-previous commutation timer3 timestamp (hi byte)
 Comm_Period4x_L:			DS	1		; Timer3 counts between the last 4 commutations (lo byte)
@@ -2168,7 +2259,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	4		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2298,7 +2389,7 @@ CSEG AT 1A60h
 Eep_Name:					DB	"                "				; Name tag (16 Bytes)
 
 ;**** **** **** **** ****
-Interrupt_Table_Definition		; SiLabs interrupts
+	Interrupt_Table_Definition		; SiLabs interrupts
 CSEG AT 80h			; Code segment after interrupt vectors 
 
 ;**** **** **** **** ****
@@ -2364,7 +2455,6 @@ ENDIF
 	mov	A, Current_Pwm_Limited
 	jz	t0_int_pwm_on_exit
 
-t0_int_pwm_on_execute:
 	clr	A					
 	jmp	@A+DPTR					; Jump to pwm on routines. DPTR should be set to one of the pwm_nfet_on labels
 
@@ -2451,6 +2541,7 @@ t0_int_pwm_off_damped:
 IF PFETON_DELAY < 128
 	All_nFETs_Off 				; Switch off all nfets
 	jb	Flags1.SKIP_DAMP_ON, t0_int_pwm_off_damp_done 
+	jb	Flags0.DEMAG_CUT_POWER, t0_int_pwm_off_damp_done 
 IF PFETON_DELAY NE 0
 	mov	A, #PFETON_DELAY
 	djnz	ACC, $	
@@ -2460,9 +2551,11 @@ t0_int_pwm_off_damp_done:
 ENDIF
 IF PFETON_DELAY >= 128			; "Negative", 1's complement
 	jb	Flags1.SKIP_DAMP_ON, t0_int_pwm_off_damp_done
+	jb	Flags0.DEMAG_CUT_POWER, t0_int_pwm_off_damp_done 
 	Damping_FET_on				; Damping fet on
 	mov	A, #PFETON_DELAY
 	cpl	A
+	djnz	ACC, $	
 t0_int_pwm_off_damp_done:
 	All_nFETs_Off 				; Switch off all nfets
 ENDIF
@@ -2476,7 +2569,7 @@ ENDIF
 	setb	EA			; Enable all interrupts
 	reti
 
-t0_int_pwm_off_fullpower_exit:
+t0_int_pwm_off_fullpower_exit: 
 	mov	TL0, #0		; Set long time till next interrupt
 IF MCU_48MHZ == 1
 	setb	Flags0.PWM_TIMER0_OVERFLOW
@@ -2583,13 +2676,13 @@ ENDIF
 	; Clear low byte interrupt flag
 	clr	TF2L						; Clear interrupt flag
 	; Check RC pulse timeout counter
-	mov	A, Rcp_Timeout_Cnt			; RC pulse timeout count zero?
+	mov	A, Rcp_Timeout_Cntd			; RC pulse timeout count zero?
 	jz	t2_int_pulses_absent		; Yes - pulses are absent
 
 	; Decrement timeout counter (if PWM)
 	jb	Flags2.RCP_PPM, t2_int_skip_start	; If flag is set (PPM) - branch
 
-	dec	Rcp_Timeout_Cnt			; No - decrement
+	dec	Rcp_Timeout_Cntd			; No - decrement
 	ajmp	t2_int_skip_start
 
 t2_int_pulses_absent:
@@ -2615,11 +2708,11 @@ t2_int_pulses_absent:
 t2_int_pulses_absent_no_max:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+6)	; Is measure RCP pwm frequency flag set?
 
-	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Yes - set timeout count to start value
+	mov	Rcp_Timeout_Cntd, #RCP_TIMEOUT	; Yes - set timeout count to start value
 
 	jb	Flags2.RCP_PPM, t2_int_ppm_timeout_set	; If flag is set (PPM) - branch
 
-	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; For PWM, set timeout count to start value
+	mov	Rcp_Timeout_Cntd, #RCP_TIMEOUT	; For PWM, set timeout count to start value
 
 t2_int_ppm_timeout_set:
 	mov	New_Rcp, Temp1				; Store new pulse length
@@ -2629,11 +2722,11 @@ t2_int_skip_start:
 	jb	Flags2.RCP_PPM, t2_int_rcp_update_start	; If flag is set (PPM) - branch
 
 	; Check RC pulse skip counter
-	mov	A, Rcp_Skip_Cnt			
+	mov	A, Rcp_Skip_Cntd			
 	jz 	t2_int_skip_end			; If RC pulse skip count is zero - end skipping RC pulse detection
 	
 	; Decrement skip counter (only if edge counter is zero)
-	dec	Rcp_Skip_Cnt				; Decrement
+	dec	Rcp_Skip_Cntd				; Decrement
 	ajmp	t2_int_rcp_update_start
 
 t2_int_skip_end:
@@ -2738,6 +2831,7 @@ IF MODE >= 1	; Tail or multi
 	rrc	A
 	clr	C
 	rrc	A
+	add	A, #6
 	add	A, Requested_Pwm			
 	mov	Requested_Pwm, A
 	jnc	($+5)
@@ -2851,6 +2945,9 @@ t2_int_exit:
 	reti
 
 t2h_int:
+	; High byte interrupt (happens every 32ms)
+	clr	TF2H					; Clear interrupt flag
+	inc	Timer2_X
 IF MCU_48MHZ == 1
 	mov	A, Clock_Set_At_48MHz
 	jz 	t2h_int_start
@@ -2865,17 +2962,15 @@ IF MCU_48MHZ == 1
 t2h_int_start:
 	mov	Skip_T2h_Int, #1			; Skip next interrupt
 ENDIF
-	; High byte interrupt (happens every 32ms)
-	clr	TF2H					; Clear interrupt flag
 	mov	Temp1, #GOV_SPOOLRATE	; Load governor spool rate
 	; Check RC pulse timeout counter (used here for PPM only)
-	mov	A, Rcp_Timeout_Cnt			; RC pulse timeout count zero?
+	mov	A, Rcp_Timeout_Cntd			; RC pulse timeout count zero?
 	jz	t2h_int_rcp_stop_check		; Yes - do not decrement
 
 	; Decrement timeout counter (if PPM)
 	jnb	Flags2.RCP_PPM, t2h_int_rcp_stop_check	; If flag is not set (PWM) - branch
 
-	dec	Rcp_Timeout_Cnt			; No flag set (PPM) - decrement
+	dec	Rcp_Timeout_Cntd			; No flag set (PPM) - decrement
 
 t2h_int_rcp_stop_check:
 	; Check RC pulse against stop value
@@ -3553,10 +3648,10 @@ pca_int_limited:
 	setb	Flags2.RCP_PPM				; Set flag (PPM)
 
 pca_int_set_timeout:
-	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT	; Set timeout count to start value
+	mov	Rcp_Timeout_Cntd, #RCP_TIMEOUT	; Set timeout count to start value
 	jnb	Flags2.RCP_PPM, pca_int_ppm_timeout_set	; If flag is not set (PWM) - branch
 
-	mov	Rcp_Timeout_Cnt, #RCP_TIMEOUT_PPM	; No flag set means PPM. Set timeout count
+	mov	Rcp_Timeout_Cntd, #RCP_TIMEOUT_PPM	; No flag set means PPM. Set timeout count
 
 pca_int_ppm_timeout_set:
 	jnb	Flags0.RCP_MEAS_PWM_FREQ, ($+5)	; Is measure RCP pwm frequency flag set?
@@ -3570,7 +3665,7 @@ pca_int_ppm_timeout_set:
 pca_int_exit:	; Exit interrupt routine	
 	jb	Flags2.RCP_PPM, ($+6)		; If flag is set (PPP) - branch
 
-	mov	Rcp_Skip_Cnt, #RCP_SKIP_RATE	; Load number of skips
+	mov	Rcp_Skip_Cntd, #RCP_SKIP_RATE	; Load number of skips
 
 	pop	B			; Restore preserved registers
 	pop	ACC			
@@ -4912,12 +5007,20 @@ initialize_timing:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 calc_next_comm_timing:		; Entry point for run phase
 	; Read commutation time
+	clr	EA
 	mov	TMR2CN, #20h		; Timer2 disabled
 	mov	Temp1, TMR2L		; Load timer value
 	mov	Temp2, TMR2H	
+	mov	Temp3, Timer2_X	
+	jnb	TF2H, ($+4)		; Check if interrupt is pending
+	inc	Temp3			; If it is pending, then timer has already wrapped
 	mov	TMR2CN, #24h		; Timer2 enabled
+	setb	EA
 IF MCU_48MHZ == 1
 	clr	C
+	mov	A, Temp3
+	rrc	A
+	mov	Temp3, A
 	mov	A, Temp2
 	rrc	A
 	mov	Temp2, A
@@ -4926,16 +5029,18 @@ IF MCU_48MHZ == 1
 	mov	Temp1, A
 ENDIF
 	; Calculate this commutation time
-	mov	Temp3, Prev_Comm_L
-	mov	Temp4, Prev_Comm_H
+	mov	Temp4, Prev_Comm_L 
+	mov	Temp5, Prev_Comm_H 
 	mov	Prev_Comm_L, Temp1		; Store timestamp as previous commutation
 	mov	Prev_Comm_H, Temp2
 	clr	C
 	mov	A, Temp1
-	subb	A, Temp3				; Calculate the new commutation time
+	subb	A, Temp4				; Calculate the new commutation time
 	mov	Temp1, A
 	mov	A, Temp2
-	subb	A, Temp4
+	subb	A, Temp5		
+	jb	Flags1.STARTUP_PHASE, calc_next_comm_startup	
+
 IF MCU_48MHZ == 1
 	anl	A, #7Fh
 ENDIF
@@ -4943,36 +5048,44 @@ ENDIF
 	jnb	Flags0.HIGH_RPM, ($+5)	; Branch if high rpm
 	ajmp	calc_next_comm_timing_fast
 
-	jnb	Flags1.STARTUP_PHASE, calc_next_comm_startup_done	
+	ajmp	calc_next_comm_normal
 
-	mov	Temp5, Prev_Prev_Comm_L
-	mov	Temp6, Prev_Prev_Comm_H
-	mov	Prev_Prev_Comm_L, Temp3
-	mov	Prev_Prev_Comm_H, Temp4
-	clr	C
-	mov	A, Temp4
-	subb	A, Temp6				; Calculate previous commutation time (hi byte only)
+calc_next_comm_startup:
+	mov	Temp6, Prev_Comm_X
+	mov	Prev_Comm_X, Temp3		; Store extended timestamp as previous commutation
+	mov	Temp2, A
+	mov	A, Temp3
+	subb	A, Temp6				; Calculate the new extended commutation time
 IF MCU_48MHZ == 1
 	anl	A, #7Fh
 ENDIF
-	mov	Temp4, A
+	mov	Temp3, A
+	jz	($+6)
+
+	mov	Temp1, #0FFh
+	mov	Temp2, #0FFh
+
+	mov	Temp7, Prev_Prev_Comm_L 
+	mov	Temp8, Prev_Prev_Comm_H 
+	mov	Prev_Prev_Comm_L, Temp4 
+	mov	Prev_Prev_Comm_H, Temp5 
+	clr	C
+	mov	A, Temp5 
+	subb	A, Temp8 				; Calculate previous commutation time (hi byte only)
+	mov	Temp5, A 
 	clr	C
 	mov	A, Temp2
-	subb	A, Temp4				; Calculate the difference between the two previous commutation times (hi bytes only)
+	subb	A, Temp5 				; Calculate the difference between the two previous commutation times (hi bytes only)
 	mov	Comm_Diff, A
 	mov	Temp1, Prev_Comm_L		; Reload this commutation time	
 	mov	Temp2, Prev_Comm_H
 	clr	C
 	mov	A, Temp1
-	subb	A, Temp5				; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
+	subb	A, Temp7 				; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
 	mov	Temp1, A
 	mov	A, Temp2
-	subb	A, Temp6
-IF MCU_48MHZ == 1
-	anl	A, #7Fh
-ENDIF
+	subb	A, Temp8 
 	mov	Temp2, A
-
 	clr	C
 	mov	A, Comm_Period4x_H		; Average with previous and save
 	rrc	A
@@ -4986,9 +5099,14 @@ ENDIF
 	mov	A, Temp2
 	addc	A, Temp4
 	mov	Comm_Period4x_H, A
+	jnc	($+8)
+
+	mov	Comm_Period4x_L, #0FFh
+	mov	Comm_Period4x_H, #0FFh
+
 	ajmp	calc_new_wait_times_setup
 
-calc_next_comm_startup_done:
+calc_next_comm_normal:
 	; Calculate new commutation time 
 	mov	Temp3, Comm_Period4x_L	; Comm_Period4x(-l-h) holds the time of 4 commutations
 	mov	Temp4, Comm_Period4x_H
@@ -5098,11 +5216,26 @@ calc_new_wait_per_startup_done:
 	mov	Temp8, #5				; Set timing to max
 
 calc_new_wait_per_demag_done:
-	; Set timing reduction
-IF MCU_48MHZ == 0
-	mov	Temp7, #4
+IF MCU_48MHZ == 0				; Set timing reduction
+ IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
+  IF ((NFETON_DELAY + PFETON_DELAY) <= 30)
+	mov	Temp7, #(4 + ((NFETON_DELAY + PFETON_DELAY)/10))	; Min to max 
+  ELSE
+ 	mov	Temp7, #7									; Max
+  ENDIF
+ ELSE
+	mov	Temp7, #5									; Mid
+ ENDIF
 ELSE
-	mov	Temp7, #1
+ IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
+  IF ((NFETON_DELAY + PFETON_DELAY) <= 40)
+	mov	Temp7, #(2 + ((NFETON_DELAY + PFETON_DELAY)/20))	; Min to max 
+  ELSE
+ 	mov	Temp7, #4									; Max
+  ENDIF
+ ELSE
+	mov	Temp7, #3									; Mid
+ ENDIF
 ENDIF
 	; Load current commutation timing
 	mov	A, Comm_Period4x_H		; Divide 4 times
@@ -5141,7 +5274,7 @@ load_min_time:
 	mov	Temp4, A 
 
 calc_new_wait_times_exit:	
-	ret
+	ajmp	wait_advance_timing
 
 
 ; Fast calculation (Comm_Period4x_H less than 2)
@@ -5185,10 +5318,26 @@ calc_next_comm_timing_fast:
 
 	clr	Flags0.HIGH_RPM 		; Clear high rpm bit 
 	
-IF MCU_48MHZ == 0
-	mov	Temp1, #4				; Set timing reduction
+IF MCU_48MHZ == 0				; Set timing reduction
+ IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
+  IF ((NFETON_DELAY + PFETON_DELAY) <= 30)
+	mov	Temp1, #(4 + ((NFETON_DELAY + PFETON_DELAY)/10))	; Min to max 
+  ELSE
+ 	mov	Temp1, #7									; Max
+  ENDIF
+ ELSE
+	mov	Temp1, #5									; Mid
+ ENDIF
 ELSE
-	mov	Temp1, #1
+ IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
+  IF ((NFETON_DELAY + PFETON_DELAY) <= 40)
+	mov	Temp1, #(2 + ((NFETON_DELAY + PFETON_DELAY)/20))	; Min to max 
+  ELSE
+ 	mov	Temp1, #4									; Max
+  ENDIF
+ ELSE
+	mov	Temp1, #3									; Mid
+ ENDIF
 ENDIF
 	mov	A, Temp4				; Divide by 2 4 times
 	swap	A
@@ -5216,7 +5365,6 @@ calc_new_wait_times_fast_done:
 	mov	Temp1, #Pgm_Comm_Timing	; Load timing setting
 	mov	A, @Temp1				
 	mov	Temp8, A				; Store in Temp8
-	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -5238,7 +5386,6 @@ wait_advance_timing:
 	mov	Next_Wt_Start_H, Wt_ZC_Tout_Start_H
 	setb	Flags0.T3_PENDING
 	orl	EIE1, #80h	; Enable timer3 interrupts
-	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -5333,7 +5480,7 @@ store_times_increase:
 	mov	Wt_Adv_Start_H, Temp2
 	mov	Wt_Zc_Scan_Start_L, Temp5	; Use this value for zero cross scan delay (7.5deg)
 	mov	Wt_Zc_Scan_Start_H, Temp6
-	ret
+	ajmp	wait_before_zc_scan
 
 store_times_decrease:
 	mov	Wt_Comm_Start_L, Temp1		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
@@ -5366,7 +5513,7 @@ store_times_decrease:
 	mov	Wt_Comm_Start_H, A 
 
 store_times_exit:
-	ret
+	ajmp	wait_before_zc_scan
 
 
 calc_new_wait_times_fast:	
@@ -5409,13 +5556,12 @@ store_times_increase_fast:
 	mov	Wt_Comm_Start_L, Temp3		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	mov	Wt_Adv_Start_L, Temp1		; New commutation advance time (~15deg nominal)
 	mov	Wt_Zc_Scan_Start_L, Temp5	; Use this value for zero cross scan delay (7.5deg)
-	ret
+	ajmp	wait_before_zc_scan
 
 store_times_decrease_fast:
 	mov	Wt_Comm_Start_L, Temp1		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	mov	Wt_Adv_Start_L, Temp3		; New commutation advance time (~15deg nominal)
 	mov	Wt_Zc_Scan_Start_L, Temp5	; Use this value for zero cross scan delay (7.5deg)
-	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -5444,6 +5590,12 @@ wait_before_zc_scan_wait:
 	jnb	Flags0.T3_PENDING, ($+5)
 	ajmp	wait_before_zc_scan_wait
 
+IF MCU_48MHZ == 1
+	mov	Startup_Zc_Timeout_Cntd, #4
+ELSE
+	mov	Startup_Zc_Timeout_Cntd, #2
+ENDIF
+setup_zc_scan_timeout:
 	setb	Flags0.T3_PENDING
 	orl	EIE1, #80h			; Enable timer3 interrupts
 	mov	A, Flags1
@@ -5452,6 +5604,7 @@ wait_before_zc_scan_wait:
 
 	mov	Temp1, Comm_Period4x_L	; Set long timeout when starting
 	mov	Temp2, Comm_Period4x_H
+IF MCU_48MHZ == 0
 	clr	C
 	mov	A, Temp2
 	rrc	A
@@ -5459,15 +5612,8 @@ wait_before_zc_scan_wait:
 	mov	A, Temp1
 	rrc	A
 	mov	Temp1, A
-IF MCU_48MHZ == 1
-	clr	C
-	mov	A, Temp1
-	rlc	A
-	mov	Temp1, A
-	mov	A, Temp2
-	rlc	A
-	mov	Temp2, A
 ENDIF
+	clr	EA
 	anl	EIE1, #7Fh			; Disable timer3 interrupts
 	mov	TMR3CN, #00h			; Timer3 disabled and interrupt flag cleared
 	clr	C
@@ -5478,9 +5624,9 @@ ENDIF
 	subb	A, Temp2		
 	mov	TMR3H, A
 	mov	TMR3CN, #04h			; Timer3 enabled and interrupt flag cleared
-
 	setb	Flags0.T3_PENDING
 	orl	EIE1, #80h			; Enable timer3 interrupts
+	setb	EA
 
 wait_before_zc_scan_exit:          
 	ret
@@ -5541,7 +5687,7 @@ wait_for_comp_out_start:
 	mov	Temp1, #6
 
 comp_wait_no_of_readings:
-	jnb	Flags1.STARTUP_PHASE, ($+5)		; Set many samples during startup
+	jnb	Flags1.STARTUP_PHASE, ($+5)	; Set many samples during startup
 	mov	Temp1, #10
 
 comp_wait_on_comp_able:
@@ -5550,11 +5696,22 @@ comp_wait_on_comp_able:
 	mov	A, Comparator_Read_Cnt			; Check that comparator has been read
 	jz	comp_wait_on_comp_able_not_timed_out	; If not read - branch
 
+	jnb	Flags1.STARTUP_PHASE, comp_wait_on_comp_able_timeout_extended	; Extend timeout during startup
+
+	clr	C
+	mov	A, Startup_Cnt					; Do not extend timeout for the first commutations			
+	subb	A, #3
+	jc	comp_wait_on_comp_able_timeout_extended
+
+	djnz	Startup_Zc_Timeout_Cntd, comp_wait_on_comp_able_extend_timeout
+
+comp_wait_on_comp_able_timeout_extended:
 	setb	EA							; Enable interrupts
 	setb	Flags1.COMP_TIMED_OUT
-	ret								; Yes - return
+	ajmp	setup_comm_wait
 
-
+comp_wait_on_comp_able_extend_timeout:
+	call	setup_zc_scan_timeout
 comp_wait_on_comp_able_not_timed_out:
 	setb	EA							; Enable interrupts
 	nop								; Allocate only just enough time to capture interrupt
@@ -5613,14 +5770,8 @@ comp_read_wrong:
 	clr	C
 	mov	A, Temp1
 	subb	A, #10					; If above initial requirement - go back and restart
-	jc	($+4)
-	ajmp	wait_for_comp_out_start
-
-	clr	C
-	mov	A, Startup_Cnt				; For the first commutations - go back and restart
-	subb	A, #6
-	jnc	($+4)
-	ajmp	wait_for_comp_out_start
+	jc	($+3)
+	inc	Temp1
 
 	ajmp	comp_wait_on_comp_able		; If below initial requirement - continue to look for good ones
 
@@ -5656,6 +5807,11 @@ IF MCU_48MHZ == 1
 	mov	A, Temp8
 	rlc	A
 	mov	Temp8, A
+	jnc	($+6)
+
+	mov	Temp7, #0FFh
+	mov	Temp8, #0FFh
+
 ENDIF
 	clr	C
 	clr	A
@@ -5683,7 +5839,29 @@ comp_read_ok_jmp:
 	ajmp	comp_wait_on_comp_able	
 
 	clr	Flags1.COMP_TIMED_OUT
-	ret							
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Setup commutation timing routine
+;
+; No assumptions
+;
+; Sets up and starts wait from commutation to zero cross
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+setup_comm_wait: 
+	anl	EIE1, #7Fh		; Disable timer3 interrupts
+	mov	TMR3CN, #00h		; Timer3 disabled and interrupt flag cleared
+	mov	TMR3L, Wt_Comm_Start_L
+	mov	TMR3H, Wt_Comm_Start_H
+	mov	TMR3CN, #04h		; Timer3 enabled and interrupt flag cleared
+	; Setup next wait time
+	mov	Next_Wt_Start_L, Wt_Adv_Start_L
+	mov	Next_Wt_Start_H, Wt_Adv_Start_H
+	setb	Flags0.T3_PENDING
+	orl	EIE1, #80h		; Enable timer3 interrupts
+	setb	EA				; Enable interrupts again
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -5713,30 +5891,6 @@ eval_comp_check_timeout:
 	ljmp	run_to_wait_for_power_on_fail			; Yes - exit run mode
 
 eval_comp_exit:
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Setup commutation timing routine
-;
-; No assumptions
-;
-; Sets up and starts wait from commutation to zero cross
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-setup_comm_wait: 
-	anl	EIE1, #7Fh		; Disable timer3 interrupts
-	mov	TMR3CN, #00h		; Timer3 disabled and interrupt flag cleared
-	mov	TMR3L, Wt_Comm_Start_L
-	mov	TMR3H, Wt_Comm_Start_H
-	mov	TMR3CN, #04h		; Timer3 enabled and interrupt flag cleared
-	; Setup next wait time
-	mov	Next_Wt_Start_L, Wt_Adv_Start_L
-	mov	Next_Wt_Start_H, Wt_Adv_Start_H
-	setb	Flags0.T3_PENDING
-	orl	EIE1, #80h		; Enable timer3 interrupts
-	setb	EA				; Enable interrupts again
 	ret
 
 
@@ -7061,7 +7215,8 @@ program_by_tx_entry_wait_ppm:
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #RCP_MAX			; At or above max?
-	jc	program_by_tx_entry_wait_ppm	; No - start over
+	jnc	($+4)
+	ajmp	arming_ppm_check		; No - go back
 
 	jmp	program_by_tx			; Yes - enter programming mode
 
@@ -7152,7 +7307,7 @@ beep_delay_set:
 
 wait_for_power_on_no_beep:
 	call wait10ms
-	mov	A, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
+	mov	A, Rcp_Timeout_Cntd				; Load RC pulse timeout counter value
 	jnz	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
 
 	jnb	Flags2.RCP_PPM, wait_for_power_on_ppm_not_missing	; If flag is not set (PWM) - branch
@@ -7181,7 +7336,7 @@ ENDIF
 	lcall wait100ms			; Wait to see if start pulse was only a glitch
 
 wait_for_power_on_check_timeout:
-	mov	A, Rcp_Timeout_Cnt		; Load RC pulse timeout counter value
+	mov	A, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
 	jnz	($+5)				; If it is not zero - proceed
 
 	ljmp	init_no_signal			; If it is zero (pulses missing) - go back to detect input signal
@@ -7279,13 +7434,11 @@ init_start_bidir_done:
 	mov	Startup_Cnt, #0			; Reset counter
 	call comm5comm6				; Initialize commutation
 	call comm6comm1				
+	call initialize_timing			; Initialize timing
 	call	calc_next_comm_timing		; Set virtual commutation point
-	call	calc_next_comm_timing		
 	call initialize_timing			; Initialize timing
 	call	calc_next_comm_timing		
-	call calc_new_wait_times			; Calculate new wait times
 	call	initialize_timing			; Initialize timing
-	call	wait_before_zc_scan			; Set up comparator timeout
 	jmp	run1
 
 
@@ -7307,22 +7460,22 @@ damped_transition:
 ; Out_cA changes from low to high
 run1:
 	call wait_for_comp_out_high	; Wait zero cross wait and wait for high
-	call setup_comm_wait		; Setup wait time from zero cross to commutation
-	call	evaluate_comparator_integrity	; Check whether comparator reading has been normal
+;	 	setup_comm_wait		; Setup wait time from zero cross to commutation
+;	 	evaluate_comparator_integrity	; Check whether comparator reading has been normal
 	call calc_governor_target	; Calculate governor target
 	call wait_for_comm			; Wait from zero cross to commutation
 	call comm1comm2			; Commutate
 	call calc_next_comm_timing	; Calculate next timing and start advance timing wait
-	call wait_advance_timing		; Wait advance timing and start zero cross wait
-	call calc_new_wait_times
-	call wait_before_zc_scan		; Wait zero cross wait and start zero cross timeout
+;	 	wait_advance_timing		; Wait advance timing and start zero cross wait
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan		; Wait zero cross wait and start zero cross timeout
 
 ; Run 2 = A(p-on) + C(n-pwm) - comparator B evaluated
 ; Out_cB changes from high to low
 run2:
 	call wait_for_comp_out_low
-	call setup_comm_wait	
-	call	evaluate_comparator_integrity	
+;	 	setup_comm_wait	
+;		evaluate_comparator_integrity	
 	jnb	Flags1.GOV_ACTIVE, ($+6)
 	lcall calc_governor_prop_error
 	jb	Flags0.HIGH_RPM, ($+6)	; Skip if high rpm
@@ -7332,69 +7485,69 @@ run2:
 	call wait_for_comm
 	call comm2comm3
 	call calc_next_comm_timing
-	call wait_advance_timing
-	call calc_new_wait_times
-	call wait_before_zc_scan	
+;	 	wait_advance_timing
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan	
 
 ; Run 3 = A(p-on) + B(n-pwm) - comparator C evaluated
 ; Out_cC changes from low to high
 run3:
 	call wait_for_comp_out_high
-	call setup_comm_wait	
-	call	evaluate_comparator_integrity	
+;	 	setup_comm_wait	
+;	 	evaluate_comparator_integrity	
 	jnb	Flags1.GOV_ACTIVE, ($+6)
 	lcall calc_governor_int_error
 	call wait_for_comm
 	call comm3comm4
 	call calc_next_comm_timing
-	call wait_advance_timing
-	call calc_new_wait_times
-	call wait_before_zc_scan	
+;	 	wait_advance_timing
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan	
 
 ; Run 4 = C(p-on) + B(n-pwm) - comparator A evaluated
 ; Out_cA changes from high to low
 run4:
 	call wait_for_comp_out_low
-	call setup_comm_wait	
-	call	evaluate_comparator_integrity	
+;	 	setup_comm_wait	
+;	 	evaluate_comparator_integrity	
 	jnb	Flags1.GOV_ACTIVE, ($+6)
 	lcall calc_governor_prop_correction
 	call wait_for_comm
 	call comm4comm5
 	call calc_next_comm_timing
-	call wait_advance_timing
-	call calc_new_wait_times
-	call wait_before_zc_scan	
+;	 	wait_advance_timing
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan	
 
 ; Run 5 = C(p-on) + A(n-pwm) - comparator B evaluated
 ; Out_cB changes from low to high
 run5:
 	call wait_for_comp_out_high
-	call setup_comm_wait	
-	call	evaluate_comparator_integrity	
+;	 	setup_comm_wait	
+;	 	evaluate_comparator_integrity	
 	jnb	Flags1.GOV_ACTIVE, ($+6)
 	lcall calc_governor_int_correction
 	call wait_for_comm
 	call comm5comm6
 	call calc_next_comm_timing
-	call wait_advance_timing
-	call calc_new_wait_times
-	call wait_before_zc_scan	
+;	 	wait_advance_timing
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan	
 
 ; Run 6 = B(p-on) + A(n-pwm) - comparator C evaluated
 ; Out_cC changes from high to low
 run6:
 	call start_adc_conversion
 	call wait_for_comp_out_low
-	call setup_comm_wait	
-	call	evaluate_comparator_integrity	
+;	 	setup_comm_wait	
+;	 	evaluate_comparator_integrity	
 	call wait_for_comm
 	call comm6comm1
 	call check_temp_voltage_and_limit_power
 	call calc_next_comm_timing
-	call wait_advance_timing
-	call calc_new_wait_times
-	call wait_before_zc_scan	
+;	 	wait_advance_timing
+;	 	calc_new_wait_times
+;	 	wait_before_zc_scan	
 
 	; Check if it is direct startup
 	jnb	Flags1.STARTUP_PHASE, normal_run_checks
@@ -7463,6 +7616,8 @@ normal_run_check_startup_rot:
 	jmp	run_to_wait_for_power_on
 
 initial_run_phase_done:
+	; Reset stall count
+	mov	Stall_Cnt, #0
 IF MODE == 0	; Main
 	; Check if throttle is zeroed
 	clr	C
@@ -7485,7 +7640,7 @@ ENDIF
 
 	jnb	Flags2.RCP_PPM, run6_check_dir; If flag is not set (PWM) - branch
 
-	mov	A, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
+	mov	A, Rcp_Timeout_Cntd			; Load RC pulse timeout counter value
 	jz	run_to_wait_for_power_on		; If it is zero - go back to wait for poweron
 
 run6_check_dir:
@@ -7574,7 +7729,7 @@ ENDIF
 IF MODE == 0	; Main
 	jnb	Flags2.RCP_PPM, run_to_next_state_main	; If flag is not set (PWM) - branch
 
-	mov	A, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
+	mov	A, Rcp_Timeout_Cntd			; Load RC pulse timeout counter value
 	jnz	run_to_next_state_main		; If it is not zero - branch
 
 	jmp	init_no_signal				; If it is zero (pulses missing) - go back to detect input signal
