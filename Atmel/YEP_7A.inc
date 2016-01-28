@@ -104,15 +104,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 	out	EIMSK, @0
 .ENDMACRO
 .MACRO Rcp_Int_First
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
+	ldi	@0, (1<<ISC01)+(1<<ISC00); Default - set next int0 to rising
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
 	sts	EICRA, @0		
 .ENDMACRO
 .MACRO Rcp_Int_Second
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
+	ldi	@0, (1<<ISC01)			; Default - set next int0 to falling
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
 	sts	EICRA, @0		
@@ -364,8 +362,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 
 .MACRO Initialize_Adc
 	ldi	@0, Volt_Ip
-	sbr  @0, (1<<REFS1) 	
-	sbr  @0, (1<<REFS0) 		
+	ori	@0, (1<<REFS1)+(1<<REFS0)
 	sts	ADMUX, @0			; Set ADMUX register
   	lds  @0, ADCSRA		; Set ADCSRA register (1MHz clock)
   	sbr  @0, (1<<ADPS2) 	
@@ -380,7 +377,6 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am168PA#"	; Project and MCU tag (16 Bytes)
 	sbr	Flags1, (1<<ADC_READ_TEMP)
 .ENDMACRO
 .MACRO Start_Adc
-	sbrs	Flags1, ADC_READ_TEMP
 	ldi	@0, Volt_Ip
 	sbrc	Flags1, ADC_READ_TEMP
 	ldi	@0, Volt_Ip

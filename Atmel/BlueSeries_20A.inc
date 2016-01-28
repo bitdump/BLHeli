@@ -105,15 +105,13 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	out	GICR, @0
 .ENDMACRO
 .MACRO Rcp_Int_First
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
+	ldi	@0, (1<<ISC01)+(1<<ISC00); Default - set next int0 to rising
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
 	out	MCUCR, @0		
 .ENDMACRO
 .MACRO Rcp_Int_Second
-	sbrs	Flags3, PGM_RCP_PWM_POL	; Is pwm polarity positive?
-	ldi	@0, (1<<ISC01)			; Yes - set next int0 to falling
+	ldi	@0, (1<<ISC01)			; Default - set next int0 to falling
 	sbrc Flags3, PGM_RCP_PWM_POL	; Is pwm polarity negative?
 	ldi	@0, (1<<ISC01)+(1<<ISC00); Yes - set next int0 to rising
 	out	MCUCR, @0		
@@ -337,7 +335,6 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	sbr	Flags1, (1<<ADC_READ_TEMP)
 .ENDMACRO
 .MACRO Start_Adc
-	sbrs	Flags1, ADC_READ_TEMP
 	ldi	@0, Volt_Ip
 	sbrc	Flags1, ADC_READ_TEMP
 	ldi	@0, Temp_Ip

@@ -120,6 +120,10 @@
 ; - Rev14.3 Moved reset vector to be just before the settings segment, in order to better recover from partially failed flashing operation
 ;           Shortened stall detect time to about 5sec, and prevented going into tx programming after a stall
 ;           Optimizations of software timing and running reliability
+; - Rev14.4 Improved startup, particularly for larger motors
+;           Improved running at very high rpms
+;           Made damped light default for MULTI on ESCs that support it
+;           Miscellaneous other changes
 ;
 ;
 ;
@@ -158,7 +162,7 @@
 ; - Scan for zero cross			22.5deg	, Nominal, with some motor variations
 ;
 ; Motor startup:
-; Startup is the only phase, before normal bemf commutation run begins.
+; There is a startup phase and an initial run phase, before normal bemf commutation run begins.
 ;
 ;**** **** **** **** ****
 ; Select the ESC and mode to use (or unselect all for use with external batch compile file);
@@ -167,7 +171,7 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI
+;#define BLUESERIES_20A_MULTI 
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI 
@@ -278,13 +282,13 @@
 ;#define SUNRISE_BLHELI_SLIM_30A_MULTI
 ;#define DYS_SN20A_MAIN				; ICP1 as input		
 ;#define DYS_SN20A_TAIL
-;#define DYS_SN20A_MULTI 
+;#define DYS_SN20A_MULTI
 ;#define TBS_CUBE_20A_MAIN			; ICP1 as input		
 ;#define TBS_CUBE_20A_TAIL
 ;#define TBS_CUBE_20A_MULTI 
 ;#define ZTW_SPIDER_LITE_18Av2_MAIN
 ;#define ZTW_SPIDER_LITE_18Av2_TAIL
-;#define ZTW_SPIDER_LITE_18Av2_MULTI
+;#define ZTW_SPIDER_LITE_18Av2_MULTI 
 
 
 
@@ -907,6 +911,7 @@
 
 
 
+
 ;**** **** **** **** ****
 ; TX programming defaults
 ;
@@ -959,7 +964,7 @@
 .EQU	DEFAULT_PGM_MULTI_GAIN 			= 3 	; 1=0.75 		2=0.88 		3=1.00 		4=1.12 		5=1.25
 .EQU	DEFAULT_PGM_MULTI_COMM_TIMING		= 3 	; 1=Low 		2=MediumLow 	3=Medium 		4=MediumHigh 	5=High
 .IF DAMPED_MODE_ENABLE == 1
-.EQU	DEFAULT_PGM_MULTI_PWM_FREQ	 	= 1 	; 1=High 		2=Low 		3=DampedLight 
+.EQU	DEFAULT_PGM_MULTI_PWM_FREQ	 	= 3 	; 1=High 		2=Low 		3=DampedLight 
 .ELSE
 .EQU	DEFAULT_PGM_MULTI_PWM_FREQ	 	= 1 	; 1=High 		2=Low
 .ENDIF
@@ -1133,8 +1138,8 @@ Current_Pwm_Lim_Dith:		.BYTE	1		; Current pwm that is limited and dithered (appl
 Rcp_Prev_Edge_L:			.BYTE	1		; RC pulse previous edge timer3 timestamp (lo byte)
 Rcp_Prev_Edge_H:			.BYTE	1		; RC pulse previous edge timer3 timestamp (hi byte)
 Rcp_Outside_Range_Cnt:		.BYTE	1		; RC pulse outside range counter (incrementing) 
-Rcp_Timeout_Cnt:			.BYTE	1		; RC pulse timeout counter (decrementing) 
-Rcp_Skip_Cnt:				.BYTE	1		; RC pulse skip counter (decrementing) 
+Rcp_Timeout_Cntd:			.BYTE	1		; RC pulse timeout counter (decrementing) 
+Rcp_Skip_Cntd:				.BYTE	1		; RC pulse skip counter (decrementing) 
 
 Initial_Arm:				.BYTE	1		; Variable that is set during the first arm sequence after power on
 
@@ -1142,14 +1147,17 @@ Power_On_Wait_Cnt_L: 		.BYTE	1		; Power on wait counter (lo byte)
 Power_On_Wait_Cnt_H: 		.BYTE	1		; Power on wait counter (hi byte)
 
 Startup_Cnt:				.BYTE	1		; Startup phase commutations counter (incrementing)
+Startup_Zc_Timeout_Cntd:		.BYTE	1		; Startup zero cross timeout counter (decrementing)
 Initial_Run_Rot_Cnt:		.BYTE	1		; Initial run rotations counter (incrementing)
 Stall_Cnt:				.BYTE	1		; Counts start/run attempts that resulted in stall. Reset upon a proper stop
 Demag_Detected_Metric:		.BYTE	1		; Metric used to gauge demag event frequency
 Demag_Pwr_Off_Thresh:		.BYTE	1		; Metric threshold above which power is cut
 Low_Rpm_Pwr_Slope:			.BYTE	1		; Sets the slope of power increase for low rpms
 
+Timer2_X:					.BYTE	1		; Timer 2 extended byte
 Prev_Comm_L:				.BYTE	1		; Previous commutation timer timestamp (lo byte)
 Prev_Comm_H:				.BYTE	1		; Previous commutation timer timestamp (hi byte)
+Prev_Comm_X:				.BYTE	1		; Previous commutation timer3 timestamp (ext byte)
 Prev_Prev_Comm_L:			.BYTE	1		; Pre-previous commutation timer timestamp (lo byte)
 Prev_Prev_Comm_H:			.BYTE	1		; Pre-previous commutation timer timestamp (hi byte)
 Comm_Period4x_L:			.BYTE	1		; Timer3 counts between the last 4 commutations (lo byte)
@@ -1271,7 +1279,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	3		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	4		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	20		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1458,7 +1466,6 @@ t2_int:	; Used for pwm control
 	tst	Current_Pwm_Limited
 	breq	t2_int_pwm_on_exit
 
-t2_int_pwm_on_execute:
 	ijmp							; Jump to pwm on routines. Z should be set to one of the pwm_nfet_on labels
 
 t2_int_pwm_on_exit:
@@ -1514,6 +1521,8 @@ t2_int_pwm_off_damped:
 	All_nFETs_Off 					; Switch off all nfets
 	sbrc	Flags1, SKIP_DAMP_ON
 	rjmp	t2_int_pwm_off_damp_done 
+	sbrc	Flags0, DEMAG_CUT_POWER
+	rjmp	t2_int_pwm_off_damp_done 
 .IF PFETON_DELAY != 0
 	ldi	YL, PFETON_DELAY
 	dec	YL
@@ -1524,6 +1533,8 @@ t2_int_pwm_off_damp_done:
 .ENDIF
 .IF PFETON_DELAY >= 128				; "Negative", 1's complement
 	sbrc	Flags1, SKIP_DAMP_ON
+	rjmp	t2_int_pwm_off_damp_done 
+	sbrc	Flags0, DEMAG_CUT_POWER
 	rjmp	t2_int_pwm_off_damp_done 
 	Damping_FET_on YL				; Damping fet on
 	ldi	YL, PFETON_DELAY
@@ -1539,8 +1550,7 @@ t2_int_pwm_off_exit:
 	reti
 
 t2_int_pwm_off_fullpower_exit:
-	ldi	YL, 0
-	Set_TCNT2 YL					; Write start point for timer
+	Set_TCNT2 Zero					; Write start point for timer
 	T2_Clear_Int_Flag YL			; Clear interrupt flag
 	sbr	Flags0, (1<<PWM_ON)	
 	rjmp	t2_int_pwm_off_exit
@@ -1660,7 +1670,7 @@ t0_int:	; Happens every 128us
 	T0_Int_Disable XL						; Disable timer0 interrupts
 	sei							; Enable interrupts
 	; Check RC pulse timeout counter
-	lds	XL, Rcp_Timeout_Cnt			; RC pulse timeout count zero?
+	lds	XL, Rcp_Timeout_Cntd		; RC pulse timeout count zero?
 	tst	XL
 	breq	t0_int_pulses_absent		; Yes - pulses are absent
 
@@ -1668,9 +1678,9 @@ t0_int:	; Happens every 128us
 	sbrc	Flags2, RCP_PPM		
 	rjmp	t0_int_skip_start			; If flag is set (PPM) - branch
 
-	lds	XL, Rcp_Timeout_Cnt			; No - decrement
+	lds	XL, Rcp_Timeout_Cntd		; No - decrement
 	dec	XL
-	sts	Rcp_Timeout_Cnt, XL
+	sts	Rcp_Timeout_Cntd, XL
 	rjmp	t0_int_skip_start
 
 t0_int_pulses_absent:
@@ -1697,13 +1707,13 @@ t0_int_pulses_absent_no_max:
 	ldi	XL, RCP_TIMEOUT			; Load timeout count
 	sbrc	Flags0, RCP_MEAS_PWM_FREQ	; Is measure RCP pwm frequency flag set?
 
-	sts	Rcp_Timeout_Cnt, XL			; Yes - set timeout count to start value
+	sts	Rcp_Timeout_Cntd, XL		; Yes - set timeout count to start value
 
 	sbrc	Flags2, RCP_PPM		
 	rjmp	t0_int_ppm_timeout_set		; If flag is set (PPM) - branch
 
 	ldi	XL, RCP_TIMEOUT			; For PWM, set timeout count to start value
-	sts	Rcp_Timeout_Cnt, XL
+	sts	Rcp_Timeout_Cntd, XL
 
 t0_int_ppm_timeout_set:
 	sts	New_Rcp, I_Temp1			; Store new pulse length
@@ -1714,14 +1724,14 @@ t0_int_skip_start:
 	rjmp	t0_int_rcp_update_start		; If flag is set (PPM) - branch
 
 	; Check RC pulse skip counter
-	lds	XL, Rcp_Skip_Cnt			
+	lds	XL, Rcp_Skip_Cntd			
 	tst	XL
 	breq	t0_int_skip_end			; If RC pulse skip count is zero - end skipping RC pulse detection
 	
 	; Decrement skip counter (only if edge counter is zero)
-	lds	XL, Rcp_Skip_Cnt			; Decrement
+	lds	XL, Rcp_Skip_Cntd			; Decrement
 	dec	XL
-	sts	Rcp_Skip_Cnt, XL
+	sts	Rcp_Skip_Cntd, XL
 	rjmp	t0_int_rcp_update_start
 
 t0_int_skip_end:
@@ -1805,15 +1815,17 @@ t0_int_pwm_update:
 	; Update requested_pwm
 	sts	Requested_Pwm, I_Temp1		; Set requested pwm
 .IF MODE >= 1	; Tail or multi
-	; Limit pwm during start
+	; Boost pwm during direct start
 	mov	XL, Flags1
 	andi	XL, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
 	breq	t0_int_current_pwm_update		
 
-	lds	XL, Requested_Pwm			; Limit pwm during start
-	lds	I_Temp2, Startup_Cnt		; Add an extra power boost during start
-	lsr	I_Temp2
-	lsr	I_Temp2
+	lds	XL, Startup_Cnt			; Add an extra power boost during start
+	lsr	XL
+	lsr	XL
+	ldi	I_Temp2, 6
+	add	XL, I_Temp2
+	lds	I_Temp2, Requested_Pwm			
 	add	XL, I_Temp2
 	sts	Requested_Pwm, XL
 	brcc	PC+4
@@ -1933,9 +1945,12 @@ t0_int_pwm_ret:
 
 t0h_int:
 	; Every 256th interrupt (happens every 32ms)
+	lds	XL, Timer2_X
+	inc	XL
+	sts	Timer2_X, XL
 	ldi	I_Temp1, GOV_SPOOLRATE		; Load governor spool rate
 	; Check RC pulse timeout counter (used here for PPM only)
-	lds	I_Temp2, Rcp_Timeout_Cnt		; RC pulse timeout count zero?
+	lds	I_Temp2, Rcp_Timeout_Cntd	; RC pulse timeout count zero?
 	tst	I_Temp2
 	breq	t0h_int_rcp_stop_check		; Yes - do not decrement
 
@@ -1944,7 +1959,7 @@ t0h_int:
 	rjmp	t0h_int_rcp_stop_check		; If flag is not set (PWM) - branch
 
 	dec	I_Temp2					; No flag set (PPM) - decrement
-	sts	Rcp_Timeout_Cnt, I_Temp2
+	sts	Rcp_Timeout_Cntd, I_Temp2
 
 t0h_int_rcp_stop_check:
 	; Check RC pulse against stop value
@@ -2400,8 +2415,7 @@ rcp_int_ppm_check_full_range:
 	sts	Rcp_Outside_Range_Cnt, XL
 
 	; Calculate "1000us" plus throttle minimum
-	ldi	XL, 0						; Set 1000us as default minimum
-	mov	I_Temp3, XL
+	mov	I_Temp3, Zero					; Set 1000us as default minimum
 	lds	I_Temp2, Pgm_Direction			; Check if bidirectional operation (store in I_Temp2)
 	sbrc	Flags3, FULL_THROTTLE_RANGE		; Check if full range is chosen
 	rjmp	rcp_int_ppm_calculate			; Yes - branch
@@ -2554,12 +2568,12 @@ rcp_int_limited:
 
 rcp_int_set_timeout:
 	ldi	XL, RCP_TIMEOUT			; Set timeout count to start value
-	sts	Rcp_Timeout_Cnt, XL
+	sts	Rcp_Timeout_Cntd, XL
 	sbrs	Flags2, RCP_PPM		
 	rjmp	rcp_int_ppm_timeout_set		; If flag is not set (PWM) - branch
 
 	ldi	XL, RCP_TIMEOUT_PPM			; No flag set means PPM. Set timeout count
-	sts	Rcp_Timeout_Cnt, XL
+	sts	Rcp_Timeout_Cntd, XL
 
 rcp_int_ppm_timeout_set:
 	sbrc	Flags0, RCP_MEAS_PWM_FREQ	; Is measure RCP pwm frequency flag set?
@@ -2575,7 +2589,7 @@ rcp_int_exit:	; Exit interrupt routine
 	rjmp	PC+4						
 
 	ldi	XL, RCP_SKIP_RATE			; Load number of skips
-	sts	Rcp_Skip_Cnt, XL
+	sts	Rcp_Skip_Cntd, XL
 
 	cli							; Disable interrupts
 	T0_Int_Enable XL				; Enable timer0 interrupts
@@ -3806,42 +3820,60 @@ calc_next_comm_timing:			; Entry point for run phase
 	cli 						; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp1
 	Read_TCNT1H Temp2
+	lds	Temp3, Timer2_X	
 	sei
 	; Calculate this commutation time
-	lds	Temp3, Prev_Comm_L
-	lds	Temp4, Prev_Comm_H
+	lds	Temp4, Prev_Comm_L 
+	lds	Temp5, Prev_Comm_H 
 	sts	Prev_Comm_L, Temp1		; Store timestamp as previous commutation
 	sts	Prev_Comm_H, Temp2
-	sub	Temp1, Temp3			; Calculate the new commutation time
-	sbc	Temp2, Temp4
+	sub	Temp1, Temp4			; Calculate the new commutation time
+	sbc	Temp2, Temp5 
+	sbrc	Flags1, STARTUP_PHASE	
+	rjmp	calc_next_comm_startup
+
 	sbrc	Flags1, HIGH_RPM		; Branch if high rpm
 	rjmp	calc_next_comm_timing_fast
 
-	sbrs	Flags1, STARTUP_PHASE	
-	rjmp	calc_next_comm_startup_done	
+	rjmp	calc_next_comm_normal
 
-	lds	Temp5, Prev_Prev_Comm_L
-	lds	Temp6, Prev_Prev_Comm_H
-	sts	Prev_Prev_Comm_L, Temp3
-	sts	Prev_Prev_Comm_H, Temp4
-	sub	Temp4, Temp6			; Calculate previous commutation time (hi byte only)
-	sub	Temp2, Temp4			; Calculate the difference between the two previous commutation times (hi bytes only)
+calc_next_comm_startup:
+	lds	Temp6, Prev_Comm_X
+	sts	Prev_Comm_X, Temp3		; Store extended timestamp as previous commutation
+	sbc	Temp3, Temp6			; Calculate the new extended commutation time
+	tst	Temp3
+	breq	PC+3
+
+	ldi	Temp1, 0xFF
+	ldi	Temp2, 0xFF
+
+	lds	Temp7, Prev_Prev_Comm_L 
+	lds	Temp8, Prev_Prev_Comm_H 
+	sts	Prev_Prev_Comm_L, Temp4
+	sts	Prev_Prev_Comm_H, Temp5 
+	sub	Temp5, Temp8			; Calculate previous commutation time (hi byte only)
+	sub	Temp2, Temp5 			; Calculate the difference between the two previous commutation times (hi bytes only)
 	sts	Comm_Diff, Temp2
 	lds	Temp1, Prev_Comm_L		; Reload this commutation time
 	lds	Temp2, Prev_Comm_H
-	sub	Temp1, Temp5			; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
-	sbc	Temp2, Temp6
-	lds	Temp4, Comm_Period4x_H	; Average with previous and save
-	lds	Temp3, Comm_Period4x_L
+	sub	Temp1, Temp7 			; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
+	sbc	Temp2, Temp8 
+	lds	Temp3, Comm_Period4x_L	; Average with previous and save
+	lds	Temp4, Comm_Period4x_H
 	lsr	Temp4			
 	ror	Temp3
 	add	Temp1, Temp3
 	adc	Temp2, Temp4
+	brcc	PC+3
+
+	ldi	Temp1, 0xFF
+	ldi	Temp2, 0xFF
+
 	sts	Comm_Period4x_L, Temp1
 	sts	Comm_Period4x_H, Temp2
 	rjmp	calc_new_wait_times_setup
 
-calc_next_comm_startup_done:
+calc_next_comm_normal:
 	; Calculate new commutation time
 	lds	Temp3, Comm_Period4x_L	; Comm_Period4x(-l-h) holds the time of 4 commutations
 	lds	Temp4, Comm_Period4x_H
@@ -3954,8 +3986,7 @@ load_min_time:
 
 calc_new_wait_times_exit:
 	movw	Temp3, Temp1
-	ret
-
+	rjmp	wait_advance_timing
 
 ; Fast calculation (Comm_Period4x_H less than 2)
 calc_next_comm_timing_fast:			
@@ -4000,7 +4031,6 @@ load_min_time_fast:
 calc_new_wait_times_fast_done:	
 	movw	Temp1, Temp3
 	lds	Temp8, Pgm_Comm_Timing	; Store timing in Temp8	
-	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -4022,7 +4052,6 @@ wait_advance_timing:
 	lds	Next_Wt_H, Wt_ZC_Timeout_H
 	sbr	Flags0, (1<<OC1A_PENDING)
 	T1oca_Int_Enable XH				; Enable timer1 OCA interrupt
-	ret
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -4075,7 +4104,7 @@ store_times_increase:
 	sts	Wt_Advance_H, Temp2
 	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
 	sts	Wt_Zc_Scan_H, Temp6
-	ret
+	rjmp	set_comparator_phase
 
 store_times_decrease:
 	sts	Wt_Comm_L, Temp1		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
@@ -4102,7 +4131,7 @@ store_times_decrease:
 	sts	Wt_Comm_H, Temp1 
 
 store_times_exit:
-	ret
+	rjmp	set_comparator_phase
 
 
 calc_new_wait_times_fast:	
@@ -4133,13 +4162,50 @@ store_times_increase_fast:
 	sts	Wt_Comm_L, Temp3		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	sts	Wt_Advance_L, Temp1		; New commutation advance time (~15deg nominal)
 	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
-	ret
+	rjmp	set_comparator_phase
 
 store_times_decrease_fast:
 	sts	Wt_Comm_L, Temp1		; Now commutation time (~60deg) divided by 4 (~15deg nominal)
 	sts	Wt_Advance_L, Temp3		; New commutation advance time (~15deg nominal)
 	sts	Wt_Zc_Scan_L, Temp5		; Use this value for zero cross scan delay (7.5deg)
-	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Set comparator phase
+;
+; No assumptions
+;
+; Sets up comparator muxes
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+set_comparator_phase:
+	lds	Temp1, Comm_Phase				
+	sbrc	Temp1, 2
+	subi	Temp1, 3
+	cpi	Temp1, 1
+	brne	set_comp_phase_not1
+
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	set_comp_phase_to_C
+set_comp_phase_to_A:
+	Set_Comp_Phase_A XH			
+	rjmp	set_comp_phase_exit
+
+set_comp_phase_not1:
+	cpi	Temp1, 2
+	brne	set_comp_phase_3
+
+	Set_Comp_Phase_B XH				
+	rjmp	set_comp_phase_exit
+
+set_comp_phase_3:
+	sbrc	Flags3, PGM_DIR_REV
+	rjmp	set_comp_phase_to_A
+set_comp_phase_to_C:
+	Set_Comp_Phase_C XH			
+
+set_comp_phase_exit:
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -4167,6 +4233,9 @@ wait_before_zc_scan_wait:
 	sbrc	Flags0, OC1A_PENDING 
 	rjmp	wait_before_zc_scan_wait
 
+	ldi	XH, 2
+	sts	Startup_Zc_Timeout_Cntd, XH
+setup_zc_scan_timeout:
 	sbr	Flags0, (1<<OC1A_PENDING)
 	T1oca_Int_Enable XH				; Enable timer1 OCA interrupt
 	mov	XH, Flags1
@@ -4248,7 +4317,7 @@ wait_for_comp_out_start:
 	ldi	Temp1, 6
 
 comp_wait_no_of_readings:
-	sbrc	Flags1, STARTUP_PHASE 			; Set many samples during startup
+	sbrc	Flags1, STARTUP_PHASE 		; Set many samples during startup
 	ldi	Temp1, 10
 
 comp_wait_on_comp_able:
@@ -4259,10 +4328,24 @@ comp_wait_on_comp_able:
 	tst	XH
 	breq	comp_wait_on_comp_able_not_timed_out	; If not read - branch
 
+	sbrs	Flags1, STARTUP_PHASE			; Extend timeout during startup
+	rjmp	comp_wait_on_comp_able_timeout_extended	
+
+	lds	XH, Startup_Cnt				; Do not extend timeout for the first commutations
+	cpi	XH, 3
+	brcs	comp_wait_on_comp_able_timeout_extended
+
+	lds	XH, Startup_Zc_Timeout_Cntd
+	dec	XH
+	brne	comp_wait_on_comp_able_extend_timeout
+
+comp_wait_on_comp_able_timeout_extended:
 	sei								; Enable interrupts
 	sbr	Flags1, (1<<COMP_TIMED_OUT)
-	ret								; Yes - return
+	rjmp	setup_comm_wait
 
+comp_wait_on_comp_able_extend_timeout:
+	xcall setup_zc_scan_timeout
 comp_wait_on_comp_able_not_timed_out:
 	sei								; Enable interrupts
 	nop								; Allocate only just enough time to capture interrupt
@@ -4324,12 +4407,7 @@ comp_read_wrong:
 	inc	Temp1						; Increment number of OK readings required
 	cpi	Temp1, 10						; If above initial requirement - go back and restart
 	brcs	PC+2
-	rjmp	wait_for_comp_out_start
-
-	lds	XH, Startup_Cnt				; For the first commutations - go back and restart
-	cpi	XH, 6
-	brcc	PC+2
-	rjmp	wait_for_comp_out_start
+	inc	Temp1
 
 	rjmp	comp_wait_on_comp_able			; If below initial requirement - continue to look for good ones
 
@@ -4365,7 +4443,34 @@ comp_read_ok:
 	rjmp	comp_wait_on_comp_able
 
 	cbr	Flags1, (1<<COMP_TIMED_OUT)
-	ret							
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Setup commutation timing routine
+;
+; No assumptions
+;
+; Sets up and starts wait from commutation to zero cross
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+setup_comm_wait: 
+	lds	Temp3, Wt_Comm_L	; Set wait commutation value
+	lds	Temp4, Wt_Comm_H
+	cli					; Disable interrupts while reading timer 1
+	T1oca_Clear_Int_Flag XH	; Clear t1oca interrupt flag if set
+	Read_TCNT1L Temp1
+	Read_TCNT1H Temp2
+	add	Temp1, Temp3		; Set new output compare value
+	adc	Temp2, Temp4
+	Set_OCR1AH Temp2		; Update high byte first to avoid false output compare
+	Set_OCR1AL Temp1
+	; Setup next wait time
+	lds	Next_Wt_L, Wt_Advance_L
+	lds	Next_Wt_H, Wt_Advance_H
+	sbr	Flags0, (1<<OC1A_PENDING)
+	T1oca_Int_Enable XH		; Enable timer1 OCA interrupt
+	sei
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -4401,35 +4506,6 @@ eval_comp_check_timeout:
 	rjmp	run_to_wait_for_power_on_fail		; Yes - exit run mode
 
 eval_comp_exit:
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Setup commutation timing routine
-;
-; No assumptions
-;
-; Sets up and starts wait from commutation to zero cross
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-setup_comm_wait: 
-	lds	Temp3, Wt_Comm_L	; Set wait commutation value
-	lds	Temp4, Wt_Comm_H
-	cli					; Disable interrupts while reading timer 1
-	T1oca_Clear_Int_Flag XH	; Clear t1oca interrupt flag if set
-	Read_TCNT1L Temp1
-	Read_TCNT1H Temp2
-	add	Temp1, Temp3		; Set new output compare value
-	adc	Temp2, Temp4
-	Set_OCR1AH Temp2		; Update high byte first to avoid false output compare
-	Set_OCR1AL Temp1
-	; Setup next wait time
-	lds	Next_Wt_L, Wt_Advance_L
-	lds	Next_Wt_H, Wt_Advance_H
-	sbr	Flags0, (1<<OC1A_PENDING)
-	T1oca_Int_Enable XH		; Enable timer1 OCA interrupt
-	sei
 	ret
 
 
@@ -4811,45 +4887,6 @@ comm61_nfet_done_rev:
 
 comm_exit:
 	cbr	Flags0, (1<<DEMAG_CUT_POWER)	; Clear demag power cut flag
-	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Set comparator phase
-;
-; No assumptions
-;
-; Sets up comparator muxes
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-set_comparator_phase:
-	lds	Temp1, Comm_Phase				
-	sbrc	Temp1, 2
-	subi	Temp1, 3
-	cpi	Temp1, 1
-	brne	set_comp_phase_not1
-
-	sbrc	Flags3, PGM_DIR_REV
-	rjmp	set_comp_phase_to_C
-set_comp_phase_to_A:
-	Set_Comp_Phase_A XH			
-	rjmp	set_comp_phase_exit
-
-set_comp_phase_not1:
-	cpi	Temp1, 2
-	brne	set_comp_phase_3
-
-	Set_Comp_Phase_B XH				
-	rjmp	set_comp_phase_exit
-
-set_comp_phase_3:
-	sbrc	Flags3, PGM_DIR_REV
-	rjmp	set_comp_phase_to_A
-set_comp_phase_to_C:
-	Set_Comp_Phase_C XH			
-
-set_comp_phase_exit:
 	ret
 
 
@@ -5355,8 +5392,7 @@ average_throttle_meas:
 	xcall wait3ms			; Wait for new RC pulse value
 	lds	XH, New_Rcp		; Get new RC pulse value
 	add	Temp3, XH
-	ldi	XH, 0
-	adc 	Temp4, XH
+	adc 	Temp4, Zero
 	dec	Temp5
 	brne	average_throttle_meas
 
@@ -5799,7 +5835,8 @@ program_by_tx_entry_wait_ppm:
 	sei
 	lds	XH, New_Rcp			; Load new RC pulse value
 	cpi	XH, RCP_MAX			; At or above max?
-	brcs	program_by_tx_entry_wait_ppm	; No - start over
+	brcc	PC+2
+	rjmp	arming_ppm_check		; No - go back
 
 	rjmp	program_by_tx			; Yes - enter programming mode
 
@@ -5891,7 +5928,7 @@ beep_delay_set:
 
 wait_for_power_on_no_beep:
 	xcall wait10ms
-	lds	XH, Rcp_Timeout_Cnt				; Load RC pulse timeout counter value
+	lds	XH, Rcp_Timeout_Cntd			; Load RC pulse timeout counter value
 	tst	XH
 	brne	wait_for_power_on_ppm_not_missing	; If it is not zero - proceed
 
@@ -5919,7 +5956,7 @@ wait_for_power_on_ppm_not_missing:
 	xcall wait100ms			; Wait to see if start pulse was only a glitch
 
 wait_for_power_on_check_timeout:
-	lds	XH, Rcp_Timeout_Cnt		; Load RC pulse timeout counter value
+	lds	XH, Rcp_Timeout_Cntd	; Load RC pulse timeout counter value
 	tst	XH
 	brne	PC+2					; If it is not zero - proceed
 
@@ -6017,14 +6054,11 @@ init_start_bidir_done:
 	sts	Startup_Cnt, Zero			; Reset counter
 	xcall comm5comm6				; Initialize commutation
 	xcall comm6comm1				
+	xcall initialize_timing			; Initialize timing
 	xcall calc_next_comm_timing		; Set virtual commutation point
-	xcall calc_next_comm_timing	
 	xcall initialize_timing			; Initialize timing
 	xcall calc_next_comm_timing	
-	xcall calc_new_wait_times		; Calculate new wait times
 	xcall initialize_timing			; Initialize timing
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan		; Set up comparator timeout
 	rjmp	run1
 
 
@@ -6046,23 +6080,23 @@ damped_transition:
 ; Out_cA changes from low to high
 run1:
 	xcall wait_for_comp_out_high	; Wait zero cross wait and wait for high
-	xcall setup_comm_wait		; Setup wait time from zero cross to commutation
-	xcall evaluate_comparator_integrity	; Check whether comparator reading has been normal
+;		 setup_comm_wait		; Setup wait time from zero cross to commutation
+;		 evaluate_comparator_integrity	; Check whether comparator reading has been normal
 	xcall calc_governor_target	; Calculate governor target
 	xcall wait_for_comm			; Wait from zero cross to commutation
 	xcall comm1comm2			; Commutate
 	xcall calc_next_comm_timing	; Calculate next timing and start advance timing wait
-	xcall wait_advance_timing	; Wait advance timing and start zero cross wait
-	xcall calc_new_wait_times
-	xcall set_comparator_phase	; Set comparator phase
-	xcall wait_before_zc_scan	; Wait zero cross wait and start zero cross timeout
+;		 wait_advance_timing	; Wait advance timing and start zero cross wait
+;		 calc_new_wait_times
+;		 set_comparator_phase	; Set comparator phase
+;		 wait_before_zc_scan	; Wait zero cross wait and start zero cross timeout
 
 ; Run 2 = A(p-on) + C(n-pwm) - comparator B evaluated
 ; Out_cB changes from high to low
 run2:
 	xcall wait_for_comp_out_low
-	xcall setup_comm_wait	
-	xcall evaluate_comparator_integrity
+;		 setup_comm_wait	
+;		 evaluate_comparator_integrity
 	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_prop_error
 	sbrs	Flags1, HIGH_RPM		; Skip if high rpm
@@ -6072,74 +6106,74 @@ run2:
 	xcall wait_for_comm
 	xcall comm2comm3
 	xcall calc_next_comm_timing
-	xcall wait_advance_timing
-	xcall calc_new_wait_times
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan	
+;		 wait_advance_timing
+;		 calc_new_wait_times
+;		 set_comparator_phase
+;		 wait_before_zc_scan	
 
 ; Run 3 = A(p-on) + B(n-pwm) - comparator C evaluated
 ; Out_cC changes from low to high
 run3:
 	xcall wait_for_comp_out_high
-	xcall setup_comm_wait	
-	xcall evaluate_comparator_integrity
+;		 setup_comm_wait	
+;		 evaluate_comparator_integrity
 	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_int_error
 	xcall wait_for_comm
 	xcall comm3comm4
 	xcall calc_next_comm_timing
-	xcall wait_advance_timing
-	xcall calc_new_wait_times
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan	
+;		 wait_advance_timing
+;		 calc_new_wait_times
+;		 set_comparator_phase
+;		 wait_before_zc_scan	
 
 ; Run 4 = C(p-on) + B(n-pwm) - comparator A evaluated
 ; Out_cA changes from high to low
 run4:
 	xcall wait_for_comp_out_low
-	xcall setup_comm_wait	
-	xcall evaluate_comparator_integrity
+;		 setup_comm_wait	
+;		 evaluate_comparator_integrity
 	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_prop_correction
 	xcall wait_for_comm
 	xcall comm4comm5
 	xcall calc_next_comm_timing
-	xcall wait_advance_timing
-	xcall calc_new_wait_times
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan	
+;		 wait_advance_timing
+;		 calc_new_wait_times
+;		 set_comparator_phase
+;		 wait_before_zc_scan	
 
 ; Run 5 = C(p-on) + A(n-pwm) - comparator B evaluated
 ; Out_cB changes from low to high
 run5:
 	xcall wait_for_comp_out_high
-	xcall setup_comm_wait	
-	xcall evaluate_comparator_integrity
+;		 setup_comm_wait	
+;		 evaluate_comparator_integrity
 	sbrc	Flags0, GOV_ACTIVE				
 	xcall calc_governor_int_correction
 	xcall wait_for_comm
 	xcall comm5comm6
 	xcall calc_next_comm_timing
-	xcall wait_advance_timing
-	xcall calc_new_wait_times
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan	
+;		 wait_advance_timing
+;		 calc_new_wait_times
+;		 set_comparator_phase
+;		 wait_before_zc_scan	
 
 ; Run 6 = B(p-on) + A(n-pwm) - comparator C evaluated
 ; Out_cC changes from high to low
 run6:
 	xcall wait_for_comp_out_low
+;		 setup_comm_wait	
+;		 evaluate_comparator_integrity
 	Start_Adc XH
-	xcall setup_comm_wait	
-	xcall evaluate_comparator_integrity
 	xcall wait_for_comm
 	xcall comm6comm1
 	xcall calc_next_comm_timing
-	xcall wait_advance_timing
-	xcall calc_new_wait_times
+;		 wait_advance_timing
+;		 calc_new_wait_times
+;		 set_comparator_phase
+;		 wait_before_zc_scan	
 	xcall check_temp_voltage_and_limit_power
-	xcall set_comparator_phase
-	xcall wait_before_zc_scan	
 
 	; Check if it is startup
 	sbrs	Flags1, STARTUP_PHASE
@@ -6214,6 +6248,8 @@ normal_run_check_startup_rot:
 
 
 initial_run_phase_done:
+	; Reset stall count
+	sts	Stall_Cnt, Zero
 .IF MODE == 0	; Main
 	; Check if throttle is zeroed
 	lds	XH, Rcp_Stop_Cnt			; Load stop RC pulse counter value
@@ -6239,7 +6275,7 @@ run6_check_rcp_stop_count:
 	sbrs	Flags2, RCP_PPM		
 	rjmp	run6_check_dir				; If flag is not set (PWM) - branch
 
-	lds	XH, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
+	lds	XH, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
 	tst	XH
 	breq	run_to_wait_for_power_on		; If it is zero - go back to wait for poweron
 
@@ -6336,7 +6372,7 @@ run_to_wait_for_power_on_stall_done:
 	sbrs	Flags2, RCP_PPM		
 	rjmp	run_to_next_state_main		; If flag is not set (PWM) - branch
 
-	lds	XH, Rcp_Timeout_Cnt			; Load RC pulse timeout counter value
+	lds	XH, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
 	tst	XH
 	brne	run_to_next_state_main		; If it is not zero - branch
 
