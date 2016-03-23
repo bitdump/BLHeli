@@ -86,11 +86,11 @@ SIGNATURE_002			EQU	030h
 ;*********************  
 Rcp_In		EQU	7	;i
 Vref			EQU	6	;i
-Mux_A		EQU	5	;i
+Mux_C		EQU	5	;i
 ;			EQU	4	;i
 Mux_B		EQU	3	;i
 Comp_Com		EQU	2	;i
-Mux_C		EQU	1	;i
+Mux_A		EQU	1	;i
 Adc_Ip		EQU	0	;i
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip)+(1 SHL Vref))
