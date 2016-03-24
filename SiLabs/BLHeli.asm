@@ -233,7 +233,6 @@ $NOMOD51
 ;           Made damped light default for MULTI on ESCs that support it
 ;           Miscellaneous other changes
 ;
-;           
 ;
 ;**** **** **** **** ****
 ; Up to 8K Bytes of In-System Self-Programmable Flash
@@ -478,36 +477,51 @@ Flycolor_Fairy_6A_Multi 			EQU 198
 Flycolor_Fairy_30A_Main			EQU 199   
 Flycolor_Fairy_30A_Tail 			EQU 200  
 Flycolor_Fairy_30A_Multi 		EQU 201  
-FVT_Littlebee_20A_Main			EQU 202  
-FVT_Littlebee_20A_Tail			EQU 203  
-FVT_Littlebee_20A_Multi			EQU 204  
-FVT_Littlebee_30A_Main			EQU 205  
-FVT_Littlebee_30A_Tail			EQU 206  
-FVT_Littlebee_30A_Multi			EQU 207  
-Graupner_Ultra_20A_Main			EQU 208  
-Graupner_Ultra_20A_Tail			EQU 209  
-Graupner_Ultra_20A_Multi			EQU 210  
-F85_3A_Main					EQU 211  
-F85_3A_Tail					EQU 212  
-F85_3A_Multi					EQU 213  
-ZTW_Spider_Pro_20A_Main			EQU 214  
-ZTW_Spider_Pro_20A_Tail			EQU 215  
-ZTW_Spider_Pro_20A_Multi			EQU 216  
-ZTW_Spider_Pro_20A_Premium_Main	EQU 217  
-ZTW_Spider_Pro_20A_Premium_Tail	EQU 218  
-ZTW_Spider_Pro_20A_Premium_Multi	EQU 219  
-ZTW_Spider_Pro_20A_HV_Main		EQU 220  
-ZTW_Spider_Pro_20A_HV_Tail		EQU 221  
-ZTW_Spider_Pro_20A_HV_Multi		EQU 222  
-ZTW_Spider_Pro_30A_HV_Main		EQU 223  
-ZTW_Spider_Pro_30A_HV_Tail		EQU 224  
-ZTW_Spider_Pro_30A_HV_Multi		EQU 225  
-DYS_XM20A_Main					EQU 226  
-DYS_XM20A_Tail					EQU 227  
-DYS_XM20A_Multi				EQU 228  
-Oversky_MR_20A_Pro_Main			EQU 229  
-Oversky_MR_20A_Pro_Tail			EQU 230  
-Oversky_MR_20A_Pro_Multi			EQU 231  
+Flycolor_Raptor_20A_Main			EQU 202   
+Flycolor_Raptor_20A_Tail 		EQU 203  
+Flycolor_Raptor_20A_Multi 		EQU 204  
+Flycolor_Raptor_390_20A_Main		EQU 205
+Flycolor_Raptor_390_20A_Tail 		EQU 206  
+Flycolor_Raptor_390_20A_Multi 	EQU 207  
+FVT_Littlebee_20A_Main			EQU 208  
+FVT_Littlebee_20A_Tail			EQU 209  
+FVT_Littlebee_20A_Multi			EQU 210  
+FVT_Littlebee_20A_Pro_Main		EQU 211  
+FVT_Littlebee_20A_Pro_Tail		EQU 212  
+FVT_Littlebee_20A_Pro_Multi		EQU 213  
+FVT_Littlebee_30A_Main			EQU 214  
+FVT_Littlebee_30A_Tail			EQU 215  
+FVT_Littlebee_30A_Multi			EQU 216  
+Graupner_Ultra_20A_Main			EQU 217  
+Graupner_Ultra_20A_Tail			EQU 218  
+Graupner_Ultra_20A_Multi			EQU 219  
+F85_3A_Main					EQU 220  
+F85_3A_Tail					EQU 221  
+F85_3A_Multi					EQU 222  
+ZTW_Spider_Pro_20A_Main			EQU 223  
+ZTW_Spider_Pro_20A_Tail			EQU 224  
+ZTW_Spider_Pro_20A_Multi			EQU 225  
+ZTW_Spider_Pro_20A_Premium_Main	EQU 226  
+ZTW_Spider_Pro_20A_Premium_Tail	EQU 227  
+ZTW_Spider_Pro_20A_Premium_Multi	EQU 228  
+ZTW_Spider_Pro_20A_HV_Main		EQU 229  
+ZTW_Spider_Pro_20A_HV_Tail		EQU 230  
+ZTW_Spider_Pro_20A_HV_Multi		EQU 231  
+ZTW_Spider_Pro_30A_HV_Main		EQU 232  
+ZTW_Spider_Pro_30A_HV_Tail		EQU 233  
+ZTW_Spider_Pro_30A_HV_Multi		EQU 234  
+DYS_XM20A_Main					EQU 235  
+DYS_XM20A_Tail					EQU 236  
+DYS_XM20A_Multi				EQU 237  
+Oversky_MR_20A_Pro_Main			EQU 238  
+Oversky_MR_20A_Pro_Tail			EQU 239  
+Oversky_MR_20A_Pro_Multi			EQU 240  
+TBS_Cube_12A_Main				EQU 241  
+TBS_Cube_12A_Tail				EQU 242  
+TBS_Cube_12A_Multi				EQU 243  
+DALRC_XR20A_Main				EQU 244  
+DALRC_XR20A_Tail				EQU 245  
+DALRC_XR20A_Multi				EQU 246  
 
 
 ;**** **** **** **** ****
@@ -713,9 +727,18 @@ Oversky_MR_20A_Pro_Multi			EQU 231
 ;BESCNO EQU Flycolor_Fairy_30A_Main
 ;BESCNO EQU Flycolor_Fairy_30A_Tail
 ;BESCNO EQU Flycolor_Fairy_30A_Multi
+;BESCNO EQU Flycolor_Raptor_20A_Main
+;BESCNO EQU Flycolor_Raptor_20A_Tail
+;BESCNO EQU Flycolor_Raptor_20A_Multi 
+;BESCNO EQU Flycolor_Raptor_390_20A_Main
+;BESCNO EQU Flycolor_Raptor_390_20A_Tail
+;BESCNO EQU Flycolor_Raptor_390_20A_Multi
 ;BESCNO EQU FVT_Littlebee_20A_Main
 ;BESCNO EQU FVT_Littlebee_20A_Tail
-;BESCNO EQU FVT_Littlebee_20A_Multi  
+;BESCNO EQU FVT_Littlebee_20A_Multi
+;BESCNO EQU FVT_Littlebee_20A_Pro_Main
+;BESCNO EQU FVT_Littlebee_20A_Pro_Tail
+;BESCNO EQU FVT_Littlebee_20A_Pro_Multi  
 ;BESCNO EQU FVT_Littlebee_30A_Main
 ;BESCNO EQU FVT_Littlebee_30A_Tail
 ;BESCNO EQU FVT_Littlebee_30A_Multi 
@@ -743,6 +766,12 @@ Oversky_MR_20A_Pro_Multi			EQU 231
 ;BESCNO EQU Oversky_MR_20A_Pro_Main
 ;BESCNO EQU Oversky_MR_20A_Pro_Tail
 ;BESCNO EQU Oversky_MR_20A_Pro_Multi
+;BESCNO EQU TBS_Cube_12A_Main	 
+;BESCNO EQU TBS_Cube_12A_Tail	  
+;BESCNO EQU TBS_Cube_12A_Multi 	 
+;BESCNO EQU DALRC_XR20A_Main	 
+;BESCNO EQU DALRC_XR20A_Tail	  
+;BESCNO EQU DALRC_XR20A_Multi 	 
 
 
 ;**** **** **** **** ****
@@ -1752,6 +1781,36 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Flycolor_Fairy_30A.inc)	; Select Flycolor Fairy 30A pinout
 ENDIF
 
+IF BESCNO == Flycolor_Raptor_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Flycolor_Raptor_20A.inc)	; Select Flycolor Raptor 20A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Raptor_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Flycolor_Raptor_20A.inc)	; Select Flycolor Raptor 20A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Raptor_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Flycolor_Raptor_20A.inc)	; Select Flycolor Raptor 20A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Raptor_390_20A_Main
+MODE 	EQU 	0					; Choose mode. Set to 0 for main motor
+$include (Flycolor_Raptor_390_20A.inc)	; Select Flycolor Raptor 390 20A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Raptor_390_20A_Tail
+MODE 	EQU 	1					; Choose mode. Set to 1 for tail motor
+$include (Flycolor_Raptor_390_20A.inc)	; Select Flycolor Raptor 390 20A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Raptor_390_20A_Multi
+MODE 	EQU 	2					; Choose mode. Set to 2 for multirotor
+$include (Flycolor_Raptor_390_20A.inc)	; Select Flycolor Raptor 390 20A pinout
+ENDIF
+
 IF BESCNO == FVT_Littlebee_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
@@ -1765,6 +1824,21 @@ ENDIF
 IF BESCNO == FVT_Littlebee_20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (FVT_Littlebee_20A.inc)	; Select Favourite Littlebee 20A pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_20A_Pro_Main
+MODE 	EQU 	0					; Choose mode. Set to 0 for main motor
+$include (FVT_Littlebee_20A_Pro.inc)	; Select Favourite Littlebee 20A Pro pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_20A_Pro_Tail
+MODE 	EQU 	1					; Choose mode. Set to 1 for tail motor
+$include (FVT_Littlebee_20A_Pro.inc)	; Select Favourite Littlebee 20A Pro pinout
+ENDIF
+
+IF BESCNO == FVT_Littlebee_20A_Pro_Multi
+MODE 	EQU 	2					; Choose mode. Set to 2 for multirotor
+$include (FVT_Littlebee_20A_Pro.inc)	; Select Favourite Littlebee 20A Pro pinout
 ENDIF
 
 IF BESCNO == FVT_Littlebee_30A_Main
@@ -1901,6 +1975,37 @@ IF BESCNO == Oversky_MR_20A_Pro_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Oversky_MR_20A_Pro.inc)	; Select Oversky MR-20A Pro pinout
 ENDIF
+
+IF BESCNO == TBS_Cube_12A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (TBS_Cube_12A.inc)		; Select TBS Cube 12A pinout
+ENDIF
+
+IF BESCNO == TBS_Cube_12A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (TBS_Cube_12A.inc)		; Select TBS Cube 12A pinout
+ENDIF
+
+IF BESCNO == TBS_Cube_12A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (TBS_Cube_12A.inc)		; Select TBS Cube 12A pinout
+ENDIF
+
+IF BESCNO == DALRC_XR20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (DALRC_XR20A.inc)		; Select DALRC 20A pinout
+ENDIF
+
+IF BESCNO == DALRC_XR20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (DALRC_XR20A.inc)		; Select DALRC 20A pinout
+ENDIF
+
+IF BESCNO == DALRC_XR20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (DALRC_XR20A.inc)		; Select DALRC 20A pinout
+ENDIF
+
 
 
 ;**** **** **** **** ****
@@ -3450,6 +3555,11 @@ pca_int_ppm_below_full_range:
 
 pca_int_ppm_outside_range:
 	inc	Rcp_Outside_Range_Cnt
+	mov	A, Rcp_Outside_Range_Cnt
+	jnz	($+4)
+
+	dec	Rcp_Outside_Range_Cnt
+
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt
 	subb	A, #10						; Allow a given number of outside pulses
@@ -3461,6 +3571,7 @@ pca_int_ppm_outside_range:
 	ajmp	pca_int_set_timeout			
 
 pca_int_ppm_check_full_range:
+	; Decrement outside range counter
 	mov	A, Rcp_Outside_Range_Cnt
 	jz	($+4)
 
@@ -6739,7 +6850,7 @@ test_throttle_gain:
 ;
 ; Average throttle 
 ;
-; Outputs result in Temp3
+; Outputs result in Temp7
 ;
 ; Averages throttle calibration readings
 ;

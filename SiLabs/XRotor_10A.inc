@@ -262,7 +262,7 @@ ENDM
 
 MACRO Initialize_Adc
 	mov	REF0CN, #0Eh		; Set vdd (3.3V) as reference. Enable temp sensor and bias
-IF MCU_50MHZ == 0
+IF MCU_48MHZ == 0
 	mov	ADC0CF, #58h		; ADC clock 2MHz
 ELSE
 	mov	ADC0CF, #0C0h		; ADC clock 2MHz
@@ -294,8 +294,8 @@ ENDM
 MACRO Clear_RPM_Out
 ENDM
 MACRO Set_MCU_Clk_24MHz
-	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	CLKSEL, #0		; Set clock to 24MHz
+	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	Clock_Set_At_48MHz, #0
 ENDM
 MACRO Set_MCU_Clk_48MHz
