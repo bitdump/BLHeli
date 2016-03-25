@@ -291,8 +291,8 @@ ENDM
 MACRO Clear_RPM_Out
 ENDM
 MACRO Set_MCU_Clk_24MHz
-	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	CLKSEL, #0		; Set clock to 24MHz
+	mov	FLSCL, #80h		; Set flash timing for 24MHz
 	mov	Clock_Set_At_48MHz, #0
 ENDM
 MACRO Set_MCU_Clk_48MHz

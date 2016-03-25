@@ -2396,7 +2396,11 @@ rcp_int_fall_check_range:
 rcp_int_ppm_outside_range:
 	lds	XL, Rcp_Outside_Range_Cnt
 	inc	XL
+	tst	XL
+	brne	PC+3
+
 	sts	Rcp_Outside_Range_Cnt, XL
+
 	cpi	XL, 10						; Allow a given number of outside pulses
 	brcc	PC+2
 	rjmp	rcp_int_set_timeout				; If below limit - ignore pulse
@@ -5375,7 +5379,7 @@ test_throttle_gain:
 ;
 ; Average throttle 
 ;
-; Outputs result in Temp3
+; Outputs result in Temp7
 ;
 ; Averages throttle calibration readings
 ;
