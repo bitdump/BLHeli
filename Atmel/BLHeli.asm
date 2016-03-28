@@ -2397,7 +2397,7 @@ rcp_int_ppm_outside_range:
 	lds	XL, Rcp_Outside_Range_Cnt
 	inc	XL
 	tst	XL
-	brne	PC+3
+	breq	PC+3
 
 	sts	Rcp_Outside_Range_Cnt, XL
 
