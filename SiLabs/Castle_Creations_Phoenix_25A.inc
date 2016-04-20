@@ -91,7 +91,7 @@ Rcp_In      EQU 4   ;i
 Mux_A       EQU 1   ;i
 Comp_Com    EQU 0   ;i
 
-P0_DIGITAL  EQU NOT((1 SHL Mux_A)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip))
+P0_DIGITAL  EQU NOT((1 SHL Mux_A)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT     EQU 0FFh
 P0_PUSHPULL EQU 0
 P0_SKIP     EQU NOT(1 SHL Rcp_In) AND 0FFh
