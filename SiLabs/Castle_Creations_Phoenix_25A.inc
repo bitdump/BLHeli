@@ -55,7 +55,7 @@ HIGH_BEC_VOLTAGE        EQU 0       ; Set to 1 or more if high BEC voltage is su
 DAMPED_MODE_ENABLE      EQU 0       ; Damped mode disabled
 NFETON_DELAY            EQU 10      ; Wait delay from pfets off to nfets on (will need to experiment with this for these ESCs)
 PFETON_DELAY            EQU 10      ; Wait delay from nfets off to pfets on (will need to experiment with this for these ESCs)
-ADC_LIMIT_L             EQU 85      ; Power supply measurement ADC value for which main motor power is limited (low byte)
+ADC_LIMIT_L             EQU 200     ; Power supply measurement ADC value for which main motor power is limited (low byte) (guessed this based on other ESCs)
 ADC_LIMIT_H             EQU 0       ; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT              EQU 109     ; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP         EQU 4       ; Temperature measurement ADC value increment for which main motor power is further limited
