@@ -187,6 +187,8 @@ SET BESCNAME=TBS_CUBE_12A
 call:compile
 SET BESCNAME=DALRC_XR20A
 call:compile
+SET BESCNAME=CASTLE_CREATIONS_PHOENIX_25A
+call:compile
 
 goto :end
 

@@ -522,6 +522,9 @@ TBS_Cube_12A_Multi				EQU 243
 DALRC_XR20A_Main				EQU 244  
 DALRC_XR20A_Tail				EQU 245  
 DALRC_XR20A_Multi				EQU 246  
+Castle_Creations_Phoenix_25A_Main EQU 247  
+Castle_Creations_Phoenix_25A_Tail EQU 248  
+Castle_Creations_Phoenix_25A_Multi EQU 249  
 
 
 ;**** **** **** **** ****
@@ -772,6 +775,9 @@ DALRC_XR20A_Multi				EQU 246
 ;BESCNO EQU DALRC_XR20A_Main	 
 ;BESCNO EQU DALRC_XR20A_Tail	  
 ;BESCNO EQU DALRC_XR20A_Multi 	 
+;BESCNO EQU Castle_Creations_Phoenix_25A_Main
+;BESCNO EQU Castle_Creations_Phoenix_25A_Tail
+;BESCNO EQU Castle_Creations_Phoenix_25A_Multi
 
 
 ;**** **** **** **** ****
@@ -2004,6 +2010,21 @@ ENDIF
 IF BESCNO == DALRC_XR20A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (DALRC_XR20A.inc)		; Select DALRC 20A pinout
+ENDIF
+
+IF BESCNO == Castle_Creations_Phoenix_25A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$INCLUDE (Castle_Creations_Phoenix_25A.inc)		; Select Castle Creations Phoenix 25A pinout
+ENDIF
+
+IF BESCNO == Castle_Creations_Phoenix_25A_Tail
+MODE    EQU 	1				; Choose mode. Set to 1 for tail motor
+$INCLUDE (Castle_Creations_Phoenix_25A.inc)		; Select Castle Creations Phoenix 25A pinout
+ENDIF
+
+IF BESCNO == Castle_Creations_Phoenix_25A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$INCLUDE (Castle_Creations_Phoenix_25A.inc)		; Select Castle Creations Phoenix 25A pinout
 ENDIF
 
 
