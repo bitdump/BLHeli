@@ -84,7 +84,7 @@ SIGNATURE_002   EQU 030h
 
 ;*********************
 ; PORT 0 definitions *
-;*********************  
+;*********************
 
 Mux_C       EQU 5   ;i
 Rcp_In      EQU 4   ;i
@@ -116,7 +116,7 @@ MACRO Rcp_Int_Disable
 ENDM
 
 MACRO Rcp_Int_First
-    anl PCA0CPM0, #0CFh         
+    anl PCA0CPM0, #0CFh
     jb  Flags3.PGM_RCP_PWM_POL, ($+6)   ; Is pwm polarity positive?
     orl PCA0CPM0, #20h                  ; Capture rising edge
     jnb Flags3.PGM_RCP_PWM_POL, ($+6)   ; Is pwm polarity negative?
@@ -124,7 +124,7 @@ MACRO Rcp_Int_First
 ENDM
 
 MACRO Rcp_Int_Second
-    anl PCA0CPM0, #0CFh         
+    anl PCA0CPM0, #0CFh
     jb  Flags3.PGM_RCP_PWM_POL, ($+6)   ; Is pwm polarity positive?
     orl PCA0CPM0, #10h                  ; Capture falling edge
     jnb Flags3.PGM_RCP_PWM_POL, ($+6)   ; Is pwm polarity negative?
@@ -133,7 +133,7 @@ ENDM
 
 MACRO Rcp_Clear_Int_Flag
     clr     CCF0                        ; Clear interrupt flag
-ENDM        
+ENDM
 
 ;*********************
 ; PORT 1 definitions *
@@ -225,15 +225,15 @@ MACRO Damping_FET_On
 ENDM
 
 MACRO Set_Comp_Phase_A
-    mov CPT0MX, #21h    ; Set comparator multiplexer to phase A
+    mov CPT0MX, #00h    ; Set comparator multiplexer to phase A
 ENDM
 
 MACRO Set_Comp_Phase_B
-    mov CPT0MX, #11h    ; Set comparator multiplexer to phase B
+    mov CPT0MX, #70h    ; Set comparator multiplexer to phase B
 ENDM
 
 MACRO Set_Comp_Phase_C
-    mov CPT0MX, #01h    ; Set comparator multiplexer to phase C
+    mov CPT0MX, #20h    ; Set comparator multiplexer to phase C
 ENDM
 
 MACRO Read_Comp_Out
@@ -256,18 +256,18 @@ P2_PUSHPULL EQU (1 SHL DebugPin)
 MACRO Interrupt_Table_Definition
 CSEG AT 0           ; Code segment start
     jmp reset
-CSEG AT 0Bh         ; Timer0 interrupt  
-    jmp t0_int  
-CSEG AT 2Bh         ; Timer2 interrupt  
-    jmp t2_int  
-CSEG AT 5Bh         ; PCA interrupt 
-    jmp pca_int 
-CSEG AT 73h         ; Timer3 interrupt  
-    jmp t3_int  
+CSEG AT 0Bh         ; Timer0 interrupt
+    jmp t0_int
+CSEG AT 2Bh         ; Timer2 interrupt
+    jmp t2_int
+CSEG AT 5Bh         ; PCA interrupt
+    jmp pca_int
+CSEG AT 73h         ; Timer3 interrupt
+    jmp t3_int
 ENDM
 
 MACRO Initialize_Xbar
-    mov XBR1, #41h  ; Xbar enabled, CEX0 routed to pin Rcp_In           
+    mov XBR1, #41h  ; Xbar enabled, CEX0 routed to pin Rcp_In
 ENDM
 
 MACRO Initialize_Adc
@@ -291,7 +291,7 @@ MACRO Start_Adc
 ENDM
 
 MACRO Get_Adc_Status
-    mov A, ADC0CN       
+    mov A, ADC0CN
 ENDM
 
 MACRO Read_Adc_Result
