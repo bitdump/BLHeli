@@ -52,9 +52,9 @@ COMP1_USED              EQU 0       ; Set to 1 if MCU has comparator 1 and it is
 LOCK_BYTE_ADDRESS_16K   EQU 3FFFh   ; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K    EQU 1DFFh   ; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE        EQU 0       ; Set to 1 or more if high BEC voltage is supported
-DAMPED_MODE_ENABLE      EQU 1       ; Damped mode disabled
-NFETON_DELAY            EQU 3       ; Wait delay from pfets off to nfets on
-PFETON_DELAY            EQU 5       ; Wait delay from nfets off to pfets on
+DAMPED_MODE_ENABLE      EQU 0       ; Damped mode disabled
+NFETON_DELAY            EQU 10      ; Wait delay from pfets off to nfets on (will need to experiment with this for these ESCs)
+PFETON_DELAY            EQU 10      ; Wait delay from nfets off to pfets on (will need to experiment with this for these ESCs)
 ADC_LIMIT_L             EQU 85      ; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H             EQU 0       ; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT              EQU 109     ; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
@@ -65,18 +65,18 @@ TEMP_LIMIT_STEP         EQU 4       ; Temperature measurement ADC value incremen
 ;**** **** **** **** ****
 
 DEFAULT_PGM_MAIN_SPOOLUP_TIME   EQU 10  ; Main motor spoolup time
-DEFAULT_PGM_MAIN_STARTUP_PWR    EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188   7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
-DEFAULT_PGM_TAIL_STARTUP_PWR    EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188   7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
-DEFAULT_PGM_MULTI_STARTUP_PWR   EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188   7=0.25  8=0.38  9=0.50  10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MAIN_STARTUP_PWR    EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188 7=0.25 8=0.38 9=0.50 10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_TAIL_STARTUP_PWR    EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188 7=0.25 8=0.38 9=0.50 10=0.75 11=1.00 12=1.25 13=1.50
+DEFAULT_PGM_MULTI_STARTUP_PWR   EQU 10  ; 1=0.031 2=0.047 3=0.063 4=0.094 5=0.125 6=0.188 7=0.25 8=0.38 9=0.50 10=0.75 11=1.00 12=1.25 13=1.50
 
 ;**** **** **** **** ****
 ; Bootloader definitions
 ;**** **** **** **** ****
 
 RTX_PORT    EQU P0      ; Receive/Transmit port
-RTX_MDOUT   EQU P0MDOUT ; Set to 1 for PUSHPULL             
-RTX_MDIN    EQU P0MDIN  ; Set to 1 for DIGITAL              
-RTX_SKIP    EQU P0SKIP  ; Set to 1 for SKIP             
+RTX_MDOUT   EQU P0MDOUT ; Set to 1 for PUSHPULL
+RTX_MDIN    EQU P0MDIN  ; Set to 1 for DIGITAL
+RTX_SKIP    EQU P0SKIP  ; Set to 1 for SKIP
 RTX_PIN     EQU 7       ; RTX pin
 
 SIGNATURE_001   EQU 0f3h    ; Device signature
@@ -86,15 +86,12 @@ SIGNATURE_002   EQU 030h
 ; PORT 0 definitions *
 ;*********************  
 
-Rcp_In      EQU 7   ;i
-Adc_Ip      EQU 6   ;i
-Mux_A       EQU 5   ;i
-Mux_B       EQU 3   ;i
-Comp_Com    EQU 2   ;i
-Mux_C       EQU 1   ;i
-Vref        EQU 0   ;i
+Mux_C       EQU 5   ;i
+Rcp_In      EQU 4   ;i
+Mux_A       EQU 1   ;i
+Comp_Com    EQU 0   ;i
 
-P0_DIGITAL  EQU NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip)+(1 SHL Vref))
+P0_DIGITAL  EQU NOT((1 SHL Mux_A)+(1 SHL Mux_C)+(1 SHL Comp_Com)+(1 SHL Adc_Ip))
 P0_INIT     EQU 0FFh
 P0_PUSHPULL EQU 0
 P0_SKIP     EQU NOT(1 SHL Rcp_In) AND 0FFh
@@ -138,51 +135,52 @@ MACRO Rcp_Clear_Int_Flag
     clr     CCF0                        ; Clear interrupt flag
 ENDM        
 
-
 ;*********************
 ; PORT 1 definitions *
 ;*********************
 
-ApFET   EQU 5   ;o
-BpFET   EQU 4   ;o
-CpFET   EQU 3   ;o
-AnFET   EQU 2   ;o
-BnFET   EQU 1   ;o
-CnFET   EQU 0   ;o
+Mux_B   EQU 7   ;i
+Adc_Ip  EQU 6   ;i
+CpFET   EQU 5   ;o
+CnFET   EQU 4   ;o
+BpFET   EQU 3   ;o
+BnFET   EQU 2   ;o
+ApFET   EQU 1   ;o
+AnFET   EQU 0   ;o
 
 P1_DIGITAL  EQU (1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_INIT     EQU (1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)       
+P1_INIT     EQU (1 SHL Mux_B)+(1 SHL Adc_Ip)
 P1_PUSHPULL EQU (1 SHL AnFET)+(1 SHL BnFET)+(1 SHL CnFET)+(1 SHL ApFET)+(1 SHL BpFET)+(1 SHL CpFET)
-P1_SKIP     EQU 0
+P1_SKIP     EQU (1 SHL Mux_B)+(1 SHL Adc_Ip)
 
 MACRO AnFET_on
-    clr P1.AnFET
+    setb P1.AnFET
 ENDM
 
 MACRO AnFET_off
-    setb P1.AnFET
+    clr P1.AnFET
 ENDM
 
 MACRO BnFET_on
-    clr P1.BnFET
+    setb P1.BnFET
 ENDM
 
 MACRO BnFET_off
-    setb P1.BnFET
+    clr P1.BnFET
 ENDM
 
 MACRO CnFET_on
-    clr P1.CnFET
+    setb P1.CnFET
 ENDM
 
 MACRO CnFET_off
-    setb P1.CnFET
+    clr P1.CnFET
 ENDM
 
 MACRO All_nFETs_Off
-    setb P1.AnFET
-    setb P1.BnFET
-    setb P1.CnFET
+    clr P1.AnFET
+    clr P1.BnFET
+    clr P1.CnFET
 ENDM
 
 MACRO ApFET_on
