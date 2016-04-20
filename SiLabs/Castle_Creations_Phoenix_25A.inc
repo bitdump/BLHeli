@@ -41,7 +41,7 @@ $include (c8051f330.inc)
 ;**** **** **** **** ****
 
 CSEG AT 1A40h
-Eep_ESC_Layout:         DB  "#Phoenix25A#    "  ; ESC layout tag
+Eep_ESC_Layout:         DB  "#PHOENIX25A#    "  ; ESC layout tag
 CSEG AT 1A50h
 Eep_ESC_MCU:            DB  "#BLHELI#F330#   "  ; Project and MCU tag (16 Bytes)
 
@@ -52,9 +52,9 @@ COMP1_USED              EQU 0       ; Set to 1 if MCU has comparator 1 and it is
 LOCK_BYTE_ADDRESS_16K   EQU 3FFFh   ; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K    EQU 1DFFh   ; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE        EQU 0       ; Set to 1 or more if high BEC voltage is supported
-DAMPED_MODE_ENABLE      EQU 0       ; Damped mode disabled
-NFETON_DELAY            EQU 10      ; Wait delay from pfets off to nfets on (will need to experiment with this for these ESCs)
-PFETON_DELAY            EQU 10      ; Wait delay from nfets off to pfets on (will need to experiment with this for these ESCs)
+DAMPED_MODE_ENABLE      EQU 1       ; Damped mode disabled
+NFETON_DELAY            EQU 5       ; Wait delay from pfets off to nfets on (will need to experiment with this for these ESCs)
+PFETON_DELAY            EQU 5       ; Wait delay from nfets off to pfets on (will need to experiment with this for these ESCs)
 ADC_LIMIT_L             EQU 200     ; Power supply measurement ADC value for which main motor power is limited (low byte) (guessed this based on other ESCs)
 ADC_LIMIT_H             EQU 0       ; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT              EQU 109     ; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
@@ -77,7 +77,7 @@ RTX_PORT    EQU P0      ; Receive/Transmit port
 RTX_MDOUT   EQU P0MDOUT ; Set to 1 for PUSHPULL
 RTX_MDIN    EQU P0MDIN  ; Set to 1 for DIGITAL
 RTX_SKIP    EQU P0SKIP  ; Set to 1 for SKIP
-RTX_PIN     EQU 7       ; RTX pin
+RTX_PIN     EQU 4       ; RTX pin
 
 SIGNATURE_001   EQU 0f3h    ; Device signature
 SIGNATURE_002   EQU 030h
@@ -94,7 +94,7 @@ Comp_Com    EQU 0   ;i
 P0_DIGITAL  EQU NOT((1 SHL Mux_A)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT     EQU 0FFh
 P0_PUSHPULL EQU 0
-P0_SKIP     EQU NOT(1 SHL Rcp_In) AND 0FFh
+P0_SKIP     EQU NOT(1 SHL Rcp_In)
 
 MACRO Get_Rcp_Capture_Values
     mov Temp1, PCA0CPL0     ; Get PCA capture values
@@ -313,3 +313,4 @@ ENDM
 
 MACRO Set_MCU_Clk_48MHz
 ENDM
+
