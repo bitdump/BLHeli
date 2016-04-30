@@ -213,6 +213,12 @@ MACRO All_pFETs_Off
 	clr	P1.CpFET
 	clr	P1.BpFET
 ENDM
+
+MACRO Brake_FETs_On	
+	ApFET_on
+	BpFET_on
+	CpFET_on
+ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
 	orl	P1, A
