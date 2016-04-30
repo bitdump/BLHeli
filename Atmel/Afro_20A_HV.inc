@@ -214,15 +214,16 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .MACRO CpFET_off
 	cbi	PORTB, CpFET
 .ENDMACRO
-.MACRO All_pFETs_On
-	sbi	PORTD, ApFET
-	sbi	PORTB, BpFET
-	sbi	PORTB, CpFET
-.ENDMACRO
 .MACRO All_pFETs_Off
 	cbi	PORTD, ApFET
 	cbi	PORTB, BpFET
 	cbi	PORTB, CpFET
+.ENDMACRO
+
+.MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 .ENDMACRO
 .MACRO Damping_FET_On	
 	lds	@0, DampingFET	
@@ -232,7 +233,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	sbi	PORTB, BpFET		
 	sbrc	@0, 2
 	sbi	PORTB, CpFET		
-.ENDM
+.ENDMACRO
 
 .MACRO Comp_Init
 	in	@0, SFIOR			; Toggling ACME improves comparator performance on many ESCs			

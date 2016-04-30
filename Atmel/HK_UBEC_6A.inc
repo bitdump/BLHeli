@@ -209,15 +209,16 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 .MACRO CpFET_off
 	cbi	PORTC, CpFET
 .ENDMACRO
-.MACRO All_pFETs_On
-	sbi	PORTD, ApFET
-	sbi	PORTC, BpFET
-	sbi	PORTC, CpFET
-.ENDMACRO
 .MACRO All_pFETs_Off
 	cbi	PORTD, ApFET
 	cbi	PORTC, BpFET
 	cbi	PORTC, CpFET
+.ENDMACRO
+
+.MACRO Brake_FETs_On	
+	AnFET_on
+	BnFET_on
+	CnFET_on
 .ENDMACRO
 .MACRO Damping_FET_On	
 	lds	@0, DampingFET	
@@ -227,7 +228,7 @@ Eep_ESC_MCU:			.DB	"#BLHELI#Am8A#   "	; Project and MCU tag (16 Bytes)
 	sbi	PORTC, BpFET		
 	sbrc	@0, 2
 	sbi	PORTC, CpFET		
-.ENDM
+.ENDMACRO
 
 .MACRO Comp_Init
 	in	@0, SFIOR			; Toggle Analog Comparator Multiplexer Enable			
