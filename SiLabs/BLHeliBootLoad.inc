@@ -75,7 +75,7 @@ IF SIGNATURE_001 == 0f8h
 ENDIF
 	orl	RTX_MDIN, #(1 SHL RTX_PIN)		; Set digital
 	anl	RTX_MDOUT, #NOT(1 SHL RTX_PIN)	; Disable pushpull
-	mov	RTX_SKIP, #0
+	mov	RTX_SKIP, #0FFh
 	setb	RTX_PORT.RTX_PIN		; Set data high
 	; Set number of connect attempts before exiting bootloader
 	mov	Cmdh, #250
