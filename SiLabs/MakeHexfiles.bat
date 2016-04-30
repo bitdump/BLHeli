@@ -13,7 +13,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=REV14_5
+SET Revision=REV14_4
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 
@@ -153,8 +153,6 @@ SET BESCNAME=MDRX62H
 call:compile
 SET BESCNAME=ROTORGEEKS_20A
 call:compile
-SET BESCNAME=ROTORGEEKS_20A_PLUS
-call:compile
 SET BESCNAME=FLYCOLOR_FAIRY_6A
 call:compile
 SET BESCNAME=FLYCOLOR_FAIRY_30A
@@ -162,8 +160,6 @@ call:compile
 SET BESCNAME=FLYCOLOR_RAPTOR_20A
 call:compile
 SET BESCNAME=FLYCOLOR_RAPTOR_390_20A
-call:compile
-SET BESCNAME=FVT_LITTLEBEE_12A
 call:compile
 SET BESCNAME=FVT_LITTLEBEE_20A
 call:compile
@@ -190,8 +186,6 @@ call:compile
 SET BESCNAME=TBS_CUBE_12A
 call:compile
 SET BESCNAME=DALRC_XR20A
-call:compile
-SET BESCNAME=AIKON_BOLTLITE_30A
 call:compile
 
 goto :end

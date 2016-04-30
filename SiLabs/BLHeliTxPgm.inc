@@ -90,7 +90,7 @@ read_eeprom_block1:
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #25	; 25 parameters 
+	mov	Temp4, #24	; 24 parameters 
 read_eeprom_block2:
 	call read_eeprom_byte
 	inc	DPTR				
@@ -144,7 +144,7 @@ write_eeprom_block1:
 
 	mov	DPTR, #Eep_Enable_TX_Program
 	mov	Temp1, #Pgm_Enable_TX_Program	
-	mov	Temp4, #25	; 25 parameters 
+	mov	Temp4, #24	; 24 parameters 
 write_eeprom_block2:
 	call write_eeprom_byte
 	inc	DPTR						

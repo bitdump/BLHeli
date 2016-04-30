@@ -209,16 +209,15 @@ ENDM
 MACRO CpFET_off
 	clr	P0.CpFET
 ENDM
+MACRO All_pFETs_On
+	setb	P0.ApFET
+	setb	P0.BpFET
+	setb	P0.CpFET
+ENDM
 MACRO All_pFETs_Off
 	clr	P0.ApFET
 	clr	P0.BpFET
 	clr	P0.CpFET
-ENDM
-
-MACRO Brake_FETs_On	
-	AnFET_on
-	BnFET_on
-	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET

@@ -50,9 +50,9 @@ ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 PORT3_EXIST			EQU	0	; Set to 1 if MCU has port3
 COMP1_USED			EQU	0	; Set to 1 if MCU has comparator 1 and it is being used
 LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
-LOCK_BYTE_ADDRESS_8K	EQU	1FFFh	; Address of lock byte if 8k flash size
+LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
-DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
+DAMPED_MODE_ENABLE		EQU	1	; Damped mode disabled
 NFETON_DELAY			EQU	6	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	245	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
@@ -191,16 +191,15 @@ ENDM
 MACRO CpFET_off
 	setb	P1.CpFET
 ENDM
+MACRO All_pFETs_On
+	clr	P1.ApFET
+	clr	P1.BpFET
+	clr	P1.CpFET
+ENDM
 MACRO All_pFETs_Off
 	setb	P1.ApFET
 	setb	P1.BpFET
 	setb	P1.CpFET
-ENDM
-
-MACRO Brake_FETs_On	
-	AnFET_on
-	BnFET_on
-	CnFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
