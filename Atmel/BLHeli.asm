@@ -124,7 +124,11 @@
 ;           Improved running at very high rpms
 ;           Made damped light default for MULTI on ESCs that support it
 ;           Miscellaneous other changes
-;
+; - Rev14.5 Longer between beacon beeps (to reduce motor heating), and now again beeping on two motor phases
+;           Implemented programmable brake on zero throttle
+;           Slightly modified throttle calibration
+;           Improved startup, particularly for small motors
+;           Improved smoothness
 ;
 ;
 ;**** **** **** **** ****
@@ -171,7 +175,7 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI 
+;#define BLUESERIES_20A_MULTI
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI 
@@ -282,7 +286,7 @@
 ;#define SUNRISE_BLHELI_SLIM_30A_MULTI
 ;#define DYS_SN20A_MAIN				; ICP1 as input		
 ;#define DYS_SN20A_TAIL
-;#define DYS_SN20A_MULTI
+;#define DYS_SN20A_MULTI 
 ;#define TBS_CUBE_20A_MAIN			; ICP1 as input		
 ;#define TBS_CUBE_20A_TAIL
 ;#define TBS_CUBE_20A_MULTI 
@@ -985,6 +989,7 @@
 .EQU	DEFAULT_PGM_ENABLE_TEMP_PROT	 	= 0 	; 1=Enabled 	0=Disabled
 .EQU	DEFAULT_PGM_ENABLE_POWER_PROT 	= 1 	; 1=Enabled 	0=Disabled
 .EQU	DEFAULT_PGM_ENABLE_PWM_INPUT	 	= 0 	; 1=Enabled 	0=Disabled
+.EQU DEFAULT_PGM_BRAKE_ON_STOP	 	= 0 	; 1=Enabled 	0=Disabled
 
 ;**** **** **** **** ****
 ; Constant definitions for main
@@ -1091,11 +1096,11 @@
 .EQU	MOTOR_SPINNING			=	0		; Set when in motor is spinning
 .EQU	STARTUP_PHASE			= 	1		; Set when in startup phase
 .EQU	INITIAL_RUN_PHASE		=	2		; Set when in initial run phase, before synchronized run is achieved
-.EQU	ADC_READ_TEMP			= 	3		; Set when ADC input shall be set to read temperature
-.EQU	COMP_TIMED_OUT			= 	4		; Set when comparator reading timed out
-.EQU	SKIP_DAMP_ON			= 	5 		; Set when turning damping fet on is skipped
-.EQU	HIGH_RPM				= 	6		; Set when motor rpm is high (Comm_Period4x_H less than 2)
-;						= 	7
+.EQU	MOTOR_STARTED			= 	3		; Set when motor is started
+.EQU	ADC_READ_TEMP			= 	4		; Set when ADC input shall be set to read temperature
+.EQU	COMP_TIMED_OUT			= 	5		; Set when comparator reading timed out
+.EQU	SKIP_DAMP_ON			= 	6 		; Set when turning damping fet on is skipped
+.EQU	HIGH_RPM				= 	7		; Set when motor rpm is high (Comm_Period4x_H less than 2)
 
 .DEF	Flags2				=	R24		; State flags. NOT reset upon init_start
 .EQU	RCP_UPDATED			= 	0		; New RC pulse length value available
@@ -1162,7 +1167,6 @@ Prev_Prev_Comm_L:			.BYTE	1		; Pre-previous commutation timer timestamp (lo byte
 Prev_Prev_Comm_H:			.BYTE	1		; Pre-previous commutation timer timestamp (hi byte)
 Comm_Period4x_L:			.BYTE	1		; Timer3 counts between the last 4 commutations (lo byte)
 Comm_Period4x_H:			.BYTE	1		; Timer3 counts between the last 4 commutations (hi byte)
-Comm_Diff:				.BYTE	1		; Timer3 count difference between the last two commutations
 Comm_Phase:				.BYTE	1		; Current commutation phase
 Comparator_Read_Cnt: 		.BYTE	1		; Number of comparator reads done
 
@@ -1265,6 +1269,7 @@ Pgm_Enable_Temp_Prot:		.BYTE	1		; Programmed temperature protection enable
 Pgm_Enable_Power_Prot:		.BYTE	1		; Programmed low rpm power protection enable
 Pgm_Enable_Pwm_Input:		.BYTE	1		; Programmed PWM input signal enable
 Pgm_Pwm_Dither:			.BYTE	1		; Programmed output PWM dither
+Pgm_Brake_On_Stop:			.BYTE	1		; Programmed braking when throttle is zero
 
 ; The sequence of the variables below is no longer of importance
 Pgm_Gov_P_Gain_Decoded:		.BYTE	1		; Programmed governor decoded P gain
@@ -1279,8 +1284,8 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	4		; Sub revision of the firmware
-.EQU	EEPROM_LAYOUT_REVISION		=	20		; Revision of the EEPROM layout
+.EQU	EEPROM_FW_SUB_REVISION		=	5		; Sub revision of the firmware
+.EQU	EEPROM_LAYOUT_REVISION		=	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		.DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -1323,6 +1328,7 @@ Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of pro
 Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
 Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
 _Eep_Pgm_Pwm_Dither:		.DB	0xFF	
+Eep_Pgm_Brake_On_Stop:		.DB	DEFAULT_PGM_BRAKE_ON_STOP		; EEPROM copy of programmed braking when throttle is zero
 .ENDIF
 
 .IF MODE == 1
@@ -1362,6 +1368,7 @@ Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of pro
 Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
 Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
 Eep_Pgm_Pwm_Dither:			.DB	DEFAULT_PGM_TAIL_PWM_DITHER		; EEPROM copy of programmed output PWM dither
+Eep_Pgm_Brake_On_Stop:		.DB	DEFAULT_PGM_BRAKE_ON_STOP		; EEPROM copy of programmed braking when throttle is zero
 .ENDIF
 
 .IF MODE == 2
@@ -1401,6 +1408,7 @@ Eep_Pgm_Temp_Prot_Enable:	.DB	DEFAULT_PGM_ENABLE_TEMP_PROT		; EEPROM copy of pro
 Eep_Pgm_Enable_Power_Prot:	.DB	DEFAULT_PGM_ENABLE_POWER_PROT		; EEPROM copy of programmed low rpm power protection enable
 Eep_Pgm_Enable_Pwm_Input:	.DB	DEFAULT_PGM_ENABLE_PWM_INPUT		; EEPROM copy of programmed PWM input signal enable
 Eep_Pgm_Pwm_Dither:			.DB	DEFAULT_PGM_MULTI_PWM_DITHER		; EEPROM copy of programmed output PWM dither
+Eep_Pgm_Brake_On_Stop:		.DB	DEFAULT_PGM_BRAKE_ON_STOP		; EEPROM copy of programmed braking when throttle is zero
 .ENDIF
 
 
@@ -1420,7 +1428,7 @@ Interrupt_Table_Definition		; ATmega interrupts
 ; Table definitions
 GOV_GAIN_TABLE:   		.DB 	0x02, 0x03, 0x04, 0x06, 0x08, 0x0C, 0x10, 0x18, 0x20, 0x30, 0x40, 0x60, 0x80, 0 ; Padded zero for an even number
 STARTUP_POWER_TABLE:  	.DB 	0x04, 0x06, 0x08, 0x0C, 0x10, 0x18, 0x20, 0x30, 0x40, 0x60, 0x80, 0xA0, 0xC0, 0 ; Padded zero for an even number
-PWM_DITHER_TABLE:  		.DB 	0x00, 0x07, 0x0F, 0x1F, 0x3F, 0 ; Padded zero for an even number
+PWM_DITHER_TABLE:  		.DB 	0x00, 0x03, 0x07, 0x0F, 0x1F, 0 ; Padded zero for an even number
 .IF MODE == 0
   .IF DAMPED_MODE_ENABLE == 1
 TX_PGM_PARAMS_MAIN:  	.DB 	13, 13, 4, 3, 6, 13, 5, 3, 3, 2, 2, 0 ; Padded zero for an even number
@@ -1820,14 +1828,22 @@ t0_int_pwm_update:
 	andi	XL, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
 	breq	t0_int_current_pwm_update		
 
-	lds	XL, Startup_Cnt			; Add an extra power boost during start
-	lsr	XL
-	lsr	XL
-	ldi	I_Temp2, 6
-	add	XL, I_Temp2
-	lds	I_Temp2, Requested_Pwm			
-	add	XL, I_Temp2
-	sts	Requested_Pwm, XL
+	sbrc	Flags1, MOTOR_STARTED		; Do not boost when changing direction in bidirectional mode
+	rjmp	t0_int_current_pwm_update
+
+	lds	XL, Stall_Cnt				; Add an extra power boost during start
+	lsl	XL
+	lsl	XL
+	lds	I_Temp2, Pwm_Spoolup_Beg		; Set 25% of max startup power as minimum power
+	lsr	I_Temp2
+	lsr	I_Temp2
+	cp	I_Temp2, I_Temp1
+	brcs	PC+2
+
+	mov	I_Temp1, I_Temp2
+
+	add	I_Temp1, XL
+	sts	Requested_Pwm, I_Temp1
 	brcc	PC+4
 
 	ldi	XL, 0xFF
@@ -2681,10 +2697,6 @@ beep_f4:	; Entry point 4, load beeper frequency 4 settings
 beep:	; Beep loop start
 	ldi	Temp2, 2					; Must be an even number (or direction will change)
 beep_onoff:
-	sbrc	Flags3, PGM_DIR_REV			; Toggle between using A fet and C fet
-	cbr	Flags3, (1<<PGM_DIR_REV)
-	sbrs	Flags3, PGM_DIR_REV			; Toggle between using A fet and C fet
-	sbr	Flags3, (1<<PGM_DIR_REV)
 	clr	XH
 	BpFET_off			; BpFET off
 	dec	XH			; Allow some time after pfet is turned off
@@ -2699,12 +2711,26 @@ beep_onoff:
 	dec	XH			; Allow some time after pfet is turned on
 	brne	PC-1	
 	; Turn on nfet
+	cpi	Temp2, 2
+	breq	beep_anfet_on
 	AnFET_on			; AnFET on
+beep_anfet_on:
+	cpi	Temp2, 2
+	brne	beep_cnfet_on
+	CnFET_on			; CnFET on
+beep_cnfet_on:
 	lds	XH, Beep_Strength
 	dec	XH			
 	brne	PC-1	
 	; Turn off nfet
+	cpi	Temp2, 2
+	breq	beep_anfet_off
 	AnFET_off			; AnFET off
+beep_anfet_off:
+	cpi	Temp2, 2
+	brne	beep_cnfet_off
+	CnFET_off			; CnFET off
+beep_cnfet_off:
 	ldi	XH, 135		; 25µs off
 	dec	XH			
 	brne	PC-1	
@@ -3855,9 +3881,6 @@ calc_next_comm_startup:
 	lds	Temp8, Prev_Prev_Comm_H 
 	sts	Prev_Prev_Comm_L, Temp4
 	sts	Prev_Prev_Comm_H, Temp5 
-	sub	Temp5, Temp8			; Calculate previous commutation time (hi byte only)
-	sub	Temp2, Temp5 			; Calculate the difference between the two previous commutation times (hi bytes only)
-	sts	Comm_Diff, Temp2
 	lds	Temp1, Prev_Comm_L		; Reload this commutation time
 	lds	Temp2, Prev_Comm_H
 	sub	Temp1, Temp7 			; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
@@ -4120,19 +4143,13 @@ store_times_decrease:
 	sbrs	Flags1, STARTUP_PHASE 			
 	rjmp	store_times_exit
 
-	lds	XH, Startup_Cnt			
-	cpi	XH, 3
-	brcs	store_times_exit
-
-	lds	Temp1, Wt_Comm_H		; Compensate commutation wait for comparator offset
-	lds	Temp2, Comm_Diff
-	asr	Temp2
-	add	Temp1, Temp2
-	brcs	store_times_exit
-	brmi	store_times_exit
-
-	sts	Wt_Comm_L, Zero
-	sts	Wt_Comm_H, Temp1 
+	ldi	XH, 0x0F
+	sts	Wt_Comm_L, XH			; Set very short delays for all but advance time during startup, in order to widen zero cross capture range
+	sts	Wt_Comm_H, Zero
+	sts	Wt_Zc_Scan_L, XH
+	sts	Wt_Zc_Scan_H, Zero
+	sts	Wt_Zc_Timeout_L, XH
+	sts	Wt_Zc_Timeout_H, Zero
 
 store_times_exit:
 	rjmp	set_comparator_phase
@@ -4250,6 +4267,15 @@ setup_zc_scan_timeout:
 	lds	Temp4, Comm_Period4x_H
 	lsr	Temp4
 	ror	Temp3
+	lsr	Temp4
+	ror	Temp3
+	sbrs	Flags1, STARTUP_PHASE 			
+	rjmp	setup_zc_scan_timeout_startup_done
+
+	ldi	XH, 0x40
+	add	Temp4, XH
+
+setup_zc_scan_timeout_startup_done:
 	cli							; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp1
 	Read_TCNT1H Temp2
@@ -4292,11 +4318,11 @@ wait_for_comp_out_high:
 	ldi	Temp3, 0
 
 wait_for_comp_out_start:
-	sei							; Enable interrupts
 	; Set number of comparator readings
 	ldi	Temp1, 1					; Number of OK readings required
+	ldi	Temp2, 1					; Max number of readings required	
 	sbrc	Flags1, HIGH_RPM			; Branch if high rpm	
-	rjmp	comp_wait_on_comp_able
+	rjmp	comp_check_timeout
 
 	mov	XH, Flags1				; Clear demag detected flag if start phases
 	andi	XH, ((1<<STARTUP_PHASE)+(1<<INITIAL_RUN_PHASE))
@@ -4304,86 +4330,43 @@ wait_for_comp_out_start:
 		
 	cbr	Flags0, (1<<DEMAG_DETECTED)
 
-	lds 	XH, Comm_Period4x_H			; Set number of readings higher for lower speeds
-	subi	XH, 0x05
-	brcs	comp_wait_on_comp_able
+	lds 	Temp1, Comm_Period4x_H		; Set number of readings higher for lower speeds	
+	ldi	Temp2, 20 				; Too low value (~<15) causes rough running at pwm harmonics. Too high a value (~>35) causes the RCT4215 630 to run rough on full throttle
+	cpi	Temp1, 20					; Approximately one pwm period
+	brcs	PC+2
 
-	ldi	Temp1, 2
+	ldi	Temp1, 20
+	
+	sbrs	Flags1, STARTUP_PHASE		; Branch if not startup	
+	rjmp	comp_check_timeout		
 
-	subi	XH, 0x05
-	brcs	comp_wait_no_of_readings
+	ldi	Temp1, 20					; Set many samples during startup
+	ldi	Temp2, 20
 
-	ldi	Temp1, 3
-
-	subi	XH, 0x05
-	brcs	comp_wait_no_of_readings
-
-	ldi	Temp1, 6
-
-comp_wait_no_of_readings:
-	sbrc	Flags1, STARTUP_PHASE 		; Set many samples during startup
-	ldi	Temp1, 10
-
-comp_wait_on_comp_able:
+comp_check_timeout:
 	sbrc	Flags0, OC1A_PENDING			; Has zero cross scan timeout elapsed?
-	rjmp	comp_wait_on_comp_able_not_timed_out
+	rjmp	comp_check_timeout_not_timed_out
 
 	lds	XH, Comparator_Read_Cnt			; Check that comparator has been read
 	tst	XH
-	breq	comp_wait_on_comp_able_not_timed_out	; If not read - branch
+	breq	comp_check_timeout_not_timed_out	; If not read - branch
 
 	sbrs	Flags1, STARTUP_PHASE			; Extend timeout during startup
-	rjmp	comp_wait_on_comp_able_timeout_extended	
-
-	lds	XH, Startup_Cnt				; Do not extend timeout for the first commutations
-	cpi	XH, 3
-	brcs	comp_wait_on_comp_able_timeout_extended
+	rjmp	comp_check_timeout_timeout_extended	
 
 	lds	XH, Startup_Zc_Timeout_Cntd
 	dec	XH
-	brne	comp_wait_on_comp_able_extend_timeout
+	sts	Startup_Zc_Timeout_Cntd, XH
+	brne	comp_check_timeout_extend_timeout
 
-comp_wait_on_comp_able_timeout_extended:
-	sei								; Enable interrupts
+comp_check_timeout_timeout_extended:
 	sbr	Flags1, (1<<COMP_TIMED_OUT)
 	rjmp	setup_comm_wait
 
-comp_wait_on_comp_able_extend_timeout:
+comp_check_timeout_extend_timeout:
 	xcall setup_zc_scan_timeout
-comp_wait_on_comp_able_not_timed_out:
-	sei								; Enable interrupts
-	nop								; Allocate only just enough time to capture interrupt
-	nop
-	cli								; Disable interrupts
-	sbrc	Flags1, HIGH_RPM				; Branch if high rpm	
-	rjmp	comp_wait_read_comp
-
-	lds	Temp2, Comm_Period4x_H			; Reduce required distance to pwm transition for higher speeds
-	cpi	Temp2, 0x07
-	brcs	PC+2
-
-	ldi	Temp2, 0x07
-
-	ldi	XH, 5
-	add	Temp2, XH
-	sbrc	Flags1, INITIAL_RUN_PHASE		
-	ldi	Temp2, 16
-	sbrs	Flags2, PGM_PWM_HIGH_FREQ	; Use twice the time when pwm frequency is low
-	lsl	Temp2
-	sbrs	Flags0, PWM_ON					; More delay for pwm off
-	lsl	Temp2
-	sbrc	Flags1, STARTUP_PHASE			; Set a long delay from pwm on/off events during direct startup
-	ldi	Temp2, 130
-
-	Read_TCNT2 XH
-	lds	Temp5, Pwm_Prev_Edge
-	sub	XH, Temp5
-	brcs	comp_wait_on_comp_able			; Re-evaluate pwm cycle if timer has wrapped 
-	sbc	XH, Temp2
-	brcs	comp_wait_on_comp_able			; Re-evaluate pwm cycle
-
-comp_wait_read_comp:
-	Comp_Init	XH, Temp2					; Toggling ACME improves comparator performance on many ESCs
+comp_check_timeout_not_timed_out:
+	Comp_Init	XH, Temp4					; Toggling ACME improves comparator performance on many ESCs
 	lds	XH, Comparator_Read_Cnt			; Increment comparator read count
 	inc	XH
 	sts	Comparator_Read_Cnt, XH
@@ -4393,7 +4376,7 @@ comp_wait_read_comp:
 
 	ldi	XH, 1
 	sbrc	Flags1, STARTUP_PHASE			
-	ldi	XH, 2						; More delay between readings for startup
+	ldi	XH, 3						; More delay between readings for startup
 	dec	XH
 	brne	PC-1
 	Read_Comp_Out XH					; Another reading reduces comparator noise on some ESCs (for some reason...)				
@@ -4409,17 +4392,26 @@ comp_read_wrong:
 	rjmp	comp_read_wrong_not_startup
 
 	inc	Temp1						; Increment number of OK readings required
-	cpi	Temp1, 10						; If above initial requirement - go back and restart
+	cp	Temp1, Temp2					; If above initial requirement - go back and restart
 	brcs	PC+2
-	inc	Temp1
+	dec	Temp1
 
-	rjmp	comp_wait_on_comp_able			; If below initial requirement - continue to look for good ones
+	rjmp	comp_check_timeout				; Continue to look for good ones
 
 comp_read_wrong_not_startup:
-	sbrs	Flags0, DEMAG_DETECTED
-	rjmp	wait_for_comp_out_start			; If comparator output is not correct, and timeout already extended - go back and restart
+	sbrc	Flags0, DEMAG_DETECTED
+	rjmp	comp_read_wrong_extend_timeout
 
+	inc	Temp1						; Increment number of OK readings required
+	cp	Temp1, Temp2					
+	brcs	PC+2
+	rjmp	wait_for_comp_out_start			; If above initial requirement - go back and restart
+
+	rjmp	comp_check_timeout				; Otherwise - take another reading
+
+comp_read_wrong_extend_timeout:
 	cbr	Flags0, (1<<DEMAG_DETECTED)		; Clear demag detected flag
+	cli								; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp4					; Assuming interrupts are disabled
 	Read_TCNT1H Temp5
 	lds	Temp6, Comm_Period4x_L			; Set timeout to zero comm period 4x value
@@ -4431,11 +4423,12 @@ comp_read_wrong_not_startup:
 	sbr	Flags0, (1<<OC1A_PENDING)
 	T1oca_Clear_Int_Flag XH				; Clear interrupt flag in case there are pending interrupts
 	T1oca_Int_Enable XH					; Enable timer1 OCA interrupt
+	sei
 	rjmp	wait_for_comp_out_start			; If comparator output is not correct - go back and restart
 
 comp_read_ok:
-	lds	XH, Startup_Cnt				; Force a timeout for the first commutations			
-	cpi	XH, 2
+	lds	XH, Startup_Cnt				; Force a timeout for the first commutation		
+	cpi	XH, 1
 	brcc	PC+2
 	rjmp	wait_for_comp_out_start
 
@@ -4444,7 +4437,7 @@ comp_read_ok:
 
 	dec	Temp1						; Decrement readings counter - repeat comparator reading if not zero
 	breq	PC+2
-	rjmp	comp_wait_on_comp_able
+	rjmp	comp_check_timeout
 
 	cbr	Flags1, (1<<COMP_TIMED_OUT)
 
@@ -4594,6 +4587,10 @@ comm1comm2:
 	sts	Comm_Phase, XH
 	BpFET_off 				; Turn off pfet
 	ApFET_on					; Turn on pfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm12_nfet_done		; No - branch
+	CnFET_on					; Pwm on - turn on nfet
+comm12_nfet_done:
 	sei
 	rjmp	comm_exit
 
@@ -4602,6 +4599,10 @@ comm12_rev:
 	sts	Comm_Phase, XH
 	BpFET_off 				; Turn off pfet
 	CpFET_on					; Turn on pfet (reverse)
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm12_nfet_done_rev	; No - branch
+	AnFET_on					; Pwm on - turn on nfet
+comm12_nfet_done_rev:
 	sei
 	rjmp	comm_exit
 
@@ -4625,7 +4626,7 @@ comm2comm3:
 	CnFET_off					; Turn off fets
 	CpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm23_nfet_off		; Yes - branch
+	rjmp	comm23_nfet_off		; No - branch
 	BnFET_on					; Pwm on - turn on nfet
 	rjmp	comm23_fets_done
 comm23_nfet_off:
@@ -4645,7 +4646,7 @@ comm23_damp_rev:
 	AnFET_off					; Turn off fets (reverse)
 	ApFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm23_nfet_off_rev		; Yes - branch
+	rjmp	comm23_nfet_off_rev		; No - branch
 	BnFET_on					; Pwm on - turn on nfet
 	rjmp	comm23_fets_done_rev
 comm23_nfet_off_rev:
@@ -4697,6 +4698,10 @@ comm3comm4:
 	sts	Comm_Phase, XH
 	ApFET_off 				; Turn off pfet
 	CpFET_on					; Turn on pfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm34_nfet_done		; No - branch
+	BnFET_on					; Pwm on - turn on nfet
+comm34_nfet_done:
 	sei
 	rjmp	comm_exit
 
@@ -4705,6 +4710,10 @@ comm34_rev:
 	sts	Comm_Phase, XH
 	CpFET_off 				; Turn off pfet (reverse)
 	ApFET_on					; Turn on pfet (reverse)
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm34_nfet_done_rev	; No - branch
+	BnFET_on					; Pwm on - turn on nfet
+comm34_nfet_done_rev:
 	sei
 	rjmp	comm_exit
 
@@ -4728,7 +4737,7 @@ comm4comm5:
 	BnFET_off					; Turn off fets
 	BpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm45_nfet_off		; Yes - branch
+	rjmp	comm45_nfet_off		; No - branch
 	AnFET_on					; Pwm on - turn on nfet
 	rjmp	comm45_fets_done
 comm45_nfet_off:
@@ -4748,7 +4757,7 @@ comm45_damp_rev:
 	BnFET_off					; Turn off fets
 	BpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm45_nfet_off_rev		; Yes - branch
+	rjmp	comm45_nfet_off_rev		; No - branch
 	CnFET_on					; Pwm on - turn on nfet (reverse)
 	rjmp	comm45_fets_done_rev
 comm45_nfet_off_rev:
@@ -4799,6 +4808,10 @@ comm5comm6:
 	sts	Comm_Phase, XH
 	CpFET_off 				; Turn off pfet
 	BpFET_on					; Turn on pfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm56_nfet_done		; No - branch
+	AnFET_on					; Pwm on - turn on nfet
+comm56_nfet_done:
 	sei
 	rjmp	comm_exit
 
@@ -4807,6 +4820,10 @@ comm56_rev:
 	sts	Comm_Phase, XH
 	ApFET_off 				; Turn off pfet (reverse)
 	BpFET_on					; Turn on pfet
+	sbrs	Flags0, PWM_ON			; Is pwm on?
+	rjmp	comm56_nfet_done_rev	; No - branch
+	CnFET_on					; Pwm on - turn on nfet
+comm56_nfet_done_rev:
 	sei
 	rjmp	comm_exit
 
@@ -4830,7 +4847,7 @@ comm6comm1:
 	AnFET_off					; Turn off fets
 	ApFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm61_nfet_off		; Yes - branch
+	rjmp	comm61_nfet_off		; No - branch
 	CnFET_on					; Pwm on - turn on nfet
 	rjmp	comm61_fets_done
 comm61_nfet_off:
@@ -4850,7 +4867,7 @@ comm61_damp_rev:
 	CnFET_off					; Turn off fets (reverse)
 	CpFET_off						
 	sbrs	Flags0, PWM_ON			; Is pwm on?
-	rjmp	comm61_nfet_off_rev		; Yes - branch
+	rjmp	comm61_nfet_off_rev		; No - branch
 	AnFET_on					; Pwm on - turn on nfet (reverse)
 	rjmp	comm61_fets_done_rev
 comm61_nfet_off_rev:
@@ -4995,6 +5012,8 @@ set_default_parameters:
 	st	X+, Temp1
 	ldi	Temp1, 0xFF
 	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_BRAKE_ON_STOP
+	st	X+, Temp1
 .ENDIF
 .IF MODE == 1	; Tail
 	ldi	XL, low(Pgm_Gov_P_Gain)
@@ -5061,6 +5080,8 @@ set_default_parameters:
 	ldi	Temp1, DEFAULT_PGM_ENABLE_PWM_INPUT
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_TAIL_PWM_DITHER
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_BRAKE_ON_STOP
 	st	X+, Temp1
 .ENDIF
 .IF MODE == 2	; Multi
@@ -5131,6 +5152,8 @@ set_default_parameters:
 	ldi	Temp1, DEFAULT_PGM_ENABLE_PWM_INPUT
 	st	X+, Temp1
 	ldi	Temp1, DEFAULT_PGM_MULTI_PWM_DITHER
+	st	X+, Temp1
+	ldi	Temp1, DEFAULT_PGM_BRAKE_ON_STOP
 	st	X+, Temp1
 .ENDIF
 	ret
@@ -5601,6 +5624,8 @@ bootloader_done:
 
 	; Measure number of lipo cells
 	xcall Measure_Lipo_Cells			; Measure number of lipo cells
+	; Reset stall count
+	sts	Stall_Cnt, Zero
 	; Initialize RC pulse
 	Rcp_Int_First XH				; Enable interrupt and set to first edge
 	Rcp_Int_Enable XH	 			; Enable interrupt
@@ -5787,7 +5812,9 @@ throttle_high_cal:
 
 	xcall average_throttle
 	mov	XH, Temp7				; Limit to max 250
+.IF MODE <= 1	; Main or tail
 	subi	XH, 5				; Subtract about 2% and ensure that it is 250 or lower
+.ENDIF
 	sts	Pgm_Ppm_Max_Throttle, XH	; Store
 	xcall wait200ms				
 	cli					
@@ -5887,7 +5914,7 @@ wait_for_power_on_loop:
 	inc	XH
 	sts	Power_On_Wait_Cnt_L, XH
 	cpi	XH, 0xFF
-	brne	wait_for_power_on_no_beep; Counter wrapping (about 1 sec)?
+	brne	wait_for_power_on_no_beep; Counter wrapping (about 3 sec)?
 
 	lds	XH, Power_On_Wait_Cnt_H	; Increment high wait counter
 	inc	XH
@@ -5916,11 +5943,12 @@ beep_delay_set:
 	cp	XH, Temp1				; Check against chosen delay
 	brcs	wait_for_power_on_no_beep; Has delay elapsed?
 
+	xcall switch_power_off		; Switch power off in case braking is set
+	xcall wait1ms
 	lds	XH, Power_On_Wait_Cnt_H	; Decrement high wait counter
 	dec	XH
 	sts	Power_On_Wait_Cnt_H, XH
-	ldi	XH, 180				; Set low wait counter
-	sts	Power_On_Wait_Cnt_L, XH
+	sts	Power_On_Wait_Cnt_L, Zero; Set low wait counter
 	lds	XH, Pgm_Beacon_Strength
 	sts	Beep_Strength, XH
 	cli						; Disable all interrupts
@@ -6020,11 +6048,7 @@ read_initial_temp:
 	sts	Adc_Conversion_Cnt, XH
 	Set_Adc_Ip_Temp
 	; Set up start operating conditions
-	lds	Temp7, Pgm_Pwm_Freq		; Store setting in Temp7
-	ldi	XH, 2				; Set nondamped low frequency pwm mode
-	sts	Pgm_Pwm_Freq, XH
 	xcall decode_parameters		; (Decode_parameters uses Temp1 and Temp8)
-	sts	Pgm_Pwm_Freq, Temp7		; Restore settings
 	; Set max allowed power
 	cli						; Disable interrupts to avoid that Requested_Pwm is overwritten
 	ldi	XH, 0xFF				; Set pwm limit to max
@@ -6063,7 +6087,6 @@ init_start_bidir_done:
 	xcall initialize_timing			; Initialize timing
 	xcall calc_next_comm_timing	
 	xcall initialize_timing			; Initialize timing
-	rjmp	run1
 
 
 
@@ -6072,13 +6095,6 @@ init_start_bidir_done:
 ; Run entry point
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-damped_transition:
-	; Transition from nondamped to damped if applicable
-	cli
-	xcall decode_parameters		; Set programmed parameters
-	sei
-	sts	Adc_Conversion_Cnt, Zero	; Make sure a voltage reading is done next time
-	Set_Adc_Ip_Volt			; Set adc measurement to voltage
 
 ; Run 1 = B(p-on) + C(n-pwm) - comparator A evaluated
 ; Out_cA changes from low to high
@@ -6182,8 +6198,6 @@ run6:
 	; Check if it is startup
 	sbrs	Flags1, STARTUP_PHASE
 	rjmp	normal_run_checks
-	sbrc	Flags0, DIR_CHANGE_BRAKE		; If a direction change - branch
-	rjmp	normal_run_checks
 
 	; Set spoolup power variables
 	lds	XH, Pwm_Spoolup_Beg
@@ -6238,7 +6252,8 @@ normal_run_checks:
 	brne	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	cbr	Flags1, (1<<INITIAL_RUN_PHASE); Clear initial run phase flag
-	rjmp damped_transition			; Do damped transition if counter is zero
+	sbr	Flags1, (1<<MOTOR_STARTED)	; Set motor started
+	rjmp run1						; Continue with normal run
 
 normal_run_check_startup_rot:
 	sts	Initial_Run_Rot_Cnt, XH		; Not zero - store counter
@@ -6272,6 +6287,12 @@ run6_check_rcp_stop_count:
 	; Exit run loop after a given time
 	lds	XH, Rcp_Stop_Cnt			; Load stop RC pulse counter value
 	ldi	Temp1, RCP_STOP_LIMIT
+	lds	Temp2, Pgm_Brake_On_Stop
+	tst	Temp2	
+	breq	PC+2
+
+	ldi	Temp1, 3					; About 100ms before stopping when brake is set
+
 	cp	XH, Temp1					; Is number of stop RC pulses above limit?
 	brcs	PC+2
 	rjmp	run_to_wait_for_power_on		; Yes, go back to wait for poweron
@@ -6367,10 +6388,18 @@ run_to_wait_for_power_on_stall_done:
 	mov	Current_Pwm_Limited, Zero	; Set limited current pwm to zero
 	sts	Current_Pwm_Lim_Dith, Zero	
 	sts	Pwm_Motor_Idle, Zero		; Set motor idle to zero
-	cbr	Flags1, (1<<MOTOR_SPINNING)	; Clear motor spinning flag
+	ldi	Flags0, 0					; Clear flags0
+	ldi	Flags1, 0					; Clear flags1
 	sei
-	xcall wait1ms					; Wait for pwm to be stopped
+	xcall wait100ms				; Wait for pwm to be stopped
 	xcall switch_power_off
+	lds	Temp1, Pgm_Brake_On_Stop
+	tst	Temp1
+	breq	run_to_wait_for_power_on_brake_done
+
+	Brake_FETs_On
+
+run_to_wait_for_power_on_brake_done:
 	Initialize_Adc	XH				; Initialize ADC, to keep reference on for selected ESCs
 .IF MODE == 0	; Main
 	sbrs	Flags2, RCP_PPM		
@@ -6397,7 +6426,7 @@ jmp_wait_for_power_on:
 	rjmp	jmp_wait_for_power_on		; If flag is not set (PWM) - branch
 
 	lds	XH, Stall_Cnt
-	cpi	XH, 5
+	cpi	XH, 4
 	brcs	jmp_wait_for_power_on
 	rjmp	init_no_signal
 

@@ -105,7 +105,7 @@ read_eeprom_block1:
 	dec	Temp4
 	brne	read_eeprom_block1
 
-	ldi	Temp4, 24	; 24 parameters 
+	ldi	Temp4, 25	; 25 parameters 
 	ldi	XL, low(Pgm_Enable_TX_Program)
 	ldi	XH, high(Pgm_Enable_TX_Program)
 	ldi	ZL, low(Eep_Enable_TX_Program)
@@ -177,7 +177,7 @@ write_eeprom_block1:
 	dec	Temp4
 	brne	write_eeprom_block1
 
-	ldi	Temp4, 24	; 24 parameters 
+	ldi	Temp4, 25	; 25 parameters 
 	ldi	XL, low(Pgm_Enable_TX_Program)
 	ldi	XH, high(Pgm_Enable_TX_Program)
 	ldi	ZL, low(Eep_Enable_TX_Program)

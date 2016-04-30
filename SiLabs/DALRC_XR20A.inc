@@ -203,15 +203,16 @@ ENDM
 MACRO CpFET_off
 	clr	P1.CpFET
 ENDM
-MACRO All_pFETs_On
-	setb	P1.ApFET
-	setb	P1.CpFET
-	setb	P1.BpFET
-ENDM
 MACRO All_pFETs_Off
 	clr	P1.ApFET
 	clr	P1.CpFET
 	clr	P1.BpFET
+ENDM
+
+MACRO Brake_FETs_On	
+	ApFET_on
+	BpFET_on
+	CpFET_on
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
@@ -259,11 +260,6 @@ ENDM
 
 MACRO Initialize_Xbar
 	mov	XBR1, #41h	; Xbar enabled, CEX0 routed to pin Rcp_In			
-	All_nFETs_off		; For unlocking of HIP2103/4 driver circuits
-	call wait100ms
-	All_pFETs_on
-	call wait1ms
-	All_pFETs_off
 ENDM
 
 MACRO Initialize_Adc
