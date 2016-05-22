@@ -47,6 +47,7 @@ $NOMOD51
 ;           Implemented reverse bidirectional mode
 ;           Implemented separate throttle gains fwd and rev in bidirectional mode
 ;           Implemented support for Oneshot42 and Multishot
+; - Rev16.1 Made low rpm power limiting programmable through the startup power parameter
 ;
 ;
 ;**** **** **** **** ****
@@ -110,7 +111,7 @@ G_			EQU 7	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noni
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
-;MCU_48MHZ EQU	1
+;MCU_48MHZ EQU	0
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
@@ -355,7 +356,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	0		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	32		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -482,6 +483,8 @@ t2_int_exit:
 t3_int:	; Used for commutation timing
 	clr 	IE_EA			; Disable all interrupts
 	anl	EIE1, #7Fh		; Disable timer3 interrupts
+	mov	TMR3RLL, #0FAh		; Set a short delay before next interrupt
+	mov	TMR3RLH, #0FFh
 	clr	Flags0.T3_PENDING 	; Flag that timer has wrapped
 	anl	TMR3CN0, #07Fh		; Timer3 interrupt flag cleared
 	setb	IE_EA			; Enable all interrupts
@@ -2057,18 +2060,22 @@ wait_for_comp_out_start:
 		
 	clr	Flags0.DEMAG_DETECTED
 
-	mov 	Temp1, Comm_Period4x_H		; Set number of readings higher for lower speeds
 	mov	Temp2, #20 				; Too low value (~<15) causes rough running at pwm harmonics. Too high a value (~>35) causes the RCT4215 630 to run rough on full throttle
+	mov 	A, Comm_Period4x_H			; Set number of readings higher for lower speeds
+	clr	C
+	rrc	A
+	jnz	($+3)
+	inc	A
+	mov	Temp1, A
 	clr	C						
-	mov 	A, Temp1			
-	subb	A, #27					; Approximately one pwm period
+	subb	A, #20
 	jc	($+4)
 
-	mov	Temp1, #27
+	mov	Temp1, #20
 	
 	jnb	Flags1.STARTUP_PHASE, comp_scale_samples
 
-	mov	Temp1, #27				; Set many samples during startup
+	mov	Temp1, #27				; Set many samples during startup, approximately one pwm period
 	mov	Temp2, #27
 
 comp_scale_samples:
@@ -2639,22 +2646,27 @@ decode_settings:
 	movc A, @A+DPTR	
 	mov	Temp1, #Pgm_Startup_Pwr_Decoded
 	mov	@Temp1, A	
+	; Decode low rpm power slope
+	mov	Temp1, #Pgm_Startup_Pwr
+	mov	A, @Temp1
+	mov	Low_Rpm_Pwr_Slope, A
+	clr	C
+	subb	A, #2
+	jnc	($+5)
+	mov	Low_Rpm_Pwr_Slope, #2
 	; Decode demag compensation
 	mov	Temp1, #Pgm_Demag_Comp		
 	mov	A, @Temp1				
 	mov	Demag_Pwr_Off_Thresh, #255	; Set default
-	mov	Low_Rpm_Pwr_Slope, #12		; Set default
 
 	cjne	A, #2, decode_demag_high
 
 	mov	Demag_Pwr_Off_Thresh, #160	; Settings for demag comp low
-	mov	Low_Rpm_Pwr_Slope, #10		
 
 decode_demag_high:
 	cjne	A, #3, decode_demag_done
 
 	mov	Demag_Pwr_Off_Thresh, #130	; Settings for demag comp high
-	mov	Low_Rpm_Pwr_Slope, #5		
 
 decode_demag_done:
 	; Decode throttle cal
@@ -3562,8 +3574,6 @@ initial_run_phase_done:
 	; Reset stall count
 	mov	Stall_Cnt, #0
 	; Exit run loop after a given time
-	clr	C
-	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
 	mov	Temp1, #250
 	mov	Temp2, #Pgm_Brake_On_Stop
 	mov	A, @Temp2
@@ -3571,6 +3581,8 @@ initial_run_phase_done:
 
 	mov	Temp1, #3					; About 100ms before stopping when brake is set
 
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
 	subb	A, Temp1					; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
