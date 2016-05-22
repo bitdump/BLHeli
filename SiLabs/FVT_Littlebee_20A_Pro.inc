@@ -53,8 +53,8 @@ LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
 LOCK_BYTE_ADDRESS_8K	EQU	1FFFh	; Address of lock byte if 8k flash size
 HIGH_BEC_VOLTAGE		EQU	0	; Set to 1 or more if high BEC voltage is supported
 DAMPED_MODE_ENABLE		EQU	1	; Damped mode enabled
-NFETON_DELAY			EQU	16	; Wait delay from pfets off to nfets on
-PFETON_DELAY			EQU	16	; Wait delay from nfets off to pfets on
+NFETON_DELAY			EQU	18	; Wait delay from pfets off to nfets on
+PFETON_DELAY			EQU	18	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	85	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	0	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
 TEMP_LIMIT			EQU 	114	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
