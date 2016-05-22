@@ -129,6 +129,10 @@
 ;           Slightly modified throttle calibration
 ;           Improved startup, particularly for small motors
 ;           Improved smoothness
+; - Rev14.6 Fixed bug that caused tail motor not to stop
+;           Fixed bug that caused brake not to work for low side pwm ESCs
+;           Fixed bug where noisy input signal could cause loss of sync
+;           Made low rpm power limiting programmable through the startup power parameter
 ;
 ;
 ;**** **** **** **** ****
@@ -175,7 +179,7 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI
+;#define BLUESERIES_20A_MULTI 
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI 
@@ -289,7 +293,7 @@
 ;#define DYS_SN20A_MULTI 
 ;#define TBS_CUBE_20A_MAIN			; ICP1 as input		
 ;#define TBS_CUBE_20A_TAIL
-;#define TBS_CUBE_20A_MULTI 
+;#define TBS_CUBE_20A_MULTI
 ;#define ZTW_SPIDER_LITE_18Av2_MAIN
 ;#define ZTW_SPIDER_LITE_18Av2_TAIL
 ;#define ZTW_SPIDER_LITE_18Av2_MULTI 
@@ -959,7 +963,7 @@
 .EQU	DEFAULT_PGM_TAIL_BEEP_STRENGTH	= 250; Beep strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_STRENGTH	= 250; Beacon strength
 .EQU	DEFAULT_PGM_TAIL_BEACON_DELAY		= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-.EQU	DEFAULT_PGM_TAIL_PWM_DITHER		= 3 	; 1=Off		2=7			3=15			4=31			5=63
+.EQU	DEFAULT_PGM_TAIL_PWM_DITHER		= 3 	; 1=Off		2=3			3=7			4=15			5=31
 
 ; Multi
 .EQU	DEFAULT_PGM_MULTI_P_GAIN 		= 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
@@ -978,7 +982,7 @@
 .EQU	DEFAULT_PGM_MULTI_BEEP_STRENGTH	= 40	; Beep strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_STRENGTH	= 80	; Beacon strength
 .EQU	DEFAULT_PGM_MULTI_BEACON_DELAY	= 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-.EQU	DEFAULT_PGM_MULTI_PWM_DITHER		= 3 	; 1=Off		2=7			3=15			4=31			5=63
+.EQU	DEFAULT_PGM_MULTI_PWM_DITHER		= 3 	; 1=Off		2=3			3=7			4=15			5=31
 
 ; Common
 .EQU	DEFAULT_PGM_ENABLE_TX_PROGRAM 	= 1 	; 1=Enabled 	0=Disabled
@@ -1207,7 +1211,6 @@ Pwm_Limit_Spoolup:			.BYTE	1		; Maximum allowed pwm during spoolup of main
 Pwm_Limit_By_Rpm:			.BYTE	1		; Maximum allowed pwm for low or high rpms
 Pwm_Spoolup_Beg:			.BYTE	1		; Pwm to begin main spoolup with
 Pwm_Motor_Idle:			.BYTE	1		; Motor idle speed pwm
-Pwm_Prev_Edge:				.BYTE	1		; Timestamp from timer 2 when pwm toggles on or off
 Pwm_Dither_Decoded:			.BYTE	1		; Decoded pwm dither value
 Pwm_Dither_Excess_Power:		.BYTE	1		; Excess power (above max) from pwm dither
 Random:					.BYTE	1		; Random number from LFSR 
@@ -1284,7 +1287,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	5		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	6		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1472,7 +1475,7 @@ t2_int:	; Used for pwm control
 
 	; Pwm on cycle
 	tst	Current_Pwm_Limited
-	breq	t2_int_pwm_on_exit
+	breq	t2_int_pwm_on_ret
 
 	ijmp							; Jump to pwm on routines. Z should be set to one of the pwm_nfet_on labels
 
@@ -1485,8 +1488,8 @@ t2_int_pwm_on_exit:
 	ror	YL
 	Set_TCNT2 YL					; Write start point for timer
 	; Set other variables
-	sts	Pwm_Prev_Edge, YL			; Set timestamp
 	sbr	Flags0, (1<<PWM_ON)			; Set pwm on flag
+t2_int_pwm_on_ret:
 	; Exit interrupt
 	out	SREG, II_Sreg
 	reti
@@ -1499,7 +1502,6 @@ t2_int_pwm_off:
 	sbrc	Flags2, PGM_PWM_HIGH_FREQ	; Use half the time when pwm frequency is high
 	ror	YL
 	Set_TCNT2 YL					; Load new timer setting
-	sts	Pwm_Prev_Edge, YL			; Set timestamp
 	; Clear pwm on flag
 	cbr	Flags0, (1<<PWM_ON)
 	; Set full PWM (on all the time) if current PWM near max. This will give full power, but at the cost of a small "jump" in power
@@ -1509,9 +1511,9 @@ t2_int_pwm_off:
 	rjmp	t2_int_pwm_off_fullpower_exit	; Yes - exit
 
 .IF DAMPED_MODE_ENABLE == 1
-	; Do not execute damped pwm when stopped
+	; Do not execute pwm off when stopped
 	sbrs	Flags1, MOTOR_SPINNING
-	rjmp	t2_int_pwm_off_exit_nfets_off
+	rjmp	t2_int_pwm_off_exit
 
 	; If damped operation, set pFETs on in pwm_off
 	sbrc	Flags2, PGM_PWMOFF_DAMPED	; Damped operation?
@@ -1553,7 +1555,6 @@ t2_int_pwm_off_damp_done:
 	All_nFETs_Off 					; Switch off all nfets
 .ENDIF
 t2_int_pwm_off_exit:	
-	sts	Pwm_Prev_Edge, Zero			; Set timestamp to zero
 	out	SREG, II_Sreg
 	reti
 
@@ -2345,7 +2346,7 @@ rcp_int_store_data:
 	; Store pre previous edge
 	sts	Rcp_PrePrev_Edge_L, I_Temp1
 	sts	Rcp_PrePrev_Edge_H, I_Temp2
-	ldi	Temp1, RCP_VALIDATE
+	ldi	I_Temp1, RCP_VALIDATE
 	rjmp	rcp_int_limited
 
 rcp_int_fall:
@@ -4330,17 +4331,20 @@ wait_for_comp_out_start:
 		
 	cbr	Flags0, (1<<DEMAG_DETECTED)
 
-	lds 	Temp1, Comm_Period4x_H		; Set number of readings higher for lower speeds	
 	ldi	Temp2, 20 				; Too low value (~<15) causes rough running at pwm harmonics. Too high a value (~>35) causes the RCT4215 630 to run rough on full throttle
-	cpi	Temp1, 20					; Approximately one pwm period
+	lds 	Temp1, Comm_Period4x_H		; Set number of readings higher for lower speeds	
+	lsr	Temp1
+	brne	PC+2
+	inc	Temp1
+	cpi	Temp1, 15
 	brcs	PC+2
 
-	ldi	Temp1, 20
+	ldi	Temp1, 15
 	
 	sbrs	Flags1, STARTUP_PHASE		; Branch if not startup	
 	rjmp	comp_check_timeout		
 
-	ldi	Temp1, 20					; Set many samples during startup
+	ldi	Temp1, 20					; Set many samples during startup, approximately one pwm period
 	ldi	Temp2, 20
 
 comp_check_timeout:
@@ -5249,7 +5253,7 @@ decode_settings:
 	ldi	ZH, high(STARTUP_POWER_TABLE<<1)
 	lds	Temp1, Pgm_Startup_Pwr
 	xcall load_flash_table_entry
-	sts	Pgm_Startup_Pwr_Decoded, XH	
+	sts	Pgm_Startup_Pwr_Decoded, XH
 .IF MODE == 0	; Main
 	; Decode spoolup time
 	lds	Temp1, Pgm_Main_Spoolup_Time		
@@ -5277,26 +5281,28 @@ decode_settings:
 	add	XH, Temp1		; Now 15x
 	sts	Main_Spoolup_Time_15x, XH
 .ENDIF
+	; Decode low rpm power slope
+	lds	Temp1, Pgm_Startup_Pwr
+	cpi	Temp1, 2
+	brcc	PC+2
+	ldi	Temp1, 2
+	sts	Low_Rpm_Pwr_Slope, Temp1
 	; Decode demag compensation
 	lds	XH, Pgm_Demag_Comp
 	ldi	Temp1, 255				; Set defaults
-	ldi	Temp2, 12
 	cpi	XH, 2
 	brne	decode_demag_high
 	
 	ldi	Temp1, 160				; Settings for demag comp low
-	ldi	Temp2, 10
 
 decode_demag_high:
 	cpi	XH, 3
 	brne	decode_demag_done
 
 	ldi	Temp1, 130				; Settings for demag comp high
-	ldi	Temp2, 5
 
 decode_demag_done:
 	sts	Demag_Pwr_Off_Thresh, Temp1	; Set variables
-	sts	Low_Rpm_Pwr_Slope, Temp2
 	; Decode pwm dither
 	ldi	ZL, low(PWM_DITHER_TABLE<<1)	
 	ldi	ZH, high(PWM_DITHER_TABLE<<1)
@@ -5811,7 +5817,7 @@ throttle_high_cal:
 	brne	throttle_high_cal		; Continue to wait
 
 	xcall average_throttle
-	mov	XH, Temp7				; Limit to max 250
+	mov	XH, Temp7			
 .IF MODE <= 1	; Main or tail
 	subi	XH, 5				; Subtract about 2% and ensure that it is 250 or lower
 .ENDIF
