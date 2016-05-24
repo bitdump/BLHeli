@@ -545,6 +545,9 @@ DALRC_XR20A_Multi				EQU 255
 AIKON_Boltlite_30A_Main			EQU 256  
 AIKON_Boltlite_30A_Tail			EQU 257  
 AIKON_Boltlite_30A_Multi			EQU 258  
+Align_MR25_15A_Main			EQU 259  
+Align_MR25_15A_Tail			EQU 260
+Align_MR25_15A_Multi			EQU 261
 
 
 ;**** **** **** **** ****
@@ -807,6 +810,9 @@ AIKON_Boltlite_30A_Multi			EQU 258
 ;BESCNO EQU AIKON_Boltlite_30A_Main	 
 ;BESCNO EQU AIKON_Boltlite_30A_Tail	  
 ;BESCNO EQU AIKON_Boltlite_30A_Multi 
+;BESCNO EQU Align_MR25_15A_Main	 
+;BESCNO EQU Align_MR25_15A_Tail	  
+;BESCNO EQU Align_MR25_15A_Multi
 
 
 ;**** **** **** **** ****
@@ -2101,6 +2107,20 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (AIKON_Boltlite_30A.inc)	; Select AIKON_Boltlite 30A pinout
 ENDIF
 
+IF BESCNO == Align_MR25_15A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_MR25_15A.inc)	; Select ALIGN_MR25 30A pinout
+ENDIF
+
+IF BESCNO == Align_MR25_15A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_MR25_15A.inc)	; Select ALIGN_MR25 30A pinout
+ENDIF
+
+IF BESCNO == Align_MR25_15A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_MR25_15A.inc)	; Select ALIGN_MR25 30A pinout
+ENDIF
 
 
 ;**** **** **** **** ****
