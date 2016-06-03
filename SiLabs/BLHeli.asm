@@ -239,6 +239,12 @@ $NOMOD51
 ;           Slightly modified throttle calibration
 ;           Improved startup, particularly for small motors
 ;           Improved smoothness
+; - Rev14.6 Fixed bug that caused tail motor not to stop
+;           Fixed bug that caused brake not to work for low side pwm ESCs
+;           Fixed bug where noisy input signal could cause loss of sync
+;           Increased fet deadtime a bit for the LB20A and the LB20A pro
+;           Made low rpm power limiting programmable through the startup power parameter
+;
 ;
 ;
 ;**** **** **** **** ****
@@ -461,81 +467,84 @@ EMAX_40A_Multi 				EQU 177
 EMAX_Nano_20A_Main				EQU 178   
 EMAX_Nano_20A_Tail 				EQU 179  
 EMAX_Nano_20A_Multi 			EQU 180  
-XRotor_10A_Main				EQU 181   
-XRotor_10A_Tail 				EQU 182  
-XRotor_10A_Multi 				EQU 183  
-XRotor_20A_Main				EQU 184   
-XRotor_20A_Tail 				EQU 185  
-XRotor_20A_Multi 				EQU 186  
-XRotor_40A_Main				EQU 187   
-XRotor_40A_Tail 				EQU 188  
-XRotor_40A_Multi 				EQU 189  
-MDRX62H_Main					EQU 190   
-MDRX62H_Tail 					EQU 191  
-MDRX62H_Multi 					EQU 192  
-RotorGeeks_20A_Main				EQU 193   
-RotorGeeks_20A_Tail 			EQU 194  
-RotorGeeks_20A_Multi 			EQU 195  
-RotorGeeks_20A_Plus_Main			EQU 196   
-RotorGeeks_20A_Plus_Tail 		EQU 197  
-RotorGeeks_20A_Plus_Multi 		EQU 198  
-Flycolor_Fairy_6A_Main			EQU 199   
-Flycolor_Fairy_6A_Tail 			EQU 200  
-Flycolor_Fairy_6A_Multi 			EQU 201  
-Flycolor_Fairy_30A_Main			EQU 202   
-Flycolor_Fairy_30A_Tail 			EQU 203  
-Flycolor_Fairy_30A_Multi 		EQU 204  
-Flycolor_Raptor_20A_Main			EQU 205   
-Flycolor_Raptor_20A_Tail 		EQU 206  
-Flycolor_Raptor_20A_Multi 		EQU 207  
-Flycolor_Raptor_390_20A_Main		EQU 208
-Flycolor_Raptor_390_20A_Tail 		EQU 209  
-Flycolor_Raptor_390_20A_Multi 	EQU 210  
-FVT_Littlebee_12A_Main			EQU 211  
-FVT_Littlebee_12A_Tail			EQU 212  
-FVT_Littlebee_12A_Multi			EQU 213  
-FVT_Littlebee_20A_Main			EQU 214  
-FVT_Littlebee_20A_Tail			EQU 215  
-FVT_Littlebee_20A_Multi			EQU 216  
-FVT_Littlebee_20A_Pro_Main		EQU 217  
-FVT_Littlebee_20A_Pro_Tail		EQU 218  
-FVT_Littlebee_20A_Pro_Multi		EQU 219  
-FVT_Littlebee_30A_Main			EQU 220  
-FVT_Littlebee_30A_Tail			EQU 221  
-FVT_Littlebee_30A_Multi			EQU 222  
-Graupner_Ultra_20A_Main			EQU 223  
-Graupner_Ultra_20A_Tail			EQU 224  
-Graupner_Ultra_20A_Multi			EQU 225  
-F85_3A_Main					EQU 226  
-F85_3A_Tail					EQU 227  
-F85_3A_Multi					EQU 228  
-ZTW_Spider_Pro_20A_Main			EQU 229  
-ZTW_Spider_Pro_20A_Tail			EQU 230  
-ZTW_Spider_Pro_20A_Multi			EQU 231  
-ZTW_Spider_Pro_20A_Premium_Main	EQU 232  
-ZTW_Spider_Pro_20A_Premium_Tail	EQU 233  
-ZTW_Spider_Pro_20A_Premium_Multi	EQU 234  
-ZTW_Spider_Pro_20A_HV_Main		EQU 235  
-ZTW_Spider_Pro_20A_HV_Tail		EQU 236  
-ZTW_Spider_Pro_20A_HV_Multi		EQU 237  
-ZTW_Spider_Pro_30A_HV_Main		EQU 238  
-ZTW_Spider_Pro_30A_HV_Tail		EQU 239  
-ZTW_Spider_Pro_30A_HV_Multi		EQU 240  
-DYS_XM20A_Main					EQU 241  
-DYS_XM20A_Tail					EQU 242  
-DYS_XM20A_Multi				EQU 243  
-Oversky_MR_20A_Pro_Main			EQU 244  
-Oversky_MR_20A_Pro_Tail			EQU 245  
-Oversky_MR_20A_Pro_Multi			EQU 246  
-TBS_Cube_12A_Main				EQU 247  
-TBS_Cube_12A_Tail				EQU 248  
-TBS_Cube_12A_Multi				EQU 249  
-DALRC_XR20A_Main				EQU 250  
-DALRC_XR20A_Tail				EQU 251  
-DALRC_XR20A_Multi				EQU 252  
-AIKON_Boltlite_30A_Main			EQU 253  
-AIKON_Boltlite_30A_Tail			EQU 254  
-AIKON_Boltlite_30A_Multi			EQU 255  
+EMAX_Lightning_20A_Main			EQU 181   
+EMAX_Lightning_20A_Tail 			EQU 182  
+EMAX_Lightning_20A_Multi 		EQU 183  
+XRotor_10A_Main				EQU 184   
+XRotor_10A_Tail 				EQU 185  
+XRotor_10A_Multi 				EQU 186  
+XRotor_20A_Main				EQU 187   
+XRotor_20A_Tail 				EQU 188  
+XRotor_20A_Multi 				EQU 189  
+XRotor_40A_Main				EQU 190   
+XRotor_40A_Tail 				EQU 191  
+XRotor_40A_Multi 				EQU 192  
+MDRX62H_Main					EQU 193   
+MDRX62H_Tail 					EQU 194  
+MDRX62H_Multi 					EQU 195  
+RotorGeeks_20A_Main				EQU 196   
+RotorGeeks_20A_Tail 			EQU 197  
+RotorGeeks_20A_Multi 			EQU 198  
+RotorGeeks_20A_Plus_Main			EQU 199   
+RotorGeeks_20A_Plus_Tail 		EQU 200  
+RotorGeeks_20A_Plus_Multi 		EQU 201  
+Flycolor_Fairy_6A_Main			EQU 202   
+Flycolor_Fairy_6A_Tail 			EQU 203  
+Flycolor_Fairy_6A_Multi 			EQU 204  
+Flycolor_Fairy_30A_Main			EQU 205   
+Flycolor_Fairy_30A_Tail 			EQU 206  
+Flycolor_Fairy_30A_Multi 		EQU 207  
+Flycolor_Raptor_20A_Main			EQU 208   
+Flycolor_Raptor_20A_Tail 		EQU 209  
+Flycolor_Raptor_20A_Multi 		EQU 210  
+Flycolor_Raptor_390_20A_Main		EQU 211
+Flycolor_Raptor_390_20A_Tail 		EQU 212  
+Flycolor_Raptor_390_20A_Multi 	EQU 213  
+FVT_Littlebee_12A_Main			EQU 214  
+FVT_Littlebee_12A_Tail			EQU 215  
+FVT_Littlebee_12A_Multi			EQU 216  
+FVT_Littlebee_20A_Main			EQU 217  
+FVT_Littlebee_20A_Tail			EQU 218  
+FVT_Littlebee_20A_Multi			EQU 219  
+FVT_Littlebee_20A_Pro_Main		EQU 220  
+FVT_Littlebee_20A_Pro_Tail		EQU 221  
+FVT_Littlebee_20A_Pro_Multi		EQU 222  
+FVT_Littlebee_30A_Main			EQU 223  
+FVT_Littlebee_30A_Tail			EQU 224  
+FVT_Littlebee_30A_Multi			EQU 225  
+Graupner_Ultra_20A_Main			EQU 226  
+Graupner_Ultra_20A_Tail			EQU 227  
+Graupner_Ultra_20A_Multi			EQU 228  
+F85_3A_Main					EQU 229  
+F85_3A_Tail					EQU 230  
+F85_3A_Multi					EQU 231  
+ZTW_Spider_Pro_20A_Main			EQU 232  
+ZTW_Spider_Pro_20A_Tail			EQU 233  
+ZTW_Spider_Pro_20A_Multi			EQU 234  
+ZTW_Spider_Pro_20A_Premium_Main	EQU 235  
+ZTW_Spider_Pro_20A_Premium_Tail	EQU 236  
+ZTW_Spider_Pro_20A_Premium_Multi	EQU 237  
+ZTW_Spider_Pro_20A_HV_Main		EQU 238  
+ZTW_Spider_Pro_20A_HV_Tail		EQU 239  
+ZTW_Spider_Pro_20A_HV_Multi		EQU 240  
+ZTW_Spider_Pro_30A_HV_Main		EQU 241  
+ZTW_Spider_Pro_30A_HV_Tail		EQU 242  
+ZTW_Spider_Pro_30A_HV_Multi		EQU 243  
+DYS_XM20A_Main					EQU 244  
+DYS_XM20A_Tail					EQU 245  
+DYS_XM20A_Multi				EQU 246  
+Oversky_MR_20A_Pro_Main			EQU 247  
+Oversky_MR_20A_Pro_Tail			EQU 248  
+Oversky_MR_20A_Pro_Multi			EQU 249  
+TBS_Cube_12A_Main				EQU 250 
+TBS_Cube_12A_Tail				EQU 251  
+TBS_Cube_12A_Multi				EQU 252  
+DALRC_XR20A_Main				EQU 253  
+DALRC_XR20A_Tail				EQU 254  
+DALRC_XR20A_Multi				EQU 255  
+AIKON_Boltlite_30A_Main			EQU 256  
+AIKON_Boltlite_30A_Tail			EQU 257  
+AIKON_Boltlite_30A_Multi			EQU 258  
 
 
 ;**** **** **** **** ****
@@ -720,6 +729,9 @@ AIKON_Boltlite_30A_Multi			EQU 255
 ;BESCNO EQU EMAX_Nano_20A_Main
 ;BESCNO EQU EMAX_Nano_20A_Tail
 ;BESCNO EQU EMAX_Nano_20A_Multi 
+;BESCNO EQU EMAX_Lightning_20A_Main
+;BESCNO EQU EMAX_Lightning_20A_Tail
+;BESCNO EQU EMAX_Lightning_20A_Multi 
 ;BESCNO EQU XRotor_10A_Main 
 ;BESCNO EQU XRotor_10A_Tail
 ;BESCNO EQU XRotor_10A_Multi 
@@ -728,7 +740,7 @@ AIKON_Boltlite_30A_Multi			EQU 255
 ;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
-;BESCNO EQU XRotor_40A_Multi 
+;BESCNO EQU XRotor_40A_Multi  
 ;BESCNO EQU MDRX62H_Main
 ;BESCNO EQU MDRX62H_Tail
 ;BESCNO EQU MDRX62H_Multi 
@@ -755,10 +767,10 @@ AIKON_Boltlite_30A_Multi			EQU 255
 ;BESCNO EQU FVT_Littlebee_12A_Multi
 ;BESCNO EQU FVT_Littlebee_20A_Main
 ;BESCNO EQU FVT_Littlebee_20A_Tail
-;BESCNO EQU FVT_Littlebee_20A_Multi
+;BESCNO EQU FVT_Littlebee_20A_Multi 
 ;BESCNO EQU FVT_Littlebee_20A_Pro_Main
 ;BESCNO EQU FVT_Littlebee_20A_Pro_Tail
-;BESCNO EQU FVT_Littlebee_20A_Pro_Multi  
+;BESCNO EQU FVT_Littlebee_20A_Pro_Multi 
 ;BESCNO EQU FVT_Littlebee_30A_Main
 ;BESCNO EQU FVT_Littlebee_30A_Tail
 ;BESCNO EQU FVT_Littlebee_30A_Multi 
@@ -788,13 +800,13 @@ AIKON_Boltlite_30A_Multi			EQU 255
 ;BESCNO EQU Oversky_MR_20A_Pro_Multi
 ;BESCNO EQU TBS_Cube_12A_Main	 
 ;BESCNO EQU TBS_Cube_12A_Tail	  
-;BESCNO EQU TBS_Cube_12A_Multi 	 
+;BESCNO EQU TBS_Cube_12A_Multi 
 ;BESCNO EQU DALRC_XR20A_Main	 
 ;BESCNO EQU DALRC_XR20A_Tail	  
 ;BESCNO EQU DALRC_XR20A_Multi 	 
 ;BESCNO EQU AIKON_Boltlite_30A_Main	 
 ;BESCNO EQU AIKON_Boltlite_30A_Tail	  
-;BESCNO EQU AIKON_Boltlite_30A_Multi
+;BESCNO EQU AIKON_Boltlite_30A_Multi 
 
 
 ;**** **** **** **** ****
@@ -1699,6 +1711,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (EMAX_Nano_20A.inc)		; Select EMAX Nano 20A pinout
 ENDIF
 
+IF BESCNO == EMAX_Lightning_20A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (EMAX_Lightning_20A.inc)	; Select EMAX Lightning 20A pinout
+ENDIF
+
+IF BESCNO == EMAX_Lightning_20A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (EMAX_Lightning_20A.inc)	; Select EMAX Lightning 20A pinout
+ENDIF
+
+IF BESCNO == EMAX_Lightning_20A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (EMAX_Lightning_20A.inc)	; Select EMAX Lightning 20A pinout
+ENDIF
+
 IF BESCNO == XRotor_10A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (XRotor_10A.inc)		; Select XRotor 10A pinout
@@ -2119,7 +2146,7 @@ DEFAULT_PGM_TAIL_RCP_PWM_POL 		EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_TAIL_BEEP_STRENGTH	EQU 250	; Beep strength
 DEFAULT_PGM_TAIL_BEACON_STRENGTH	EQU 250	; Beacon strength
 DEFAULT_PGM_TAIL_BEACON_DELAY		EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-DEFAULT_PGM_TAIL_PWM_DITHER		EQU 3 	; 1=Off		2=7			3=15			4=31			5=63
+DEFAULT_PGM_TAIL_PWM_DITHER		EQU 3 	; 1=Off		2=3			3=7			4=15			5=31
 
 ; MULTI
 DEFAULT_PGM_MULTI_P_GAIN 		EQU 9 	; 1=0.13		2=0.17		3=0.25		4=0.38 		5=0.50 	6=0.75 	7=1.00 8=1.5 9=2.0 10=3.0 11=4.0 12=6.0 13=8.0
@@ -2138,7 +2165,7 @@ DEFAULT_PGM_MULTI_RCP_PWM_POL 	EQU 1 	; 1=Positive 	2=Negative
 DEFAULT_PGM_MULTI_BEEP_STRENGTH	EQU 40	; Beep strength
 DEFAULT_PGM_MULTI_BEACON_STRENGTH	EQU 80	; Beacon strength
 DEFAULT_PGM_MULTI_BEACON_DELAY	EQU 4 	; 1=1m		2=2m			3=5m			4=10m		5=Infinite
-DEFAULT_PGM_MULTI_PWM_DITHER		EQU 3 	; 1=Off		2=7			3=15			4=31			5=63
+DEFAULT_PGM_MULTI_PWM_DITHER		EQU 3 	; 1=Off		2=3			3=7			4=15			5=31
 
 ; COMMON
 DEFAULT_PGM_ENABLE_TX_PROGRAM 	EQU 1 	; 1=Enabled 	0=Disabled
@@ -2329,8 +2356,6 @@ Wt_Zc_Tout_Start_L:			DS	1		; Timer3 start point for zero cross scan timeout (lo
 Wt_Zc_Tout_Start_H:			DS	1		; Timer3 start point for zero cross scan timeout (hi byte)
 Wt_Comm_Start_L:			DS	1		; Timer3 start point from zero cross to commutation (lo byte)
 Wt_Comm_Start_H:			DS	1		; Timer3 start point from zero cross to commutation (hi byte)
-Next_Wt_Start_L:			DS	1		; Timer3 start point for next wait period (lo byte)
-Next_Wt_Start_H:			DS	1		; Timer3 start point for next wait period (hi byte)
 
 Rcp_PrePrev_Edge_L:			DS	1		; RC pulse pre previous edge pca timestamp (lo byte)
 Rcp_PrePrev_Edge_H:			DS	1		; RC pulse pre previous edge pca timestamp (hi byte)
@@ -2433,7 +2458,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	5		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	6		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2630,7 +2655,7 @@ ENDIF
 
 	; Pwm on cycle
 	mov	A, Current_Pwm_Limited
-	jz	t0_int_pwm_on_exit
+	jz	t0_int_pwm_on_ret
 
 	clr	A					
 	jmp	@A+DPTR					; Jump to pwm on routines. DPTR should be set to one of the pwm_nfet_on labels
@@ -2657,6 +2682,7 @@ t0_int_pwm_on_timer_set:
 ENDIF
 	; Set other variables
 	setb	Flags0.PWM_ON				; Set pwm on flag
+t0_int_pwm_on_ret:
 	; Exit interrupt
 	pop	ACC			; Restore preserved registers
 	pop	PSW
@@ -2691,8 +2717,8 @@ ENDIF
 	jz	t0_int_pwm_off_fullpower_exit	; Yes - exit
 
 IF DAMPED_MODE_ENABLE == 1
-	; Do not execute damped pwm when stopped
-	jnb	Flags1.MOTOR_SPINNING, t0_int_pwm_off_exit_nfets_off
+	; Do not execute pwm off when stopped
+	jnb	Flags1.MOTOR_SPINNING, t0_int_pwm_off_exit
 
 	; If damped operation, set pFETs on in pwm_off
 	jb	Flags2.PGM_PWMOFF_DAMPED, t0_int_pwm_off_damped	; Damped operation?
@@ -3334,6 +3360,8 @@ t2h_int_exit:
 t3_int:	; Used for commutation timing
 	clr 	EA				; Disable all interrupts
 	anl	EIE1, #7Fh		; Disable timer3 interrupts
+	mov	TMR3RLL, #0FAh		; Set a short delay before next interrupt
+	mov	TMR3RLH, #0FFh
 	clr	Flags0.T3_PENDING 	; Flag that timer has wrapped
 	mov	TMR3CN, #04h		; Timer3 enabled and interrupt flag cleared
 	setb	EA				; Enable all interrupts
@@ -4729,7 +4757,7 @@ set_pwm_demag_done:
 	mov	Temp1, Pwm_Spoolup_Beg				
 
 set_pwm_limit_low_rpm_exit:
-	mov	Pwm_Limit_By_Rpm, Temp1				
+	mov	Pwm_Limit_By_Rpm, Temp1
 	ret
 	
 
@@ -5414,27 +5442,7 @@ calc_new_wait_per_startup_done:
 	mov	Temp8, #5				; Set timing to max
 
 calc_new_wait_per_demag_done:
-IF MCU_48MHZ == 0				; Set timing reduction
- IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
-  IF ((NFETON_DELAY + PFETON_DELAY) <= 30)
-	mov	Temp7, #(4 + ((NFETON_DELAY + PFETON_DELAY)/10))	; Min to max 
-  ELSE
- 	mov	Temp7, #7									; Max
-  ENDIF
- ELSE
-	mov	Temp7, #5									; Mid
- ENDIF
-ELSE
- IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
-  IF ((NFETON_DELAY + PFETON_DELAY) <= 40)
-	mov	Temp7, #(2 + ((NFETON_DELAY + PFETON_DELAY)/20))	; Min to max 
-  ELSE
- 	mov	Temp7, #4									; Max
-  ENDIF
- ELSE
-	mov	Temp7, #3									; Mid
- ENDIF
-ENDIF
+	mov	Temp7, #2				; Set timing reduction
 	; Load current commutation timing
 	mov	A, Comm_Period4x_H		; Divide 4 times
 	swap	A
@@ -5516,27 +5524,7 @@ calc_next_comm_timing_fast:
 
 	clr	Flags0.HIGH_RPM 		; Clear high rpm bit 
 	
-IF MCU_48MHZ == 0				; Set timing reduction
- IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
-  IF ((NFETON_DELAY + PFETON_DELAY) <= 30)
-	mov	Temp1, #(4 + ((NFETON_DELAY + PFETON_DELAY)/10))	; Min to max 
-  ELSE
- 	mov	Temp1, #7									; Max
-  ENDIF
- ELSE
-	mov	Temp1, #5									; Mid
- ENDIF
-ELSE
- IF (NFETON_DELAY < 128) AND (PFETON_DELAY < 128)
-  IF ((NFETON_DELAY + PFETON_DELAY) <= 40)
-	mov	Temp1, #(2 + ((NFETON_DELAY + PFETON_DELAY)/20))	; Min to max 
-  ELSE
- 	mov	Temp1, #4									; Max
-  ENDIF
- ELSE
-	mov	Temp1, #3									; Mid
- ENDIF
-ENDIF
+	mov	Temp1, #2				; Set timing reduction
 	mov	A, Temp4				; Divide by 2 4 times
 	swap	A
 	mov	Temp7, A
@@ -5855,7 +5843,7 @@ wait_for_comp_out_start:
 	; Set number of comparator readings
 	mov	Temp1, #1					; Number of OK readings required
 	mov	Temp2, #1					; Max number of readings required
-	jb	Flags1.HIGH_RPM, comp_scale_samples	; Branch if high rpm
+	jb	Flags0.HIGH_RPM, comp_scale_samples	; Branch if high rpm
 
 	mov	A, Flags1					; Clear demag detected flag if start phases
 	anl	A, #((1 SHL STARTUP_PHASE)+(1 SHL INITIAL_RUN_PHASE))
@@ -5863,18 +5851,22 @@ wait_for_comp_out_start:
 		
 	clr	Flags0.DEMAG_DETECTED
 
-	mov 	Temp1, Comm_Period4x_H		; Set number of readings higher for lower speeds	
 	mov	Temp2, #20 				; Too low value (~<15) causes rough running at pwm harmonics. Too high a value (~>35) causes the RCT4215 630 to run rough on full throttle
+	mov 	A, Comm_Period4x_H			; Set number of readings higher for lower speeds	
+	clr	C
+	rrc	A
+	jnz	($+3)
+	inc	A
+	mov	Temp1, A
 	clr	C						
-	mov 	A, Temp1			
-	subb	A, #27					; Approximately one pwm period
+	subb	A, #20			
 	jc	($+4)
 
-	mov	Temp1, #27
+	mov	Temp1, #20
 	
 	jnb	Flags1.STARTUP_PHASE, comp_scale_samples		
 
-	mov	Temp1, #27				; Set many samples during startup
+	mov	Temp1, #27				; Set many samples during startup, approximately one pwm period
 	mov	Temp2, #27
 
 comp_scale_samples:
@@ -6814,22 +6806,27 @@ IF MODE == 0	; Main
 	add	A, Temp1		; Now 15x
 	mov	Main_Spoolup_Time_15x, A
 ENDIF
+	; Decode low rpm power slope
+	mov	Temp1, #Pgm_Startup_Pwr
+	mov	A, @Temp1
+	mov	Low_Rpm_Pwr_Slope, A
+	clr	C	
+	subb	A, #2
+	jnc	($+5)
+	mov	Low_Rpm_Pwr_Slope, #2
 	; Decode demag compensation
 	mov	Temp1, #Pgm_Demag_Comp		
 	mov	A, @Temp1				
 	mov	Demag_Pwr_Off_Thresh, #255	; Set default
-	mov	Low_Rpm_Pwr_Slope, #12		; Set default
 
 	cjne	A, #2, decode_demag_high
 
 	mov	Demag_Pwr_Off_Thresh, #160	; Settings for demag comp low
-	mov	Low_Rpm_Pwr_Slope, #10		
 
 decode_demag_high:
 	cjne	A, #3, decode_demag_done
 
 	mov	Demag_Pwr_Off_Thresh, #130	; Settings for demag comp high
-	mov	Low_Rpm_Pwr_Slope, #5		
 
 decode_demag_done:
 	; Decode pwm dither
@@ -7379,7 +7376,7 @@ throttle_high_cal:
 
 	call	average_throttle
 	clr	C
-	mov	A, Temp7				; Limit to max 250
+	mov	A, Temp7				
 IF MODE <= 1	; Main or tail
 	subb	A, #5				; Subtract about 2% and ensure that it is 250 or lower
 ENDIF
@@ -7832,8 +7829,6 @@ IF MODE == 0	; Main
 run6_check_rcp_stop_count:
 ENDIF
 	; Exit run loop after a given time
-	clr	C
-	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
 	mov	Temp1, #RCP_STOP_LIMIT
 	mov	Temp2, #Pgm_Brake_On_Stop
 	mov	A, @Temp2	
@@ -7841,6 +7836,8 @@ ENDIF
 
 	mov	Temp1, #3					; About 100ms before stopping when brake is set
 
+	clr	C
+	mov	A, Rcp_Stop_Cnt			; Load stop RC pulse counter low byte value
 	subb	A, Temp1					; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
