@@ -195,6 +195,8 @@ SET BESCNAME=DALRC_XR20A
 call:compile
 SET BESCNAME=AIKON_BOLTLITE_30A
 call:compile
+SET BESCNAME=ALIGN_MR25_15A
+call:compile
 
 goto :end
 
