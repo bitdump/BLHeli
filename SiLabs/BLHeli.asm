@@ -494,57 +494,64 @@ Flycolor_Fairy_6A_Multi 			EQU 204
 Flycolor_Fairy_30A_Main			EQU 205   
 Flycolor_Fairy_30A_Tail 			EQU 206  
 Flycolor_Fairy_30A_Multi 		EQU 207  
-Flycolor_Raptor_20A_Main			EQU 208   
-Flycolor_Raptor_20A_Tail 		EQU 209  
-Flycolor_Raptor_20A_Multi 		EQU 210  
-Flycolor_Raptor_390_20A_Main		EQU 211
-Flycolor_Raptor_390_20A_Tail 		EQU 212  
-Flycolor_Raptor_390_20A_Multi 	EQU 213  
-FVT_Littlebee_12A_Main			EQU 214  
-FVT_Littlebee_12A_Tail			EQU 215  
-FVT_Littlebee_12A_Multi			EQU 216  
-FVT_Littlebee_20A_Main			EQU 217  
-FVT_Littlebee_20A_Tail			EQU 218  
-FVT_Littlebee_20A_Multi			EQU 219  
-FVT_Littlebee_20A_Pro_Main		EQU 220  
-FVT_Littlebee_20A_Pro_Tail		EQU 221  
-FVT_Littlebee_20A_Pro_Multi		EQU 222  
-FVT_Littlebee_30A_Main			EQU 223  
-FVT_Littlebee_30A_Tail			EQU 224  
-FVT_Littlebee_30A_Multi			EQU 225  
-Graupner_Ultra_20A_Main			EQU 226  
-Graupner_Ultra_20A_Tail			EQU 227  
-Graupner_Ultra_20A_Multi			EQU 228  
-F85_3A_Main					EQU 229  
-F85_3A_Tail					EQU 230  
-F85_3A_Multi					EQU 231  
-ZTW_Spider_Pro_20A_Main			EQU 232  
-ZTW_Spider_Pro_20A_Tail			EQU 233  
-ZTW_Spider_Pro_20A_Multi			EQU 234  
-ZTW_Spider_Pro_20A_Premium_Main	EQU 235  
-ZTW_Spider_Pro_20A_Premium_Tail	EQU 236  
-ZTW_Spider_Pro_20A_Premium_Multi	EQU 237  
-ZTW_Spider_Pro_20A_HV_Main		EQU 238  
-ZTW_Spider_Pro_20A_HV_Tail		EQU 239  
-ZTW_Spider_Pro_20A_HV_Multi		EQU 240  
-ZTW_Spider_Pro_30A_HV_Main		EQU 241  
-ZTW_Spider_Pro_30A_HV_Tail		EQU 242  
-ZTW_Spider_Pro_30A_HV_Multi		EQU 243  
-DYS_XM20A_Main					EQU 244  
-DYS_XM20A_Tail					EQU 245  
-DYS_XM20A_Multi				EQU 246  
-Oversky_MR_20A_Pro_Main			EQU 247  
-Oversky_MR_20A_Pro_Tail			EQU 248  
-Oversky_MR_20A_Pro_Multi			EQU 249  
-TBS_Cube_12A_Main				EQU 250 
-TBS_Cube_12A_Tail				EQU 251  
-TBS_Cube_12A_Multi				EQU 252  
-DALRC_XR20A_Main				EQU 253  
-DALRC_XR20A_Tail				EQU 254  
-DALRC_XR20A_Multi				EQU 255  
-AIKON_Boltlite_30A_Main			EQU 256  
-AIKON_Boltlite_30A_Tail			EQU 257  
-AIKON_Boltlite_30A_Multi			EQU 258  
+Flycolor_Fairy_V2_30A_Main		EQU 208
+Flycolor_Fairy_V2_30A_Tail 		EQU 209  
+Flycolor_Fairy_V2_30A_Multi 		EQU 210 
+Flycolor_Raptor_20A_Main			EQU 211   
+Flycolor_Raptor_20A_Tail 		EQU 212  
+Flycolor_Raptor_20A_Multi 		EQU 213  
+Flycolor_Raptor_390_20A_Main		EQU 214
+Flycolor_Raptor_390_20A_Tail 		EQU 215  
+Flycolor_Raptor_390_20A_Multi 	EQU 216  
+FVT_Littlebee_12A_Main			EQU 217  
+FVT_Littlebee_12A_Tail			EQU 218  
+FVT_Littlebee_12A_Multi			EQU 219  
+FVT_Littlebee_20A_Main			EQU 220  
+FVT_Littlebee_20A_Tail			EQU 221  
+FVT_Littlebee_20A_Multi			EQU 222  
+FVT_Littlebee_20A_Pro_Main		EQU 223  
+FVT_Littlebee_20A_Pro_Tail		EQU 224  
+FVT_Littlebee_20A_Pro_Multi		EQU 225  
+FVT_Littlebee_30A_Main			EQU 226  
+FVT_Littlebee_30A_Tail			EQU 227  
+FVT_Littlebee_30A_Multi			EQU 228  
+Graupner_Ultra_20A_Main			EQU 229  
+Graupner_Ultra_20A_Tail			EQU 230  
+Graupner_Ultra_20A_Multi			EQU 231  
+F85_3A_Main					EQU 232  
+F85_3A_Tail					EQU 233  
+F85_3A_Multi					EQU 234  
+ZTW_Spider_Pro_20A_Main			EQU 235  
+ZTW_Spider_Pro_20A_Tail			EQU 236  
+ZTW_Spider_Pro_20A_Multi			EQU 237  
+ZTW_Spider_Pro_20A_Premium_Main	EQU 238  
+ZTW_Spider_Pro_20A_Premium_Tail	EQU 239  
+ZTW_Spider_Pro_20A_Premium_Multi	EQU 240  
+ZTW_Spider_Pro_20A_HV_Main		EQU 241  
+ZTW_Spider_Pro_20A_HV_Tail		EQU 242  
+ZTW_Spider_Pro_20A_HV_Multi		EQU 243  
+ZTW_Spider_Pro_30A_HV_Main		EQU 244  
+ZTW_Spider_Pro_30A_HV_Tail		EQU 245  
+ZTW_Spider_Pro_30A_HV_Multi		EQU 246  
+DYS_XM20A_Main					EQU 247  
+DYS_XM20A_Tail					EQU 248  
+DYS_XM20A_Multi				EQU 249  
+Oversky_MR_20A_Pro_Main			EQU 250  
+Oversky_MR_20A_Pro_Tail			EQU 251  
+Oversky_MR_20A_Pro_Multi			EQU 252  
+TBS_Cube_12A_Main				EQU 253 
+TBS_Cube_12A_Tail				EQU 254  
+TBS_Cube_12A_Multi				EQU 255  
+DALRC_XR20A_Main				EQU 256  
+DALRC_XR20A_Tail				EQU 257  
+DALRC_XR20A_Multi				EQU 258  
+AIKON_Boltlite_30A_Main			EQU 259  
+AIKON_Boltlite_30A_Tail			EQU 260  
+AIKON_Boltlite_30A_Multi			EQU 261
+Align_MR25_15A_Main				EQU 262   
+Align_MR25_15A_Tail 			EQU 263  
+Align_MR25_15A_Multi 			EQU 264   
+  
 
 
 ;**** **** **** **** ****
@@ -756,6 +763,9 @@ AIKON_Boltlite_30A_Multi			EQU 258
 ;BESCNO EQU Flycolor_Fairy_30A_Main
 ;BESCNO EQU Flycolor_Fairy_30A_Tail
 ;BESCNO EQU Flycolor_Fairy_30A_Multi
+;BESCNO EQU Flycolor_Fairy_V2_30A_Main
+;BESCNO EQU Flycolor_Fairy_V2_30A_Tail
+;BESCNO EQU Flycolor_Fairy_V2_30A_Multi 
 ;BESCNO EQU Flycolor_Raptor_20A_Main
 ;BESCNO EQU Flycolor_Raptor_20A_Tail
 ;BESCNO EQU Flycolor_Raptor_20A_Multi 
@@ -794,7 +804,7 @@ AIKON_Boltlite_30A_Multi			EQU 258
 ;BESCNO EQU ZTW_Spider_Pro_30A_HV_Multi 
 ;BESCNO EQU DYS_XM20A_Main
 ;BESCNO EQU DYS_XM20A_Tail
-;BESCNO EQU DYS_XM20A_Multi 
+;BESCNO EQU DYS_XM20A_Multi
 ;BESCNO EQU Oversky_MR_20A_Pro_Main
 ;BESCNO EQU Oversky_MR_20A_Pro_Tail
 ;BESCNO EQU Oversky_MR_20A_Pro_Multi
@@ -807,6 +817,9 @@ AIKON_Boltlite_30A_Multi			EQU 258
 ;BESCNO EQU AIKON_Boltlite_30A_Main	 
 ;BESCNO EQU AIKON_Boltlite_30A_Tail	  
 ;BESCNO EQU AIKON_Boltlite_30A_Multi 
+;BESCNO EQU Align_MR25_15A_Main	 
+;BESCNO EQU Align_MR25_15A_Tail	  
+;BESCNO EQU Align_MR25_15A_Multi 
 
 
 ;**** **** **** **** ****
@@ -1846,6 +1859,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Flycolor_Fairy_30A.inc)	; Select Flycolor Fairy 30A pinout
 ENDIF
 
+IF BESCNO == Flycolor_Fairy_V2_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Flycolor_Fairy_V2_30A.inc)	; Select Flycolor Fairy V2 30A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Fairy_V2_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Flycolor_Fairy_V2_30A.inc)	; Select Flycolor Fairy V2 30A pinout
+ENDIF
+
+IF BESCNO == Flycolor_Fairy_V2_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Flycolor_Fairy_V2_30A.inc)	; Select Flycolor Fairy V2 30A pinout
+ENDIF
+
 IF BESCNO == Flycolor_Raptor_20A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Flycolor_Raptor_20A.inc)	; Select Flycolor Raptor 20A pinout
@@ -2099,6 +2127,21 @@ ENDIF
 IF BESCNO == AIKON_Boltlite_30A_Multi
 MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (AIKON_Boltlite_30A.inc)	; Select AIKON_Boltlite 30A pinout
+ENDIF
+
+IF BESCNO == Align_MR25_15A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Align_MR25_15A.inc)		; Select Align MR25 15A pinout
+ENDIF
+
+IF BESCNO == Align_MR25_15A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Align_MR25_15A.inc)		; Select Align MR25 15A pinout
+ENDIF
+
+IF BESCNO == Align_MR25_15A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Align_MR25_15A.inc)		; Select Align MR25 15A pinout
 ENDIF
 
 
