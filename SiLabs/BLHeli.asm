@@ -551,6 +551,9 @@ AIKON_Boltlite_30A_Multi			EQU 261
 Align_MR25_15A_Main				EQU 262   
 Align_MR25_15A_Tail 			EQU 263  
 Align_MR25_15A_Multi 			EQU 264   
+Servoking_Monster_30A_Main		EQU 265   
+Servoking_Monster_30A_Tail 		EQU 266  
+Servoking_Monster_30A_Multi 		EQU 267   
   
 
 
@@ -820,6 +823,9 @@ Align_MR25_15A_Multi 			EQU 264
 ;BESCNO EQU Align_MR25_15A_Main	 
 ;BESCNO EQU Align_MR25_15A_Tail	  
 ;BESCNO EQU Align_MR25_15A_Multi 
+;BESCNO EQU Servoking_Monster_30A_Main	 
+;BESCNO EQU Servoking_Monster_30A_Tail	  
+;BESCNO EQU Servoking_Monster_30A_Multi
 
 
 ;**** **** **** **** ****
@@ -2144,6 +2150,20 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Align_MR25_15A.inc)		; Select Align MR25 15A pinout
 ENDIF
 
+IF BESCNO == Servoking_Monster_30A_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Servoking_Monster_30A.inc)	; Select Servoking Monster 30A pinout
+ENDIF
+
+IF BESCNO == Servoking_Monster_30A_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Servoking_Monster_30A.inc)	; Select Servoking Monster 30A pinout
+ENDIF
+
+IF BESCNO == Servoking_Monster_30A_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Servoking_Monster_30A.inc)	; Select Servoking Monster 30A pinout
+ENDIF
 
 
 ;**** **** **** **** ****
