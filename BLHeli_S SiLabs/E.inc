@@ -105,10 +105,8 @@ Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
 ENDIF
 
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
-LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
-LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
-TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; Bootloader definitions
@@ -444,11 +442,11 @@ Initialize_Xbar MACRO
 ENDM
 
 Initialize_Adc MACRO
-	mov	REF0CN, #2Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
+	mov	REF0CN, #0Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 IF MCU_48MHZ == 0
-	mov	ADC0CF, #58h		; ADC clock 2MHz
+	mov	ADC0CF, #59h	; ADC clock 2MHz, PGA gain 1
 ELSE
-	mov	ADC0CF, #0C0h		; ADC clock 2MHz
+	mov	ADC0CF, #0B9h	; ADC clock 2MHz, PGA gain 1
 ENDIF
 	mov	ADC0MX, #10h	; Select temp sensor input
 	mov	ADC0CN0, #80h	; ADC enabled 

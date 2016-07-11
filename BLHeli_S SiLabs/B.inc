@@ -22,8 +22,8 @@
 ;
 ;**** **** **** **** ****
 ;
-; Hardware definition file "B". Equals "A", but with A and C fets swapped
-; X  X  RC X  MC MB MA CC    X  X  Ac Ap Bc Bp Cc Cp
+; Hardware definition file "B". Equals "A", but with A and C fets swapped and pwm and com fets swapped
+; X  X  RC X  MC MB MA CC    X  X  Ap Ac Bp Bc Cp Cc
 ;
 ;**** **** **** **** ****
 
@@ -105,10 +105,8 @@ Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
 ENDIF
 
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
-LOCK_BYTE_ADDRESS_16K	EQU	3FFFh	; Address of lock byte if 16k flash size
-LOCK_BYTE_ADDRESS_8K	EQU	1DFFh	; Address of lock byte if 8k flash size
-TEMP_LIMIT			EQU 	246	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; Bootloader definitions
@@ -195,20 +193,24 @@ ENDIF
 ENDIF
 ENDM
 Set_Pwm_Polarity MACRO
-	mov	PCA0POL, #02h				; Damping inverted, pwm noninverted
+IF FETON_DELAY == 0
+	mov	PCA0POL, #00h				; Pwm noninverted
+ELSE
+	mov	PCA0POL, #01h				; Damping inverted, pwm noninverted
+ENDIF
 ENDM
 Enable_Power_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM0, #4Ah				; Enable comparator of module, enable match, set pwm mode
 ELSE
-	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Enable_Damp_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM1, #00h				; Disable
 ELSE
-	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Set_Power_Pwm_Regs MACRO
@@ -222,8 +224,8 @@ ELSE
 	mov	Temp1, A
 	mov	A, Power_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL0, A
-	mov	PCA0CPH0, Temp1
+	mov	PCA0CPL1, A
+	mov	PCA0CPH1, Temp1
 ENDIF
 ENDM		
 Set_Damp_Pwm_Regs MACRO
@@ -237,8 +239,8 @@ ELSE
 	mov	Temp1, A
 	mov	A, Damp_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL1, A
-	mov	PCA0CPH1, Temp1
+	mov	PCA0CPL0, A
+	mov	PCA0CPH0, Temp1
 ENDIF
 ENDM		
 Clear_COVF_Interrupt MACRO
@@ -438,11 +440,11 @@ Initialize_Xbar MACRO
 ENDM
 
 Initialize_Adc MACRO
-	mov	REF0CN, #2Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
+	mov	REF0CN, #0Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 IF MCU_48MHZ == 0
-	mov	ADC0CF, #58h		; ADC clock 2MHz
+	mov	ADC0CF, #59h	; ADC clock 2MHz, PGA gain 1
 ELSE
-	mov	ADC0CF, #0C0h		; ADC clock 2MHz
+	mov	ADC0CF, #0B9h	; ADC clock 2MHz, PGA gain 1
 ENDIF
 	mov	ADC0MX, #10h	; Select temp sensor input
 	mov	ADC0CN0, #80h	; ADC enabled 

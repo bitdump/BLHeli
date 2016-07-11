@@ -48,11 +48,15 @@ $NOMOD51
 ;           Implemented separate throttle gains fwd and rev in bidirectional mode
 ;           Implemented support for Oneshot42 and Multishot
 ; - Rev16.1 Made low rpm power limiting programmable through the startup power parameter
+; - Rev16.2 Fixed bug that prevented temperature protection
+;           Improved robustness to very high input signal rates
+;           Beeps can be turned off by programming beep strength to 1
+;           Throttle cal difference is checked to be above required minimum before storing. Throttle cal max is not stored until successful min throttle cal
 ;
 ;
 ;**** **** **** **** ****
 ; Minimum 8K Bytes of In-System Self-Programmable Flash
-; 512 Bytes Internal SRAM
+; Minimum 512 Bytes Internal SRAM
 ;
 ;**** **** **** **** ****
 ; Master clock is internal 24MHz oscillator (or 48MHz, for which the times below are halved)
@@ -91,12 +95,17 @@ $NOMOD51
 ;**** **** **** **** ****
 ; List of enumerated supported ESCs
 A_			EQU 1	; X  X  RC X  MC MB MA CC    X  X  Cc Cp Bc Bp Ac Ap
-B_			EQU 2	; X  X  RC X  MC MB MA CC    X  X  Ac Ap Bc Bp Cc Cp
+B_			EQU 2	; X  X  RC X  MC MB MA CC    X  X  Ap Ac Bp Bc Cp Cc
 C_			EQU 3	; Ac Ap MC MB MA CC X  RC    X  X  X  X  Cc Cp Bc Bp
 D_			EQU 4	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Com fets inverted
 E_			EQU 5	; L1 L0 RC X  MC MB MA CC    X  L2 Cc Cp Bc Bp Ac Ap	A with LEDs
 F_			EQU 6	; X  X  RC X  MA MB MC CC    X  X  Cc Cp Bc Bp Ac Ap
 G_			EQU 7	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noninverted com fets
+H_			EQU 8	; RC X  X  X  MA MB CC MC    X  Ap Bp Cp X  Ac Bc Cc
+I_			EQU 9	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
+J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap
+K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
+L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 
 
 ;**** **** **** **** ****
@@ -108,14 +117,19 @@ G_			EQU 7	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noni
 ;ESCNO EQU E_
 ;ESCNO EQU F_
 ;ESCNO EQU G_
+;ESCNO EQU H_
+;ESCNO EQU I_
+;ESCNO EQU J_
+;ESCNO EQU K_
+;ESCNO EQU L_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
-;MCU_48MHZ EQU	0
+;MCU_48MHZ EQU	1
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
-;FETON_DELAY EQU 15	; 20.4ns per step
+;FETON_DELAY EQU 30	; 20.4ns per step
 
 
 ;**** **** **** **** ****
@@ -146,6 +160,18 @@ ENDIF
 
 IF ESCNO == G_
 $include (G.inc)	; Select pinout G
+ENDIF
+
+IF ESCNO == H_
+$include (H.inc)	; Select pinout H
+ENDIF
+
+IF ESCNO == I_
+$include (I.inc)	; Select pinout I
+ENDIF
+
+IF ESCNO == J_
+$include (J.inc)	; Select pinout J
 ENDIF
 
 
@@ -356,7 +382,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	1		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	32		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -499,10 +525,13 @@ t3_int:	; Used for commutation timing
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 int0_int:	; Used for RC pulse timing
+	clr	IE_EA
+	anl	EIE1, #0EFh		; Disable pca interrupts
 	push	PSW				; Preserve registers through interrupt
 	push	ACC
 	push	B
 	setb	PSW.3			; Select register bank 1 for this interrupt 
+	setb	IE_EA
 	; Get the counter values
 	Get_Rcp_Capture_Values
 	; Scale down to 10 bits (for 24MHz, and 11 bits for 48MHz)
@@ -894,7 +923,7 @@ int0_int_demag_done:
 	mov	A, Pwm_Limit					; Limit to the smallest
 	mov	Temp5, A						; Store limit in Temp5
 	subb	A, Pwm_Limit_By_Rpm
-	jc	($+5)
+	jc	($+4)
 
 	mov	Temp5, Pwm_Limit_By_Rpm			
 
@@ -958,6 +987,7 @@ IF FETON_DELAY != 0
 	pop	PSW
 	Clear_COVF_Interrupt
 	Enable_COVF_Interrupt				; Generate a pca interrupt
+	orl	EIE1, #10h					; Enable pca interrupts
 	reti
 ELSE
 	mov	A, Current_Power_Pwm_Reg_H
@@ -972,6 +1002,7 @@ ENDIF
 	pop	PSW
 	Clear_COVF_Interrupt
 	Enable_COVF_Interrupt				; Generate a pca interrupt
+	orl	EIE1, #10h					; Enable pca interrupts
 	reti
 
 int0_int_set_pca_int_hi_pwm:
@@ -980,6 +1011,7 @@ int0_int_set_pca_int_hi_pwm:
 	pop	PSW
 	Clear_CCF_Interrupt
 	Enable_CCF_Interrupt				; Generate pca interrupt
+	orl	EIE1, #10h					; Enable pca interrupts
 	reti
 ENDIF
 
@@ -988,6 +1020,7 @@ int0_int_set_timeout:
 	pop	B							; Restore preserved registers
 	pop	ACC
 	pop	PSW
+	orl	EIE1, #10h					; Enable pca interrupts
 	reti
 
 
@@ -999,6 +1032,8 @@ int0_int_set_timeout:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 pca_int:	; Used for setting pwm registers
+	clr	IE_EA
+	anl	IE, #0FEh			; Disable int0 interrupts
 	push	PSW				; Preserve registers through interrupt
 	push	ACC
 	setb	PSW.3			; Select register bank 1 for this interrupt
@@ -1008,24 +1043,28 @@ IF FETON_DELAY != 0					; HI/LO enable style drivers
 	mov	Temp1, PCA0L				; Read low byte, to transfer high byte to holding register
 	mov	A, Current_Power_Pwm_Reg_H
 IF MCU_48MHZ == 0
-	jnb	ACC.0, pca_int_hi_pwm
-ELSE
 	jnb	ACC.1, pca_int_hi_pwm
+ELSE
+	jnb	ACC.2, pca_int_hi_pwm
 ENDIF
 	mov	A, PCA0H
 IF MCU_48MHZ == 0
-	jnb	ACC.1, pca_int_set_pwm		; Power below 50%, update pca in the 0x20-0x3F range
+	jb	ACC.1, pca_int_exit			; Power below 50%, update pca in the 0x00-0x0F range
+	jb	ACC.0, pca_int_exit
 ELSE
-	jnb	ACC.2, pca_int_set_pwm
+	jb	ACC.2, pca_int_exit
+	jb	ACC.1, pca_int_exit
 ENDIF
-	ajmp	pca_int_exit
+	ajmp	pca_int_set_pwm
 
 pca_int_hi_pwm:
 	mov	A, PCA0H
 IF MCU_48MHZ == 0
-	jnb	ACC.1, pca_int_exit			; Power above 50%, update pca in the 0x00-0x1F range
+	jnb	ACC.1, pca_int_exit			; Power above 50%, update pca in the 0x20-0x2F range
+	jb	ACC.0, pca_int_exit
 ELSE
 	jnb	ACC.2, pca_int_exit
+	jb	ACC.1, pca_int_exit
 ENDIF
 
 pca_int_set_pwm:
@@ -1035,7 +1074,6 @@ pca_int_set_pwm:
 	Disable_COVF_Interrupt
 
 ELSE								; EN/PWM style drivers
-
 	Set_Power_Pwm_Regs
 	mov	Current_Power_Pwm_Reg_H, Power_Pwm_Reg_H
 	Disable_COVF_Interrupt
@@ -1069,6 +1107,8 @@ IF FETON_DELAY == 0
 ENDIF
 	pop	ACC						; Restore preserved registers
 	pop	PSW
+	orl	IE, #01h					; Enable int0 interrupts
+	setb	IE_EA
 reti
 
 
@@ -1141,6 +1181,11 @@ beep_f4:	; Entry point 4, load beeper frequency 4 settings
 	jmp	beep
 
 beep:	; Beep loop start
+	mov	A, Beep_Strength
+	djnz	ACC, beep_start
+	ret
+
+beep_start:
 	mov	Temp2, #2
 beep_onoff:
 	clr	A
@@ -1570,7 +1615,7 @@ calc_next_comm_normal:
 	clr	C
 	mov	A, Temp4
 	subb	A, #08h
-	jc	($+4)
+	jc	calc_next_comm_avg_period_div
 
 	dec	Temp7				; Reduce averaging time constant more for even lower speeds
 	dec	Temp8
@@ -2884,6 +2929,7 @@ average_throttle:
 	setb	Flags2.RCP_FULL_RANGE	; Set range to 1000-2020us
 	call	find_throttle_gains	; Set throttle gains
 	call wait30ms		
+	call wait30ms
 	mov	Temp3, #0
 	mov	Temp4, #0
 	mov	Temp5, #16		; Average 16 measurments
@@ -2970,34 +3016,6 @@ led_3_done:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
 pgm_start:
-	; Check flash lock byte
-	mov	A, RSTSRC			
-	jb	ACC.6, ($+6)		; Check if flash access error was reset source 
-
-	mov	Bit_Access, #0		; No - then this is the first try
-
-	inc	Bit_Access
-	mov	DPTR, #LOCK_BYTE_ADDRESS_16K	; First try is for 16k flash size
-	mov	A, Bit_Access
-	dec	A
-	jz	lock_byte_test
-
-	mov	DPTR, #LOCK_BYTE_ADDRESS_8K	; Second try is for 8k flash size
-	dec	A
-	jz	lock_byte_test
-
-lock_byte_test:
-	movc A, @A+DPTR		; Read lock byte
-	inc	A				
-	jz	lock_byte_ok		; If lock byte is 0xFF, then start code execution
-
-IF ONE_S_CAPABLE == 0		
-	mov	RSTSRC, #12h		; Generate hardware reset and set VDD monitor
-ELSE
-	mov	RSTSRC, #10h		; Generate hardware reset and disable VDD monitor
-ENDIF
-
-lock_byte_ok:
 	; Disable the WDT.
 	mov	WDTCN, #0DEh		; Disable watchdog
 	mov	WDTCN, #0ADh		
@@ -3201,7 +3219,6 @@ throttle_high_cal:
 	clr	IE_EA				; Disable interrupts (freeze New_Rcp value)
 	clr	Flags2.RCP_FULL_RANGE	; Set programmed range
 	call	find_throttle_gains		; Set throttle gains
-	mov	Temp7, New_Rcp			; Store new RC pulse value
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #(255/2)			; Is RC pulse above midstick?
@@ -3220,7 +3237,6 @@ throttle_high_cal:
 	mov	Temp1, #Pgm_Max_Throttle	; Store
 	mov	@Temp1, A			
 	call wait200ms				
-	call erase_and_store_all_in_eeprom	
 	call	success_beep
 
 throttle_low_cal_start:
@@ -3232,7 +3248,6 @@ throttle_low_cal:
 	clr	IE_EA				; Disable interrupts (freeze New_Rcp value)
 	clr	Flags2.RCP_FULL_RANGE	; Set programmed range
 	call	find_throttle_gains		; Set throttle gains
-	mov	Temp7, New_Rcp			; Store new RC pulse value
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #(255/2)			; Below midstick?
@@ -3252,6 +3267,20 @@ throttle_low_cal:
 	add	A, #3				; Add about 1%
 	mov	Temp1, #Pgm_Min_Throttle	; Store
 	mov	@Temp1, A			
+	mov	Temp1, A				; Min throttle in Temp1
+	mov	Temp2, #Pgm_Max_Throttle
+	mov	A, @Temp2
+	clr	C
+	subb	A, #35				; Subtract 35 (140us) from max throttle
+	subb	A, Temp1				; Subtract min from max
+	jnc	program_by_tx_entry_store
+
+	mov	A, Temp1				; Load min
+	add	A, #35				; Make max 140us higher than min
+	mov	Temp1, #Pgm_Max_Throttle	; Store new max
+	mov	@Temp1, A
+
+program_by_tx_entry_store:
 	call wait200ms				
 	call erase_and_store_all_in_eeprom	
 	call	success_beep_inverted
