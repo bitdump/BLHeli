@@ -133,6 +133,11 @@
 ;           Fixed bug that caused brake not to work for low side pwm ESCs
 ;           Fixed bug where noisy input signal could cause loss of sync
 ;           Made low rpm power limiting programmable through the startup power parameter
+; - Rev14.7 Beeps can be turned off by programming beep strength to 1
+;           Throttle cal difference is checked to be above required minimum before storing. Throttle cal max is not stored until successful min throttle cal
+;           In order to have a good code for fixed wing planes, that has low voltage limiting, a main code spoolup time setting of 0 is made fast
+;           Some small changes for improved sync hold
+;
 ;
 ;
 ;**** **** **** **** ****
@@ -275,7 +280,7 @@
 ;#define AFRO_12A_MULTI 
 ;#define AFRO_20A_MAIN				; ICP1 as input		
 ;#define AFRO_20A_TAIL
-;#define AFRO_20A_MULTI 
+;#define AFRO_20A_MULTI
 ;#define AFRO_20A_HV_MAIN			; ICP1 as input		
 ;#define AFRO_20A_HV_TAIL
 ;#define AFRO_20A_HV_MULTI
@@ -296,7 +301,22 @@
 ;#define TBS_CUBE_20A_MULTI
 ;#define ZTW_SPIDER_LITE_18Av2_MAIN
 ;#define ZTW_SPIDER_LITE_18Av2_TAIL
-;#define ZTW_SPIDER_LITE_18Av2_MULTI 
+;#define ZTW_SPIDER_LITE_18Av2_MULTI
+;#define HTIRC_DRAGONFLY_6A_MAIN
+;#define HTIRC_DRAGONFLY_6A_TAIL
+;#define HTIRC_DRAGONFLY_6A_MULTI 
+;#define HTIRC_DRAGONFLY_12A_MAIN
+;#define HTIRC_DRAGONFLY_12A_TAIL
+;#define HTIRC_DRAGONFLY_12A_MULTI 
+;#define HTIRC_DRAGONFLY_20A_MAIN
+;#define HTIRC_DRAGONFLY_20A_TAIL
+;#define HTIRC_DRAGONFLY_20A_MULTI 
+;#define HTIRC_DRAGONFLY_30A_MAIN
+;#define HTIRC_DRAGONFLY_30A_TAIL
+;#define HTIRC_DRAGONFLY_30A_MULTI 
+;#define HTIRC_DRAGONFLY_40A_MAIN
+;#define HTIRC_DRAGONFLY_40A_TAIL
+;#define HTIRC_DRAGONFLY_40A_MULTI 
 
 
 
@@ -917,6 +937,80 @@
 .INCLUDE "ZTW_Spider_Lite_18Av2.inc"	; Select ZTW Spider Lite 18Av2 pinout
 #endif
 
+#if defined(HTIRC_DRAGONFLY_6A_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "Htirc_Dragonfly_6A.inc"		; Select HTIRC Dragonfly 6A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_6A_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "Htirc_Dragonfly_6A.inc"		; Select HTIRC Dragonfly 6A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_6A_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "Htirc_Dragonfly_6A.inc"		; Select HTIRC Dragonfly 6A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_12A_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "Htirc_Dragonfly_12A.inc"		; Select HTIRC Dragonfly 12A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_12A_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "Htirc_Dragonfly_12A.inc"		; Select HTIRC Dragonfly 12A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_12A_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "Htirc_Dragonfly_12A.inc"		; Select HTIRC Dragonfly 12A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_20A_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "Htirc_Dragonfly_20A.inc"		; Select HTIRC Dragonfly 20A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_20A_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "Htirc_Dragonfly_20A.inc"		; Select HTIRC Dragonfly 20A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_20A_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "Htirc_Dragonfly_20A.inc"		; Select HTIRC Dragonfly 20A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_30A_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "Htirc_Dragonfly_30A.inc"		; Select HTIRC Dragonfly 30A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_30A_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "Htirc_Dragonfly_30A.inc"		; Select HTIRC Dragonfly 30A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_30A_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "Htirc_Dragonfly_30A.inc"		; Select HTIRC Dragonfly 30A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_40A_MAIN)
+.EQU	MODE 	= 	0				; Choose mode. Set to 0 for main motor
+.INCLUDE "Htirc_Dragonfly_40A.inc"		; Select HTIRC Dragonfly 40A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_40A_TAIL)
+.EQU	MODE 	= 	1				; Choose mode. Set to 1 for tail motor
+.INCLUDE "Htirc_Dragonfly_40A.inc"		; Select HTIRC Dragonfly 40A pinout
+#endif
+
+#if defined(HTIRC_DRAGONFLY_40A_MULTI)
+.EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
+.INCLUDE "Htirc_Dragonfly_40A.inc"		; Select HTIRC Dragonfly 40A pinout
+#endif
 
 
 
@@ -1090,11 +1184,11 @@
 .EQU	OC1A_PENDING			= 	0		; Timer1 output compare pending flag
 .EQU	RCP_MEAS_PWM_FREQ		=	1		; Measure RC pulse pwm frequency
 .EQU	PWM_ON				=	2		; Set in on part of pwm cycle
-.EQU	DEMAG_ENABLED			= 	3		; Set when demag compensation is enabled (above a min speed and throttle)
-.EQU	DEMAG_DETECTED			= 	4		; Set when excessive demag time is detected
-.EQU	DEMAG_CUT_POWER		= 	5		; Set when demag compensation cuts power
-.EQU	GOV_ACTIVE			= 	6		; Set when governor is active
-.EQU	DIR_CHANGE_BRAKE		= 	7		; Set when braking before direction change
+.EQU	DEMAG_DETECTED			= 	3		; Set when excessive demag time is detected
+.EQU	DEMAG_CUT_POWER		= 	4		; Set when demag compensation cuts power
+.EQU	GOV_ACTIVE			= 	5		; Set when governor is active
+.EQU	DIR_CHANGE_BRAKE		= 	6		; Set when braking before direction change
+;						=	7
 
 .DEF	Flags1				=	R23    	; State flags. Reset upon init_start 
 .EQU	MOTOR_SPINNING			=	0		; Set when in motor is spinning
@@ -1157,7 +1251,7 @@ Power_On_Wait_Cnt_H: 		.BYTE	1		; Power on wait counter (hi byte)
 
 Startup_Cnt:				.BYTE	1		; Startup phase commutations counter (incrementing)
 Startup_Zc_Timeout_Cntd:		.BYTE	1		; Startup zero cross timeout counter (decrementing)
-Initial_Run_Rot_Cnt:		.BYTE	1		; Initial run rotations counter (incrementing)
+Initial_Run_Rot_Cntd:		.BYTE	1		; Initial run rotations counter (decrementing)
 Stall_Cnt:				.BYTE	1		; Counts start/run attempts that resulted in stall. Reset upon a proper stop
 Demag_Detected_Metric:		.BYTE	1		; Metric used to gauge demag event frequency
 Demag_Pwr_Off_Thresh:		.BYTE	1		; Metric threshold above which power is cut
@@ -1287,7 +1381,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	6		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	7		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1856,7 +1950,7 @@ t0_int_current_pwm_update:
 	lds	I_Temp1, Pgm_Gov_Mode		; Governor mode?
 	cpi	I_Temp1, 4
 	breq	PC+2			
-	rjmp	t0_int_pwm_exit			; Yes - branch
+	rjmp	t0_int_exit				; Yes - branch
 .ENDIF
 
 	lds	XL, Requested_Pwm			; Set equal as default
@@ -1931,18 +2025,11 @@ t0_int_current_pwm_no_dither:
 	; Skip damping fet switching for high throttle
 	cbr	Flags1, (1<<SKIP_DAMP_ON)
 	subi	I_Temp1, 248
-	brcs	t0_int_pwm_exit
+	brcs	t0_int_exit
 	sbr	Flags1, (1<<SKIP_DAMP_ON)
 .ENDIF
 .ENDIF
-t0_int_pwm_exit:	
-	; Set demag enabled if pwm is above limit
-	mov	XL, Current_Pwm_Limited		
-	cpi	XL, 0x40					; Set if above 25%
-	brcs	PC+2
-
-	sbr	Flags0, (1<<DEMAG_ENABLED)
-
+t0_int_exit:
 	; Increment counter and check if high "interrupt" 
 	lds	XL, Timer0_Int_Cnt
 	inc	XL
@@ -2065,6 +2152,11 @@ t0h_int_rcp_gov_pwm_done:
 
 	ldi	XL, 1						; Reset skip count. Default is fast spoolup
 	sts	Spoolup_Limit_Skip, XL			
+	ldi	I_Temp1, 8					; Default fast increase for spoolup time of zero
+	lds	XL, Main_Spoolup_Time_3x			
+	tst	XL
+	breq	t0h_int_rcp_inc_limit			; Jump for spoolup time of zero
+	
 	ldi	I_Temp1, 5					; Default fast increase
 
 	lds	XL, Main_Spoolup_Time_3x			; No spoolup until 3*N*32ms (Spoolup_Limit_Cnt in I_Temp2)
@@ -2696,7 +2788,13 @@ beep_f4:	; Entry point 4, load beeper frequency 4 settings
 	rjmp	beep
 
 beep:	; Beep loop start
-	ldi	Temp2, 2					; Must be an even number (or direction will change)
+	lds	XH, Beep_Strength
+	dec	XH
+	brne	beep_start 
+	ret
+
+beep_start:    
+	ldi	Temp2, 2	
 beep_onoff:
 	clr	XH
 	BpFET_off			; BpFET off
@@ -3379,24 +3477,9 @@ calc_governor_int_corr_exit:
 set_pwm_limit_low_rpm:
 	; Set pwm limit and demag disable for low rpms
 	ldi	Temp1, 0xFF					; Default full power
-	cbr	Flags0, (1<<DEMAG_ENABLED)		; Default disabled
 	sbrc	Flags1, STARTUP_PHASE			; Exit if startup phase set
 	rjmp	set_pwm_limit_low_rpm_exit
-	sbrc	Flags1, INITIAL_RUN_PHASE		; Skip demag portion if initial run phase set
-	rjmp	set_pwm_demag_done
 
-	sbr	Flags0, (1<<DEMAG_ENABLED)		; Enable demag
-	lds	XH, Comm_Period4x_H
-	cpi	XH, 0x0A						; ~31250 eRPM
-	brcs	set_pwm_demag_done				; If speed above - branch
-
-	mov	XH, Current_Pwm_Limited
-	cpi	XH, 0x40						; Do not disable if pwm above 25%
-	brcc	set_pwm_demag_done
-
-	cbr	Flags0, (1<<DEMAG_ENABLED)		; Disable demag
-
-set_pwm_demag_done:
 	lds	XH, Pgm_Enable_Power_Prot		; Check if low RPM power protection is enabled
 	tst	XH
 	breq	set_pwm_limit_low_rpm_exit		; Exit if disabled
@@ -3911,13 +3994,16 @@ calc_next_comm_normal:
 	ldi	XH, 2				; Divide new commutation time 2 times as default
 	mov	Temp8, XH
 	cpi	Temp4, 0x04
-	brcs	PC+3
+	brcs	calc_next_comm_avg_period_div
 
 	dec	Temp7				; Reduce averaging time constant for low speeds
 	dec	Temp8
 
 	cpi	Temp4, 0x08
-	brcs	PC+3
+	brcs	calc_next_comm_avg_period_div
+
+	sbrc	Flags1, INITIAL_RUN_PHASE	
+	rjmp	calc_next_comm_avg_period_div	; Do not average very fast during initial run
 
 	dec	Temp7				; Reduce averaging time constant more for even lower speeds
 	dec	Temp8
@@ -4418,10 +4504,18 @@ comp_read_wrong_extend_timeout:
 	cli								; Disable interrupts while reading timer 1
 	Read_TCNT1L Temp4					; Assuming interrupts are disabled
 	Read_TCNT1H Temp5
-	lds	Temp6, Comm_Period4x_L			; Set timeout to zero comm period 4x value
-	lds	Temp7, Comm_Period4x_H	
+	lds	Temp6, Comm_Period4x_L			; Set timeout to ~4x comm period 4x value
+	lds	XH, Comm_Period4x_H
+	lsl	Temp6
+	rol	XH
+	brcc	PC+2
+	ldi	XH, 0xFF
+	lsl	Temp6
+	rol	XH
+	brcc	PC+2
+	ldi	XH, 0xFF
 	add	Temp4, Temp6					; Set new output compare value
-	adc	Temp5, Temp7
+	adc	Temp5, XH
 	Set_OCR1AH Temp5					; Update high byte first to avoid false output compare
 	Set_OCR1AL Temp4
 	sbr	Flags0, (1<<OC1A_PENDING)
@@ -4522,8 +4616,6 @@ eval_comp_exit:
 wait_for_comm: 
 	; Update demag metric
 	ldi	Temp1, 0
-	sbrs	Flags0, DEMAG_ENABLED
-	rjmp	PC+4
 	sbrs	Flags0, DEMAG_DETECTED
 	rjmp	PC+2
 
@@ -5258,10 +5350,12 @@ decode_settings:
 	; Decode spoolup time
 	lds	Temp1, Pgm_Main_Spoolup_Time		
 	tst	Temp1
-	brne	PC+2			; If not zero - branch
+	brne	decode_main_spoolup_nonzero	; If not zero - branch
 	
-	inc	Temp1
+	sts	Main_Spoolup_Time_3x, Zero
+	rjmp	decode_main_spoolup_done
 
+decode_main_spoolup_nonzero:
 	cpi	Temp1, 17		; Limit to 17 max
 	brcs	PC+2
 
@@ -5280,6 +5374,7 @@ decode_settings:
 	add	XH, Temp1		
 	add	XH, Temp1		; Now 15x
 	sts	Main_Spoolup_Time_15x, XH
+decode_main_spoolup_done:
 .ENDIF
 	; Decode low rpm power slope
 	lds	Temp1, Pgm_Startup_Pwr
@@ -5416,7 +5511,8 @@ test_throttle_gain:
 average_throttle:
 	sbr	Flags3, (1<<FULL_THROTTLE_RANGE)	; Set range to 1000-2020us
 	xcall find_throttle_gain		; Set throttle gain
-	xcall wait30ms		
+	xcall wait30ms	
+	xcall wait30ms	
 	ldi	Temp3, 0
 	ldi	Temp4, 0
 	ldi	XH, 16			; Average 16 measurments
@@ -5824,7 +5920,6 @@ throttle_high_cal:
 	sts	Pgm_Ppm_Max_Throttle, XH	; Store
 	xcall wait200ms				
 	cli					
-	xcall store_all_in_eeprom	
 	xcall success_beep
 	sei					
 
@@ -5859,6 +5954,20 @@ throttle_low_cal:
 	mov	XH, Temp7			
 	subi	XH, 0xFB				; Add about 2% (subtract negative number)
 	sts	Pgm_Ppm_Min_Throttle, XH	; Store
+	mov	Temp1, XH				; Min throttle in Temp1
+	lds	Temp2, Pgm_Ppm_Max_Throttle
+	subi	Temp2, 130			; Subtract 130 (520us) from max throttle
+	brcs	program_by_tx_entry_limit
+
+	sbc	Temp2, Temp1			; Subtract min from max
+	brcc	program_by_tx_entry_store
+
+program_by_tx_entry_limit:
+	ldi	XH, 130
+	add	Temp1, XH				; Make max 520us higher than min
+	sts	Pgm_Ppm_Max_Throttle, Temp1	; Store new max
+
+program_by_tx_entry_store:
 	xcall wait200ms				
 	cli					
 	xcall store_all_in_eeprom	
@@ -6222,7 +6331,7 @@ run6:
 
 	cbr	Flags1, (1<<STARTUP_PHASE)	; Clear startup phase flag
 	sbr	Flags1, (1<<INITIAL_RUN_PHASE); Set initial run phase flag
-	sts	Initial_Run_Rot_Cnt, Temp3	; Set initial run rotation count
+	sts	Initial_Run_Rot_Cntd, Temp3	; Set initial run rotation count
 .IF MODE == 1	; Tail
 	ldi	XH, 0xFF
 	sts	Pwm_Limit, XH				; Allow full power
@@ -6252,7 +6361,7 @@ normal_run_checks:
 	rjmp	initial_run_phase_done
 
 	; Decrement startup rotation count
-	lds	XH, Initial_Run_Rot_Cnt
+	lds	XH, Initial_Run_Rot_Cntd
 	dec	XH
 	; Check number of nondamped rotations
 	brne	normal_run_check_startup_rot	; Branch if counter is not zero
@@ -6262,7 +6371,7 @@ normal_run_checks:
 	rjmp run1						; Continue with normal run
 
 normal_run_check_startup_rot:
-	sts	Initial_Run_Rot_Cnt, XH		; Not zero - store counter
+	sts	Initial_Run_Rot_Cntd, XH		; Not zero - store counter
 	lds	XH, New_Rcp				; Load new pulse value
 	cpi	XH, RCP_STOP				; Check if pulse is below stop value
 	brcs	PC+2
@@ -6362,7 +6471,7 @@ run6_brake_done:
 	sbr	Flags3, (1<<PGM_DIR_REV)		; Set spinning direction
 	sbr	Flags1, (1<<INITIAL_RUN_PHASE)
 	ldi	XH, 18
-	sts	Initial_Run_Rot_Cnt, XH
+	sts	Initial_Run_Rot_Cntd, XH
 	lds	XH, Pwm_Spoolup_Beg			; Set initial max power
 	sts	Pwm_Limit, XH
 	rjmp	run1						; Go back to run 1 

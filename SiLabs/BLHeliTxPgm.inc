@@ -186,9 +186,17 @@ write_eeprom_byte:
 write_eeprom_byte_from_acc:
 	orl	PSCTL, #01h			; Set the PSWE bit
 	anl	PSCTL, #0FDh			; Clear the PSEE bit
-	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                                
-	mov	FLKEY, #0A5h			; First key code
-	mov	FLKEY, #0F1h			; Second key code
+	mov	Temp8, A
+	clr	C
+	mov	A, DPH				; Check that address is not in bootloader area
+	subb	A, #1Ch
+	jc	($+3)
+
+	ret
+
+	mov	A, Temp8
+	mov	FLKEY, Flash_Key_1		; First key code
+	mov	FLKEY, Flash_Key_2		; Second key code
 	movx	@DPTR, A				; Write to flash
 	anl	PSCTL, #0FEh			; Clear the PSWE bit
 	ret
@@ -204,9 +212,8 @@ write_eeprom_byte_from_acc:
 erase_flash:	
 	orl	PSCTL, #02h			; Set the PSEE bit
 	orl	PSCTL, #01h			; Set the PSWE bit
-	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                                
-	mov	FLKEY, #0A5h			; First key code
-	mov	FLKEY, #0F1h			; Second key code
+	mov	FLKEY, Flash_Key_1		; First key code
+	mov	FLKEY, Flash_Key_2		; Second key code
 	mov	DPTR, #Eep_Initialized_L	
 	movx	@DPTR, A
 	anl	PSCTL, #0FCh			; Clear the PSEE and PSWE bits
@@ -578,9 +585,9 @@ func_paraval_store:
 	call success_beep			; Beep success
 	clr	EA					; Disable all interrupts
 IF ONE_S_CAPABLE == 0		
-	mov	RSTSRC, #12h			; Generate hardware reset and set VDD monitor
+	mov	RSTSRC, #16h			; Generate hardware reset and set missing clock and VDD monitor
 ELSE
-	mov	RSTSRC, #10h			; Generate hardware reset and disable VDD monitor
+	mov	RSTSRC, #14h			; Generate hardware reset and disable VDD monitor
 ENDIF
 	call wait1s
 
@@ -652,8 +659,8 @@ program_by_tx_exit:
 	call erase_and_store_all_in_eeprom	; Erase flash and program
 	clr	EA					; Disable all interrupts
 IF ONE_S_CAPABLE == 0		
-	mov	RSTSRC, #12h			; Generate hardware reset and set VDD monitor
+	mov	RSTSRC, #16h			; Generate hardware reset and set missing clock and VDD monitor
 ELSE
-	mov	RSTSRC, #10h			; Generate hardware reset and disable VDD monitor
+	mov	RSTSRC, #14h			; Generate hardware reset and disable VDD monitor
 ENDIF
 	call wait1s
