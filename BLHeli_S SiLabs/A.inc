@@ -105,8 +105,8 @@ Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
 ENDIF
 
 ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
-TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	49	; Temperature measurement ADC value for which main motor power is limited at 80degC (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	9	; Temperature measurement ADC value increment for another 10degC
 
 ;**** **** **** **** ****
 ; Bootloader definitions
@@ -447,9 +447,6 @@ ENDIF
 ENDM
 Start_Adc MACRO
 	mov	ADC0CN0, #90h	; ADC start
-ENDM
-Get_Adc_Status MACRO
-	mov	A, ADC0CN0		
 ENDM
 Read_Adc_Result MACRO
 	mov	Temp1, ADC0L

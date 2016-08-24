@@ -32,8 +32,8 @@ $NOMOD51
 ;
 ; The code is designed for multirotor applications, running damped light mode
 ;
-; The input signal can be Normal (1-2ms), OneShot125 (125-250us) or OneShot42 (41.7-83.3us) at rates as high as allowed by the format.
-; The code autodetects normal, OneShot125 or Oneshot42.
+; The input signal can be Normal (1-2ms), OneShot125 (125-250us), OneShot42 (41.7-83.3us) or Multishot (5-25us) at rates as high as allowed by the format.
+; The code autodetects normal, OneShot125, Oneshot42 or Multishot.
 ;
 ; The first lines of the software must be modified according to the chosen environment:
 ; ESCNO EQU "ESC"
@@ -52,6 +52,9 @@ $NOMOD51
 ;           Improved robustness to very high input signal rates
 ;           Beeps can be turned off by programming beep strength to 1
 ;           Throttle cal difference is checked to be above required minimum before storing. Throttle cal max is not stored until successful min throttle cal
+; - Rev16.3 Implemented programmable temperature protection
+;           Improved protection of bootloader and generally reduced risk of flash corruption
+;           Some small changes for improved sync hold
 ;
 ;
 ;**** **** **** **** ****
@@ -129,7 +132,7 @@ L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
-;FETON_DELAY EQU 30	; 20.4ns per step
+;FETON_DELAY EQU 50	; 20.4ns per step
 
 
 ;**** **** **** **** ****
@@ -174,6 +177,14 @@ IF ESCNO == J_
 $include (J.inc)	; Select pinout J
 ENDIF
 
+IF ESCNO == K_
+$include (K.inc)	; Select pinout K
+ENDIF
+
+IF ESCNO == L_
+$include (L.inc)	; Select pinout L
+ENDIF
+
 
 ;**** **** **** **** ****
 ; Programming defaults
@@ -191,7 +202,7 @@ DEFAULT_PGM_ENABLE_TX_PROGRAM 		EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_MIN_THROTTLE				EQU 37	; 4*37+1000=1148
 DEFAULT_PGM_MAX_THROTTLE				EQU 208	; 4*208+1000=1832
 DEFAULT_PGM_CENTER_THROTTLE			EQU 122	; 4*122+1000=1488 (used in bidirectional mode)
-DEFAULT_PGM_ENABLE_TEMP_PROT	 		EQU 1 	; 1=Enabled 	0=Disabled
+DEFAULT_PGM_ENABLE_TEMP_PROT	 		EQU 7 	; 0=Disabled	1=80C	2=90C	3=100C	4=110C	5=120C	6=130C	7=140C
 DEFAULT_PGM_ENABLE_POWER_PROT 		EQU 1 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_BRAKE_ON_STOP	 		EQU 0 	; 1=Enabled 	0=Disabled
 DEFAULT_PGM_LED_CONTROL	 			EQU 0 	; Byte for LED control. 2bits per LED, 0=Off, 1=On
@@ -220,10 +231,10 @@ Rcp_Timeout_Cntd:			DS	1		; RC pulse timeout counter (decrementing)
 
 Flags0:					DS	1    	; State flags. Reset upon init_start
 T3_PENDING				EQU 	0		; Timer3 pending flag
-DEMAG_ENABLED				EQU 	1		; Set when demag compensation is enabled (above a min speed and throttle)
-DEMAG_DETECTED				EQU 	2		; Set when excessive demag time is detected
-DEMAG_CUT_POWER			EQU 	3		; Set when demag compensation cuts power
-COMP_TIMED_OUT				EQU 	4		; Set when comparator reading timed out
+DEMAG_DETECTED				EQU 	1		; Set when excessive demag time is detected
+DEMAG_CUT_POWER			EQU 	2		; Set when demag compensation cuts power
+COMP_TIMED_OUT				EQU 	3		; Set when comparator reading timed out
+;						EQU 	4
 ;						EQU 	5	
 ;						EQU 	6	
 ;						EQU 	7	
@@ -329,6 +340,11 @@ Beep_Strength:				DS	1		; Strength of beeps
 Skip_T2_Int:				DS	1		; Set for 48MHz MCUs when timer 2 interrupt shall be ignored
 Clock_Set_At_48MHz:			DS	1		; Variable set if 48MHz MCUs run at 48MHz
 
+Flash_Key_1:				DS	1		; Flash key one
+Flash_Key_2:				DS	1		; Flash key two
+
+Temp_Prot_Limit:			DS	1		; Temperature protection limit
+
 ; Indirect addressing data segment. The variables below must be in this sequence
 ISEG AT 080h					
 _Pgm_Gov_P_Gain:			DS	1		; Programmed governor P gain
@@ -382,8 +398,8 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	2		; Sub revision of the firmware
-EEPROM_LAYOUT_REVISION		EQU	32		; Revision of the EEPROM layout
+EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
+EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
 Eep_FW_Sub_Revision:		DB	EEPROM_FW_SUB_REVISION			; EEPROM firmware sub revision number
@@ -909,15 +925,6 @@ ENDIF
 int0_int_pulse_ready:
 	mov	New_Rcp, Temp1					; Store new pulse length
 	setb	Flags2.RCP_UPDATED		 		; Set updated flag
-	; Set demag enabled if pwm is above limit
-	clr	C
-	mov	A, Temp1
-	subb	A, #40h
-	jc	int0_int_demag_done				; Set if above 25%
-
-	setb	Flags0.DEMAG_ENABLED
-
-int0_int_demag_done:
 	; Set pwm limit
 	clr	C
 	mov	A, Pwm_Limit					; Limit to the smallest
@@ -1241,24 +1248,8 @@ beep_off:		; Fets off loop
 set_pwm_limit_low_rpm:
 	; Set pwm limit and demag disable for low rpms
 	mov	Temp1, #0FFh					; Default full power
-	clr	Flags0.DEMAG_ENABLED			; Default disabled
 	jb	Flags1.STARTUP_PHASE, set_pwm_limit_low_rpm_exit	; Exit if startup phase set
-	jb	Flags1.INITIAL_RUN_PHASE, set_pwm_demag_done		; Skip demag portion if initial run phase set
 
-	setb	Flags0.DEMAG_ENABLED			; Enable demag
-	clr	C
-	mov	A, Comm_Period4x_H
-	subb	A, #0Ah						; ~31250 eRPM
-	jc	set_pwm_demag_done				; If speed above - branch
-
-	clr	C
-	mov	A, New_Rcp
-	subb	A, #40h
-	jnc	set_pwm_demag_done				; Jump if above 25%
-
-	clr	Flags0.DEMAG_ENABLED			; Disable demag
-
-set_pwm_demag_done:
 	mov	Temp2, #Pgm_Enable_Power_Prot		; Check if low RPM power protection is enabled
 	mov	A, @Temp2
 	jz	set_pwm_limit_low_rpm_exit		; Exit if disabled
@@ -1284,7 +1275,7 @@ set_pwm_demag_done:
 	subb	A, Pwm_Limit_Beg
 	jnc	set_pwm_limit_low_rpm_exit
 
-	mov	Temp1, Pwm_Limit_Beg				
+	mov	Temp1, Pwm_Limit_Beg
 
 set_pwm_limit_low_rpm_exit:
 	mov	Pwm_Limit_By_Rpm, Temp1				
@@ -1362,8 +1353,7 @@ check_temp_voltage_and_limit_power:
 	jc	check_voltage_start			; No - check voltage
 
 	; Wait for ADC conversion to complete
-	Get_Adc_Status 
-	jb	ADC0CN0_ADBUSY, check_temp_voltage_and_limit_power
+	jnb	ADC0CN0_ADINT, check_temp_voltage_and_limit_power
 	; Read ADC result
 	Read_Adc_Result
 	; Stop ADC
@@ -1407,25 +1397,25 @@ temp_average_updated_load_acc:
 temp_average_updated:
 	mov	Current_Average_Temp, A
 	clr	C
-	subb	A, #TEMP_LIMIT				; Is temperature below first limit?
+	subb	A, Temp_Prot_Limit			; Is temperature below first limit?
 	jc	temp_check_exit			; Yes - exit
 
 	mov  Pwm_Limit, #192			; No - limit pwm
 
 	clr	C
-	subb	A, #TEMP_LIMIT_STEP			; Is temperature below second limit
+	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below second limit
 	jc	temp_check_exit			; Yes - exit
 
 	mov  Pwm_Limit, #128			; No - limit pwm
 
 	clr	C
-	subb	A, #TEMP_LIMIT_STEP			; Is temperature below third limit
+	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below third limit
 	jc	temp_check_exit			; Yes - exit
 
 	mov  Pwm_Limit, #64				; No - limit pwm
 
 	clr	C
-	subb	A, #TEMP_LIMIT_STEP			; Is temperature below final limit
+	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below final limit
 	jc	temp_check_exit			; Yes - exit
 
 	mov  Pwm_Limit, #0				; No - limit pwm
@@ -1616,6 +1606,8 @@ calc_next_comm_normal:
 	mov	A, Temp4
 	subb	A, #08h
 	jc	calc_next_comm_avg_period_div
+
+	jb	Flags1.INITIAL_RUN_PHASE, calc_next_comm_avg_period_div	; Do not average very fast during initial run
 
 	dec	Temp7				; Reduce averaging time constant more for even lower speeds
 	dec	Temp8
@@ -1831,7 +1823,7 @@ calc_new_wait_times_fast_done:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 wait_advance_timing:	
 	jnb	Flags0.T3_PENDING, ($+5)
-	jmp	wait_advance_timing
+	ajmp	wait_advance_timing
 
 	; Setup next wait time
 	mov	TMR3RLL, Wt_ZC_Tout_Start_L
@@ -2188,11 +2180,11 @@ comp_read_wrong_extend_timeout:
 	mov	TMR3CN0, #00h				; Timer3 disabled and interrupt flag cleared
 	jnb	Flags1.HIGH_RPM, comp_read_wrong_low_rpm	; Branch if not high rpm
 
-	mov	TMR3L, #00h				; Set timeout to 256us
+	mov	TMR3L, #00h				; Set timeout to ~1ms
 IF MCU_48MHZ == 1
-	mov	TMR3H, #0FCh
+	mov	TMR3H, #0F0h
 ELSE
-	mov	TMR3H, #0FEh
+	mov	TMR3H, #0F8h
 ENDIF
 comp_read_wrong_timeout_set:
 	mov	TMR3CN0, #04h				; Timer3 enabled and interrupt flag cleared
@@ -2202,28 +2194,29 @@ comp_read_wrong_timeout_set:
 	ajmp	wait_for_comp_out_start		; If comparator output is not correct - go back and restart
 
 comp_read_wrong_low_rpm:
-	mov	Temp7, Comm_Period4x_L		; Set timeout to comm period 4x value
-	mov	Temp8, Comm_Period4x_H
+	mov	A, Comm_Period4x_H			; Set timeout to ~4x comm period 4x value
+	mov	Temp7, #0FFh				; Default to long
 IF MCU_48MHZ == 1
 	clr	C
-	mov	A, Temp7
 	rlc	A
-	mov	Temp7, A
-	mov	A, Temp8
-	rlc	A
-	mov	Temp8, A
-	jnc	($+6)
-
-	mov	Temp7, #0FFh
-	mov	Temp8, #0FFh
+	jc	comp_read_wrong_load_timeout
 
 ENDIF
 	clr	C
+	rlc	A
+	jc	comp_read_wrong_load_timeout
+
+	clr	C
+	rlc	A
+	jc	comp_read_wrong_load_timeout
+
+	mov	Temp7, A
+
+comp_read_wrong_load_timeout:
+	clr	C
 	clr	A
-	subb	A, Temp7		
-	mov	TMR3L, A
-	clr	A
-	subb	A, Temp8		
+	subb	A, Temp7
+	mov	TMR3L, #0
 	mov	TMR3H, A
 	ajmp	comp_read_wrong_timeout_set
 
@@ -2312,7 +2305,6 @@ eval_comp_exit:
 wait_for_comm: 
 	; Update demag metric
 	mov	Temp1, #0
-	jnb	Flags0.DEMAG_ENABLED, ($+8); If demag disabled - branch
 	jnb	Flags0.DEMAG_DETECTED, ($+5)
 
 	mov	Temp1, #1
@@ -2349,7 +2341,7 @@ wait_for_comm:
 
 wait_for_comm_wait:
 	jnb Flags0.T3_PENDING, ($+5)			
-	jmp	wait_for_comm_wait					
+	ajmp	wait_for_comm_wait
 
 	; Setup next wait time
 	mov	TMR3RLL, Wt_Zc_Scan_Start_L
@@ -2714,6 +2706,19 @@ decode_demag_high:
 	mov	Demag_Pwr_Off_Thresh, #130	; Settings for demag comp high
 
 decode_demag_done:
+	; Decode temperature protection limit
+	mov	Temp1, #Pgm_Enable_Temp_Prot
+	mov	A, @Temp1
+	mov	Temp1, A
+	jz	decode_temp_done
+
+	mov	A, #(TEMP_LIMIT-TEMP_LIMIT_STEP)
+decode_temp_step:
+	add	A, #TEMP_LIMIT_STEP
+	djnz	Temp1, decode_temp_step
+
+decode_temp_done:
+	mov	Temp_Prot_Limit, A
 	; Decode throttle cal
 	mov	Temp1, #Pgm_Min_Throttle		; Throttle cal is in 4us units
 	mov	A, @Temp1
@@ -3016,6 +3021,9 @@ led_3_done:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 
 pgm_start:
+	; Initialize flash keys to invalid values
+	mov	Flash_Key_1, #0
+	mov	Flash_Key_2, #0
 	; Disable the WDT.
 	mov	WDTCN, #0DEh		; Disable watchdog
 	mov	WDTCN, #0ADh		
@@ -3023,11 +3031,10 @@ pgm_start:
 	mov	SP, #0c0h			; Stack = 64 upper bytes of RAM
 	; Initialize VDD monitor
 	orl	VDM0CN, #080h    	; Enable the VDD monitor
-	call	wait1ms			; Wait at least 100us
 IF ONE_S_CAPABLE == 0		
-	mov 	RSTSRC, #02h   	; Set VDD monitor as a reset source (PORSF) if not 1S capable                                
+	mov 	RSTSRC, #06h   	; Set missing clock and VDD monitor as a reset source if not 1S capable
 ELSE
-	mov 	RSTSRC, #00h   	; Do not set VDD monitor as a reset source for 1S ESCSs, in order to avoid resets due to it                              
+	mov 	RSTSRC, #04h   	; Do not set VDD monitor as a reset source for 1S ESCSs, in order to avoid resets due to it
 ENDIF
 	; Set clock frequency
 	mov	CLKSEL, #00h		; Set clock divider to 1
@@ -3084,6 +3091,9 @@ ENDIF
 init_no_signal:
 	; Disable interrupts explicitly
 	clr	IE_EA
+	; Initialize flash keys to invalid values
+	mov	Flash_Key_1, #0
+	mov	Flash_Key_2, #0
 	; Check if input signal is high for more than 15ms
 	mov	Temp1, #250
 input_high_check_1:
@@ -3210,6 +3220,9 @@ arming_initial_arm_check:
 	jmp 	program_by_tx_checked	; No - branch
 
 arming_check:
+	; Initialize flash keys to valid values
+	mov	Flash_Key_1, #0A5h
+	mov	Flash_Key_2, #0F1h
 	; Throttle calibration and tx program entry
 	mov	Temp8, #2				; Set 1 seconds wait time
 throttle_high_cal:			
@@ -3272,9 +3285,11 @@ throttle_low_cal:
 	mov	A, @Temp2
 	clr	C
 	subb	A, #35				; Subtract 35 (140us) from max throttle
+	jc	program_by_tx_entry_limit
 	subb	A, Temp1				; Subtract min from max
 	jnc	program_by_tx_entry_store
 
+program_by_tx_entry_limit:
 	mov	A, Temp1				; Load min
 	add	A, #35				; Make max 140us higher than min
 	mov	Temp1, #Pgm_Max_Throttle	; Store new max
@@ -3291,6 +3306,9 @@ program_by_tx_entry_wait:
 	ajmp	init_no_signal			; Go back
 
 program_by_tx_checked:
+	; Initialize flash keys to invalid values
+	mov	Flash_Key_1, #0
+	mov	Flash_Key_2, #0
 	call wait100ms				; Wait for new throttle value
 	mov	Temp1, #1				; Default stop value
 	jnb	Flags3.PGM_BIDIR, ($+5)	; No - branch
@@ -3410,8 +3428,7 @@ init_start:
 	call wait1ms
 	call start_adc_conversion
 read_initial_temp:
-	Get_Adc_Status 
-	jb	ADC0CN0_ADBUSY, read_initial_temp
+	jnb	ADC0CN0_ADINT, read_initial_temp
 	Read_Adc_Result						; Read initial temperature
 	mov	A, Temp2
 	jnz	($+3)							; Is reading below 256?
