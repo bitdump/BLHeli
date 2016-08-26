@@ -38,6 +38,8 @@ Baudh:				DS 	1
 Bit_Cnt:				DS 	1			; Counter in UART loops
 Byte_Cntl:			DS 	1			; Generic counter
 Byte_Cnth:			DS 	1			
+BL_Flash_Key_1:		DS	1			; Flash keys
+BL_Flash_Key_2:		DS	1
 
 CSEG AT BOOT_START		; Bootloader start
 init:clr	EA
@@ -65,7 +67,9 @@ ENDIF
 	mov	Baudl, #38h  			; Wait 100us
 	mov	Baudh, #03h
 	acall waitf
-	mov 	RSTSRC, #02h   		; Set VDD monitor as a reset source (PORSF)                              
+	; Initialize flash keys
+	mov	BL_Flash_Key_1, #0A5h	; First key code
+	mov	BL_Flash_Key_2, #0F1h	; Second key code
 	; Initialize ports
 IF SIGNATURE_001 == 0f3h		
 	mov	XBR1, #40h;			; Enable crossbar
@@ -180,6 +184,8 @@ mai2:acall getw				; Get CRC
 	jz	rst
 exit:mov	Bit_Access, #0			; Clear variable used by flash lock detect
 	mov	Bit_Access_Int, #0FFh	; Set variable to indicate that program execution came from bootloader
+	mov	BL_Flash_Key_1, #0		; Set flash keys to invalid values
+	mov	BL_Flash_Key_2, #0
 	ljmp	0000h
 rst:	ajmp	init
 
@@ -224,8 +230,8 @@ mai4:clr	C
 	; Erase flash
 	orl	PSCTL, #02h			; Set the PSEE bit
 	orl	PSCTL, #01h			; Set the PSWE bit
-	mov	FLKEY, #0A5h			; First key code
-	mov	FLKEY, #0F1h			; Second key code
+	mov	FLKEY, BL_Flash_Key_1	; First key code
+	mov	FLKEY, BL_Flash_Key_2	; Second key code
 	movx	@DPTR, A
 	jnb	Bit_Reg.0, pro6		; Jump if erase command
 
@@ -241,12 +247,20 @@ pro4:djnz	Xl, pro5
 	ajmp	pro6
 
 pro5:
+	clr	C
+	mov	A, DPH				; Check that address is not in bootloader area
+	subb	A, #1Ch
+	jc	($+5)
+
+	inc	DPTR					; Increment flash address
+	ajmp	pro4
+
 IF SIGNATURE_001 == 0f3h		
 	mov	EMI0CN, Xh
 ENDIF
 	movx	A, @Xl				; Read from XRAM		
-	mov	FLKEY, #0A5h			; First key code
-	mov	FLKEY, #0F1h			; Second key code
+	mov	FLKEY, BL_Flash_Key_1	; First key code
+	mov	FLKEY, BL_Flash_Key_2	; Second key code
 	movx	@DPTR, A				; Write to flash
 	inc	DPTR					; Increment flash address
 	ajmp	pro4

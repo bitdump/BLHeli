@@ -57,8 +57,8 @@ NFETON_DELAY			EQU	5	; Wait delay from pfets off to nfets on
 PFETON_DELAY			EQU	1	; Wait delay from nfets off to pfets on
 ADC_LIMIT_L			EQU 	128	; Power supply measurement ADC value for which main motor power is limited (low byte)
 ADC_LIMIT_H			EQU	2	; Power supply measurement ADC value for which main motor power is limited (2 MSBs)
-TEMP_LIMIT			EQU 	103	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
-TEMP_LIMIT_STEP		EQU	4	; Temperature measurement ADC value increment for which main motor power is further limited
+TEMP_LIMIT			EQU 	237	; Temperature measurement ADC value for which main motor power is limited (low byte, assuming high byte is 1)
+TEMP_LIMIT_STEP		EQU	6	; Temperature measurement ADC value increment for which main motor power is further limited
 
 ;**** **** **** **** ****
 ; ESC specific defaults
@@ -252,8 +252,8 @@ MACRO Initialize_Xbar
 ENDM
 
 MACRO Initialize_Adc
-	mov	REF0CN, #0BCh		; Set 2.4V as reference. Enable temp sensor and bias
-	mov	ADC0CF, #58h		; ADC clock 2MHz
+	mov	REF0CN, #9Ch		; Set 2.4V as reference. Enable temp sensor and bias
+	mov	ADC0CF, #59h		; ADC clock 2MHz, PGA gain 1
 	mov	ADC0MX, #(8+Adc_Ip)	; Select ADC input
 	mov	ADC0CN0, #80h		; ADC enabled 
 	mov	ADC0CN1, #01h		; Common mode buffer enabled
@@ -266,9 +266,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN0, #90h		; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN0	
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L

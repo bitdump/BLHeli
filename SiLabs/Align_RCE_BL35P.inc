@@ -204,7 +204,7 @@ MACRO Brake_FETs_On
 ENDM
 MACRO Damping_FET_On
 	mov	A, DampingFET
-	cjne	A, CpFET, damp_on_ab
+	cjne	A, #(1 SHL CpFET), damp_on_ab
 	orl	P1, A
 	ajmp	damp_on_exit
 damp_on_ab:
@@ -270,9 +270,6 @@ MACRO Set_Adc_Ip_Temp
 ENDM
 MACRO Start_Adc
 	mov	ADC0CN, #90h	; ADC start
-ENDM
-MACRO Get_Adc_Status
-	mov	A, ADC0CN		
 ENDM
 MACRO Read_Adc_Result
 	mov	Temp1, ADC0L
