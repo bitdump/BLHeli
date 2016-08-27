@@ -379,7 +379,7 @@ wait1:djnz Cntl, wait1
 
 BOOT_SIGN:	DB	"BLHeli"	
 
-BOOT_MSG:		DB	"471c"		; Interface-MCU_BootlaoderRevision
+BOOT_MSG:		DB	"471d"		; Interface-MCU_BootlaoderRevision
 
 BOOT_INFO:	DB	SIGNATURE_001, SIGNATURE_002, BOOT_VERSION, BOOT_PAGES
 
