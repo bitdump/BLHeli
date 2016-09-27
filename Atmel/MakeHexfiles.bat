@@ -116,6 +116,10 @@ SET NAME=HTIRC_DRAGONFLY_30A
 call :compile
 SET NAME=HTIRC_DRAGONFLY_40A
 call :compile
+SET NAME=TBS_BULLETPROOF_4A
+call :compile
+SET NAME=TBS_BULLETPROOF_30A
+call :compile
 
 goto :end
 

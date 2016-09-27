@@ -317,6 +317,12 @@
 ;#define HTIRC_DRAGONFLY_40A_MAIN
 ;#define HTIRC_DRAGONFLY_40A_TAIL
 ;#define HTIRC_DRAGONFLY_40A_MULTI 
+;#define TBS_BULLETPROOF_4A_MAIN			; ICP1 as input		
+;#define TBS_BULLETPROOF_4A_TAIL
+;#define TBS_BULLETPROOF_4A_MULTI
+;#define TBS_BULLETPROOF_30A_MAIN			; ICP1 as input		
+;#define TBS_BULLETPROOF_30A_TAIL
+;#define TBS_BULLETPROOF_30A_MULTI
 
 
 
@@ -1011,6 +1017,38 @@
 .EQU	MODE 	= 	2				; Choose mode. Set to 2 for multirotor
 .INCLUDE "Htirc_Dragonfly_40A.inc"		; Select HTIRC Dragonfly 40A pinout
 #endif
+
+#if defined(TBS_BULLETPROOF_4A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "TBS_BULLETPROOF_4A.inc"	; Select TBS BULLETPROOF 4A pinout
+#endif
+
+#if defined(TBS_BULLETPROOF_4A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "TBS_BULLETPROOF_4A.inc"	; Select TBS BULLETPROOF 4A pinout
+#endif
+
+#if defined(TBS_BULLETPROOF_4A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "TBS_BULLETPROOF_4A.inc"	; Select TBS BULLETPROOF 4A pinout
+#endif
+
+#if defined(TBS_BULLETPROOF_30A_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "TBS_BULLETPROOF_30A.inc"	; Select TBS BULLETPROOF 30A pinout
+#endif
+
+#if defined(TBS_BULLETPROOF_30A_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "TBS_BULLETPROOF_30A.inc"	; Select TBS BULLETPROOF 30A pinout
+#endif
+
+#if defined(TBS_BULLETPROOF_30A_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "TBS_BULLETPROOF_30A.inc"	; Select TBS BULLETPROOF 30A pinout
+#endif
+
+
 
 
 
