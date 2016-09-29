@@ -249,6 +249,7 @@ $NOMOD51
 ;           In order to have a good code for fixed wing planes, that has low voltage limiting, a main code spoolup time setting of 0 is made fast
 ;           Improved protection of bootloader and generally reduced risk of flash corruption
 ;           Some small changes for improved sync hold
+; - Rev14.8 Fixed bug where bootloader operation could be blocked by a defective "eeprom" signature
 ;
 ;
 ;
@@ -773,7 +774,7 @@ HTIRC_Hummingbird_30A_Pro_Multi	EQU 285
 ;BESCNO EQU XRotor_20A_Multi 
 ;BESCNO EQU XRotor_40A_Main
 ;BESCNO EQU XRotor_40A_Tail
-;BESCNO EQU XRotor_40A_Multi 
+;BESCNO EQU XRotor_40A_Multi
 ;BESCNO EQU MDRX62H_Main
 ;BESCNO EQU MDRX62H_Tail
 ;BESCNO EQU MDRX62H_Multi 
@@ -827,7 +828,7 @@ HTIRC_Hummingbird_30A_Pro_Multi	EQU 285
 ;BESCNO EQU ZTW_Spider_Pro_20A_HV_Multi 
 ;BESCNO EQU ZTW_Spider_Pro_30A_HV_Main
 ;BESCNO EQU ZTW_Spider_Pro_30A_HV_Tail
-;BESCNO EQU ZTW_Spider_Pro_30A_HV_Multi 
+;BESCNO EQU ZTW_Spider_Pro_30A_HV_Multi
 ;BESCNO EQU DYS_XM20A_Main
 ;BESCNO EQU DYS_XM20A_Tail
 ;BESCNO EQU DYS_XM20A_Multi
@@ -2656,7 +2657,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	7		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	8		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2754,7 +2755,7 @@ Eep_Pgm_Startup_Pwr:		DB	DEFAULT_PGM_MULTI_STARTUP_PWR		; EEPROM copy of program
 Eep_Pgm_Pwm_Freq:			DB	DEFAULT_PGM_MULTI_PWM_FREQ		; EEPROM copy of programmed pwm frequency
 Eep_Pgm_Direction:			DB	DEFAULT_PGM_MULTI_DIRECTION		; EEPROM copy of programmed rotation direction
 Eep_Pgm_Input_Pol:			DB	DEFAULT_PGM_MULTI_RCP_PWM_POL		; EEPROM copy of programmed input polarity
-Eep_Initialized_L:			DB	055h							; EEPROM initialized signature low byte
+Eep_Initialized_L:			DB	55h							; EEPROM initialized signature low byte
 Eep_Initialized_H:			DB	0AAh							; EEPROM initialized signature high byte
 Eep_Enable_TX_Program:		DB	DEFAULT_PGM_ENABLE_TX_PROGRAM		; EEPROM TX programming enable
 _Eep_Main_Rearm_Start:		DB	0FFh							
@@ -8185,12 +8186,11 @@ jmp_wait_for_power_on:
 ENDIF
 
 
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-
 $include (BLHeliTxPgm.inc)			; Include source code for programming the ESC with the TX
 $include (BLHeliBootLoad.inc)			; Include source code for bootloader
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
+
 
 
 CSEG AT 19FDh

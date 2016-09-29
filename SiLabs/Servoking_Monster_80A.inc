@@ -90,12 +90,12 @@ Rcp_In		EQU	5	;i
 ;			EQU	4	;i
 Comp_Com		EQU	3	;i
 Mux_B		EQU	2	;i
-;			EQU	1	;i
+Rpm_Out		EQU	1	;o
 Mux_A		EQU	0	;i
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT		EQU	0FFh
-P0_PUSHPULL	EQU	0
+P0_PUSHPULL	EQU	(1 SHL Rpm_Out)
 P0_SKIP		EQU	NOT(1 SHL Rcp_In)
 
 MACRO Get_Rcp_Capture_Values
@@ -272,8 +272,10 @@ ENDM
 MACRO Stop_Adc
 ENDM
 MACRO Set_RPM_Out
+	setb	P0.Rpm_Out
 ENDM
 MACRO Clear_RPM_Out
+	clr	P0.Rpm_Out
 ENDM
 MACRO Set_MCU_Clk_24MHz
 ENDM

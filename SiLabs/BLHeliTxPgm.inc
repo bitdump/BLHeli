@@ -68,8 +68,12 @@ ENDIF
 
 
 read_eeprom_store_defaults:
+	mov	Flash_Key_1, #0A5h
+	mov	Flash_Key_2, #0F1h
 	call set_default_parameters	
 	call erase_and_store_all_in_eeprom	
+	mov	Flash_Key_1, #0
+	mov	Flash_Key_2, #0
 	jmp	read_eeprom_exit
 
 read_eeprom_read:
