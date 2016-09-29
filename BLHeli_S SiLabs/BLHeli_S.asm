@@ -55,6 +55,8 @@ $NOMOD51
 ; - Rev16.3 Implemented programmable temperature protection
 ;           Improved protection of bootloader and generally reduced risk of flash corruption
 ;           Some small changes for improved sync hold
+; - Rev16.4 Fixed bug where bootloader operation could be blocked by a defective "eeprom" signature
+;
 ;
 ;
 ;**** **** **** **** ****
@@ -106,9 +108,10 @@ F_			EQU 6	; X  X  RC X  MA MB MC CC    X  X  Cc Cp Bc Bp Ac Ap
 G_			EQU 7	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noninverted com fets
 H_			EQU 8	; RC X  X  X  MA MB CC MC    X  Ap Bp Cp X  Ac Bc Cc
 I_			EQU 9	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
-J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap
+J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap	LEDs
 K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
 L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
+M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X	Inverted LED
 
 
 ;**** **** **** **** ****
@@ -125,6 +128,7 @@ L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 ;ESCNO EQU J_
 ;ESCNO EQU K_
 ;ESCNO EQU L_
+;ESCNO EQU M_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -132,7 +136,7 @@ L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
-;FETON_DELAY EQU 50	; 20.4ns per step
+;FETON_DELAY EQU 40	; 20.4ns per step
 
 
 ;**** **** **** **** ****
@@ -183,6 +187,10 @@ ENDIF
 
 IF ESCNO == L_
 $include (L.inc)	; Select pinout L
+ENDIF
+
+IF ESCNO == M_
+$include (M.inc)	; Select pinout M
 ENDIF
 
 
@@ -398,7 +406,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	3		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	4		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -3673,7 +3681,7 @@ run6_brake_done:
 	clr	Flags3.PGM_DIR_REV			; Set spinning direction. Default fwd
 	jnb	Flags2.RCP_DIR_REV, ($+5)	; Check force direction
 	setb	Flags3.PGM_DIR_REV			; Set spinning direction
-	setb	Flags1.INITIAL_RUN_PHASE		
+	setb	Flags1.INITIAL_RUN_PHASE
 	mov	Initial_Run_Rot_Cntd, #18
 	mov	Pwm_Limit, Pwm_Limit_Beg		; Set initial max power
 	jmp	run1						; Go back to run 1 

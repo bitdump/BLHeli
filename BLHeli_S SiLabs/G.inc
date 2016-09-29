@@ -131,10 +131,10 @@ ENDIF
 ;			EQU	6	;i
 Rcp_In		EQU	5	;i
 ;			EQU	4	;i 
-Mux_C		EQU	3	;i
-Mux_B		EQU	2	;i
-Mux_A		EQU	1	;i
-Comp_Com		EQU	0	;i
+Comp_Com		EQU	3	;i
+Mux_A		EQU	4	;i
+Mux_C		EQU	1	;i
+Mux_B		EQU	0	;i
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT		EQU	0FFh
