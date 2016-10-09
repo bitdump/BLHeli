@@ -441,6 +441,10 @@ Initialize_Xbar MACRO
 	All_comFETs_off
 ENDM
 
+Initialize_Comparator MACRO
+	mov	CMP0CN0, #80h	; Comparator enabled, no hysteresis
+	mov	CMP0MD, #00h	; Comparator response time 100ns
+ENDM
 Initialize_Adc MACRO
 	mov	REF0CN, #0Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 IF MCU_48MHZ == 0

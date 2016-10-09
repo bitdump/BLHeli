@@ -22,8 +22,8 @@
 ;
 ;**** **** **** **** ****
 ;
-; Hardware definition file "J"
-; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap
+; Hardware definition file "N"
+; X  X  RC X  MC MB MA CC    X  X  Cc Cp Bc Bp Ac Ap
 ;
 ;**** **** **** **** ****
 
@@ -49,27 +49,27 @@ ENDIF
 IF MCU_48MHZ == 0
 CSEG AT 1A40h
 IF FETON_DELAY == 0
-Eep_ESC_Layout:		DB	"#J_L_00#        "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#N_L_00#        "	; ESC layout tag
 ELSEIF FETON_DELAY == 5
-Eep_ESC_Layout:		DB	"#J_L_05#        "
+Eep_ESC_Layout:		DB	"#N_L_05#        "
 ELSEIF FETON_DELAY == 10
-Eep_ESC_Layout:		DB	"#J_L_10#        "
+Eep_ESC_Layout:		DB	"#N_L_10#        "
 ELSEIF FETON_DELAY == 15
-Eep_ESC_Layout:		DB	"#J_L_15#        "
+Eep_ESC_Layout:		DB	"#N_L_15#        "
 ELSEIF FETON_DELAY == 20
-Eep_ESC_Layout:		DB	"#J_L_20#        "
+Eep_ESC_Layout:		DB	"#N_L_20#        "
 ELSEIF FETON_DELAY == 25
-Eep_ESC_Layout:		DB	"#J_L_25#        "
+Eep_ESC_Layout:		DB	"#N_L_25#        "
 ELSEIF FETON_DELAY == 30
-Eep_ESC_Layout:		DB	"#J_L_30#        "
+Eep_ESC_Layout:		DB	"#N_L_30#        "
 ELSEIF FETON_DELAY == 40
-Eep_ESC_Layout:		DB	"#J_L_40#        "
+Eep_ESC_Layout:		DB	"#N_L_40#        "
 ELSEIF FETON_DELAY == 50
-Eep_ESC_Layout:		DB	"#J_L_50#        "
+Eep_ESC_Layout:		DB	"#N_L_50#        "
 ELSEIF FETON_DELAY == 70
-Eep_ESC_Layout:		DB	"#J_L_70#        "
+Eep_ESC_Layout:		DB	"#N_L_70#        "
 ELSEIF FETON_DELAY == 90
-Eep_ESC_Layout:		DB	"#J_L_90#        "
+Eep_ESC_Layout:		DB	"#N_L_90#        "
 ENDIF
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B10#"	; Project and MCU tag (16 Bytes)
@@ -78,27 +78,27 @@ ELSE
 
 CSEG AT 1A40h
 IF FETON_DELAY == 0
-Eep_ESC_Layout:		DB	"#J_H_00#        "	; ESC layout tag
+Eep_ESC_Layout:		DB	"#N_H_00#        "	; ESC layout tag
 ELSEIF FETON_DELAY == 5
-Eep_ESC_Layout:		DB	"#J_H_05#        "
+Eep_ESC_Layout:		DB	"#N_H_05#        "
 ELSEIF FETON_DELAY == 10
-Eep_ESC_Layout:		DB	"#J_H_10#        "
+Eep_ESC_Layout:		DB	"#N_H_10#        "
 ELSEIF FETON_DELAY == 15
-Eep_ESC_Layout:		DB	"#J_H_15#        "
+Eep_ESC_Layout:		DB	"#N_H_15#        "
 ELSEIF FETON_DELAY == 20
-Eep_ESC_Layout:		DB	"#J_H_20#        "
+Eep_ESC_Layout:		DB	"#N_H_20#        "
 ELSEIF FETON_DELAY == 25
-Eep_ESC_Layout:		DB	"#J_H_25#        "
+Eep_ESC_Layout:		DB	"#N_H_25#        "
 ELSEIF FETON_DELAY == 30
-Eep_ESC_Layout:		DB	"#J_H_30#        "
+Eep_ESC_Layout:		DB	"#N_H_30#        "
 ELSEIF FETON_DELAY == 40
-Eep_ESC_Layout:		DB	"#J_H_40#        "
+Eep_ESC_Layout:		DB	"#N_H_40#        "
 ELSEIF FETON_DELAY == 50
-Eep_ESC_Layout:		DB	"#J_H_50#        "
+Eep_ESC_Layout:		DB	"#N_H_50#        "
 ELSEIF FETON_DELAY == 70
-Eep_ESC_Layout:		DB	"#J_H_70#        "
+Eep_ESC_Layout:		DB	"#N_H_70#        "
 ELSEIF FETON_DELAY == 90
-Eep_ESC_Layout:		DB	"#J_H_90#        "
+Eep_ESC_Layout:		DB	"#N_H_90#        "
 ENDIF
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
@@ -115,7 +115,7 @@ RTX_PORT		  		EQU 	P0		; Receive/Transmit port
 RTX_MDOUT				EQU	P0MDOUT	; Set to 1 for PUSHPULL				
 RTX_MDIN				EQU	P0MDIN	; Set to 1 for DIGITAL				
 RTX_SKIP				EQU	P0SKIP	; Set to 1 for SKIP				
-RTX_PIN				EQU 	4		; RTX pin
+RTX_PIN				EQU 	5		; RTX pin
 
 SIGNATURE_001			EQU	0E8h		; Device signature
 IF MCU_48MHZ == 0
@@ -124,21 +124,22 @@ ELSE
 SIGNATURE_002			EQU	0B2h
 ENDIF
 
+
 ;*********************
 ; PORT 0 definitions *
 ;*********************  
-LED_2		EQU	7	;o
-LED_1		EQU	6	;o
-LED_0		EQU	5	;o
-Rcp_In		EQU	4	;i
-Comp_Com		EQU	3	;i
+;			EQU	7	;i
+;			EQU	6	;i
+Rcp_In		EQU	5	;i
+;			EQU	4	;i 
+Mux_C		EQU	3	;i
 Mux_B		EQU	2	;i
-Mux_C		EQU	1	;i
-Mux_A		EQU	0	;i
+Mux_A		EQU	1	;i
+Comp_Com		EQU	0	;i
 
 P0_DIGITAL	EQU	NOT((1 SHL Mux_A)+(1 SHL Mux_B)+(1 SHL Mux_C)+(1 SHL Comp_Com))
 P0_INIT		EQU	0FFh
-P0_PUSHPULL	EQU	(1 SHL LED_0)+(1 SHL LED_1)+(1 SHL LED_2)
+P0_PUSHPULL	EQU	0
 P0_SKIP		EQU	0FFh
 
 Get_Rcp_Capture_Values MACRO
@@ -192,20 +193,24 @@ ENDIF
 ENDIF
 ENDM
 Set_Pwm_Polarity MACRO
-	mov	PCA0POL, #02h				; Damping inverted, pwm noninverted
+IF FETON_DELAY == 0
+	mov	PCA0POL, #00h				; Pwm noninverted
+ELSE
+	mov	PCA0POL, #01h				; Damping inverted, pwm noninverted
+ENDIF
 ENDM
 Enable_Power_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM0, #4Ah				; Enable comparator of module, enable match, set pwm mode
 ELSE
-	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Enable_Damp_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM1, #00h				; Disable
 ELSE
-	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Set_Power_Pwm_Regs MACRO
@@ -219,8 +224,8 @@ ELSE
 	mov	Temp1, A
 	mov	A, Power_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL0, A
-	mov	PCA0CPH0, Temp1
+	mov	PCA0CPL1, A
+	mov	PCA0CPH1, Temp1
 ENDIF
 ENDM		
 Set_Damp_Pwm_Regs MACRO
@@ -234,8 +239,8 @@ ELSE
 	mov	Temp1, A
 	mov	A, Damp_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL1, A
-	mov	PCA0CPH1, Temp1
+	mov	PCA0CPL0, A
+	mov	PCA0CPH0, Temp1
 ENDIF
 ENDM		
 Clear_COVF_Interrupt MACRO
@@ -257,17 +262,18 @@ Disable_CCF_Interrupt MACRO
 	anl	PCA0CPM0,#0FEh
 ENDM
 
+
 ;*********************
 ; PORT 1 definitions *
 ;*********************
 ;			EQU	7	;i
 ;			EQU	6	;i
-CcomFET		EQU	5	;o
-BcomFET		EQU	4	;o
-AcomFET		EQU	3	;o
-CpwmFET		EQU	2	;o
-BpwmFET		EQU	1	;o
-ApwmFET		EQU	0	;o
+CpwmFET		EQU	5	;o
+CcomFET		EQU	4	;o
+BpwmFET		EQU	3	;o
+BcomFET		EQU	2	;o
+ApwmFET		EQU	1	;o
+AcomFET		EQU	0	;o
 
 P1_DIGITAL	EQU	(1 SHL ApwmFET)+(1 SHL BpwmFET)+(1 SHL CpwmFET)+(1 SHL AcomFET)+(1 SHL BcomFET)+(1 SHL CcomFET)
 P1_INIT		EQU 	00h		
@@ -361,39 +367,39 @@ ENDM
 Set_Pwm_A MACRO
 IF FETON_DELAY == 0
 	setb	P1.AcomFET
-	mov	P1SKIP, #3Eh
+	mov	P1SKIP, #3Dh
 ELSE
-	mov	P1SKIP, #36h
+	mov	P1SKIP, #3Ch
 ENDIF
 ENDM
 Set_Pwm_B MACRO
 IF FETON_DELAY == 0
 	setb	P1.BcomFET
-	mov	P1SKIP, #3Dh
+	mov	P1SKIP, #37h
 ELSE
-	mov	P1SKIP, #2Dh
+	mov	P1SKIP, #33h
 ENDIF
 ENDM
 Set_Pwm_C MACRO
 IF FETON_DELAY == 0
 	setb	P1.CcomFET
-	mov	P1SKIP, #3Bh
+	mov	P1SKIP, #1Fh
 ELSE
-	mov	P1SKIP, #1Bh
+	mov	P1SKIP, #0Fh
 ENDIF
 ENDM
 Set_Pwms_Off MACRO
-	mov	P1SKIP, #7Fh
+	mov	P1SKIP, #3Fh
 ENDM
 
 Set_Comp_Phase_A MACRO
-	mov	CMP0MX, #03h	; Set comparator multiplexer to phase A
+	mov	CMP0MX, #10h	; Set comparator multiplexer to phase A
 ENDM
 Set_Comp_Phase_B MACRO
-	mov	CMP0MX, #23h	; Set comparator multiplexer to phase B
+	mov	CMP0MX, #20h	; Set comparator multiplexer to phase B
 ENDM
 Set_Comp_Phase_C MACRO
-	mov	CMP0MX, #13h	; Set comparator multiplexer to phase C
+	mov	CMP0MX, #30h	; Set comparator multiplexer to phase C
 ENDM
 Read_Comp_Out MACRO
 	mov	A, CMP0CN0	; Read comparator output
@@ -476,22 +482,16 @@ Set_MCU_Clk_48MHz MACRO
 	mov	Clock_Set_At_48MHz, #1
 ENDM
 Set_LED_0 MACRO
-	clr	P0.LED_0
 ENDM
 Clear_LED_0 MACRO
-	setb	P0.LED_0
 ENDM
 Set_LED_1 MACRO
-	clr	P0.LED_1
 ENDM
 Clear_LED_1 MACRO
-	setb	P0.LED_1
 ENDM
 Set_LED_2 MACRO
-	clr	P0.LED_2
 ENDM
 Clear_LED_2 MACRO
-	setb	P0.LED_2
 ENDM
 Set_LED_3 MACRO
 ENDM

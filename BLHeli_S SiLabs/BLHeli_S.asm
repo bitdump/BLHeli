@@ -112,6 +112,7 @@ J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap	LEDs
 K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
 L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X	Inverted LED
+N_			EQU 14	; X  X  RC X  MC MB MA CC    X  X  Cc Cp Bc Bp Ac Ap
 
 
 ;**** **** **** **** ****
@@ -129,6 +130,7 @@ M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X	Inverted LED
 ;ESCNO EQU K_
 ;ESCNO EQU L_
 ;ESCNO EQU M_
+;ESCNO EQU N_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -191,6 +193,10 @@ ENDIF
 
 IF ESCNO == M_
 $include (M.inc)	; Select pinout M
+ENDIF
+
+IF ESCNO == N_
+$include (N.inc)	; Select pinout N
 ENDIF
 
 
@@ -3146,8 +3152,7 @@ ENDIF
 	mov	EIE1, #90h		; Enable timer3 and PCA0 interrupts
 	mov	EIP1, #10h		; High priority to PCA0 interrupts
 	; Initialize comparator
-	mov	CMP0CN0, #80h		; Comparator enabled, no hysteresis
-	mov	CMP0MD, #00h		; Comparator response time 100ns
+	Initialize_Comparator	; Initialize comparator
 	; Initialize ADC
 	Initialize_Adc			; Initialize ADC operation
 	call	wait1ms

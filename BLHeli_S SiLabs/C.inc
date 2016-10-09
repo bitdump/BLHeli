@@ -361,7 +361,7 @@ ENDM
 
 Set_Pwm_A MACRO
 IF FETON_DELAY == 0
-	setb	P1.AcomFET
+	setb	P0.AcomFET
 	mov	P0SKIP, #0BFh
 	mov	P1SKIP, #0Fh
 ELSE
@@ -441,6 +441,10 @@ Initialize_Xbar MACRO
 	mov	XBR1, #02h	; CEX0 and CEX1 routed to pins		
 ENDM
 
+Initialize_Comparator MACRO
+	mov	CMP0CN0, #80h	; Comparator enabled, no hysteresis
+	mov	CMP0MD, #00h	; Comparator response time 100ns
+ENDM
 Initialize_Adc MACRO
 	mov	REF0CN, #0Ch	; Set vdd (3.3V) as reference. Enable temp sensor and bias
 IF MCU_48MHZ == 0
