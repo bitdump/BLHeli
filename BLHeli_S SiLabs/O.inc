@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; Hardware definition file "D". Com fets are active low for H/L_N driver and EN_N/PWM driver
+; Hardware definition file "O". like D: Com fets are active low (PFET), PWM fets are active high (NFET) + Phase measurement is inverted, 1S capable flag set
 ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap
 ;
 ;**** **** **** **** ****
