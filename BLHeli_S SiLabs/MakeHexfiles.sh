@@ -81,7 +81,7 @@ echo "Start compile ....." >> $LOG
 export WINEPREFIX=${WINE_PREFIX}
 
 ESCNO=1
-for VARIANT in A B C D E F G H I J K L M N
+for VARIANT in A B C D E F G H I J K L M N O
 do
 	for MCU in 0 1
 	do
