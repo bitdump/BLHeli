@@ -225,7 +225,7 @@ write_eeprom_signature:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 read_tags:
 	mov	Temp3, #48				; Number of tags
-	mov	Temp2, #Tag_Temporary_Storage	; Set RAM address
+	mov	Temp2, #Temp_Storage		; Set RAM address
 	mov	Temp1, #Bit_Access
 	mov	DPTR, #Eep_ESC_Layout		; Set flash address
 read_tag:	
@@ -247,7 +247,7 @@ read_tag:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 write_tags:
 	mov	Temp3, #48				; Number of tags
-	mov	Temp2, #Tag_Temporary_Storage	; Set RAM address
+	mov	Temp2, #Temp_Storage		; Set RAM address
 	mov	DPTR, #Eep_ESC_Layout		; Set flash address
 write_tag:	
 	mov	A, @Temp2			; Read from RAM

@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; Hardware definition file "O". like D: Com fets are active low (PFET), PWM fets are active high (NFET) + Phase measurement is inverted, 1S capable flag set
+; Hardware definition file "O". Com fets are active low for H/L_N driver and EN_N/PWM driver. Low side pwm and 1S flag set
 ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap
 ;
 ;**** **** **** **** ****
@@ -171,6 +171,62 @@ IF MCU_48MHZ == 1
 	mov	Temp3, A
 Get_Rcp_End:
 ENDIF
+ENDM
+Decode_Dshot_2Msb MACRO
+	movx	A, @DPTR
+	mov	Temp6, A
+	clr	C
+	subb	A, Temp5					; Subtract previous timestamp
+	clr	C
+	subb	A, Temp1
+	jc	t1_int_msb_fail			; Check that bit is longer than minimum
+
+	subb	A, Temp1					; Check if bit is zero or one
+	mov	A, Temp4					; Shift bit into data byte
+	rlc	A
+	mov	Temp4, A
+	inc	DPL						; Next bit
+	movx	A, @DPTR
+	mov	Temp5, A
+	clr	C
+	subb	A, Temp6
+	clr	C
+	subb	A, Temp1
+	jc	t1_int_msb_fail
+
+	subb	A, Temp1
+	mov	A, Temp4
+	rlc	A
+	mov	Temp4, A
+	inc	DPL
+ENDM
+Decode_Dshot_2Lsb MACRO
+	movx	A, @DPTR
+	mov	Temp6, A
+	clr	C
+	subb	A, Temp5					; Subtract previous timestamp
+	clr	C
+	subb	A, Temp1
+	jc	t1_int_lsb_fail			; Check that bit is longer than minimum
+
+	subb	A, Temp1					; Check if bit is zero or one
+	mov	A, Temp3					; Shift bit into data byte
+	rlc	A
+	mov	Temp3, A
+	inc	DPL						; Next bit
+	movx	A, @DPTR
+	mov	Temp5, A
+	clr	C
+	subb	A, Temp6
+	clr	C
+	subb	A, Temp1
+	jc	t1_int_lsb_fail
+
+	subb	A, Temp1
+	mov	A, Temp3
+	rlc	A
+	mov	Temp3, A
+	inc	DPL
 ENDM
 Initialize_PCA MACRO
 	mov	PCA0CN0, #40h				; PCA enabled
@@ -398,7 +454,7 @@ Set_Comp_Phase_C MACRO
 ENDM
 Read_Comp_Out MACRO
 	mov	A, CMP0CN0	; Read comparator output
-        cpl A
+	cpl A
 ENDM
 
 
@@ -422,6 +478,10 @@ IF MCU_48MHZ == 1
 CSEG AT 0Bh			; Timer0 overflow interrupt
 	jmp	t0_int
 ENDIF
+CSEG AT 13h			; Int1 interrupt
+	jmp	int1_int
+CSEG AT 1Bh			; Timer1 overflow interrupt
+	jmp	t1_int
 CSEG AT 2Bh			; Timer2 overflow interrupt
 	jmp	t2_int	
 CSEG AT 5Bh			; Pca interrupt
