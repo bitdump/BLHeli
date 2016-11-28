@@ -7,7 +7,7 @@ read -n 1 -s || exit
 LOG="MakeHex_Result.txt"
 rm -f ${LOG}
 
-REVISION="REV16_4"
+REVISION="REV16_5"
 
 # output directory
 OUTPUT_DIR=OUTPUT
@@ -81,7 +81,7 @@ echo "Start compile ....." >> $LOG
 export WINEPREFIX=${WINE_PREFIX}
 
 ESCNO=1
-for VARIANT in A B C D E F G H I J K L M N O
+for VARIANT in A B C D E F G H I J K L M N O P
 do
 	for MCU in 0 1
 	do
