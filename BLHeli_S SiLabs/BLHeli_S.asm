@@ -3408,11 +3408,7 @@ pgm_start:
 	mov	SP, #0c0h			; Stack = 64 upper bytes of RAM
 	; Initialize VDD monitor
 	orl	VDM0CN, #080h    	; Enable the VDD monitor
-IF ONE_S_CAPABLE == 0		
-	mov 	RSTSRC, #06h   	; Set missing clock and VDD monitor as a reset source if not 1S capable
-ELSE
-	mov 	RSTSRC, #04h   	; Do not set VDD monitor as a reset source for 1S ESCSs, in order to avoid resets due to it
-ENDIF
+	mov 	RSTSRC, #06h   	        ; Set missing clock and VDD monitor as a reset source
 	; Set clock frequency
 	mov	CLKSEL, #00h		; Set clock divider to 1
 	; Switch power off
