@@ -13,7 +13,7 @@ DEL Output\*.* /Q
 RMDIR Output
 MKDIR Output
 MKDIR Output\Hex
-SET Revision=REV14_9
+SET Revision=REV14_8
 SET SilabsPath=C:\SiLabs
 SET RaisonancePath=C:\Raisonance
 
@@ -204,8 +204,6 @@ call:compile
 SET BESCNAME=SERVOKING_MONSTER_30A
 call:compile
 SET BESCNAME=SERVOKING_MONSTER_30A_PRO
-call:compile
-SET BESCNAME=SERVOKING_MONSTER_70A_PRO
 call:compile
 SET BESCNAME=SERVOKING_MONSTER_80A
 call:compile
