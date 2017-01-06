@@ -104,7 +104,6 @@ CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
 ENDIF
 
-ONE_S_CAPABLE			EQU	0	; Set to 1 if ESC can operate at 1S
 TEMP_LIMIT			EQU 	49	; Temperature measurement ADC value for which main motor power is limited at 80degC (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	9	; Temperature measurement ADC value increment for another 10degC
 
@@ -302,7 +301,7 @@ ENDM
 Clear_COVF_Interrupt MACRO
 	anl	PCA0PWM, #0DFh
 ENDM
-Clear_CCF_Interrupt MACRO
+Clear_CCF_Interrupt MACRO	; CCF interrupt is only used for FETON_DELAY == 0
 	anl	PCA0CN0, #0FEh
 ENDM
 Enable_COVF_Interrupt MACRO
