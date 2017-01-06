@@ -250,7 +250,7 @@ $NOMOD51
 ;           Improved protection of bootloader and generally reduced risk of flash corruption
 ;           Some small changes for improved sync hold
 ; - Rev14.8 Fixed bug where bootloader operation could be blocked by a defective "eeprom" signature
-;
+; - Rev14.9 Improved bidirectional mode for high input signal rates
 ;
 ;
 ;**** **** **** **** ****
@@ -566,18 +566,21 @@ Servoking_Monster_30A_Multi 		EQU 270
 Servoking_Monster_30A_Pro_Main	EQU 271   
 Servoking_Monster_30A_Pro_Tail	EQU 272  
 Servoking_Monster_30A_Pro_Multi	EQU 273   
-Servoking_Monster_80A_Main		EQU 274   
-Servoking_Monster_80A_Tail 		EQU 275  
-Servoking_Monster_80A_Multi 		EQU 276   
-HTIRC_Hummingbird_12A_Main		EQU 277   
-HTIRC_Hummingbird_12A_Tail 		EQU 278  
-HTIRC_Hummingbird_12A_Multi 		EQU 279   
-HTIRC_Hummingbird_20A_Main		EQU 280   
-HTIRC_Hummingbird_20A_Tail 		EQU 281  
-HTIRC_Hummingbird_20A_Multi 		EQU 282   
-HTIRC_Hummingbird_30A_Pro_Main	EQU 283   
-HTIRC_Hummingbird_30A_Pro_Tail	EQU 284  
-HTIRC_Hummingbird_30A_Pro_Multi	EQU 285   
+Servoking_Monster_70A_Pro_Main	EQU 274   
+Servoking_Monster_70A_Pro_Tail	EQU 275  
+Servoking_Monster_70A_Pro_Multi	EQU 276   
+Servoking_Monster_80A_Main		EQU 277   
+Servoking_Monster_80A_Tail 		EQU 278  
+Servoking_Monster_80A_Multi 		EQU 279   
+HTIRC_Hummingbird_12A_Main		EQU 280   
+HTIRC_Hummingbird_12A_Tail 		EQU 281  
+HTIRC_Hummingbird_12A_Multi 		EQU 282   
+HTIRC_Hummingbird_20A_Main		EQU 283   
+HTIRC_Hummingbird_20A_Tail 		EQU 284  
+HTIRC_Hummingbird_20A_Multi 		EQU 285   
+HTIRC_Hummingbird_30A_Pro_Main	EQU 286   
+HTIRC_Hummingbird_30A_Pro_Tail	EQU 287  
+HTIRC_Hummingbird_30A_Pro_Multi	EQU 288   
   
 
 
@@ -765,7 +768,7 @@ HTIRC_Hummingbird_30A_Pro_Multi	EQU 285
 ;BESCNO EQU EMAX_Nano_20A_Multi 
 ;BESCNO EQU EMAX_Lightning_20A_Main
 ;BESCNO EQU EMAX_Lightning_20A_Tail
-;BESCNO EQU EMAX_Lightning_20A_Multi 
+;BESCNO EQU EMAX_Lightning_20A_Multi
 ;BESCNO EQU XRotor_10A_Main 
 ;BESCNO EQU XRotor_10A_Tail
 ;BESCNO EQU XRotor_10A_Multi 
@@ -856,6 +859,9 @@ HTIRC_Hummingbird_30A_Pro_Multi	EQU 285
 ;BESCNO EQU Servoking_Monster_30A_Pro_Main	 
 ;BESCNO EQU Servoking_Monster_30A_Pro_Tail	  
 ;BESCNO EQU Servoking_Monster_30A_Pro_Multi 
+;BESCNO EQU Servoking_Monster_70A_Pro_Main	 
+;BESCNO EQU Servoking_Monster_70A_Pro_Tail	  
+;BESCNO EQU Servoking_Monster_70A_Pro_Multi
 ;BESCNO EQU Servoking_Monster_80A_Main	 
 ;BESCNO EQU Servoking_Monster_80A_Tail	  
 ;BESCNO EQU Servoking_Monster_80A_Multi 
@@ -2237,6 +2243,21 @@ MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
 $include (Servoking_Monster_30A_Pro.inc)	; Select Servoking Monster 30A Pro pinout
 ENDIF
 
+IF BESCNO == Servoking_Monster_70A_Pro_Main
+MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
+$include (Servoking_Monster_70A_Pro.inc)	; Select Servoking Monster 70A Pro pinout
+ENDIF
+
+IF BESCNO == Servoking_Monster_70A_Pro_Tail
+MODE 	EQU 	1				; Choose mode. Set to 1 for tail motor
+$include (Servoking_Monster_70A_Pro.inc)	; Select Servoking Monster 70A Pro pinout
+ENDIF
+
+IF BESCNO == Servoking_Monster_70A_Pro_Multi
+MODE 	EQU 	2				; Choose mode. Set to 2 for multirotor
+$include (Servoking_Monster_70A_Pro.inc)	; Select Servoking Monster 70A Pro pinout
+ENDIF
+
 IF BESCNO == Servoking_Monster_80A_Main
 MODE 	EQU 	0				; Choose mode. Set to 0 for main motor
 $include (Servoking_Monster_80A.inc)	; Select Servoking Monster 80A pinout
@@ -2657,7 +2678,7 @@ Tag_Temporary_Storage:		DS	48		; Temporary storage for tags when updating "Eepro
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	14		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	8		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	9		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -2755,7 +2776,7 @@ Eep_Pgm_Startup_Pwr:		DB	DEFAULT_PGM_MULTI_STARTUP_PWR		; EEPROM copy of program
 Eep_Pgm_Pwm_Freq:			DB	DEFAULT_PGM_MULTI_PWM_FREQ		; EEPROM copy of programmed pwm frequency
 Eep_Pgm_Direction:			DB	DEFAULT_PGM_MULTI_DIRECTION		; EEPROM copy of programmed rotation direction
 Eep_Pgm_Input_Pol:			DB	DEFAULT_PGM_MULTI_RCP_PWM_POL		; EEPROM copy of programmed input polarity
-Eep_Initialized_L:			DB	55h							; EEPROM initialized signature low byte
+Eep_Initialized_L:			DB	055h							; EEPROM initialized signature low byte
 Eep_Initialized_H:			DB	0AAh							; EEPROM initialized signature high byte
 Eep_Enable_TX_Program:		DB	DEFAULT_PGM_ENABLE_TX_PROGRAM		; EEPROM TX programming enable
 _Eep_Main_Rearm_Start:		DB	0FFh							
@@ -3122,6 +3143,11 @@ t2_int_pulses_absent_no_max:
 t2_int_ppm_timeout_set:
 	mov	New_Rcp, Temp1				; Store new pulse length
 	setb	Flags2.RCP_UPDATED		 	; Set updated flag
+	; Check if zero
+	mov	A, Temp1					; Load new pulse value
+	jz	($+5)					; Check if pulse is zero
+
+	mov	Rcp_Stop_Cnt, #0			; Reset rcp stop counter
 
 t2_int_skip_start:
 	jb	Flags2.RCP_PPM, t2_int_rcp_update_start	; If flag is set (PPM) - branch
@@ -3489,7 +3515,7 @@ t2h_int_rcp_limit_middle_ramp:
 	mov	Temp1, #1						; Faster middle spoolup
 	mov	Spoolup_Limit_Skip, #1			
 
-t2h_int_rcp_set_limit:
+t2h_int_rcp_set_limit:	
 	; Do not increment spoolup limit if higher pwm is not requested, unless governor is active
 	clr	C
 	mov	A, Pwm_Limit_Spoolup
@@ -3921,7 +3947,6 @@ IF MODE >= 1	; Tail or multi
 	mov	C, Bit_Access_Int.0
 	jnc	pca_int_ppm_bidir_fwd			; If result is positive - branch				
 
-pca_int_ppm_bidir_rev:
 	jb	Flags2.RCP_DIR_REV, pca_int_ppm_bidir_dir_set	; If same direction - branch
 
 	setb	Flags2.RCP_DIR_REV
@@ -5475,11 +5500,13 @@ IF MCU_48MHZ == 1
 	anl	A, #7Fh
 ENDIF
 	mov	Temp3, A
-	jz	($+6)
+	jz	calc_next_comm_startup_no_X
 
 	mov	Temp1, #0FFh
 	mov	Temp2, #0FFh
+	ajmp	calc_next_comm_startup_average
 
+calc_next_comm_startup_no_X:
 	mov	Temp7, Prev_Prev_Comm_L 
 	mov	Temp8, Prev_Prev_Comm_H 
 	mov	Prev_Prev_Comm_L, Temp4 
@@ -5493,6 +5520,7 @@ ENDIF
 	mov	A, Temp2
 	subb	A, Temp8 
 	mov	Temp2, A
+calc_next_comm_startup_average:
 	clr	C
 	mov	A, Comm_Period4x_H		; Average with previous and save
 	rrc	A
@@ -6576,7 +6604,7 @@ comm61_damp_rev:
 	CpFET_off						
 	jnb	Flags0.PWM_ON, comm61_nfet_off_rev	; Is pwm on?
 	AnFET_on					; Pwm on - turn on nfet
-	ajmp	comm61_fets_done_rev
+	jmp	comm61_fets_done_rev
 comm61_nfet_off_rev:
 	ApFET_on					; Pwm off - switch damping fets (reverse)	
 comm61_fets_done_rev:
@@ -8008,7 +8036,7 @@ normal_run_checks:
 	; Decrement startup rotaton count
 	mov	A, Initial_Run_Rot_Cntd
 	dec	A
-	; Check number of nondamped rotations
+	; Check number of initial rotations
 	jnz 	normal_run_check_startup_rot	; Branch if counter is not zero
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
@@ -8024,6 +8052,12 @@ normal_run_check_startup_rot:
 	jc	($+5)
 
 	ljmp	run1						; Continue to run 
+
+	mov	Temp1, #Pgm_Direction		; Check if bidirectional operation
+	mov	A, @Temp1	
+	clr	C
+	subb	A, #3			
+	jz	initial_run_phase_done
 
 	jmp	run_to_wait_for_power_on
 
