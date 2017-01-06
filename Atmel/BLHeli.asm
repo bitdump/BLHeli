@@ -138,7 +138,7 @@
 ;           In order to have a good code for fixed wing planes, that has low voltage limiting, a main code spoolup time setting of 0 is made fast
 ;           Some small changes for improved sync hold
 ; - Rev14.8 No change, just created to stay in sync with SiLabs code
-;
+; - Rev14.9 Improved bidirectional mode for high input signal rates
 ;
 ;
 ;**** **** **** **** ****
@@ -185,7 +185,7 @@
 ;#define BLUESERIES_12A_MULTI 
 ;#define BLUESERIES_20A_MAIN
 ;#define BLUESERIES_20A_TAIL
-;#define BLUESERIES_20A_MULTI 
+;#define BLUESERIES_20A_MULTI
 ;#define BLUESERIES_30A_MAIN
 ;#define BLUESERIES_30A_TAIL
 ;#define BLUESERIES_30A_MULTI 
@@ -1420,7 +1420,7 @@ Pgm_Startup_Pwr_Decoded:		.BYTE	1		; Programmed startup power decoded
 .ORG 0				
 
 .EQU	EEPROM_FW_MAIN_REVISION		=	14		; Main revision of the firmware
-.EQU	EEPROM_FW_SUB_REVISION		=	8		; Sub revision of the firmware
+.EQU	EEPROM_FW_SUB_REVISION		=	9		; Sub revision of the firmware
 .EQU	EEPROM_LAYOUT_REVISION		=	21		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		.DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -1860,6 +1860,12 @@ t0_int_pulses_absent_no_max:
 t0_int_ppm_timeout_set:
 	sts	New_Rcp, I_Temp1			; Store new pulse length
 	sbr	Flags2, (1<<RCP_UPDATED)	 	; Set updated flag
+	; Check if zero
+	tst	I_Temp1					; Test new pulse value
+	breq	PC+3						; Check if pulse is zero
+
+	sts	Rcp_Stop_Cnt, Zero			; Reset rcp stop counter
+
 
 t0_int_skip_start:
 	sbrc	Flags2, RCP_PPM		
@@ -2235,11 +2241,11 @@ t0h_int_rcp_set_limit:
 
 	sts	Pwm_Limit_Spoolup, I_Temp5		; Set limit to what current pwm is
 	inc	I_Temp2						; Check if spoolup limit count is 255
-	breq	PC+3							; If it is, then this is a "bailout" ramp
+	breq	PC+5							; If it is, then this is a "bailout" ramp
 
 	lds	XL, Main_Spoolup_Time_3x			; Stay in an early part of the spoolup sequence (unless "bailout" ramp)
-
 	sts	Spoolup_Limit_Cnt, XL
+
 	ldi	XL, 1						; Set skip count
 	sts	Spoolup_Limit_Skip, XL
 	ldi	XL, 60						; Set governor requested speed to ensure that it requests higher speed
@@ -2596,7 +2602,6 @@ rcp_int_ppm_calculate:
 	tst	I_Temp1
 	breq	rcp_int_ppm_bidir_fwd			; If result is positive - branch				
 
-rcp_int_ppm_bidir_rev: 
 	sbrc	Flags2, RCP_DIR_REV
 	rjmp	rcp_int_ppm_bidir_dir_set		; If same direction - branch
 
@@ -3995,11 +4000,13 @@ calc_next_comm_startup:
 	sts	Prev_Comm_X, Temp3		; Store extended timestamp as previous commutation
 	sbc	Temp3, Temp6			; Calculate the new extended commutation time
 	tst	Temp3
-	breq	PC+3
+	breq	calc_next_comm_startup_no_X
 
 	ldi	Temp1, 0xFF
 	ldi	Temp2, 0xFF
+rjmp	calc_next_comm_startup_average
 
+calc_next_comm_startup_no_X:
 	lds	Temp7, Prev_Prev_Comm_L 
 	lds	Temp8, Prev_Prev_Comm_H 
 	sts	Prev_Prev_Comm_L, Temp4
@@ -4008,6 +4015,8 @@ calc_next_comm_startup:
 	lds	Temp2, Prev_Comm_H
 	sub	Temp1, Temp7 			; Calculate the new commutation time based upon the two last commutations (to reduce sensitivity to offset)
 	sbc	Temp2, Temp8 
+
+calc_next_comm_startup_average:
 	lds	Temp3, Comm_Period4x_L	; Average with previous and save
 	lds	Temp4, Comm_Period4x_H
 	lsr	Temp4			
@@ -6416,6 +6425,10 @@ normal_run_check_startup_rot:
 	brcs	PC+2
 
 	rjmp	run1						; Continue to run 
+
+	lds	XH, Pgm_Direction			; Check if bidirectional operation
+	cpi	XH, 3
+	breq	initial_run_phase_done
 
 	rjmp	run_to_wait_for_power_on
 
