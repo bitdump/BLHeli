@@ -121,6 +121,7 @@ N_			EQU 14	; X  X  RC X  MC MB MA CC    X  X  Cp Cc Bp Bc Ap Ac
 O_			EQU 15	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but low side pwm and 1S flag set
 P_			EQU 16	; X  X  RC MA CC MB MC X     X  Cc Bc Ac Cp Bp Ap X
 Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac
+R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -141,6 +142,7 @@ Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac
 ;ESCNO EQU O_
 ;ESCNO EQU P_
 ;ESCNO EQU Q_
+;ESCNO EQU R_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -219,6 +221,10 @@ ENDIF
 
 IF ESCNO == Q_
 $include (Q.inc)	; Select pinout Q
+ENDIF
+
+IF ESCNO == R_
+$include (R.inc)	; Select pinout R
 ENDIF
 
 
@@ -1635,7 +1641,7 @@ beep_off:		; Fets off loop
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 set_pwm_limit_low_rpm:
-	; Set pwm limit and demag disable for low rpms
+	; Set pwm limit
 	mov	Temp1, #0FFh					; Default full power
 	jb	Flags1.STARTUP_PHASE, set_pwm_limit_low_rpm_exit	; Exit if startup phase set
 
@@ -1845,7 +1851,7 @@ set_startup_pwm:
 	mov	Temp1, A						; Transfer to Temp1
 	clr	C
 	mov	A, Temp1						; Check against limit
-	subb	A, Pwm_Limit	
+	subb	A, Pwm_Limit
 	jc	startup_pwm_set_pwm				; If pwm below limit - branch
 
 	mov	Temp1, Pwm_Limit				; Limit pwm
@@ -2547,7 +2553,7 @@ comp_read_wrong:
 	inc	Temp1					; Increment number of OK readings required
 	clr	C
 	mov	A, Temp1
-	subb	A, Temp2					; If above initial requirement - go back and restart
+	subb	A, Temp2					; If above initial requirement - do not increment further
 	jc	($+3)
 	dec	Temp1
 
@@ -2780,8 +2786,8 @@ comm2comm3:
 
 	clr 	IE_EA				; Disable all interrupts
 	CpwmFET_off				; Turn off pwmfet
-	Set_Pwm_B
-	AcomFET_on				; To reapply power after a demag cut
+	Set_Pwm_B					; To reapply power after a demag cut
+	AcomFET_on
 	setb	IE_EA
 	Set_Comp_Phase_C 			; Set comparator phase
 	ajmp	comm_exit
@@ -2789,8 +2795,8 @@ comm2comm3:
 comm23_rev:
 	clr 	IE_EA				; Disable all interrupts
 	ApwmFET_off				; Turn off pwmfet (reverse)
-	Set_Pwm_B
-	CcomFET_on				; To reapply power after a demag cut
+	Set_Pwm_B					; To reapply power after a demag cut
+	CcomFET_on
 	setb	IE_EA
 	Set_Comp_Phase_A 			; Set comparator phase (reverse)
 	ajmp	comm_exit
@@ -2826,8 +2832,8 @@ comm4comm5:
 
 	clr 	IE_EA				; Disable all interrupts
 	BpwmFET_off				; Turn off pwmfet
-	Set_Pwm_A
-	CcomFET_on				; To reapply power after a demag cut
+	Set_Pwm_A					; To reapply power after a demag cut
+	CcomFET_on
 	setb	IE_EA
 	Set_Comp_Phase_B 			; Set comparator phase
 	jmp	comm_exit
