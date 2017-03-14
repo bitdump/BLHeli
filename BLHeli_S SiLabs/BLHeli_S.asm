@@ -118,10 +118,11 @@ K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets invert
 L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
 M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X	Inverted LED
 N_			EQU 14	; X  X  RC X  MC MB MA CC    X  X  Cp Cc Bp Bc Ap Ac
-O_			EQU 15	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but low side pwm and 1S flag set
+O_			EQU 15	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but low side pwm
 P_			EQU 16	; X  X  RC MA CC MB MC X     X  Cc Bc Ac Cp Bp Ap X
 Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac
 R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
+S_                      EQU 19  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap    Like O, but com fets inverted
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -143,6 +144,7 @@ R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
 ;ESCNO EQU P_
 ;ESCNO EQU Q_
 ;ESCNO EQU R_
+;ESCNO EQU S_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -226,6 +228,11 @@ ENDIF
 IF ESCNO == R_
 $include (R.inc)	; Select pinout R
 ENDIF
+
+IF ESCNO == S_
+$include (S.inc)        ; Select pinout S
+ENDIF
+
 
 
 ;**** **** **** **** ****
