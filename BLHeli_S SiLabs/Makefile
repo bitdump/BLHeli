@@ -1,8 +1,8 @@
 # set current revision
-REVISION ?= REV16_5
+REVISION ?= REV16_6
 
 # targets
-TARGETS      = A B C D E F G H I J K L M N O P
+TARGETS      = A B C D E F G H I J K L M N O P Q R S
 MCUS         = H L
 FETON_DELAYS = 0 5 10 15 20 25 30 40 50 70 90
 
@@ -57,36 +57,42 @@ OBJS =
 define MAKE_OBJ
 OBJS += $(OUTPUT_DIR)/$(1)_$(2)_$(3)_$(REVISION).OBJ
 $(OUTPUT_DIR)/$(1)_$(2)_$(3)_$(REVISION).OBJ : $(ASM_SRC) $(ASM_INC)
-	$(eval ESC         := $(1))
-	$(eval ESC_INT     := $(shell printf "%d" "'${ESC}"))
-	$(eval ESCNO       := $(shell echo $$(( $(ESC_INT) - 65 + 1))))
-        $(eval MCU_48MHZ   := $(subst L,0,$(subst H,1,$(2))))
-	$(eval FETON_DELAY := $(3))
-	$(eval LOG         := $(LOG_DIR)/$(1)_$(2)_$(3)_$(REVISION).log)
+	$(eval _ESC         := $(1))
+	$(eval _ESC_INT     := $(shell printf "%d" "'${_ESC}"))
+	$(eval _ESCNO       := $(shell echo $$(( $(_ESC_INT) - 65 + 1))))
+        $(eval _MCU_48MHZ   := $(subst L,0,$(subst H,1,$(2))))
+	$(eval _FETON_DELAY := $(3))
+	$(eval _LOG         := $(LOG_DIR)/$(1)_$(2)_$(3)_$(REVISION).log)
 	@mkdir -p $(OUTPUT_DIR)
 	@mkdir -p $(LOG_DIR)
 	@echo "AX51 : $$@"
 	@$(AX51) $(ASM_SRC) \
-		"DEFINE(ESCNO=$(ESCNO)) " \
-                "DEFINE(MCU_48MHZ=$(MCU_48MHZ)) "\
-                "DEFINE(FETON_DELAY=$(FETON_DELAY)) "\
+		"DEFINE(ESCNO=$(_ESCNO)) " \
+                "DEFINE(MCU_48MHZ=$(_MCU_48MHZ)) "\
+                "DEFINE(FETON_DELAY=$(_FETON_DELAY)) "\
                 "OBJECT($$@) "\
-                "$(AX51_FLAGS)" >> $(LOG) 2>&1; test $$$$? -lt 2 || tail $(LOG)
+                "$(AX51_FLAGS)" >> $(_LOG) 2>&1; test $$$$? -lt 2 || tail $(_LOG)
 
 endef
 
 HEX_TARGETS = $(OBJS:.OBJ=.HEX)
 
-single_target : $(OUTPUT_DIR)/$(VARIANT)_$(MCU)_$(FETON_DELAY)_$(REVISION).HEX
+EFM8_LOAD_BIN  ?= efm8load.py
+EFM8_LOAD_PORT ?= /dev/ttyUSB0
+EFM8_LOAD_BAUD ?= 57600
+
+SINGLE_TARGET_HEX = $(OUTPUT_DIR)/$(VARIANT)_$(MCU)_$(FETON_DELAY)_$(REVISION).HEX
+
+single_target : $(SINGLE_TARGET_HEX)
 
 all : $$(HEX_TARGETS)
 	@echo "\nbuild finished. built $(shell ls -l $(OUTPUT_DIR_HEX) | wc -l) hex targets\n"
 
 # create all obj targets using macro expansion
-$(foreach esc,$(TARGETS), \
-	$(foreach mcu, $(MCUS), \
-		$(foreach feton_delay, $(FETON_DELAYS), \
-			$(eval $(call MAKE_OBJ,$(esc),$(mcu),$(feton_delay))))))
+$(foreach _e,$(TARGETS), \
+	$(foreach _m, $(MCUS), \
+		$(foreach _f, $(FETON_DELAYS), \
+			$(eval $(call MAKE_OBJ,$(_e),$(_m),$(_f))))))
 	
 
 $(OUTPUT_DIR)/%.OMF : $(OUTPUT_DIR)/%.OBJ
@@ -113,5 +119,9 @@ clean:
 	@rm -rf $(LOG_DIR)/*
 	@rm -rf $(OUTPUT_DIR)/*
 
-.PHONY: all 
+efm8load: single_target
+	$(EFM8_LOAD_BIN) -p $(EFM8_LOAD_PORT) -b $(EFM8_LOAD_BAUD) -w $(SINGLE_TARGET_HEX)
+
+
+.PHONY: all clean help efm8load
 
