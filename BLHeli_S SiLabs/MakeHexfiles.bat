@@ -166,6 +166,14 @@ SET MCU_48MHZ=1
 call:compile
 SET /A ESCNO+=1
 
+SET ESC=S_L_
+SET MCU_48MHZ=0
+call:compile
+SET ESC=S_H_
+SET MCU_48MHZ=1
+call:compile
+SET /A ESCNO+=1
+
 goto :end
 
 
