@@ -123,6 +123,7 @@ P_			EQU 16	; X  X  RC MA CC MB MC X     X  Cc Bc Ac Cp Bp Ap X
 Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac
 R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
 S_                      EQU 19  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap    Like O, but com fets inverted
+T_			EQU 20	; RC X  MA X  MB CC MC X     X  X  Cp Bp Ap Ac Bc Cc
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -145,6 +146,7 @@ S_                      EQU 19  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp A
 ;ESCNO EQU Q_
 ;ESCNO EQU R_
 ;ESCNO EQU S_
+;ESCNO EQU T_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -231,6 +233,10 @@ ENDIF
 
 IF ESCNO == S_
 $include (S.inc)        ; Select pinout S
+ENDIF
+
+IF ESCNO == T_
+$include (T.inc)        ; Select pinout T
 ENDIF
 
 
