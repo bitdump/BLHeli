@@ -1630,7 +1630,7 @@ beep_apwmfet_off:
 	jnb	ACC.0, beep_cpwmfet_off
 	CpwmFET_off		; CpwmFET off
 beep_cpwmfet_off:
-	mov	A, #150		; 25µs off
+	mov	A, #150		; 25Âµs off
 	djnz	ACC, $		
 	djnz	Temp2, beep_onoff
 	; Copy variable
@@ -3586,6 +3586,25 @@ ENDIF
 	subb	A, #10
 	jnc	($+4)
 	ajmp	validate_rcp_start
+	
+	; Setup timers for Multishot
+	mov	IT01CF, #RTX_PIN	; Route RCP input to INT0
+	mov	TCON, #11h		; Timer 0 run and INT0 edge triggered
+	mov	CKCON0, #04h		; Timer 0 clock is system clock
+	mov	TMOD, #09h		; Timer 0 set to 16bits and gated by INT0
+	; Setup interrupts for Multishot
+	setb	IE_ET0			; Enable timer 0 interrupts
+	clr	IE_ET1			; Disable timer 1 interrupts
+	clr	IE_EX1			; Disable int1 interrupts
+	; Test whether signal is Multishot
+	clr	Flags2.RCP_ONESHOT42
+	setb	Flags2.RCP_MULTISHOT			; Set Multishot flag
+	mov	Rcp_Outside_Range_Cnt, #0		; Reset out of range counter
+	call wait100ms						; Wait for new RC pulse
+	clr	C
+	mov	A, Rcp_Outside_Range_Cnt			; Check how many pulses were outside normal range ("900-2235us")
+	subb	A, #10
+	jc	validate_rcp_start
 
 	; Setup timers for DShot
 	mov	IT01CF, #(80h+(RTX_PIN SHL 4)+(RTX_PIN))	; Route RCP input to INT0/1, with INT1 inverted
@@ -3607,7 +3626,7 @@ ENDIF
 	mov	DShot_Pwm_Thr, #20				; Load DShot qualification pwm threshold (for DShot150)
 	mov	DShot_Frame_Length_Thr, #80		; Load DShot frame length criteria
 	; Test whether signal is DShot150
-	clr	Flags2.RCP_ONESHOT42
+	clr	Flags2.RCP_MULTISHOT
 	setb	Flags2.RCP_DSHOT
 	mov	Rcp_Outside_Range_Cnt, #10		; Set out of range counter
 	call wait100ms						; Wait for new RC pulse
@@ -3652,26 +3671,7 @@ ENDIF
 	mov	A, Rcp_Outside_Range_Cnt			; Check if pulses were accepted
 	subb	A, #10
 	jc	validate_rcp_start
-
-	; Setup timers for Multishot
-	mov	IT01CF, #RTX_PIN	; Route RCP input to INT0
-	mov	TCON, #11h		; Timer 0 run and INT0 edge triggered
-	mov	CKCON0, #04h		; Timer 0 clock is system clock
-	mov	TMOD, #09h		; Timer 0 set to 16bits and gated by INT0
-	; Setup interrupts for Multishot
-	setb	IE_ET0			; Enable timer 0 interrupts
-	clr	IE_ET1			; Disable timer 1 interrupts
-	clr	IE_EX1			; Disable int1 interrupts
-	; Test whether signal is Multishot
-	clr	Flags2.RCP_DSHOT
-	setb	Flags2.RCP_MULTISHOT			; Set Multishot flag
-	mov	Rcp_Outside_Range_Cnt, #0		; Reset out of range counter
-	call wait100ms						; Wait for new RC pulse
-	clr	C
-	mov	A, Rcp_Outside_Range_Cnt			; Check how many pulses were outside normal range ("900-2235us")
-	subb	A, #10
-	jc	validate_rcp_start
-
+	
 	ajmp	init_no_signal
 
 validate_rcp_start:
