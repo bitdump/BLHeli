@@ -60,6 +60,8 @@ $NOMOD51
 ; - Rev16.5 Added support for DShot150, DShot300 and DShot600
 ; - Rev16.6 Fixed signal detection issue of multishot at 32kHz
 ;           Improved bidirectional mode for high input signal rates
+; - Rev16.7 Addition of Dshot commands for beeps and temporary reverse direction 
+;           
 ;
 ;
 ;**** **** **** **** ****
@@ -375,6 +377,10 @@ Wt_Zc_Tout_Start_H:			DS	1		; Timer 3 start point for zero cross scan timeout (h
 Wt_Comm_Start_L:			DS	1		; Timer 3 start point from zero cross to commutation (lo byte)
 Wt_Comm_Start_H:			DS	1		; Timer 3 start point from zero cross to commutation (hi byte)
 
+Dshot_Settings:				DS	1		; New Dshot setting RC pulse value in dshot value
+Dshot_Settings_Cnt:			DS  1		; counter for dshot settings
+Programmed_Direction:		DS  1
+
 New_Rcp:					DS	1		; New RC pulse value in pca counts
 Rcp_Stop_Cnt:				DS	1		; Counter for RC pulses below stop value
 
@@ -464,7 +470,7 @@ Temp_Storage:				DS	48		; Temporary storage
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	6		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	7		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -676,7 +682,7 @@ t1_int_xor_ok:
 	mov	A, Temp3
 	cpl	A
 	swap	A
-	anl	A, #0Eh			; High nibble of low byte (ignore lsb)
+	anl	A, #0Fh			; High nibble of low byte 
 	orl	A, Temp2
 	mov	Temp3, A
 	mov	A, Temp4			; High nibble of high byte
@@ -684,20 +690,47 @@ t1_int_xor_ok:
 	swap A
 	anl	A, #0Fh
 	mov	Temp4, A
+	
 	; Subtract 96 (still 12 bits)
 	clr	C
 	mov	A, Temp3
+	mov	Temp2, A
 	subb	A, #96
 	mov	Temp3, A
 	mov	A, Temp4
 	subb	A, #0
 	mov	Temp4, A
-	jnc	($+8)
+	jnc t1_normal_range
 
+	clr	C	
+	mov	A, Temp2  ;check for 0 or dshot command
 	mov	Temp4, #0
 	mov	Temp3, #0
 	mov	Temp2, #0
+	jz t1_normal_range 
+	
 
+t1_dshot_set_range: ;We are in the special dshot range
+	clr	C
+	rrc	A ;divide by 2
+	jnc t1_dshot_set_invalid ;check for tlm bit set
+	mov Temp2, A
+	clr	C
+	subb A, Dshot_Settings
+	jz t1_dshot_set_valid
+
+t1_dshot_set_invalid:
+	mov A, Temp2
+	mov	Dshot_Settings, A
+	mov	Dshot_Settings_Cnt, #0
+	mov	Temp2, #0
+	jmp t1_normal_range
+	
+t1_dshot_set_valid:
+	inc Dshot_Settings_Cnt
+	
+	
+t1_normal_range:
 	; Check for bidirectional operation (0=stop, 96-2095->fwd, 2096-4095->rev)
 	jnb	Flags3.PGM_BIDIR, t1_int_not_bidir	; If not bidirectional operation - branch
 
@@ -1333,6 +1366,7 @@ int0_int_pulse_ready:
 	setb	Flags2.RCP_UPDATED		 		; Set updated flag
 	; Check if zero
 	mov	A, Temp1						; Load new pulse value
+	
 	jz	($+5)						; Check if pulse is zero
 
 	mov	Rcp_Stop_Cnt, #0				; Reset rcp stop counter
@@ -1572,83 +1606,6 @@ waitxms_m:	; Middle loop
 	djnz	Temp1, waitxms_m
 	djnz	Temp2, waitxms_o
 	ret
-
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Beeper routines (4 different entry points) 
-;
-; No assumptions
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-beep_f1:	; Entry point 1, load beeper frequency 1 settings
-	mov	Temp3, #20	; Off wait loop length
-	mov	Temp4, #120	; Number of beep pulses
-	jmp	beep
-
-beep_f2:	; Entry point 2, load beeper frequency 2 settings
-	mov	Temp3, #16
-	mov	Temp4, #140
-	jmp	beep
-
-beep_f3:	; Entry point 3, load beeper frequency 3 settings
-	mov	Temp3, #13
-	mov	Temp4, #180
-	jmp	beep
-
-beep_f4:	; Entry point 4, load beeper frequency 4 settings
-	mov	Temp3, #11
-	mov	Temp4, #200
-	jmp	beep
-
-beep:	; Beep loop start
-	mov	A, Beep_Strength
-	djnz	ACC, beep_start
-	ret
-
-beep_start:
-	mov	Temp2, #2
-beep_onoff:
-	clr	A
-	BcomFET_off		; BcomFET off
-	djnz	ACC, $		; Allow some time after comfet is turned off
-	BpwmFET_on		; BpwmFET on (in order to charge the driver of the BcomFET)
-	djnz	ACC, $		; Let the pwmfet be turned on a while
-	BpwmFET_off		; BpwmFET off again
-	djnz	ACC, $		; Allow some time after pwmfet is turned off
-	BcomFET_on		; BcomFET on
-	djnz	ACC, $		; Allow some time after comfet is turned on
-	; Turn on pwmfet
-	mov	A, Temp2
-	jb	ACC.0, beep_apwmfet_on
-	ApwmFET_on		; ApwmFET on
-beep_apwmfet_on:
-	jnb	ACC.0, beep_cpwmfet_on
-	CpwmFET_on		; CpwmFET on
-beep_cpwmfet_on:
-	mov	A, Beep_Strength
-	djnz	ACC, $		
-	; Turn off pwmfet
-	mov	A, Temp2
-	jb	ACC.0, beep_apwmfet_off
-	ApwmFET_off		; ApwmFET off
-beep_apwmfet_off:
-	jnb	ACC.0, beep_cpwmfet_off
-	CpwmFET_off		; CpwmFET off
-beep_cpwmfet_off:
-	mov	A, #150		; 25µs off
-	djnz	ACC, $		
-	djnz	Temp2, beep_onoff
-	; Copy variable
-	mov	A, Temp3
-	mov	Temp1, A	
-beep_off:		; Fets off loop
-	djnz	ACC, $
-	djnz	Temp1,	beep_off
-	djnz	Temp4,	beep
-	BcomFET_off		; BcomFET off
-	ret
-
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
@@ -2915,6 +2872,80 @@ comm_exit:
 	clr	Flags0.DEMAG_CUT_POWER	; Clear demag power cut flag
 	ret
 
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Beeper routines (4 different entry points) 
+;
+; No assumptions
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+beep_f1:	; Entry point 1, load beeper frequency 1 settings
+	mov	Temp3, #20	; Off wait loop length
+	mov	Temp4, #120	; Number of beep pulses
+	jmp	beep
+
+beep_f2:	; Entry point 2, load beeper frequency 2 settings
+	mov	Temp3, #16
+	mov	Temp4, #140
+	jmp	beep
+
+beep_f3:	; Entry point 3, load beeper frequency 3 settings
+	mov	Temp3, #13
+	mov	Temp4, #180
+	jmp	beep
+
+beep_f4:	; Entry point 4, load beeper frequency 4 settings
+	mov	Temp3, #11
+	mov	Temp4, #200
+	jmp	beep
+
+beep:	; Beep loop start
+	mov	A, Beep_Strength
+	djnz	ACC, beep_start
+	ret
+
+beep_start:
+	mov	Temp2, #2
+beep_onoff:
+	clr	A
+	BcomFET_off		; BcomFET off
+	djnz	ACC, $		; Allow some time after comfet is turned off
+	BpwmFET_on		; BpwmFET on (in order to charge the driver of the BcomFET)
+	djnz	ACC, $		; Let the pwmfet be turned on a while
+	BpwmFET_off		; BpwmFET off again
+	djnz	ACC, $		; Allow some time after pwmfet is turned off
+	BcomFET_on		; BcomFET on
+	djnz	ACC, $		; Allow some time after comfet is turned on
+	; Turn on pwmfet
+	mov	A, Temp2
+	jb	ACC.0, beep_apwmfet_on
+	ApwmFET_on		; ApwmFET on
+beep_apwmfet_on:
+	jnb	ACC.0, beep_cpwmfet_on
+	CpwmFET_on		; CpwmFET on
+beep_cpwmfet_on:
+	mov	A, Beep_Strength
+	djnz	ACC, $		
+	; Turn off pwmfet
+	mov	A, Temp2
+	jb	ACC.0, beep_apwmfet_off
+	ApwmFET_off		; ApwmFET off
+beep_apwmfet_off:
+	jnb	ACC.0, beep_cpwmfet_off
+	CpwmFET_off		; CpwmFET off
+beep_cpwmfet_off:
+	mov	A, #150		; 25µs off
+	djnz	ACC, $		
+	djnz	Temp2, beep_onoff
+	; Copy variable
+	mov	A, Temp3
+	mov	Temp1, A	
+beep_off:		; Fets off loop
+	djnz	ACC, $
+	djnz	Temp1,	beep_off
+	djnz	Temp4,	beep
+	BcomFET_off		; BcomFET off
+	ret
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
@@ -3077,6 +3108,7 @@ decode_settings:
 	; Load programmed direction
 	mov	Temp1, #Pgm_Direction	
 	mov	A, @Temp1				
+	mov	Programmed_Direction, A	
 	clr	C
 	subb	A, #3
 	setb	Flags3.PGM_BIDIR
@@ -3657,6 +3689,8 @@ ENDIF
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt			; Check if pulses were accepted
 	subb	A, #10
+	mov Dshot_Settings_Cnt, #0
+	mov Dshot_Settings, #0
 	jc	validate_rcp_start
 
 	; Setup timers for Multishot
@@ -3888,16 +3922,120 @@ wait_for_power_on_no_beep:
 
 wait_for_power_on_not_missing:
 	clr	C
+	mov	A, Dshot_Settings	 
+	subb	A, #1		 		; Higher than 1
+	jnc	check_dshot_command	 
+	
+	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #1		 		; Higher than stop
 	jc	wait_for_power_on_loop	; No - start over
 
 	lcall wait100ms			; Wait to see if start pulse was only a glitch
 	mov	A, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
-	jnz	($+5)				; If it is not zero - proceed
-
+	jnz	init_start_long_jump				; If it is not zero - proceed
 	ljmp	init_no_signal			; If it is zero (pulses missing) - go back to detect input signal
 
+init_start_long_jump:
+ljmp init_start
+
+check_dshot_command:
+dshot_beep_1:
+	mov A, Dshot_Settings
+	subb A, #1
+	jnz dshot_beep_2
+	clr 	IE_EA
+	call beep_f1
+	setb	IE_EA	
+	call wait100ms	
+	jmp clear_dshot_settings
+dshot_beep_2:	
+	mov A, Dshot_Settings
+	subb A, #2
+	jnz dshot_beep_3
+	clr 	IE_EA
+	call beep_f2
+	setb	IE_EA	
+	call wait100ms	
+	jmp clear_dshot_settings
+dshot_beep_3:		
+	mov A, Dshot_Settings
+	subb A, #3
+	jnz dshot_beep_4
+	clr 	IE_EA
+	call beep_f3
+	setb	IE_EA	
+	call wait100ms	
+	jmp clear_dshot_settings
+dshot_beep_4:
+	mov A, Dshot_Settings
+	subb A, #4
+	jnz dshot_beep_5
+	clr 	IE_EA
+	call beep_f4
+	setb	IE_EA	
+	call wait100ms		
+	jmp clear_dshot_settings
+dshot_beep_5:
+	mov A, Dshot_Settings
+	subb A, #5
+	jnz dshot_direction_normal
+	clr 	IE_EA
+	call beep_f4
+	setb	IE_EA	
+	call wait100ms	
+	jmp clear_dshot_settings
+
+dshot_direction_normal: 
+	mov A, Dshot_Settings
+	subb A, #20
+	jnz dshot_direction_reverse
+	mov A, Dshot_Settings_Cnt
+	clr C
+	subb A, #10 ;sent 10 times.  Needs to receive it 10 times in a row
+	jnc dont_clear_dshot_settings
+
+	mov	A, Programmed_Direction
+	cjne A, #1, dshot_direction_normal_2
+	clr Flags3.PGM_DIR_REV
+dshot_direction_normal_2:	
+	cjne A, #2, clear_dshot_settings
+	setb Flags3.PGM_DIR_REV	
+	jmp clear_dshot_settings
+	
+dshot_direction_reverse: ;temporary reverse
+	mov A, Dshot_Settings
+	subb A, #21
+	jnz dshot_save_settings
+	mov A, Dshot_Settings_Cnt
+	clr C
+	subb A, #10 ;sent 10 times.  Needs to receive it 10 times in a row
+	jnc dont_clear_dshot_settings
+	
+	mov	A, Programmed_Direction
+	cjne A, #1, dshot_direction_reverse_2
+	setb Flags3.PGM_DIR_REV
+dshot_direction_reverse_2:
+	cjne A, #2, clear_dshot_settings
+	clr Flags3.PGM_DIR_REV
+	jmp clear_dshot_settings
+	
+dshot_save_settings: ;save not working
+	mov A, Dshot_Settings 
+	subb A, #12
+	jnz clear_dshot_settings
+	call beep_f4
+
+	
+skip_save:	
+	call beep_f4
+	
+clear_dshot_settings:
+	mov Dshot_Settings, #0
+	mov Dshot_Settings_Cnt, #0
+	
+dont_clear_dshot_settings:
+	jmp wait_for_power_on_not_missing
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
