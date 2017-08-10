@@ -1,0 +1,26 @@
+0  DSHOT_CMD_MOTOR_STOP,
+1  DSHOT_CMD_BEEP1,
+2  DSHOT_CMD_BEEP2,
+3  DSHOT_CMD_BEEP3,
+4  DSHOT_CMD_BEEP4,
+5  DSHOT_CMD_BEEP5,
+6  DSHOT_CMD_ESC_INFO, 			// Currently not implemented
+7  DSHOT_CMD_SPIN_DIRECTION_1,		// Need 9x
+8  DSHOT_CMD_SPIN_DIRECTION_2,		// Need 9x
+9  DSHOT_CMD_3D_MODE_OFF,		// Need 9x
+10 DSHOT_CMD_3D_MODE_ON, 		// Need 9x
+11 DSHOT_CMD_SETTINGS_REQUEST, 		// Currently not implemented
+12 DSHOT_CMD_SAVE_SETTINGS, 		// Need 9x
+20 DSHOT_CMD_SPIN_DIRECTION_NORMAL,	// Need 9x
+21 DSHOT_CMD_SPIN_DIRECTION_REVERSED,	// Need 9x
+22 DSHOT_CMD_LED0_ON,			// Currently not implemented
+23 DSHOT_CMD_LED1_ON,			// Currently not implemented
+24 DSHOT_CMD_LED2_ON,			// Currently not implemented
+25 DSHOT_CMD_LED3_ON,			// Currently not implemented
+26 DSHOT_CMD_LED0_OFF,			// Currently not implemented
+27 DSHOT_CMD_LED1_OFF,			// Currently not implemented
+28 DSHOT_CMD_LED2_OFF,			// Currently not implemented
+29 DSHOT_CMD_LED3_OFF,			// Currently not implemented
+   DSHOT_CMD_MAX = 47
+
+
