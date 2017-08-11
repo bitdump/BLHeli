@@ -1,9 +1,9 @@
 0  DSHOT_CMD_MOTOR_STOP,
-1  DSHOT_CMD_BEEP1,
-2  DSHOT_CMD_BEEP2,
-3  DSHOT_CMD_BEEP3,
-4  DSHOT_CMD_BEEP4,
-5  DSHOT_CMD_BEEP5,
+1  DSHOT_CMD_BEEP1,			// Wait length of beep plus 100ms before next command
+2  DSHOT_CMD_BEEP2,			// Wait length of beep plus 100ms before next command
+3  DSHOT_CMD_BEEP3,			// Wait length of beep plus 100ms before next command
+4  DSHOT_CMD_BEEP4,			// Wait length of beep plus 100ms before next command
+5  DSHOT_CMD_BEEP5,			// Wait length of beep plus 100ms before next command
 6  DSHOT_CMD_ESC_INFO, 			// Currently not implemented
 7  DSHOT_CMD_SPIN_DIRECTION_1,		// Need 9x
 8  DSHOT_CMD_SPIN_DIRECTION_2,		// Need 9x
@@ -22,5 +22,6 @@
 28 DSHOT_CMD_LED2_OFF,			// Currently not implemented
 29 DSHOT_CMD_LED3_OFF,			// Currently not implemented
    DSHOT_CMD_MAX = 47
+
 
 
