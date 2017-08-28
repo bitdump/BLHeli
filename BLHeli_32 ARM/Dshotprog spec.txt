@@ -23,26 +23,8 @@
 29 DSHOT_CMD_LED3_OFF,
    DSHOT_CMD_MAX = 47
 
-ESC_INFO layout 1 (KISS):
-1-12: ESC SN
-13: EEprom/version (1.01 == 101)
-14, bit 8-6: ESC Type
-14, bit 5-1: ESC sub version (a-z)
-15: crc (same crc as is used for telemetry)
 
-ESC_INFO layout 2 (KISS):
-1-12: ESC SN
-13: now idicates if the new response is used. so if its 255 it is the new version.
-14: EEprom/version (1.01 == 101)
-15: ESC type (0-0x7F for KISS)
-16: ESC sub version letter
-17: rotation direction reversed by dshot command or not (1:0)
-18: 3D mode active or not (1:0)
-19: unused for now.. maybe used for new settings
-20: unused for now.. maybe used for new settings
-21: crc (same crc as is used for telemetry)
-
-ESC_INFO layout 3 (BLHeli_32):
+ESC_INFO layout for BLHeli_32:
 1-12: ESC SN
 13: Indicates which response version is used. 254 is for BLHeli_32 version.
 14: FW revision (32 = 32)
