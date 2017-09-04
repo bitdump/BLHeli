@@ -468,7 +468,7 @@ Temp_Storage:				DS	48		; Temporary storage
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	63		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	63 		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -4024,7 +4024,7 @@ dshot_direction_1:
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
 	ajmp wait_for_power_on_not_missing
 
@@ -4045,7 +4045,7 @@ dshot_direction_2:
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
 	ajmp wait_for_power_on_not_missing
 
@@ -4066,7 +4066,7 @@ dshot_direction_bidir_off:
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
 	ajmp wait_for_power_on_not_missing
 
@@ -4088,7 +4088,7 @@ dshot_direction_bidir_on:
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
 	ajmp wait_for_power_on_not_missing
 
@@ -4109,7 +4109,7 @@ dshot_direction_normal:
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
 	ajmp wait_for_power_on_not_missing
 
@@ -4137,7 +4137,7 @@ dshot_direction_reverse: 			; Temporary reverse
 
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jc 	dont_clear_dshot_cmd
 	
 	clr	IE_EA					; DPTR used in interrupts
@@ -4175,7 +4175,7 @@ dshot_save_settings:
 	mov	Flash_Key_2, #0F1h
 	clr 	C
 	mov 	A, Dshot_Cmd_Cnt
-	subb A, #9 					; Needs to receive it 9 times in a row
+	subb A, #6 					; Needs to receive it 6 times in a row
 	jc 	dont_clear_dshot_cmd
 
 	call erase_and_store_all_in_eeprom
