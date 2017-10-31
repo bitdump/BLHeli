@@ -2918,7 +2918,7 @@ beep_apwmfet_off:
 	jnb	ACC.0, beep_cpwmfet_off
 	CpwmFET_off		; CpwmFET off
 beep_cpwmfet_off:
-	mov	A, #150		; 25µs off
+	mov	A, #150		; 25Âµs off
 	djnz	ACC, $		
 	djnz	Temp2, beep_onoff
 	; Copy variable
@@ -3934,6 +3934,9 @@ wait_for_power_on_nonzero:
 	ljmp init_start
 
 check_dshot_cmd:
+	mov	Temp1, #Pgm_Beacon_Strength  	; Load Beep_strength with Beacon Strength value.
+	mov	Beep_Strength, @Temp1		; Under the assumption Dshot beeps will be at Beacon Volume
+						; a flag to set for Beacon/Beeper volume would be a much cleaner solution
 	clr	C
 	mov 	A, Dshot_Cmd
 	subb A, #1
@@ -3941,11 +3944,7 @@ check_dshot_cmd:
 
 	clr 	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
-	mov	Temp1, #Pgm_Beacon_Strength
-	mov	Beep_Strength, @Temp1
 	call beep_f1
-	mov	Temp1, #Pgm_Beep_Strength
-	mov	Beep_Strength, @Temp1
 	setb	IE_EA	
 	call wait100ms	
 	jmp 	clear_dshot_cmd
@@ -3958,11 +3957,7 @@ dshot_beep_2:
 
 	clr 	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
-	mov	Temp1, #Pgm_Beacon_Strength
-	mov	Beep_Strength, @Temp1
 	call beep_f2
-	mov	Temp1, #Pgm_Beep_Strength
-	mov	Beep_Strength, @Temp1
 	setb	IE_EA	
 	call wait100ms	
 	jmp 	clear_dshot_cmd
@@ -3975,11 +3970,7 @@ dshot_beep_3:
 
 	clr 	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
-	mov	Temp1, #Pgm_Beacon_Strength
-	mov	Beep_Strength, @Temp1
 	call beep_f3
-	mov	Temp1, #Pgm_Beep_Strength
-	mov	Beep_Strength, @Temp1
 	setb	IE_EA	
 	call wait100ms	
 	jmp 	clear_dshot_cmd
@@ -3992,8 +3983,6 @@ dshot_beep_4:
 
 	clr 	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
-	mov	Temp1, #Pgm_Beacon_Strength
-	mov	Beep_Strength, @Temp1
 	call beep_f4
 	setb	IE_EA	
 	call wait100ms		
@@ -4007,16 +3996,15 @@ dshot_beep_5:
 
 	clr 	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
-	mov	Temp1, #Pgm_Beacon_Strength
-	mov	Beep_Strength, @Temp1
 	call beep_f4
-	mov	Temp1, #Pgm_Beep_Strength
-	mov	Beep_Strength, @Temp1
 	setb	IE_EA	
 	call wait100ms	
 	jmp 	clear_dshot_cmd
 
 dshot_direction_1:
+	mov	Temp1, #Pgm_Beep_Strength     	; No need to load/unload Beep_volume variable for every tone, load it once at beginning
+	mov	Beep_Strength, @Temp1		; And than set it back at the end, which would be here, or clear_dshot_cmd.
+						; Even nessasary?  I beleive it's loaded back 
 	clr	C
 	mov 	A, Dshot_Cmd
 	subb A, #7
