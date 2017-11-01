@@ -23,7 +23,7 @@
 ;**** **** **** **** ****
 ;
 ; Hardware definition file "V"
-; Cc X  RC  X  MC CC MB MA    X  Ap Ac Bp X  X Bc Cp
+; Cc X  RC X  MC CC MB MA    X  Ap Ac Bp X  X  Bc Cp
 ;
 ;**** **** **** **** ****
 
@@ -104,7 +104,6 @@ CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
 ENDIF
 
-ONE_S_CAPABLE		EQU	0	; Set to 1 if ESC can operate at 1S
 TEMP_LIMIT			EQU 	49	; Temperature measurement ADC value for which main motor power is limited at 80degC (low byte, assuming high byte is 1)
 TEMP_LIMIT_STEP		EQU	9	; Temperature measurement ADC value increment for another 10degC
 
@@ -231,49 +230,72 @@ ENDM
 Initialize_PCA MACRO
 	mov	PCA0CN0, #40h				; PCA enabled
 	mov	PCA0MD, #08h				; PCA clock is system clock
+IF FETON_DELAY == 0
+IF MCU_48MHZ == 0
+	mov	PCA0PWM, #82h				; PCA ARSEL set and 10bits pwm
+ELSE
+	mov	PCA0PWM, #83h				; PCA ARSEL set and 11bits pwm
+ENDIF
+	mov	PCA0CENT, #00h				; Edge aligned pwm
+ELSE
 IF MCU_48MHZ == 0
 	mov	PCA0PWM, #81h				; PCA ARSEL set and 9bits pwm
 ELSE
 	mov	PCA0PWM, #82h				; PCA ARSEL set and 10bits pwm
 ENDIF
 	mov	PCA0CENT, #03h				; Center aligned pwm
+ENDIF
 ENDM
 Set_Pwm_Polarity MACRO
+IF FETON_DELAY == 0
+	mov	PCA0POL, #00h				; Pwm noninverted
+ELSE
 	mov	PCA0POL, #01h				; Damping inverted, pwm noninverted
-ENDM
+ENDIF
+	ENDM
 Enable_Power_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM0, #4Ah				; Enable comparator of module, enable match, set pwm mode
 ELSE
-	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Enable_Damp_Pwm_Module MACRO
 IF FETON_DELAY == 0
 	mov	PCA0CPM1, #00h				; Disable
 ELSE
-	mov	PCA0CPM1, #42h				; Enable comparator of module, set pwm mode
+	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
 Set_Power_Pwm_Regs MACRO
+IF FETON_DELAY == 0
+	mov	PCA0CPL0, Power_Pwm_Reg_L
+	mov	PCA0CPH0, Power_Pwm_Reg_H
+ELSE
 	clr	C
 	mov	A, Power_Pwm_Reg_H
 	rrc	A
 	mov	Temp1, A
 	mov	A, Power_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL0, A
-	mov	PCA0CPH0, Temp1
+	mov	PCA0CPL1, A
+	mov	PCA0CPH1, Temp1
+ENDIF
 ENDM		
 Set_Damp_Pwm_Regs MACRO
+IF FETON_DELAY == 0
+	mov	PCA0CPL1, Damp_Pwm_Reg_L
+	mov	PCA0CPH1, Damp_Pwm_Reg_H
+ELSE
 	clr	C
 	mov	A, Damp_Pwm_Reg_H
 	rrc	A
 	mov	Temp1, A
 	mov	A, Damp_Pwm_Reg_L
 	rrc	A
-	mov	PCA0CPL1, A
-	mov	PCA0CPH1, Temp1
+	mov	PCA0CPL0, A
+	mov	PCA0CPH0, Temp1
+ENDIF
 ENDM		
 Clear_COVF_Interrupt MACRO
 	anl	PCA0PWM, #0DFh
@@ -302,8 +324,8 @@ ENDM
 ApwmFET		EQU	6	;i
 AcomFET		EQU	5	;i
 BpwmFET		EQU	4	;o
-; SCL		EQU	3	;o
-; SDA		EQU	2	;o
+;    		EQU	3	;o
+;    		EQU	2	;o
 BcomFET		EQU	1	;o
 CpwmFET		EQU	0	;o
 
@@ -314,41 +336,77 @@ P1_SKIP		EQU	7Fh
 
 ApwmFET_on MACRO
 	setb	P1.ApwmFET
+IF FETON_DELAY == 0
+	setb	P1.AcomFET
+ENDIF
 ENDM
 ApwmFET_off MACRO
+IF FETON_DELAY != 0
 	clr	P1.ApwmFET
+ELSE
+	clr	P1.AcomFET
+ENDIF
 ENDM
 BpwmFET_on MACRO
 	setb	P1.BpwmFET
+IF FETON_DELAY == 0
+	setb	P1.BcomFET
+ENDIF
 ENDM
 BpwmFET_off MACRO
+IF FETON_DELAY != 0
 	clr	P1.BpwmFET
+ELSE
+	clr	P1.BcomFET
+ENDIF
 ENDM
 CpwmFET_on MACRO
 	setb	P1.CpwmFET
+IF FETON_DELAY == 0
+	setb	P0.CcomFET
+ENDIF
 ENDM
 CpwmFET_off MACRO
+IF FETON_DELAY != 0
 	clr	P1.CpwmFET
+ELSE
+	clr	P0.CcomFET
+ENDIF
 ENDM
 All_pwmFETs_Off MACRO
+IF FETON_DELAY != 0
 	clr	P1.ApwmFET
 	clr	P1.BpwmFET
 	clr	P1.CpwmFET
+ELSE
+	clr	P1.AcomFET
+	clr	P1.BcomFET
+	clr	P0.CcomFET
+ENDIF
 ENDM
 
 AcomFET_on MACRO
-	setb	P1.AcomFET
+IF FETON_DELAY == 0
+	clr	P1.ApwmFET
+ENDIF
+	setb P1.AcomFET
 ENDM
 AcomFET_off MACRO
 	clr	P1.AcomFET
 ENDM
 BcomFET_on MACRO
+IF FETON_DELAY == 0
+	clr	P1.BpwmFET
+ENDIF
 	setb	P1.BcomFET
 ENDM
 BcomFET_off MACRO
 	clr	P1.BcomFET
 ENDM
 CcomFET_on MACRO
+IF FETON_DELAY == 0
+	clr	P1.CpwmFET
+ENDIF
 	setb	P0.CcomFET
 ENDM
 CcomFET_off MACRO
@@ -361,20 +419,38 @@ All_comFETs_Off MACRO
 ENDM
 
 Set_Pwm_A MACRO
-	mov	P1SKIP, #1Fh
+IF FETON_DELAY == 0
+	setb	P1.AcomFET
 	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #3Fh
+ELSE
+	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #1Fh
+ENDIF
 ENDM
 Set_Pwm_B MACRO
-	mov	P1SKIP, #6Dh
+IF FETON_DELAY == 0
+	setb	P1.BcomFET
 	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #6Fh
+ELSE
+	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #6Dh
+endif
 ENDM
 Set_Pwm_C MACRO
-	mov	P1SKIP, #7Eh
+IF FETON_DELAY == 0
+	setb	P0.CcomFET
+	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #7Fh
+ELSE
 	mov	P0SKIP, #7Fh
+	mov	P1SKIP, #7Eh
+endif
 ENDM
 Set_Pwms_Off MACRO
-	mov	P1SKIP, #7Fh
 	mov	P0SKIP, #0FFh
+	mov	P1SKIP, #7Fh
 ENDM
 
 Set_Comp_Phase_A MACRO
