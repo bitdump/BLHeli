@@ -60,7 +60,8 @@ $NOMOD51
 ; - Rev16.5 Added support for DShot150, DShot300 and DShot600
 ; - Rev16.6 Fixed signal detection issue of multishot at 32kHz
 ;           Improved bidirectional mode for high input signal rates
-;
+; - Rev16.7 Addition of Dshot commands for beeps and temporary reverse direction (largely by brycedjohnson)
+;           
 ;
 ;**** **** **** **** ****
 ; Minimum 8K Bytes of In-System Self-Programmable Flash
@@ -116,15 +117,16 @@ I_			EQU 9	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
 J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap	LEDs
 K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
 L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
-M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X	Inverted LED
+M_			EQU 13	; MA MC CC MB RC L0 X  X     X  Cc Bc Ac Cp Bp Ap X    LED
 N_			EQU 14	; X  X  RC X  MC MB MA CC    X  X  Cp Cc Bp Bc Ap Ac
 O_			EQU 15	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but low side pwm
 P_			EQU 16	; X  X  RC MA CC MB MC X     X  Cc Bc Ac Cp Bp Ap X
-Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac
+Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac   LEDs
 R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
-S_                      EQU 19  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap    Like O, but com fets inverted
+S_          	EQU 19  	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap   Like O, but com fets inverted
 T_			EQU 20	; RC X  MA X  MB CC MC X     X  X  Cp Bp Ap Ac Bc Cc
 U_			EQU 21	; MA MC CC MB RC L0 L1 L2    X  Cc Bc Ac Cp Bp Ap X	Like M, but with 3 LEDs
+V_			EQU 22	; Cc X  RC X  MC CC MB MA    X  Ap Ac Bp X  X  Bc Cp
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -149,14 +151,15 @@ U_			EQU 21	; MA MC CC MB RC L0 L1 L2    X  Cc Bc Ac Cp Bp Ap X	Like M, but with
 ;ESCNO EQU S_
 ;ESCNO EQU T_
 ;ESCNO EQU U_
+;ESCNO EQU V_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
-;MCU_48MHZ EQU	1
+;MCU_48MHZ EQU	0
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
-;FETON_DELAY EQU 40	; 20.4ns per step
+;FETON_DELAY EQU 15	; 20.4ns per step
 
 
 ;**** **** **** **** ****
@@ -245,6 +248,10 @@ IF ESCNO == U_
 $include (U.inc)        ; Select pinout U
 ENDIF
 
+IF ESCNO == V_
+$include (V.inc)        ; Select pinout V
+ENDIF
+
 
 
 ;**** **** **** **** ****
@@ -293,8 +300,8 @@ Rcp_Timeout_Cntd:			DS	1		; RC pulse timeout counter (decrementing)
 Flags0:					DS	1    	; State flags. Reset upon init_start
 T3_PENDING				EQU 	0		; Timer 3 pending flag
 DEMAG_DETECTED				EQU 	1		; Set when excessive demag time is detected
-DEMAG_CUT_POWER			EQU 	2		; Set when demag compensation cuts power
-COMP_TIMED_OUT				EQU 	3		; Set when comparator reading timed out
+COMP_TIMED_OUT				EQU 	2		; Set when comparator reading timed out
+;						EQU 	3
 ;						EQU 	4
 ;						EQU 	5	
 ;						EQU 	6	
@@ -374,6 +381,9 @@ Wt_Zc_Tout_Start_L:			DS	1		; Timer 3 start point for zero cross scan timeout (l
 Wt_Zc_Tout_Start_H:			DS	1		; Timer 3 start point for zero cross scan timeout (hi byte)
 Wt_Comm_Start_L:			DS	1		; Timer 3 start point from zero cross to commutation (lo byte)
 Wt_Comm_Start_H:			DS	1		; Timer 3 start point from zero cross to commutation (hi byte)
+
+Dshot_Cmd:				DS	1		; Dshot command
+Dshot_Cmd_Cnt:				DS  	1		; Dshot command count
 
 New_Rcp:					DS	1		; New RC pulse value in pca counts
 Rcp_Stop_Cnt:				DS	1		; Counter for RC pulses below stop value
@@ -464,7 +474,7 @@ Temp_Storage:				DS	48		; Temporary storage
 ;**** **** **** **** ****
 CSEG AT 1A00h            ; "Eeprom" segment
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
-EEPROM_FW_SUB_REVISION		EQU	6		; Sub revision of the firmware
+EEPROM_FW_SUB_REVISION		EQU	7		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
 
 Eep_FW_Main_Revision:		DB	EEPROM_FW_MAIN_REVISION			; EEPROM firmware main revision number
@@ -561,7 +571,7 @@ t1_int:
 	mov	Temp2, TMR2H
 	setb	TMR2CN0_TR2		; Timer 2 enabled
 	setb	IE_EA
-	; Reset timer 1
+	; Reset timer 0
 	mov	TL0, #0
 	; Check frame time length
 	clr	C
@@ -628,7 +638,7 @@ t1_int_msb_fail:
 	ajmp int0_int_outside_range
 
 t1_int_decode_msb:
-	; Decode DShot data Msb. Use more code space to save time (by not usinng loop)
+	; Decode DShot data Msb. Use more code space to save time (by not using loop)
 	Decode_DShot_2Msb
 	Decode_DShot_2Msb
 	Decode_DShot_2Msb
@@ -676,7 +686,7 @@ t1_int_xor_ok:
 	mov	A, Temp3
 	cpl	A
 	swap	A
-	anl	A, #0Eh			; High nibble of low byte (ignore lsb)
+	anl	A, #0Fh			; High nibble of low byte 
 	orl	A, Temp2
 	mov	Temp3, A
 	mov	A, Temp4			; High nibble of high byte
@@ -687,17 +697,41 @@ t1_int_xor_ok:
 	; Subtract 96 (still 12 bits)
 	clr	C
 	mov	A, Temp3
+	mov	Temp2, A
 	subb	A, #96
 	mov	Temp3, A
 	mov	A, Temp4
 	subb	A, #0
 	mov	Temp4, A
-	jnc	($+8)
+	jnc 	t1_normal_range
 
+	clr	C	
+	mov	A, Temp2  		; Check for 0 or dshot command
 	mov	Temp4, #0
 	mov	Temp3, #0
 	mov	Temp2, #0
+	jz 	t1_normal_range
+	
+	clr	C				; We are in the special dshot range
+	rrc	A 				; Divide by 2
+	jnc 	t1_dshot_set_cmd 	; Check for tlm bit set (if not telemetry, Temp2 will be zero and result in invalid command)
 
+	mov 	Temp2, A
+	clr	C
+	subb A, Dshot_Cmd
+	jz 	t1_dshot_inc_cmd_cnt
+
+t1_dshot_set_cmd:
+	mov 	A, Temp2
+	mov	Dshot_Cmd, A
+	mov	Dshot_Cmd_Cnt, #0
+	mov	Temp2, #0
+	jmp 	t1_normal_range
+	
+t1_dshot_inc_cmd_cnt:
+	inc 	Dshot_Cmd_Cnt
+	
+t1_normal_range:
 	; Check for bidirectional operation (0=stop, 96-2095->fwd, 2096-4095->rev)
 	jnb	Flags3.PGM_BIDIR, t1_int_not_bidir	; If not bidirectional operation - branch
 
@@ -1573,83 +1607,6 @@ waitxms_m:	; Middle loop
 	djnz	Temp2, waitxms_o
 	ret
 
-
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-;
-; Beeper routines (4 different entry points) 
-;
-; No assumptions
-;
-;**** **** **** **** **** **** **** **** **** **** **** **** ****
-beep_f1:	; Entry point 1, load beeper frequency 1 settings
-	mov	Temp3, #20	; Off wait loop length
-	mov	Temp4, #120	; Number of beep pulses
-	jmp	beep
-
-beep_f2:	; Entry point 2, load beeper frequency 2 settings
-	mov	Temp3, #16
-	mov	Temp4, #140
-	jmp	beep
-
-beep_f3:	; Entry point 3, load beeper frequency 3 settings
-	mov	Temp3, #13
-	mov	Temp4, #180
-	jmp	beep
-
-beep_f4:	; Entry point 4, load beeper frequency 4 settings
-	mov	Temp3, #11
-	mov	Temp4, #200
-	jmp	beep
-
-beep:	; Beep loop start
-	mov	A, Beep_Strength
-	djnz	ACC, beep_start
-	ret
-
-beep_start:
-	mov	Temp2, #2
-beep_onoff:
-	clr	A
-	BcomFET_off		; BcomFET off
-	djnz	ACC, $		; Allow some time after comfet is turned off
-	BpwmFET_on		; BpwmFET on (in order to charge the driver of the BcomFET)
-	djnz	ACC, $		; Let the pwmfet be turned on a while
-	BpwmFET_off		; BpwmFET off again
-	djnz	ACC, $		; Allow some time after pwmfet is turned off
-	BcomFET_on		; BcomFET on
-	djnz	ACC, $		; Allow some time after comfet is turned on
-	; Turn on pwmfet
-	mov	A, Temp2
-	jb	ACC.0, beep_apwmfet_on
-	ApwmFET_on		; ApwmFET on
-beep_apwmfet_on:
-	jnb	ACC.0, beep_cpwmfet_on
-	CpwmFET_on		; CpwmFET on
-beep_cpwmfet_on:
-	mov	A, Beep_Strength
-	djnz	ACC, $		
-	; Turn off pwmfet
-	mov	A, Temp2
-	jb	ACC.0, beep_apwmfet_off
-	ApwmFET_off		; ApwmFET off
-beep_apwmfet_off:
-	jnb	ACC.0, beep_cpwmfet_off
-	CpwmFET_off		; CpwmFET off
-beep_cpwmfet_off:
-	mov	A, #150		; 25µs off
-	djnz	ACC, $		
-	djnz	Temp2, beep_onoff
-	; Copy variable
-	mov	A, Temp3
-	mov	Temp1, A	
-beep_off:		; Fets off loop
-	djnz	ACC, $
-	djnz	Temp1,	beep_off
-	djnz	Temp4,	beep
-	BcomFET_off		; BcomFET off
-	ret
-
-
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
 ; Set pwm limit low rpm
@@ -1867,16 +1824,7 @@ set_startup_pwm:
 	xch	A, B
 	mov	C, B.7						; Multiply result by 2 (unity gain is 128)
 	rlc	A
-	mov	Temp1, A						; Transfer to Temp1
-	clr	C
-	mov	A, Temp1						; Check against limit
-	subb	A, Pwm_Limit
-	jc	startup_pwm_set_pwm				; If pwm below limit - branch
-
-	mov	Temp1, Pwm_Limit				; Limit pwm
-
-startup_pwm_set_pwm:
-	mov	Pwm_Limit_Beg, Temp1			; Set initial pwm limit
+	mov	Pwm_Limit_Beg, A				; Set initial pwm limit
 	ret
 
 
@@ -2750,7 +2698,6 @@ wait_for_comm:
 	subb	A, Demag_Pwr_Off_Thresh
 	jc	wait_for_comm_wait		; Cut power if many consecutive demags. This will help retain sync during hard accelerations
 
-	setb	Flags0.DEMAG_CUT_POWER	; Set demag power cut flag
 	All_pwmFETs_off
 	Set_Pwms_Off
 
@@ -2912,7 +2859,82 @@ comm61_rev:
 	Set_Comp_Phase_C 			; Set comparator phase (reverse)
 
 comm_exit:
-	clr	Flags0.DEMAG_CUT_POWER	; Clear demag power cut flag
+	ret
+
+
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+;
+; Beeper routines (4 different entry points) 
+;
+; No assumptions
+;
+;**** **** **** **** **** **** **** **** **** **** **** **** ****
+beep_f1:	; Entry point 1, load beeper frequency 1 settings
+	mov	Temp3, #20	; Off wait loop length
+	mov	Temp4, #120	; Number of beep pulses
+	jmp	beep
+
+beep_f2:	; Entry point 2, load beeper frequency 2 settings
+	mov	Temp3, #16
+	mov	Temp4, #140
+	jmp	beep
+
+beep_f3:	; Entry point 3, load beeper frequency 3 settings
+	mov	Temp3, #13
+	mov	Temp4, #180
+	jmp	beep
+
+beep_f4:	; Entry point 4, load beeper frequency 4 settings
+	mov	Temp3, #11
+	mov	Temp4, #200
+	jmp	beep
+
+beep:	; Beep loop start
+	mov	A, Beep_Strength
+	djnz	ACC, beep_start
+	ret
+
+beep_start:
+	mov	Temp2, #2
+beep_onoff:
+	clr	A
+	BcomFET_off		; BcomFET off
+	djnz	ACC, $		; Allow some time after comfet is turned off
+	BpwmFET_on		; BpwmFET on (in order to charge the driver of the BcomFET)
+	djnz	ACC, $		; Let the pwmfet be turned on a while
+	BpwmFET_off		; BpwmFET off again
+	djnz	ACC, $		; Allow some time after pwmfet is turned off
+	BcomFET_on		; BcomFET on
+	djnz	ACC, $		; Allow some time after comfet is turned on
+	; Turn on pwmfet
+	mov	A, Temp2
+	jb	ACC.0, beep_apwmfet_on
+	ApwmFET_on		; ApwmFET on
+beep_apwmfet_on:
+	jnb	ACC.0, beep_cpwmfet_on
+	CpwmFET_on		; CpwmFET on
+beep_cpwmfet_on:
+	mov	A, Beep_Strength
+	djnz	ACC, $		
+	; Turn off pwmfet
+	mov	A, Temp2
+	jb	ACC.0, beep_apwmfet_off
+	ApwmFET_off		; ApwmFET off
+beep_apwmfet_off:
+	jnb	ACC.0, beep_cpwmfet_off
+	CpwmFET_off		; CpwmFET off
+beep_cpwmfet_off:
+	mov	A, #150		; 25µs off
+	djnz	ACC, $		
+	djnz	Temp2, beep_onoff
+	; Copy variable
+	mov	A, Temp3
+	mov	Temp1, A	
+beep_off:		; Fets off loop
+	djnz	ACC, $
+	djnz	Temp1,	beep_off
+	djnz	Temp4,	beep
+	BcomFET_off		; BcomFET off
 	ret
 
 
@@ -3563,6 +3585,8 @@ ENDIF
 	clr	Flags2.RCP_ONESHOT42			; Clear OneShot42 flag
 	clr	Flags2.RCP_MULTISHOT			; Clear Multishot flag
 	clr	Flags2.RCP_DSHOT				; Clear DShot flag
+	mov 	Dshot_Cmd, #0					; Clear Dshot command
+	mov 	Dshot_Cmd_Cnt, #0				; Clear Dshot command count
 	; Test whether signal is regular pwm
 	mov	Rcp_Outside_Range_Cnt, #0		; Reset out of range counter
 	call wait100ms						; Wait for new RC pulse
@@ -3621,6 +3645,8 @@ ENDIF
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt			; Check if pulses were accepted
 	subb	A, #10
+	mov 	Dshot_Cmd, #0
+	mov 	Dshot_Cmd_Cnt, #0
 	jc	validate_rcp_start
 
 	; Setup variables for DShot300
@@ -3639,6 +3665,8 @@ ENDIF
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt			; Check if pulses were accepted
 	subb	A, #10
+	mov 	Dshot_Cmd, #0
+	mov 	Dshot_Cmd_Cnt, #0
 	jc	validate_rcp_start
 
 	; Setup variables for DShot600
@@ -3657,6 +3685,8 @@ ENDIF
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt			; Check if pulses were accepted
 	subb	A, #10
+	mov 	Dshot_Cmd, #0
+	mov 	Dshot_Cmd_Cnt, #0
 	jc	validate_rcp_start
 
 	; Setup timers for Multishot
@@ -3890,14 +3920,283 @@ wait_for_power_on_not_missing:
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #1		 		; Higher than stop
-	jc	wait_for_power_on_loop	; No - start over
+	jnc	wait_for_power_on_nonzero	; Yes - proceed
 
+	clr	C
+	mov	A, Dshot_Cmd
+	subb	A, #1		 		; 1 or higher
+	jnc	check_dshot_cmd		; Check Dshot command
+
+	ljmp	wait_for_power_on_loop	; If not Dshot command - start over
+
+wait_for_power_on_nonzero:
 	lcall wait100ms			; Wait to see if start pulse was only a glitch
 	mov	A, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
 	jnz	($+5)				; If it is not zero - proceed
-
 	ljmp	init_no_signal			; If it is zero (pulses missing) - go back to detect input signal
 
+	mov 	Dshot_Cmd, #0
+	mov 	Dshot_Cmd_Cnt, #0
+	ljmp init_start
+
+check_dshot_cmd:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #1
+	jnz 	dshot_beep_2
+
+	clr 	IE_EA
+	call	switch_power_off		; Switch power off in case braking is set
+	mov	Temp1, #Pgm_Beacon_Strength
+	mov	Beep_Strength, @Temp1
+	call beep_f1
+	mov	Temp1, #Pgm_Beep_Strength
+	mov	Beep_Strength, @Temp1
+	setb	IE_EA	
+	call wait100ms	
+	jmp 	clear_dshot_cmd
+
+dshot_beep_2:	
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #2
+	jnz 	dshot_beep_3
+
+	clr 	IE_EA
+	call	switch_power_off		; Switch power off in case braking is set
+	mov	Temp1, #Pgm_Beacon_Strength
+	mov	Beep_Strength, @Temp1
+	call beep_f2
+	mov	Temp1, #Pgm_Beep_Strength
+	mov	Beep_Strength, @Temp1
+	setb	IE_EA	
+	call wait100ms	
+	jmp 	clear_dshot_cmd
+
+dshot_beep_3:		
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #3
+	jnz 	dshot_beep_4
+
+	clr 	IE_EA
+	call	switch_power_off		; Switch power off in case braking is set
+	mov	Temp1, #Pgm_Beacon_Strength
+	mov	Beep_Strength, @Temp1
+	call beep_f3
+	mov	Temp1, #Pgm_Beep_Strength
+	mov	Beep_Strength, @Temp1
+	setb	IE_EA	
+	call wait100ms	
+	jmp 	clear_dshot_cmd
+
+dshot_beep_4:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #4
+	jnz 	dshot_beep_5
+
+	clr 	IE_EA
+	call	switch_power_off		; Switch power off in case braking is set
+	mov	Temp1, #Pgm_Beacon_Strength
+	mov	Beep_Strength, @Temp1
+	call beep_f4
+	mov	Temp1, #Pgm_Beep_Strength
+	mov	Beep_Strength, @Temp1
+	setb	IE_EA	
+	call wait100ms		
+	jmp 	clear_dshot_cmd
+
+dshot_beep_5:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #5
+	jnz 	dshot_direction_1
+
+	clr 	IE_EA
+	call	switch_power_off		; Switch power off in case braking is set
+	mov	Temp1, #Pgm_Beacon_Strength
+	mov	Beep_Strength, @Temp1
+	call beep_f4
+	mov	Temp1, #Pgm_Beep_Strength
+	mov	Beep_Strength, @Temp1
+	setb	IE_EA	
+	call wait100ms	
+	jmp 	clear_dshot_cmd
+
+dshot_direction_1:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #7
+	jnz 	dshot_direction_2
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
+	ajmp wait_for_power_on_not_missing
+
+	mov	A, #1
+	jnb	Flags3.PGM_BIDIR, ($+5)
+	mov	A, #3
+	mov	Temp1, #Pgm_Direction
+	mov	@Temp1, A
+	clr 	Flags3.PGM_DIR_REV
+	clr 	Flags3.PGM_BIDIR_REV
+	jmp 	clear_dshot_cmd
+
+dshot_direction_2:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #8
+	jnz 	dshot_direction_bidir_off
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
+	ajmp wait_for_power_on_not_missing
+
+	mov	A, #2
+	jnb	Flags3.PGM_BIDIR, ($+5)
+	mov	A, #4
+	mov	Temp1, #Pgm_Direction
+	mov	@Temp1, A
+	setb Flags3.PGM_DIR_REV
+	setb Flags3.PGM_BIDIR_REV
+	jmp 	clear_dshot_cmd
+
+dshot_direction_bidir_off:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #9
+	jnz 	dshot_direction_bidir_on
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
+	ajmp wait_for_power_on_not_missing
+
+	jnb	Flags3.PGM_BIDIR, dshot_direction_bidir_on
+
+	clr	C
+	mov	Temp1, #Pgm_Direction
+	mov	A, @Temp1
+	subb	A, #2
+	mov	@Temp1, A
+	clr 	Flags3.PGM_BIDIR
+	jmp 	clear_dshot_cmd
+
+dshot_direction_bidir_on:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #10
+	jnz 	dshot_direction_normal
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
+	ajmp wait_for_power_on_not_missing
+
+	jb	Flags3.PGM_BIDIR, dshot_direction_normal
+
+	mov	Temp1, #Pgm_Direction
+	mov	A, @Temp1
+	add	A, #2
+	mov	@Temp1, A
+	setb	Flags3.PGM_BIDIR
+	jmp 	clear_dshot_cmd
+
+dshot_direction_normal: 
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #20
+	jnz 	dshot_direction_reverse
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jnc 	($+4) 					; Same as "jc dont_clear_dshot_cmd"
+	ajmp wait_for_power_on_not_missing
+
+	clr	IE_EA					; DPTR used in interrupts
+	mov	DPTR, #Eep_Pgm_Direction		; Read from flash
+	mov	A, #0
+	movc	A, @A+DPTR
+	setb	IE_EA
+	mov	Temp1, #Pgm_Direction
+	mov	@Temp1, A
+	rrc	A						; Lsb to carry
+	clr 	Flags3.PGM_DIR_REV
+	clr 	Flags3.PGM_BIDIR_REV
+	jc	($+4)
+	setb	Flags3.PGM_DIR_REV
+	jc	($+4)
+	setb	Flags3.PGM_BIDIR_REV
+	jmp 	clear_dshot_cmd
+
+dshot_direction_reverse: 			; Temporary reverse
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #21
+	jnz 	dshot_save_settings
+
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jc 	dont_clear_dshot_cmd
+	
+	clr	IE_EA					; DPTR used in interrupts
+	mov	DPTR, #Eep_Pgm_Direction		; Read from flash
+	mov	A, #0
+	movc	A, @A+DPTR
+	setb	IE_EA
+	mov	Temp1, A
+	cjne	Temp1, #1, ($+5)
+	mov	A, #2
+	cjne	Temp1, #2, ($+5)
+	mov	A, #1
+	cjne	Temp1, #3, ($+5)
+	mov	A, #4
+	cjne	Temp1, #4, ($+5)
+	mov	A, #3
+	mov	Temp1, #Pgm_Direction
+	mov	@Temp1, A
+	rrc	A						; Lsb to carry
+	clr 	Flags3.PGM_DIR_REV
+	clr 	Flags3.PGM_BIDIR_REV
+	jc	($+4)
+	setb	Flags3.PGM_DIR_REV
+	jc	($+4)
+	setb	Flags3.PGM_BIDIR_REV
+	jmp 	clear_dshot_cmd
+
+dshot_save_settings:
+	clr	C
+	mov 	A, Dshot_Cmd
+	subb A, #12
+	jnz 	clear_dshot_cmd
+
+	mov	Flash_Key_1, #0A5h			; Initialize flash keys to valid values
+	mov	Flash_Key_2, #0F1h
+	clr 	C
+	mov 	A, Dshot_Cmd_Cnt
+	subb A, #6 					; Needs to receive it 6 times in a row
+	jc 	dont_clear_dshot_cmd
+
+	call erase_and_store_all_in_eeprom
+	setb	IE_EA
+	
+clear_dshot_cmd:
+	mov 	Dshot_Cmd, #0
+	mov 	Dshot_Cmd_Cnt, #0
+
+dont_clear_dshot_cmd:
+	mov	Flash_Key_1, #0			; Initialize flash keys to invalid values
+	mov	Flash_Key_2, #0
+	jmp 	wait_for_power_on_not_missing
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 ;
@@ -3933,7 +4232,6 @@ read_initial_temp:
 	mov	Adc_Conversion_Cnt, #8				; Make sure a temp reading is done next time
 	; Set up start operating conditions
 	clr	IE_EA				; Disable interrupts
-	mov	Pwm_Limit, #0FFh		; Set pwm limit to max
 	call set_startup_pwm
 	mov	Pwm_Limit, Pwm_Limit_Beg
 	mov	Pwm_Limit_By_Rpm, Pwm_Limit_Beg
@@ -4091,23 +4389,24 @@ normal_run_checks:
 	mov	A, Initial_Run_Rot_Cntd
 	dec	A
 	; Check number of initial rotations
-	jnz 	normal_run_check_startup_rot	; Branch if counter is not zero
+	jnz 	initial_run_check_startup_rot	; Branch if counter is not zero
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
 	setb	Flags1.MOTOR_STARTED		; Set motor started
 	jmp run1						; Continue with normal run
 
-normal_run_check_startup_rot:
+initial_run_check_startup_rot:
 	mov	Initial_Run_Rot_Cntd, A		; Not zero - store counter
+
+	jb	Flags3.PGM_BIDIR, initial_run_continue_run	; Check if bidirectional operation
 
 	clr	C
 	mov	A, New_Rcp				; Load new pulse value
 	subb	A, #1					; Check if pulse is below stop value
 	jc	($+5)
 
+initial_run_continue_run:
 	ljmp	run1						; Continue to run 
-
-	jb	Flags3.PGM_BIDIR, initial_run_phase_done	; Check if bidirectional operation
 
 	jmp	run_to_wait_for_power_on
 
@@ -4115,6 +4414,8 @@ initial_run_phase_done:
 	; Reset stall count
 	mov	Stall_Cnt, #0
 	; Exit run loop after a given time
+	jb	Flags3.PGM_BIDIR, run6_check_timeout	; Check if bidirectional operation
+
 	mov	Temp1, #250
 	mov	Temp2, #Pgm_Brake_On_Stop
 	mov	A, @Temp2
@@ -4127,6 +4428,7 @@ initial_run_phase_done:
 	subb	A, Temp1					; Is number of stop RC pulses above limit?
 	jnc	run_to_wait_for_power_on		; Yes, go back to wait for poweron
 
+run6_check_timeout:
 	mov	A, Rcp_Timeout_Cntd			; Load RC pulse timeout counter value
 	jz	run_to_wait_for_power_on		; If it is zero - go back to wait for poweron
 
