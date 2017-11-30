@@ -5,14 +5,14 @@
 4  DSHOT_CMD_BEEP4,			// Wait length of beep plus 100ms before next command
 5  DSHOT_CMD_BEEP5,			// Wait length of beep plus 100ms before next command
 6  DSHOT_CMD_ESC_INFO, 			// Wait at least 10ms before next command
-7  DSHOT_CMD_SPIN_DIRECTION_1,		// Need 9x
-8  DSHOT_CMD_SPIN_DIRECTION_2,		// Need 9x
-9  DSHOT_CMD_3D_MODE_OFF,		// Need 9x
-10 DSHOT_CMD_3D_MODE_ON, 		// Need 9x
+7  DSHOT_CMD_SPIN_DIRECTION_1,		// Need 6x
+8  DSHOT_CMD_SPIN_DIRECTION_2,		// Need 6x
+9  DSHOT_CMD_3D_MODE_OFF,		// Need 6x
+10 DSHOT_CMD_3D_MODE_ON, 		// Need 6x
 11 DSHOT_CMD_SETTINGS_REQUEST, 		// Currently not implemented
-12 DSHOT_CMD_SAVE_SETTINGS, 		// Need 9x
-20 DSHOT_CMD_SPIN_DIRECTION_NORMAL,	// Need 9x
-21 DSHOT_CMD_SPIN_DIRECTION_REVERSED,	// Need 9x
+12 DSHOT_CMD_SAVE_SETTINGS, 		// Need 6x
+20 DSHOT_CMD_SPIN_DIRECTION_NORMAL,	// Need 6x
+21 DSHOT_CMD_SPIN_DIRECTION_REVERSED,	// Need 6x
 22 DSHOT_CMD_LED0_ON,
 23 DSHOT_CMD_LED1_ON,
 24 DSHOT_CMD_LED2_ON,
