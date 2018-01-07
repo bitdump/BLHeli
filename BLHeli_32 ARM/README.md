@@ -1,4 +1,4 @@
-This directory contains Rev32.31 test code for BLHeli_32.
+The "Rev32.31 hex files" directory contains test code for BLHeli_32.
 
 The changes from Rev32.3 are:
 - Added programmable current sensor calibration
