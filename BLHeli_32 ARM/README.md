@@ -7,6 +7,6 @@ The changes from Rev32.3 are:
 - Added input signal status reporting
 - Added programmable startup music
 
-This Suite should be used with this test code: http://www.mediafire.com/folder/xeapg7afxxxba/BLHeliSuite_32Beta
+The 32.3.0.4 Beta Suite should be used with this test code: https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite
 
 Note that programmable startup music is not yet implemented in this Suite.
