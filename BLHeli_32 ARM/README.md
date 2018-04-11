@@ -14,4 +14,5 @@ Some fixes:
 - Frequent CRC errors on telemetry frames shall now be fixed.
 - The occasional undesired rotations when stopping in bidirectional mode is fixed.
 
-You can find a BLHeliSuite32 version that supports this test code here:
+You can find BLHeliSuite32 as usual here:
+https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite
