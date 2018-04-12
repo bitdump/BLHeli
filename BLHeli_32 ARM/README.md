@@ -2,7 +2,7 @@ Posted here in the "Rev32.41 hex files" directory, is BLHeli_32 test code Rev32.
 
 The code has the following new fuctionality
 - Added a sine modulation mode option
-  This mode is a hybrid between sine operation and tapezoidal block commutation.
+  This mode is a hybrid between sine operation and trapezoidal block commutation.
   It can make motors run slightly smoother and slightly more effective.
 - Added autonomous telemetry option
   When selected, telemetry frames will be sent every 32ms, regardless of requests from the input signal.
