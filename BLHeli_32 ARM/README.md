@@ -1,6 +1,6 @@
 Posted here in the "Rev32.42 hex files" directory, is BLHeli_32 test code Rev32.42 (interpret as Rev32.4.2)
 
-The code has the following new fuctionality
+The code has the following new functionality
 - Added a sine modulation mode option
   This mode is a hybrid between sine operation and trapezoidal block commutation.
   It can make motors run slightly smoother and slightly more effective.
