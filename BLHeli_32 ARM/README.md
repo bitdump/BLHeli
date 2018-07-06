@@ -1,4 +1,4 @@
-Posted here in the "Rev32.43 hex files" directory, is BLHeli_32 test code Rev32.43 (interpret as Rev32.4.3)
+Posted here in the "Rev32.5 hex files" directory, is BLHeli_32 release code Rev32.5
 
 The code has the following new functionality
 - Added a sine modulation mode option.
@@ -16,7 +16,7 @@ The code has the following new functionality
 Some fixes:
 - Frequent CRC errors on telemetry frames shall now be fixed.
 - The occasional undesired rotations when stopping in bidirectional mode is fixed.
-- Improved input signal detection, particularly for Proshot.
+- Improved input signal detection, particularly for Proshot and also for Dshot at high input signal frequency.
 
 You can find BLHeliSuite32 as usual here:
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite
