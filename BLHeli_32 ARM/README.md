@@ -1,4 +1,4 @@
-Posted here in the "Rev32.51 hex files" directory, is BLHeli_32 test code Rev32.51 (read as 32.5.1)
+Posted here in the "Rev32.52 hex files" directory, is BLHeli_32 test code Rev32.52 (read as 32.5.2)
 
 The code has the following new functionality:
 - Added a sine modulation mode option
