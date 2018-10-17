@@ -6,7 +6,7 @@ Both versions are now at the same revision.
 
 To view and use the files, click the "Download ZIP" button on this page and download the repository to your computer.
 
-For flashing and configuration, download the BLHeliSuite PC software:
+For flashing and configuration, download the BLHeliSuite PC software:\n
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite
 or the Android APP on Google Play:
 https://play.google.com/store/apps/details?id=org.blheli.BLHeli_32
