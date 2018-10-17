@@ -10,8 +10,8 @@ For flashing and configuration, download the BLHeliSuite PC software:
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite
 or the Android APP on Google Play:
 https://play.google.com/store/apps/details?id=org.blheli.BLHeli_32
-For users in regions where Google is blocked, you can download the ".apk" file in the "BLHeli_32 Android APP" to 
-your phone and tablet and open it. This will install the APP.
+For users in regions where Google is blocked, you can download the ".apk" file in the 
+"BLHeli_32 ARM\BLHeli_32 Android APP" folder to your phone and tablet and open it. This will install the APP.
 
 For more information, check out these threads:
 https://www.rcgroups.com/forums/showthread.php?2864611 (for BLHeli_32)
