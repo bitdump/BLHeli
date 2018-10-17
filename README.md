@@ -1,6 +1,7 @@
 This tree contains BLHeli code for sensorless brushless motor electronic speed control (ESC) boards.  
   
-To view and use the files, click the "Download ZIP" button on this page and download the repository to your computer.  
+To view and use the files, click the "Clone or download" button on this page,  
+and then select "Download ZIP" to download the repository to your computer.  
   
 For flashing and configuration, download the BLHeliSuite PC software:  
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite  
