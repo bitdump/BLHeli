@@ -20,7 +20,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 BLHeli_32 Rev32.61 test code is published in the "BLHeli_32 Test code Rev32.61 hex files" directory  
 - Added real time signal line telemetry (for Dshot and Proshot input)
 - Added telemetry trig for PWM input (pulse <30us for 1-2ms PWM, Oneshot125 and Oneshot42)
-- Added capability of Dshot2400
+- Added capability of Dshot2400 and improved accuracy of Proshot (added Jan 13)
 - Some smaller fixes
 
 ## Discussion threads
