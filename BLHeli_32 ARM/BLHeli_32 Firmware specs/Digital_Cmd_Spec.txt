@@ -29,9 +29,6 @@ Commands are only executed when motors are stopped
 
 Commands are valid for Dshot and Proshot input signals
 
-DIGITAL_CMD_SIGNAL_LINE_ERPM_TELEMETRY: 100erpm per LSB, 409500erpm max
-
-
 ESC_INFO layout for BLHeli_32:
 1-12: ESC SN
 13: Indicates which response version is used. 254 is for BLHeli_32 version.
