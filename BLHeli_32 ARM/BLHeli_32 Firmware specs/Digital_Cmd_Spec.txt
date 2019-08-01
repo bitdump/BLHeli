@@ -23,8 +23,6 @@
 29 DIGITAL_CMD_LED3_OFF 		      // No wait required
 30 Audio_Stream mode on/Off		      // Currently not implemented
 31 Silent Mode on/Off			      // Currently not implemented
-32 DIGITAL_CMD_SIGNAL_LINE_TELEMETRY_DISABLE                  // Need 6x, no wait required
-33 DIGITAL_CMD_SIGNAL_LINE_CONTINUOUS_ERPM_TELEMETRY          // Need 6x, no wait required
 Commands are only executed when motors are stopped
 
 Commands are valid for Dshot and Proshot input signals

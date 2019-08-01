@@ -24,6 +24,7 @@ BLHeli_32 Rev32.6.4 test code is published in the "BLHeli_32 Test code Rev32.6.4
 - Added programmable stall protection (BLHeliSuite32 rev must be 32.6.1.4 or higher)
 - Some smaller fixes  
 - The "Rev32.6.5 for inverted bidirectional dshot only" subdirectory contains code to be used with inverted dshot signaling
+- The "Rev32.6.6 for inverted bidirectional dshot and GCR return data only" subdirectory contains code to be used with inverted dshot signaling and GCR return data
 
 ## Discussion threads
 
