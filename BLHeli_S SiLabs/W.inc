@@ -400,11 +400,25 @@ Set_Pwm_C MACRO
 	mov	P1SKIP, #(NOT(1 SHL CpwmFET));
 	orl	P1MDIN, #(1 SHL CpwmFET)	; enable pin driver
 ENDM
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Set_Pwm_A_Nodamp MACRO
+	mov	P1SKIP, #(NOT(1 SHL ApwmFET));
+	orl	P1MDIN, #(1 SHL ApwmFET)	; enable pin driver
+ENDM
+Set_Pwm_B_Nodamp MACRO
+	mov	P1SKIP, #(NOT(1 SHL BpwmFET));
+	orl	P1MDIN, #(1 SHL BpwmFET)	; enable pin driver
+ENDM
+Set_Pwm_C_Nodamp MACRO
+	mov	P1SKIP, #(NOT(1 SHL CpwmFET));
+	orl	P1MDIN, #(1 SHL CpwmFET)	; enable pin driver
+ENDM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 Set_Pwms_Off MACRO
 	mov	P1SKIP, #P1_SKIP;
 ENDM
-
-
 
 Set_Comp_Phase_A MACRO
 	mov	CMP0MX, #((Mux_A) SHL 4)+((Comp_Com) SHL 0);

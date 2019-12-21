@@ -200,12 +200,12 @@ Decode_Dshot_2Msb MACRO
 	inc	DPL
 ENDM
 Decode_Dshot_2Lsb MACRO
-	movx	A, @DPTR
-	mov	Temp6, A
-	clr	C
-	subb	A, Temp5					; Subtract previous timestamp
-	clr	C
-	subb	A, Temp1
+		movx	A, @DPTR
+		mov	Temp6, A
+		clr	C
+		subb	A, Temp5					; Subtract previous timestamp
+		clr	C
+		subb	A, Temp1
 	jc	t1_int_lsb_fail			; Check that bit is longer than minimum
 
 	subb	A, Temp1					; Check if bit is zero or one
@@ -213,12 +213,12 @@ Decode_Dshot_2Lsb MACRO
 	rlc	A
 	mov	Temp3, A
 	inc	DPL						; Next bit
-	movx	A, @DPTR
-	mov	Temp5, A
-	clr	C
-	subb	A, Temp6
-	clr	C
-	subb	A, Temp1
+		movx	A, @DPTR
+		mov		Temp5, A
+		clr		C
+		subb	A, Temp6
+		clr		C
+		subb	A, Temp1
 	jc	t1_int_lsb_fail
 
 	subb	A, Temp1
@@ -444,6 +444,28 @@ ELSE
 	mov	P1SKIP, #03h
 ENDIF
 ENDM
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Set_Pwm_A_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P1.AcomFET
+	ENDIF	
+	mov	P0SKIP, #NOT( (1 SHL ApwmFET) )
+ENDM
+Set_Pwm_B_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P1.BcomFET
+	ENDIF
+	mov	P0SKIP, #NOT( (1 SHL BpwmFET) )
+ENDM
+Set_Pwm_C_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P1.CcomFET
+	ENDIF
+	mov	P0SKIP, #NOT( (1 SHL CpwmFET) )
+ENDM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 Set_Pwms_Off MACRO
 	mov	P0SKIP, #0FFh
 	mov	P1SKIP, #07h

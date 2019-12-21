@@ -448,6 +448,31 @@ ELSE
 	mov	P1SKIP, #7Eh
 endif
 ENDM
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Set_Pwm_A_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P1.AcomFET
+	ENDIF	
+	mov	P1SKIP, #NOT( (1 SHL ApwmFET) )
+	mov	P0SKIP, #0FFh
+ENDM
+Set_Pwm_B_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P1.BcomFET
+	ENDIF
+	mov	P1SKIP, #NOT( (1 SHL BpwmFET) )
+	mov	P0SKIP, #0FFh
+ENDM
+Set_Pwm_C_Nodamp MACRO
+	IF FETON_DELAY == 0
+		setb	P0.CcomFET
+	ENDIF
+	mov	P1SKIP, #NOT( (1 SHL CpwmFET) )
+	mov	P0SKIP, #0FFh
+ENDM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 Set_Pwms_Off MACRO
 	mov	P0SKIP, #0FFh
 	mov	P1SKIP, #7Fh
