@@ -1415,8 +1415,9 @@ t1_normal_range:
 	IF_SET_CALL  RCP_DSHOT_LEVEL, t1_int_dshot_tlm_init	
 	
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	Set_Damp_Pwm_Regs	#0, #0					;; preset a safety damping off
-
+	clr		IE_EA
+		Set_Damp_Pwm_Regs	#0, #0					;; preset a safety damping off
+	setb	IE_EA
 	; Check for bidirectional operation (0=stop, 96-2095->fwd, 2096-4095->rev)
 	jnb	Flags3.PGM_BIDIR, t1_int_not_bidir			; If not bidirectional operation - branch
 
@@ -1615,6 +1616,12 @@ t1_int_pulse_ready:
 		Set_Power_Pwm_Regs	Temp1, Temp2
 		Set_Damp_Pwm_Regs	Temp3, Temp4	
 	setb	IE_EA	
+	
+	dec		Temp3
+	cjne	Temp3,#0ffh, t1_int_dec_damp
+	dec		Temp4
+	t1_int_dec_damp:
+	
 	MOVw	Power_Pwm_Reg_L,Power_Pwm_Reg_H,	Temp1,Temp2
 	MOVw	Damp_Pwm_Reg_L,Damp_Pwm_Reg_H,		Temp3,Temp4
 
