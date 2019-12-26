@@ -76,8 +76,8 @@ $NOMOD51
 ; - Rev16.76	Add PWM 48k mode
 ;					PWM 24khz: 10bit
 ;					PWM 48khz:  9bit
-; - Rev16.77	Preset a damping off to sccure non-overlaping of PWM and comp-PWM	
-;				Aligh PWM to commutation rising edge
+; - Rev16.77	Preset a damping off to secure non-overlaping of PWM and comp-PWM	
+;				Align PWM to commutation rising edge
 ;				Stop support deadtime=0
 ;**** **** **** **** **** **** **** **** **** **** **** **** **** **** **** 
 ;
