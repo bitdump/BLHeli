@@ -80,9 +80,20 @@ abd:	mov	Xl, #(low(BOOT_DELAY / 6)+1)
 	mov	Baudl, #low(BAUDTIME)
 	mov	Baudh, #high(BAUDTIME)
 
-wait_for_low:
-	jnb	RTX_PORT.RTX_PIN, ($+5)
-	ajmp wait_for_low
+	;wait_for_low:
+	;	jnb	RTX_PORT.RTX_PIN, ($+5)
+	;	ajmp wait_for_low	
+	clr		A
+id0:
+	jnb		RTX_PORT.RTX_PIN, id1		; Look for low add a wait limit for BF4.1
+	push	ACC						
+		clr		A
+		id00:
+		jnb		RTX_PORT.RTX_PIN, id1
+		djnz	ACC, id00
+	pop		ACC
+	djnz	ACC, id0
+	jmp		exit
 
 	; Identifier (BOOT_SIGN) scanning with timeout and checksum
 id1:	jb	RTX_PORT.RTX_PIN, id3	; Look for high

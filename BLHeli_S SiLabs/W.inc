@@ -269,36 +269,16 @@ ELSE
 	mov	PCA0CPM0, #42h				; Enable comparator of module, set pwm mode
 ENDIF
 ENDM
-Set_Power_Pwm_Regs MACRO
-IF FETON_DELAY == 0
-	mov	PCA0CPL0, Power_Pwm_Reg_L
-	mov	PCA0CPH0, Power_Pwm_Reg_H
-ELSE
-	clr	C
-	mov	A, Power_Pwm_Reg_H
-	rrc	A
-	mov	Temp1, A
-	mov	A, Power_Pwm_Reg_L
-	rrc	A
-	mov	PCA0CPL1, A
-	mov	PCA0CPH1, Temp1
-ENDIF
+
+Set_Power_Pwm_Regs MACRO byteL, byteH
+	mov	PCA0CPL1, byteL
+	mov	PCA0CPH1, byteH
 ENDM		
-Set_Damp_Pwm_Regs MACRO
-IF FETON_DELAY == 0
-	mov	PCA0CPL1, Damp_Pwm_Reg_L
-	mov	PCA0CPH1, Damp_Pwm_Reg_H
-ELSE
-	clr	C
-	mov	A, Damp_Pwm_Reg_H
-	rrc	A
-	mov	Temp1, A
-	mov	A, Damp_Pwm_Reg_L
-	rrc	A
-	mov	PCA0CPL0, A
-	mov	PCA0CPH0, Temp1
-ENDIF
-ENDM		
+Set_Damp_Pwm_Regs MACRO byteL, byteH
+	mov	PCA0CPL0, byteL
+	mov	PCA0CPH0, byteH
+ENDM
+
 Clear_COVF_Interrupt MACRO
 	anl	PCA0PWM, #0DFh
 ENDM
@@ -400,25 +380,11 @@ Set_Pwm_C MACRO
 	mov	P1SKIP, #(NOT(1 SHL CpwmFET));
 	orl	P1MDIN, #(1 SHL CpwmFET)	; enable pin driver
 ENDM
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Set_Pwm_A_Nodamp MACRO
-	mov	P1SKIP, #(NOT(1 SHL ApwmFET));
-	orl	P1MDIN, #(1 SHL ApwmFET)	; enable pin driver
-ENDM
-Set_Pwm_B_Nodamp MACRO
-	mov	P1SKIP, #(NOT(1 SHL BpwmFET));
-	orl	P1MDIN, #(1 SHL BpwmFET)	; enable pin driver
-ENDM
-Set_Pwm_C_Nodamp MACRO
-	mov	P1SKIP, #(NOT(1 SHL CpwmFET));
-	orl	P1MDIN, #(1 SHL CpwmFET)	; enable pin driver
-ENDM
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 Set_Pwms_Off MACRO
 	mov	P1SKIP, #P1_SKIP;
 ENDM
+
+
 
 Set_Comp_Phase_A MACRO
 	mov	CMP0MX, #((Mux_A) SHL 4)+((Comp_Com) SHL 0);
