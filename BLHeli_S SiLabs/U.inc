@@ -70,6 +70,8 @@ ELSEIF FETON_DELAY == 70
 Eep_ESC_Layout:		DB	"#U_L_70#        "
 ELSEIF FETON_DELAY == 90
 Eep_ESC_Layout:		DB	"#U_L_90#        "
+ELSEIF FETON_DELAY == 120
+Eep_ESC_Layout:		DB	"#U_L_120#       "
 ENDIF
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B10#"	; Project and MCU tag (16 Bytes)
@@ -99,6 +101,8 @@ ELSEIF FETON_DELAY == 70
 Eep_ESC_Layout:		DB	"#U_H_70#        "
 ELSEIF FETON_DELAY == 90
 Eep_ESC_Layout:		DB	"#U_H_90#        "
+ELSEIF FETON_DELAY == 120
+Eep_ESC_Layout:		DB	"#U_H_120#       "
 ENDIF
 CSEG AT 1A50h
 Eep_ESC_MCU:			DB	"#BLHELI$EFM8B21#"	; Project and MCU tag (16 Bytes)
@@ -539,4 +543,3 @@ Set_LED_3 MACRO
 ENDM
 Clear_LED_3 MACRO
 ENDM
-
