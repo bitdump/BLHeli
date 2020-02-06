@@ -19,7 +19,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 The folder "Rev32.7.1 SBUS and S.PORT testcode" contains test code that supports SBUS
 as input signal, and that is compatible with S.PORT for telemetry.
-Note that S.PORT is only supported on ESCs that use USART1 for telemetry.
+Note that S.PORT is only supported on ESCs that use USART1 (port PB6) for telemetry.
 If the "S.PORT Physical ID" programming parameter shows up in BLHeliSuite32, then your ESC supports it.
 
 
