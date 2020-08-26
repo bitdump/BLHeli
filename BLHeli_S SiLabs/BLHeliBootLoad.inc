@@ -1,6 +1,6 @@
 ; BLHeli bootloader for SiLabs MCUs. Based upon AVRootloader (copyright HR)
 
-XTAL					EQU	25000000	
+XTAL					EQU	25000000
 
 BOOT_START			EQU	1C00h	; Bootloader segment address
 BOOT_DELAY			EQU	XTAL/4	; About 250ms (don't set to fast to avoid connection problems)
@@ -8,53 +8,53 @@ BOOT_BAUDRATE			EQU	19200	; Only used if no baudrate detection activated, XTAL i
 BOOT_VERSION			EQU	6		; Version 6 (must be not changed)
 BOOT_PAGES			EQU	1		; Number of flash segments for bootloader
 
-UART_LOOP				EQU 	26		; Depends upon timing of putc, getc 
-BAUDTIME				EQU 	((XTAL/BOOT_BAUDRATE)/3)-UART_LOOP
+UART_LOOP				EQU	26		; Depends upon timing of putc, getc
+BAUDTIME				EQU	((XTAL/BOOT_BAUDRATE)/3)-UART_LOOP
 
-SUCCESS				EQU 	030h
-ERRORVERIFY			EQU 	0C0h
-ERRORCOMMAND			EQU 	0C1h
-ERRORCRC				EQU 	0C2h
-ERRORPROG				EQU 	0C5h
+SUCCESS				EQU	030h
+ERRORVERIFY			EQU	0C0h
+ERRORCOMMAND			EQU	0C1h
+ERRORCRC				EQU	0C2h
+ERRORPROG				EQU	0C5h
 
-POLYNOM				EQU 	0A001h		; CRC Polynom
+POLYNOM				EQU	0A001h	; CRC Polynom
 
-Xl					EQU 	R0			; Temporary X
-Xh					EQU 	R1
-Paral				EQU 	R2			; Params for UART
-Parah				EQU 	R3	
-Cmdl					EQU 	R4			; Commands
-Cmdh					EQU 	R5	
-Cntl					EQU 	R6			; Baudtime
-Cnth					EQU 	R7
+Xl					EQU	R0		; Temporary X
+Xh					EQU	R1
+Paral				EQU	R2		; Params for UART
+Parah				EQU	R3
+Cmdl					EQU	R4		; Commands
+Cmdh					EQU	R5
+Cntl					EQU	R6		; Baudtime
+Cnth					EQU	R7
 
-DSEG AT 20h					
-Bit_Reg:				DS	1			; Bit storage register
-Byte_Reg:				DS	1			; Byte storage register
-Crcl:				DS 	1			; CRC 16Bit
-Crch:				DS 	1
-Baudl:				DS 	1			; Baudtime
-Baudh:				DS 	1
-Bit_Cnt:				DS 	1			; Counter in UART loops
-Byte_Cntl:			DS 	1			; Generic counter
-Byte_Cnth:			DS 	1			
-BL_Flash_Key_1:		DS	1			; Flash keys
+DSEG AT 20h
+Bit_Reg:				DS	1		; Bit storage register
+Byte_Reg:				DS	1		; Byte storage register
+Crcl:				DS	1		; CRC 16Bit
+Crch:				DS	1
+Baudl:				DS	1		; Baudtime
+Baudh:				DS	1
+Bit_Cnt:				DS	1		; Counter in UART loops
+Byte_Cntl:			DS	1		; Generic counter
+Byte_Cnth:			DS	1
+BL_Flash_Key_1:		DS	1		; Flash keys
 BL_Flash_Key_2:		DS	1
 
 CSEG AT BOOT_START		; Bootloader start
 init:clr	IE_EA
 	; Select register bank 0 for main program routines
-	clr	PSW.3				; Select register bank 0 for main program routines	
+	clr	PSW.3				; Select register bank 0 for main program routines
 	; Disable the WDT.
 	mov	WDTCN, #0DEh			; Disable watchdog
-	mov	WDTCN, #0ADh		
+	mov	WDTCN, #0ADh
 	; Initialize stack
 	mov	SP, #0c0h				; Stack = 64 upper bytes of RAM
 	; Initialize clock
 	mov	CLKSEL, #00h			; Set clock divider to 1
 	; Initialize VDD monitor
-	orl	VDM0CN, #080h    		; Enable the VDD monitor
-	mov	Baudl, #38h  			; Wait 100us
+	orl	VDM0CN, #080h			; Enable the VDD monitor
+	mov	Baudl, #38h			; Wait 100us
 	mov	Baudh, #03h
 	acall waitf
 	; Initialize flash keys
@@ -88,7 +88,7 @@ wait_for_low:
 id1:	jb	RTX_PORT.RTX_PIN, id3	; Look for high
 	djnz	Xl, id1				; Subtract 1 from X (BOOT_DELAY)
 	djnz	Xh, id1
-	djnz	Cmdl, id1 
+	djnz	Cmdl, id1
 
 	ajmp	exit
 
@@ -100,7 +100,7 @@ id3:	jnb	RTX_PORT.RTX_PIN, id4	; Look for low
 	ajmp	exit
 
 id4:	acall getx				; Read character
-	clr	A			
+	clr	A
 	movc A, @A+DPTR			; Load BOOT_SIGN character
 	inc	DPTR
 	clr	C
@@ -115,10 +115,10 @@ id5:
 	acall getw				; Read CRC
 	jz	($+4)				; Check CRC
 	ajmp	abd
-	
+
 	; Send info about chip/bootloader (BOOT_MSG + BOOT_INFO)
 	mov	Parah, #((BOOT_INFO - BOOT_MSG) + 4)
-in1:	clr	A			
+in1:	clr	A
 	movc A, @A+DPTR			; Load character
 	mov	Paral, A
 	inc	DPTR
@@ -127,9 +127,9 @@ in1:	clr	A
 
 
 	; Main commandloop
-	; 0=Run/restart 
+	; 0=Run/restart
 	; 1=Program flash, 2=Erase flash, 3=Read flash
-	; 0xFF=Set address, 0xFE=Set buffer, 0xFD=Keep alive 
+	; 0xFF=Set address, 0xFE=Set buffer, 0xFD=Keep alive
 main:mov	Paral, #SUCCESS
 mai1:acall putc
 	mov	Crcl, #0				; Reset CRC
@@ -142,11 +142,11 @@ mai1:acall putc
 	clr	C
 	mov	A, Cmdh
 	subb	A, #0FEh
-	jc	mai2					; Jump if not set address or set buffer	
+	jc	mai2					; Jump if not set address or set buffer
 
 	acall getw				; Address or number of bytes
 	mov	Byte_Cntl, Paral		; Store number of bytes for set buffer
-	mov	Byte_Cnth, Parah	
+	mov	Byte_Cnth, Parah
 	mov	A, Cmdh
 	jnb	ACC.0, mai2			; Jump if set buffer
 
@@ -175,10 +175,10 @@ exit:mov	Bit_Access, #0			; Clear variable used by flash lock detect
 rst:	ajmp	init
 
 	; Set buffer
-setbuf:mov Xl, Byte_Cntl			; Set number of bytes 
+setbuf:mov Xl, Byte_Cntl			; Set number of bytes
 	mov	Xh, Byte_Cnth
-	inc	Xl	
-	inc	Xh	
+	inc	Xl
+	inc	Xh
 set4:djnz	Xl, set5
 	djnz	Xh, set5
 	ajmp	set6
@@ -188,7 +188,7 @@ set5:acall getc				; Receive data
 	movx	@Xl, A				; Store data in XRAM
 	ajmp	set4
 
-set6:inc	Cmdh	
+set6:inc	Cmdh
 	ajmp	mai2
 
 mai4:clr	C
@@ -199,7 +199,7 @@ mai4:clr	C
 	; Program/erase
 	mov	A, Cmdh
 	mov	C, ACC.0
-	mov	Bit_Reg.0, C	
+	mov	Bit_Reg.0, C
 	mov	Paral, #ERRORPROG
 	clr	C
 	mov	A, DPL
@@ -218,10 +218,10 @@ mai4:clr	C
 	jnb	Bit_Reg.0, pro6		; Jump if erase command
 
 	; Program flash
-pro3:mov 	Xl, Byte_Cntl			; Set number of bytes 
+pro3:mov	Xl, Byte_Cntl			; Set number of bytes
 	mov	Xh, Byte_Cnth
-	inc	Xl	
-	inc	Xh	
+	inc	Xl
+	inc	Xh
 	orl	PSCTL, #01h			; Set the PSWE bit
 	anl	PSCTL, #0FDh			; Clear the PSEE bit
 pro4:djnz	Xl, pro5
@@ -237,7 +237,7 @@ pro5:
 	inc	DPTR					; Increment flash address
 	ajmp	pro4
 
-	movx	A, @Xl				; Read from XRAM		
+	movx	A, @Xl				; Read from XRAM
 	mov	FLKEY, BL_Flash_Key_1	; First key code
 	mov	FLKEY, BL_Flash_Key_2	; Second key code
 	movx	@DPTR, A				; Write to flash
@@ -256,7 +256,7 @@ rd1:	clr	A
 	inc	DPTR					; Increment flash address
 	mov	Paral, A
 	acall putp
-	djnz	Cmdl, rd1 			; Decrement bytes to read	
+	djnz	Cmdl, rd1			; Decrement bytes to read
 
 	acall putw				; CRC
 	ajmp	main
@@ -300,11 +300,11 @@ put3:jb	Bit_Reg.1, ($+5)
 	setb	RTX_PORT.RTX_PIN		; Set pin high
 	jnb	Bit_Reg.1, ($+5)
 	clr	RTX_PORT.RTX_PIN		; Set pin low
-	acall waitf							
+	acall waitf
 	clr	C
 	rrc	A
-	jc	put4		
-						
+	jc	put4
+
 	clr	Bit_Reg.1
 
 put4:djnz	Bit_Cnt, put3
@@ -333,15 +333,15 @@ getx:mov	Bit_Cnt, #8
 	rrc	A
 	mov	Cntl, A
 	acall waith
-get2:acall waitf				; Wait one baud							
+get2:acall waitf				; Wait one baud
 	clr	C
 	mov	A, Paral
 	rrc	A
-	jnb	RTX_PORT.RTX_PIN, ($+5)			
+	jnb	RTX_PORT.RTX_PIN, ($+5)
 	orl	A, #080h
 
 	mov	Paral, A
-	jnb	ACC.7, ($+6) 
+	jnb	ACC.7, ($+6)
 	xrl	Crcl, #low(POLYNOM)
 
 	clr	C
@@ -351,22 +351,22 @@ get2:acall waitf				; Wait one baud
 	mov	A, Crcl
 	rrc	A
 	mov	Crcl, A
-	jnc	get3				
+	jnc	get3
 
 	xrl	Crch, #high(POLYNOM)
 	xrl	Crcl, #low(POLYNOM)
 
 get3:djnz	Bit_Cnt, get2
 
-	mov	A, Crcl 
-	xrl	A, Crch 
-	xrl	A, Crch 
+	mov	A, Crcl
+	xrl	A, Crch
+	xrl	A, Crch
 	mov	Crcl, A
 	ret
 
 
-	; UART delays										
-waitf:mov	Cntl, Baudl	
+	; UART delays
+waitf:mov	Cntl, Baudl
 	mov	Cnth, Baudh
 waith:inc Cntl
 	inc	Cnth
@@ -374,10 +374,10 @@ wait1:djnz Cntl, wait1
 	djnz Cnth, wait1
 
 	setb	Bit_Reg.1
-	ret									
+	ret
 
 
-BOOT_SIGN:	DB	"BLHeli"	
+BOOT_SIGN:	DB	"BLHeli"
 
 BOOT_MSG:		DB	"471d"		; Interface-MCU_BootlaoderRevision
 
