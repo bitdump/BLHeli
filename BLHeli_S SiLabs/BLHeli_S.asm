@@ -117,16 +117,17 @@ I_			EQU 9	; X  X  RC X  MC MB MA CC	X  X  Ac Bc Cc Ap Bp Cp
 J_			EQU 10	; L2 L1 L0 RC CC MB MC MA	X  X  Cc Bc Ac Cp Bp Ap	LEDs
 K_			EQU 11	; X  X  MC X  MB CC MA RC	X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
 L_			EQU 12	; X  X  RC X  CC MA MB MC	X  X  Ac Bc Cc Ap Bp Cp
-M_			EQU 13	; MA MC CC MB RC L0 X  X	X  Cc Bc Ac Cp Bp Ap X	LED
+M_			EQU 13	; MA MC CC MB RC L0 X  X 	X  Cc Bc Ac Cp Bp Ap X	LED
 N_			EQU 14	; X  X  RC X  MC MB MA CC	X  X  Cp Cc Bp Bc Ap Ac
 O_			EQU 15	; X  X  RC X  CC MA MC MB	X  X  Cc Cp Bc Bp Ac Ap	Like D, but low side pwm
-P_			EQU 16	; X  X  RC MA CC MB MC X	X  Cc Bc Ac Cp Bp Ap X
-Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X	X  MA MB MC CC Cc Bc Ac	LEDs
+P_			EQU 16	; X  X  RC MA CC MB MC X 	X  Cc Bc Ac Cp Bp Ap X
+Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X 	X  MA MB MC CC Cc Bc Ac	LEDs
 R_			EQU 18	; X  X  RC X  MC MB MA CC	X  X  Ac Bc Cc Ap Bp Cp
 S_			EQU 19	; X  X  RC X  CC MA MC MB	X  X  Cc Cp Bc Bp Ac Ap	Like O, but com fets inverted
-T_			EQU 20	; RC X  MA X  MB CC MC X	X  X  Cp Bp Ap Ac Bc Cc
+T_			EQU 20	; RC X  MA X  MB CC MC X 	X  X  Cp Bp Ap Ac Bc Cc
 U_			EQU 21	; MA MC CC MB RC L0 L1 L2	X  Cc Bc Ac Cp Bp Ap X	Like M, but with 3 LEDs
 V_			EQU 22	; Cc X  RC X  MC CC MB MA	X  Ap Ac Bp X  X  Bc Cp
+W_			EQU 23	; RC MC MB X  CC MA X X		X  Ap Bp Cp X  X  X  X	Tristate gate driver
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -152,6 +153,7 @@ V_			EQU 22	; Cc X  RC X  MC CC MB MA	X  Ap Ac Bp X  X  Bc Cp
 ;ESCNO EQU T_
 ;ESCNO EQU U_
 ;ESCNO EQU V_
+;ESCNO EQU W_
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -252,6 +254,9 @@ IF ESCNO == V_
 $include (V.inc)	; Select pinout V
 ENDIF
 
+IF ESCNO == W_
+$include (W.inc)	; Select pinout W
+ENDIF
 
 
 ;**** **** **** **** ****
