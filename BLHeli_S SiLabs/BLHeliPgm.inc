@@ -22,11 +22,11 @@
 ;
 ;**** **** **** **** ****
 ;
-; BLHeliTxPgm SiLabs                                      
-;                                                         
-; EEPROM is not available in SiLabs MCUs                  
-; Therefore a segment of the flash is used as "EEPROM"    
-;                                                         
+; BLHeliTxPgm SiLabs
+;
+; EEPROM is not available in SiLabs MCUs
+; Therefore a segment of the flash is used as "EEPROM"
+;
 ;**** **** **** **** ****
 
 
@@ -37,7 +37,7 @@
 ; No assumptions
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-read_all_eeprom_parameters:	
+read_all_eeprom_parameters:
 	; Check initialized signature
 	mov	DPTR, #Eep_Initialized_L
 	mov	Temp1, #Bit_Access
@@ -54,8 +54,8 @@ read_all_eeprom_parameters:
 read_eeprom_store_defaults:
 	mov	Flash_Key_1, #0A5h
 	mov	Flash_Key_2, #0F1h
-	call set_default_parameters	
-	call erase_and_store_all_in_eeprom	
+	call set_default_parameters
+	call erase_and_store_all_in_eeprom
 	mov	Flash_Key_1, #0
 	mov	Flash_Key_2, #0
 	jmp	read_eeprom_exit
@@ -63,24 +63,24 @@ read_eeprom_store_defaults:
 read_eeprom_read:
 	; Read eeprom
 	mov	DPTR, #_Eep_Pgm_Gov_P_Gain
-	mov	Temp1, #_Pgm_Gov_P_Gain	
+	mov	Temp1, #_Pgm_Gov_P_Gain
 	mov	Temp4, #10
 read_eeprom_block1:
 	call read_eeprom_byte
-	inc	DPTR				
-	inc	Temp1			
+	inc	DPTR
+	inc	Temp1
 	djnz	Temp4, read_eeprom_block1
 
 	mov	DPTR, #Eep_Enable_TX_Program
-	mov	Temp1, #Pgm_Enable_TX_Program	
+	mov	Temp1, #Pgm_Enable_TX_Program
 	mov	Temp4, #26	; 26 parameters
 read_eeprom_block2:
 	call read_eeprom_byte
-	inc	DPTR				
-	inc	Temp1		
+	inc	DPTR
+	inc	Temp1
 	djnz	Temp4, read_eeprom_block2
 
-	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
+	mov	DPTR, #Eep_Dummy			; Set pointer to uncritical area
 
 read_eeprom_exit:
 	ret
@@ -116,23 +116,23 @@ erase_and_store_all_in_eeprom:
 	mov	Temp4, #10
 write_eeprom_block1:
 	call write_eeprom_byte
-	inc	DPTR						
-	inc	Temp1					
+	inc	DPTR
+	inc	Temp1
 	djnz	Temp4, write_eeprom_block1
 
 	mov	DPTR, #Eep_Enable_TX_Program
-	mov	Temp1, #Pgm_Enable_TX_Program	
+	mov	Temp1, #Pgm_Enable_TX_Program
 	mov	Temp4, #26	; 26 parameters
 write_eeprom_block2:
 	call write_eeprom_byte
-	inc	DPTR						
-	inc	Temp1					
+	inc	DPTR
+	inc	Temp1
 	djnz	Temp4, write_eeprom_block2
 
 	call	write_tags
 	call write_eeprom_signature
-	mov	DPTR, #Eep_Dummy 			; Set pointer to uncritical area
-	ret	
+	mov	DPTR, #Eep_Dummy			; Set pointer to uncritical area
+	ret
 
 
 
@@ -140,7 +140,7 @@ write_eeprom_block2:
 ;
 ; Read eeprom byte routine
 ;
-; Gives data in A and in address given by Temp1. Assumes address in DPTR 
+; Gives data in A and in address given by Temp1. Assumes address in DPTR
 ; Also assumes address high byte to be zero
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -155,7 +155,7 @@ read_eeprom_byte:
 ;
 ; Write eeprom byte routine
 ;
-; Assumes data in address given by Temp1, or in accumulator. Assumes address in DPTR 
+; Assumes data in address given by Temp1, or in accumulator. Assumes address in DPTR
 ; Also assumes address high byte to be zero
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -187,12 +187,12 @@ write_eeprom_byte_from_acc:
 ; No assumptions
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-erase_flash:	
+erase_flash:
 	orl	PSCTL, #02h			; Set the PSEE bit
 	orl	PSCTL, #01h			; Set the PSWE bit
 	mov	FLKEY, Flash_Key_1		; First key code
 	mov	FLKEY, Flash_Key_2		; Second key code
-	mov	DPTR, #Eep_Initialized_L	
+	mov	DPTR, #Eep_Initialized_L
 	movx	@DPTR, A
 	anl	PSCTL, #0FCh			; Clear the PSEE and PSWE bits
 	ret
@@ -205,7 +205,7 @@ erase_flash:
 ; No assumptions
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-write_eeprom_signature:	
+write_eeprom_signature:
 	mov	DPTR, #Eep_Initialized_L
 	mov	A, #055h
 	call write_eeprom_byte_from_acc
@@ -224,17 +224,17 @@ write_eeprom_signature:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 read_tags:
-	mov	Temp3, #48				; Number of tags
-	mov	Temp2, #Temp_Storage		; Set RAM address
+	mov	Temp3, #48			; Number of tags
+	mov	Temp2, #Temp_Storage	; Set RAM address
 	mov	Temp1, #Bit_Access
-	mov	DPTR, #Eep_ESC_Layout		; Set flash address
-read_tag:	
+	mov	DPTR, #Eep_ESC_Layout	; Set flash address
+read_tag:
 	call read_eeprom_byte
 	mov	A, Bit_Access
-	mov	@Temp2, A			; Write to RAM
+	mov	@Temp2, A				; Write to RAM
 	inc	Temp2
 	inc	DPTR
-	djnz Temp3, read_tag	
+	djnz Temp3, read_tag
 	ret
 
 
@@ -246,15 +246,15 @@ read_tag:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 write_tags:
-	mov	Temp3, #48				; Number of tags
-	mov	Temp2, #Temp_Storage		; Set RAM address
-	mov	DPTR, #Eep_ESC_Layout		; Set flash address
-write_tag:	
-	mov	A, @Temp2			; Read from RAM
+	mov	Temp3, #48			; Number of tags
+	mov	Temp2, #Temp_Storage	; Set RAM address
+	mov	DPTR, #Eep_ESC_Layout	; Set flash address
+write_tag:
+	mov	A, @Temp2				; Read from RAM
 	call write_eeprom_byte_from_acc
 	inc	Temp2
 	inc	DPTR
-	djnz Temp3, write_tag	
+	djnz Temp3, write_tag
 	ret
 
 
