@@ -640,7 +640,7 @@ t1_int_msb_fail:
 	mov	DPTR, #0			; Set pointer to start
 	setb	IE_EX0			; Enable int0 interrupts
 	setb	IE_EX1			; Enable int1 interrupts
-	ajmp int0_int_outside_range
+	ajmp	int0_int_outside_range
 
 t1_int_decode_msb:
 	; Decode DShot data Msb. Use more code space to save time (by not using loop)
@@ -654,7 +654,7 @@ t1_int_lsb_fail:
 	mov	DPTR, #0			; Set pointer to start
 	setb	IE_EX0			; Enable int0 interrupts
 	setb	IE_EX1			; Enable int1 interrupts
-	ajmp int0_int_outside_range
+	ajmp	int0_int_outside_range
 
 t1_int_decode_lsb:
 	; Decode DShot data Lsb
@@ -679,13 +679,13 @@ t1_int_decode_lsb:
 	mov	DPTR, #0			; Set pointer to start
 	setb	IE_EX0			; Enable int0 interrupts
 	setb	IE_EX1			; Enable int1 interrupts
-	ajmp int0_int_outside_range
+	ajmp	int0_int_outside_range
 
 t1_int_xor_ok:
 	; Swap to be LSB aligned to 12 bits (and invert)
 	mov	A, Temp4
 	cpl	A
-	swap A
+	swap	A
 	anl	A, #0F0h			; Low nibble of high byte
 	mov	Temp2, A
 	mov	A, Temp3
@@ -696,7 +696,7 @@ t1_int_xor_ok:
 	mov	Temp3, A
 	mov	A, Temp4			; High nibble of high byte
 	cpl	A
-	swap A
+	swap	A
 	anl	A, #0Fh
 	mov	Temp4, A
 	; Subtract 96 (still 12 bits)
@@ -723,7 +723,7 @@ t1_int_xor_ok:
 
 	mov	Temp2, A
 	clr	C
-	subb A, Dshot_Cmd
+	subb	A, Dshot_Cmd
 	jz	t1_dshot_inc_cmd_cnt
 
 t1_dshot_set_cmd:
@@ -881,7 +881,7 @@ t1_int_frame_fail:
 	mov	DPTR, #0					; Set pointer to start
 	setb	IE_EX0					; Enable int0 interrupts
 	setb	IE_EX1					; Enable int1 interrupts
-	ajmp int0_int_outside_range
+	ajmp	int0_int_outside_range
 
 
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
@@ -997,7 +997,7 @@ int0_int_not_dshot:
 
 	; Multishot - Multiply by 2 and add 1/16 and 1/32
 	mov	A, Temp1		; Divide by 16
-	swap A
+	swap	A
 	anl	A, #0Fh
 	mov	Temp3, A
 	mov	A, Temp2
@@ -1116,9 +1116,9 @@ int0_int_fall_gain_done:
 	clr	C
 	mov	A, Temp4					; Is pulse 2235us or higher?
 IF MCU_48MHZ == 0
-	subb A, #09h
+	subb	A, #09h
 ELSE
-	subb A, #12h
+	subb	A, #12h
 ENDIF
 	jnc	int0_int_outside_range		; Yes - ignore pulse
 
@@ -1126,15 +1126,15 @@ ENDIF
 	clr	C
 	mov	A, Temp3
 IF MCU_48MHZ == 0
-	subb A, #9Ah
+	subb	A, #9Ah
 ELSE
-	subb A, #34h
+	subb	A, #34h
 ENDIF
 	mov	A, Temp4
 IF MCU_48MHZ == 0
-	subb A, #03h
+	subb	A, #03h
 ELSE
-	subb A, #07h
+	subb	A, #07h
 ENDIF
 	jnc	int0_int_check_full_range	; No - proceed
 
@@ -1782,7 +1782,7 @@ temp_average_updated:
 	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below second limit
 	jc	temp_check_exit			; Yes - exit
 
-	mov Pwm_Limit, #128				; No - limit pwm
+	mov	Pwm_Limit, #128			; No - limit pwm
 
 	clr	C
 	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below third limit
@@ -1794,7 +1794,7 @@ temp_average_updated:
 	subb	A, #(TEMP_LIMIT_STEP/2)		; Is temperature below final limit
 	jc	temp_check_exit			; Yes - exit
 
-	mov Pwm_Limit, #0				; No - limit pwm
+	mov	Pwm_Limit, #0				; No - limit pwm
 
 temp_check_exit:
 	ret
@@ -2119,7 +2119,7 @@ calc_next_comm_timing_fast:
 	swap	A
 	mov	Temp7, A
 	mov	A, Temp3
-	swap A
+	swap	A
 	anl	A, #0Fh
 	orl	A, Temp7
 	mov	Temp5, A
@@ -2158,7 +2158,7 @@ calc_next_comm_timing_fast:
 	mov	Temp7, A
 	mov	Temp4, #0
 	mov	A, Temp3
-	swap A
+	swap	A
 	anl	A, #0Fh
 	orl	A, Temp7
 	mov	Temp3, A
@@ -2707,7 +2707,7 @@ wait_for_comm:
 	Set_Pwms_Off
 
 wait_for_comm_wait:
-	jnb Flags0.T3_PENDING, ($+5)
+	jnb	Flags0.T3_PENDING, ($+5)
 	ajmp	wait_for_comm_wait
 
 	; Setup next wait time
@@ -3122,7 +3122,7 @@ decode_settings:
 	mov	A, @Temp1
 	dec	A
 	mov	DPTR, #STARTUP_POWER_TABLE
-	movc A, @A+DPTR
+	movc	A, @A+DPTR
 	mov	Temp1, #Pgm_Startup_Pwr_Decoded
 	mov	@Temp1, A
 	; Decode low rpm power slope
@@ -3373,8 +3373,8 @@ test_throttle_gain_mult:
 average_throttle:
 	setb	Flags2.RCP_FULL_RANGE	; Set range to 1000-2020us
 	call	find_throttle_gains		; Set throttle gains
-	call wait30ms
-	call wait30ms
+	call	wait30ms
+	call	wait30ms
 	mov	Temp3, #0
 	mov	Temp4, #0
 	mov	Temp5, #16		; Average 16 measurments
@@ -3384,7 +3384,7 @@ average_throttle_meas:
 	add	A, Temp3
 	mov	Temp3, A
 	mov	A, #0
-	addc A, Temp4
+	addc	A, Temp4
 	mov	Temp4, A
 	djnz	Temp5, average_throttle_meas
 
@@ -3497,11 +3497,11 @@ pgm_start:
 	mov	Temp1, A			; Clear Temp1
 	clear_ram:
 	mov	@Temp1, A			; Clear RAM
-	djnz Temp1, clear_ram	; Is A not zero? - jump
+	djnz	Temp1, clear_ram	; Is A not zero? - jump
 	; Set default programmed parameters
 	call	set_default_parameters
 	; Read all programmed parameters
-	call read_all_eeprom_parameters
+	call	read_all_eeprom_parameters
 	; Set beep strength
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
@@ -3509,13 +3509,13 @@ pgm_start:
 	mov	Initial_Arm, #1
 	; Initializing beep
 	clr	IE_EA			; Disable interrupts explicitly
-	call wait200ms
-	call beep_f1
-	call wait30ms
-	call beep_f2
-	call wait30ms
-	call beep_f3
-	call wait30ms
+	call	wait200ms
+	call	beep_f1
+	call	wait30ms
+	call	beep_f2
+	call	wait30ms
+	call	beep_f3
+	call	wait30ms
 	call	led_control
 
 
@@ -3584,7 +3584,7 @@ ENDIF
 	mov	Stall_Cnt, #0
 	; Initialize RC pulse
 	clr	Flags2.RCP_UPDATED			; Clear updated flag
-	call wait200ms
+	call	wait200ms
 	; Clear all shot flags
 	clr	Flags2.RCP_ONESHOT125		; Clear OneShot125 flag
 	clr	Flags2.RCP_ONESHOT42		; Clear OneShot42 flag
@@ -3594,7 +3594,7 @@ ENDIF
 	mov	Dshot_Cmd_Cnt, #0			; Clear Dshot command count
 	; Test whether signal is regular pwm
 	mov	Rcp_Outside_Range_Cnt, #0	; Reset out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check how many pulses were outside normal range ("900-2235us")
 	subb	A, #10
@@ -3604,7 +3604,7 @@ ENDIF
 	; Test whether signal is OneShot125
 	setb	Flags2.RCP_ONESHOT125		; Set OneShot125 flag
 	mov	Rcp_Outside_Range_Cnt, #0	; Reset out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check how many pulses were outside normal range ("900-2235us")
 	subb	A, #10
@@ -3615,7 +3615,7 @@ ENDIF
 	clr	Flags2.RCP_ONESHOT125
 	setb	Flags2.RCP_ONESHOT42		; Set OneShot42 flag
 	mov	Rcp_Outside_Range_Cnt, #0	; Reset out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check how many pulses were outside normal range ("900-2235us")
 	subb	A, #10
@@ -3645,7 +3645,7 @@ ENDIF
 	clr	Flags2.RCP_ONESHOT42
 	setb	Flags2.RCP_DSHOT
 	mov	Rcp_Outside_Range_Cnt, #10	; Set out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	mov	DShot_Pwm_Thr, #16			; Load DShot regular pwm threshold
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check if pulses were accepted
@@ -3665,7 +3665,7 @@ ENDIF
 	mov	DShot_Frame_Length_Thr, #40	; Load DShot frame length criteria
 	; Test whether signal is DShot300
 	mov	Rcp_Outside_Range_Cnt, #10	; Set out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	mov	DShot_Pwm_Thr, #32			; Load DShot regular pwm threshold
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check if pulses were accepted
@@ -3685,7 +3685,7 @@ ENDIF
 	mov	DShot_Frame_Length_Thr, #20	; Load DShot frame length criteria
 	; Test whether signal is DShot600
 	mov	Rcp_Outside_Range_Cnt, #10	; Set out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	mov	DShot_Pwm_Thr, #16			; Load DShot regular pwm threshold
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check if pulses were accepted
@@ -3707,7 +3707,7 @@ ENDIF
 	clr	Flags2.RCP_DSHOT
 	setb	Flags2.RCP_MULTISHOT		; Set Multishot flag
 	mov	Rcp_Outside_Range_Cnt, #0	; Reset out of range counter
-	call wait100ms					; Wait for new RC pulse
+	call	wait100ms					; Wait for new RC pulse
 	clr	C
 	mov	A, Rcp_Outside_Range_Cnt		; Check how many pulses were outside normal range ("900-2235us")
 	subb	A, #10
@@ -3717,17 +3717,17 @@ ENDIF
 
 validate_rcp_start:
 	; Validate RC pulse
-	call wait3ms					; Wait for new RC pulse
+	call	wait3ms					; Wait for new RC pulse
 	jb	Flags2.RCP_UPDATED, ($+6)	; Is there an updated RC pulse available - proceed
 	ljmp	init_no_signal				; Go back to detect input signal
 
 	; Beep arm sequence start signal
 	clr	IE_EA					; Disable all interrupts
-	call beep_f1					; Signal that RC pulse is ready
-	call beep_f1
-	call beep_f1
+	call	beep_f1					; Signal that RC pulse is ready
+	call	beep_f1
+	call	beep_f1
 	setb	IE_EA					; Enable all interrupts
-	call wait200ms
+	call	wait200ms
 
 	; Arming sequence start
 arming_start:
@@ -3736,7 +3736,7 @@ arming_start:
 
 	ljmp	program_by_tx_checked		; Disable tx programming if bidirectional operation
 
-	call wait3ms
+	call	wait3ms
 	mov	Temp1, #Pgm_Enable_TX_Program	; Start programming mode entry if enabled
 	mov	A, @Temp1
 	clr	C
@@ -3762,7 +3762,7 @@ arming_check:
 throttle_high_cal:
 	setb	Flags2.RCP_FULL_RANGE	; Set range to 1000-2020us
 	call	find_throttle_gains		; Set throttle gains
-	call wait100ms				; Wait for new throttle value
+	call	wait100ms				; Wait for new throttle value
 	clr	IE_EA				; Disable interrupts (freeze New_Rcp value)
 	clr	Flags2.RCP_FULL_RANGE	; Set programmed range
 	call	find_throttle_gains		; Set throttle gains
@@ -3772,9 +3772,9 @@ throttle_high_cal:
 	setb	IE_EA				; Enable interrupts
 	jc	program_by_tx_checked	; No - branch
 
-	call wait1ms
+	call	wait1ms
 	clr	IE_EA				; Disable all interrupts
-	call beep_f4
+	call	beep_f4
 	setb	IE_EA				; Enable all interrupts
 	djnz	Temp8, throttle_high_cal	; Continue to wait
 
@@ -3783,7 +3783,7 @@ throttle_high_cal:
 	mov	A, Temp8
 	mov	Temp1, #Pgm_Max_Throttle	; Store
 	mov	@Temp1, A
-	call wait200ms
+	call	wait200ms
 	call	success_beep
 
 throttle_low_cal_start:
@@ -3791,7 +3791,7 @@ throttle_low_cal_start:
 throttle_low_cal:
 	setb	Flags2.RCP_FULL_RANGE	; Set range to 1000-2020us
 	call	find_throttle_gains		; Set throttle gains
-	call wait100ms
+	call	wait100ms
 	clr	IE_EA				; Disable interrupts (freeze New_Rcp value)
 	clr	Flags2.RCP_FULL_RANGE	; Set programmed range
 	call	find_throttle_gains		; Set throttle gains
@@ -3801,11 +3801,11 @@ throttle_low_cal:
 	setb	IE_EA				; Enable interrupts
 	jnc	throttle_low_cal_start	; No - start over
 
-	call wait1ms
+	call	wait1ms
 	clr	IE_EA				; Disable all interrupts
-	call beep_f1
-	call wait10ms
-	call beep_f1
+	call	beep_f1
+	call	wait10ms
+	call	beep_f1
 	setb	IE_EA				; Enable all interrupts
 	djnz	Temp8, throttle_low_cal	; Continue to wait
 
@@ -3830,12 +3830,12 @@ program_by_tx_entry_limit:
 	mov	@Temp1, A
 
 program_by_tx_entry_store:
-	call wait200ms
-	call erase_and_store_all_in_eeprom
+	call	wait200ms
+	call	erase_and_store_all_in_eeprom
 	call	success_beep_inverted
 
 program_by_tx_entry_wait:
-	call wait100ms
+	call	wait100ms
 	call	find_throttle_gains		; Set throttle gains
 	ljmp	init_no_signal			; Go back
 
@@ -3843,7 +3843,7 @@ program_by_tx_checked:
 	; Initialize flash keys to invalid values
 	mov	Flash_Key_1, #0
 	mov	Flash_Key_2, #0
-	call wait100ms				; Wait for new throttle value
+	call	wait100ms				; Wait for new throttle value
 	clr	C
 	mov	A, New_Rcp			; Load new RC pulse value
 	subb	A, #1				; Below stop?
@@ -3854,11 +3854,11 @@ program_by_tx_checked:
 arm_end_beep:
 	; Beep arm sequence end signal
 	clr	IE_EA				; Disable all interrupts
-	call beep_f4				; Signal that rcpulse is ready
-	call beep_f4
-	call beep_f4
+	call	beep_f4				; Signal that rcpulse is ready
+	call	beep_f4
+	call	beep_f4
 	setb	IE_EA				; Enable all interrupts
-	call wait200ms
+	call	wait200ms
 
 	; Clear initial arm variable
 	mov	Initial_Arm, #0
@@ -3908,14 +3908,14 @@ beep_delay_set:
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
 	clr	IE_EA				; Disable all interrupts
-	call beep_f4				; Signal that there is no signal
+	call	beep_f4				; Signal that there is no signal
 	setb	IE_EA				; Enable all interrupts
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
-	call wait100ms				; Wait for new RC pulse to be measured
+	call	wait100ms				; Wait for new RC pulse to be measured
 
 wait_for_power_on_no_beep:
-	call wait10ms
+	call	wait10ms
 	mov	A, Rcp_Timeout_Cntd			; Load RC pulse timeout counter value
 	jnz	wait_for_power_on_not_missing	; If it is not zero - proceed
 
@@ -3935,111 +3935,111 @@ wait_for_power_on_not_missing:
 	ljmp	wait_for_power_on_loop	; If not Dshot command - start over
 
 wait_for_power_on_nonzero:
-	lcall wait100ms			; Wait to see if start pulse was only a glitch
+	lcall	wait100ms			; Wait to see if start pulse was only a glitch
 	mov	A, Rcp_Timeout_Cntd		; Load RC pulse timeout counter value
 	jnz	($+5)				; If it is not zero - proceed
 	ljmp	init_no_signal			; If it is zero (pulses missing) - go back to detect input signal
 
 	mov	Dshot_Cmd, #0
 	mov	Dshot_Cmd_Cnt, #0
-	ljmp init_start
+	ljmp	init_start
 
 check_dshot_cmd:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #1
+	subb	A, #1
 	jnz	dshot_beep_2
 
 	clr	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
-	call beep_f1
+	call	beep_f1
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
 	setb	IE_EA
-	call wait100ms
+	call	wait100ms
 	jmp	clear_dshot_cmd
 
 dshot_beep_2:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #2
+	subb	A, #2
 	jnz	dshot_beep_3
 
 	clr	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
-	call beep_f2
+	call	beep_f2
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
 	setb	IE_EA
-	call wait100ms
+	call	wait100ms
 	jmp	clear_dshot_cmd
 
 dshot_beep_3:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #3
+	subb	A, #3
 	jnz	dshot_beep_4
 
 	clr	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
-	call beep_f3
+	call	beep_f3
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
 	setb	IE_EA
-	call wait100ms
+	call	wait100ms
 	jmp	clear_dshot_cmd
 
 dshot_beep_4:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #4
+	subb	A, #4
 	jnz	dshot_beep_5
 
 	clr	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
-	call beep_f4
+	call	beep_f4
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
 	setb	IE_EA
-	call wait100ms
+	call	wait100ms
 	jmp	clear_dshot_cmd
 
 dshot_beep_5:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #5
+	subb	A, #5
 	jnz	dshot_direction_1
 
 	clr	IE_EA
 	call	switch_power_off		; Switch power off in case braking is set
 	mov	Temp1, #Pgm_Beacon_Strength
 	mov	Beep_Strength, @Temp1
-	call beep_f4
+	call	beep_f4
 	mov	Temp1, #Pgm_Beep_Strength
 	mov	Beep_Strength, @Temp1
 	setb	IE_EA
-	call wait100ms
+	call	wait100ms
 	jmp	clear_dshot_cmd
 
 dshot_direction_1:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #7
+	subb	A, #7
 	jnz	dshot_direction_2
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jnc	($+4)					; Same as "jc dont_clear_dshot_cmd"
-	ajmp wait_for_power_on_not_missing
+	ajmp	wait_for_power_on_not_missing
 
 	mov	A, #1
 	jnb	Flags3.PGM_BIDIR, ($+5)
@@ -4053,35 +4053,35 @@ dshot_direction_1:
 dshot_direction_2:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #8
+	subb	A, #8
 	jnz	dshot_direction_bidir_off
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jnc	($+4)					; Same as "jc dont_clear_dshot_cmd"
-	ajmp wait_for_power_on_not_missing
+	ajmp	wait_for_power_on_not_missing
 
 	mov	A, #2
 	jnb	Flags3.PGM_BIDIR, ($+5)
 	mov	A, #4
 	mov	Temp1, #Pgm_Direction
 	mov	@Temp1, A
-	setb Flags3.PGM_DIR_REV
-	setb Flags3.PGM_BIDIR_REV
+	setb	Flags3.PGM_DIR_REV
+	setb	Flags3.PGM_BIDIR_REV
 	jmp	clear_dshot_cmd
 
 dshot_direction_bidir_off:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #9
+	subb	A, #9
 	jnz	dshot_direction_bidir_on
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jnc	($+4)					; Same as "jc dont_clear_dshot_cmd"
-	ajmp wait_for_power_on_not_missing
+	ajmp	wait_for_power_on_not_missing
 
 	jnb	Flags3.PGM_BIDIR, dshot_direction_bidir_on
 
@@ -4096,14 +4096,14 @@ dshot_direction_bidir_off:
 dshot_direction_bidir_on:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #10
+	subb	A, #10
 	jnz	dshot_direction_normal
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jnc	($+4)					; Same as "jc dont_clear_dshot_cmd"
-	ajmp wait_for_power_on_not_missing
+	ajmp	wait_for_power_on_not_missing
 
 	jb	Flags3.PGM_BIDIR, dshot_direction_normal
 
@@ -4117,14 +4117,14 @@ dshot_direction_bidir_on:
 dshot_direction_normal:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #20
+	subb	A, #20
 	jnz	dshot_direction_reverse
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jnc	($+4)					; Same as "jc dont_clear_dshot_cmd"
-	ajmp wait_for_power_on_not_missing
+	ajmp	wait_for_power_on_not_missing
 
 	clr	IE_EA					; DPTR used in interrupts
 	mov	DPTR, #Eep_Pgm_Direction		; Read from flash
@@ -4145,12 +4145,12 @@ dshot_direction_normal:
 dshot_direction_reverse:			; Temporary reverse
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #21
+	subb	A, #21
 	jnz	dshot_save_settings
 
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jc	dont_clear_dshot_cmd
 
 	clr	IE_EA					; DPTR used in interrupts
@@ -4181,17 +4181,17 @@ dshot_direction_reverse:			; Temporary reverse
 dshot_save_settings:
 	clr	C
 	mov	A, Dshot_Cmd
-	subb A, #12
+	subb	A, #12
 	jnz	clear_dshot_cmd
 
 	mov	Flash_Key_1, #0A5h			; Initialize flash keys to valid values
 	mov	Flash_Key_2, #0F1h
 	clr	C
 	mov	A, Dshot_Cmd_Cnt
-	subb A, #6					; Needs to receive it 6 times in a row
+	subb	A, #6					; Needs to receive it 6 times in a row
 	jc	dont_clear_dshot_cmd
 
-	call erase_and_store_all_in_eeprom
+	call	erase_and_store_all_in_eeprom
 	setb	IE_EA
 
 clear_dshot_cmd:
@@ -4210,7 +4210,7 @@ dont_clear_dshot_cmd:
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 init_start:
 	clr	IE_EA
-	call switch_power_off
+	call	switch_power_off
 	clr	A
 	setb	IE_EA
 	clr	A
@@ -4222,8 +4222,8 @@ init_start:
 	; Motor start beginning
 	;**** **** **** **** ****
 	mov	Adc_Conversion_Cnt, #8			; Make sure a temp reading is done
-	call wait1ms
-	call start_adc_conversion
+	call	wait1ms
+	call	start_adc_conversion
 read_initial_temp:
 	jnb	ADC0CN0_ADINT, read_initial_temp
 	Read_Adc_Result					; Read initial temperature
@@ -4233,11 +4233,11 @@ read_initial_temp:
 	mov	Temp1, A						; Yes - set average temperature value to zero
 
 	mov	Current_Average_Temp, Temp1		; Set initial average temperature
-	call check_temp_voltage_and_limit_power
+	call	check_temp_voltage_and_limit_power
 	mov	Adc_Conversion_Cnt, #8			; Make sure a temp reading is done next time
 	; Set up start operating conditions
 	clr	IE_EA						; Disable interrupts
-	call set_startup_pwm
+	call	set_startup_pwm
 	mov	Pwm_Limit, Pwm_Limit_Beg
 	mov	Pwm_Limit_By_Rpm, Pwm_Limit_Beg
 	setb	IE_EA
@@ -4254,11 +4254,11 @@ ENDIF
 init_start_bidir_done:
 	setb	Flags1.STARTUP_PHASE		; Set startup phase flag
 	mov	Startup_Cnt, #0			; Reset counter
-	call comm5comm6				; Initialize commutation
-	call comm6comm1
-	call initialize_timing			; Initialize timing
+	call	comm5comm6				; Initialize commutation
+	call	comm6comm1
+	call	initialize_timing			; Initialize timing
 	call	calc_next_comm_timing		; Set virtual commutation point
-	call initialize_timing			; Initialize timing
+	call	initialize_timing			; Initialize timing
 	call	calc_next_comm_timing
 	call	initialize_timing			; Initialize timing
 
@@ -4273,12 +4273,12 @@ init_start_bidir_done:
 ; Run 1 = B(p-on) + C(n-pwm) - comparator A evaluated
 ; Out_cA changes from low to high
 run1:
-	call wait_for_comp_out_high	; Wait for high
+	call	wait_for_comp_out_high	; Wait for high
 ;		setup_comm_wait		; Setup wait time from zero cross to commutation
 ;		evaluate_comparator_integrity	; Check whether comparator reading has been normal
-	call wait_for_comm			; Wait from zero cross to commutation
-	call comm1comm2			; Commutate
-	call calc_next_comm_timing	; Calculate next timing and wait advance timing wait
+	call	wait_for_comm			; Wait from zero cross to commutation
+	call	comm1comm2			; Commutate
+	call	calc_next_comm_timing	; Calculate next timing and wait advance timing wait
 ;		wait_advance_timing		; Wait advance timing and start zero cross wait
 ;		calc_new_wait_times
 ;		wait_before_zc_scan		; Wait zero cross wait and start zero cross timeout
@@ -4286,16 +4286,16 @@ run1:
 ; Run 2 = A(p-on) + C(n-pwm) - comparator B evaluated
 ; Out_cB changes from high to low
 run2:
-	call wait_for_comp_out_low
+	call	wait_for_comp_out_low
 ;		setup_comm_wait
 ;		evaluate_comparator_integrity
 	jb	Flags1.HIGH_RPM, ($+6)	; Skip if high rpm
-	lcall set_pwm_limit_low_rpm
+	lcall	set_pwm_limit_low_rpm
 	jnb	Flags1.HIGH_RPM, ($+6)	; Do if high rpm
-	lcall set_pwm_limit_high_rpm
-	call wait_for_comm
-	call comm2comm3
-	call calc_next_comm_timing
+	lcall	set_pwm_limit_high_rpm
+	call	wait_for_comm
+	call	comm2comm3
+	call	calc_next_comm_timing
 ;		wait_advance_timing
 ;		calc_new_wait_times
 ;		wait_before_zc_scan
@@ -4303,12 +4303,12 @@ run2:
 ; Run 3 = A(p-on) + B(n-pwm) - comparator C evaluated
 ; Out_cC changes from low to high
 run3:
-	call wait_for_comp_out_high
+	call	wait_for_comp_out_high
 ;		setup_comm_wait
 ;		evaluate_comparator_integrity
-	call wait_for_comm
-	call comm3comm4
-	call calc_next_comm_timing
+	call	wait_for_comm
+	call	comm3comm4
+	call	calc_next_comm_timing
 ;		wait_advance_timing
 ;		calc_new_wait_times
 ;		wait_before_zc_scan
@@ -4316,12 +4316,12 @@ run3:
 ; Run 4 = C(p-on) + B(n-pwm) - comparator A evaluated
 ; Out_cA changes from high to low
 run4:
-	call wait_for_comp_out_low
+	call	wait_for_comp_out_low
 ;		setup_comm_wait
 ;		evaluate_comparator_integrity
-	call wait_for_comm
-	call comm4comm5
-	call calc_next_comm_timing
+	call	wait_for_comm
+	call	comm4comm5
+	call	calc_next_comm_timing
 ;		wait_advance_timing
 ;		calc_new_wait_times
 ;		wait_before_zc_scan
@@ -4329,12 +4329,12 @@ run4:
 ; Run 5 = C(p-on) + A(n-pwm) - comparator B evaluated
 ; Out_cB changes from low to high
 run5:
-	call wait_for_comp_out_high
+	call	wait_for_comp_out_high
 ;		setup_comm_wait
 ;		evaluate_comparator_integrity
-	call wait_for_comm
-	call comm5comm6
-	call calc_next_comm_timing
+	call	wait_for_comm
+	call	comm5comm6
+	call	calc_next_comm_timing
 ;		wait_advance_timing
 ;		calc_new_wait_times
 ;		wait_before_zc_scan
@@ -4342,14 +4342,14 @@ run5:
 ; Run 6 = B(p-on) + A(n-pwm) - comparator C evaluated
 ; Out_cC changes from high to low
 run6:
-	call start_adc_conversion
-	call wait_for_comp_out_low
+	call	start_adc_conversion
+	call	wait_for_comp_out_low
 ;		setup_comm_wait
 ;		evaluate_comparator_integrity
-	call wait_for_comm
-	call comm6comm1
-	call check_temp_voltage_and_limit_power
-	call calc_next_comm_timing
+	call	wait_for_comm
+	call	comm6comm1
+	call	check_temp_voltage_and_limit_power
+	call	calc_next_comm_timing
 ;		wait_advance_timing
 ;		calc_new_wait_times
 ;		wait_before_zc_scan
@@ -4398,7 +4398,7 @@ normal_run_checks:
 
 	clr	Flags1.INITIAL_RUN_PHASE		; Clear initial run phase flag
 	setb	Flags1.MOTOR_STARTED		; Set motor started
-	jmp run1						; Continue with normal run
+	jmp	run1						; Continue with normal run
 
 initial_run_check_startup_rot:
 	mov	Initial_Run_Rot_Cntd, A		; Not zero - store counter
@@ -4491,7 +4491,7 @@ run_to_wait_for_power_on:
 
 run_to_wait_for_power_on_stall_done:
 	clr	IE_EA
-	call switch_power_off
+	call	switch_power_off
 	mov	Flags0, #0				; Clear flags0
 	mov	Flags1, #0				; Clear flags1
 IF MCU_48MHZ == 1
@@ -4499,7 +4499,7 @@ IF MCU_48MHZ == 1
 ENDIF
 	setb	IE_EA
 	call	wait100ms					; Wait for pwm to be stopped
-	call switch_power_off
+	call	switch_power_off
 	mov	Temp1, #Pgm_Brake_On_Stop
 	mov	A, @Temp1
 	jz	run_to_wait_for_power_on_brake_done
