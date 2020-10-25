@@ -23,7 +23,9 @@ The benefits of variable pwm frequency are:
 - Low frequency for low throttle gives good active braking where it is most needed
 - High frequency for higher throttle makes running smoother
 - The variable frequency will work as dithering making running even more smooth
+
 This test code also has several smaller fixes.
+
 Note that for the latest functionality you will also need the latest version of BLHeliSuite32.
 
 ## Discussion threads
