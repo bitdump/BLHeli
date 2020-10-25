@@ -17,12 +17,14 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-The folder "Rev32.7.2 SBUS and S.PORT testcode" contains test code that supports SBUS
-as input signal, and that is compatible with S.PORT for telemetry.
-Note that S.PORT is only supported on ESCs that use USART1 (port PB6) for telemetry.
-If the "S.PORT Physical ID" programming parameter shows up in BLHeliSuite32, then your ESC supports it.
+The folder "Rev32.7.3 Variable PWM frequency testcode" contains test code that supports 
+variable pwm frequency. You can configure motor pwm frequency to increase with throttle.
+The benefits of variable pwm frequency are:
+- Low frequency for low throttle gives good active braking where it is most needed
+- High frequency for higher throttle makes running smoother
+- The variable frequency will work as dithering making running even more smooth
 This test code also has several smaller fixes.
-
+Note that for the latest functionality you will also need the latest version of BLHeliSuite32.
 
 ## Discussion threads
 
