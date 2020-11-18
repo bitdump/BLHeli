@@ -198,6 +198,9 @@
 ;#define BLUESERIES_70A_MAIN
 ;#define BLUESERIES_70A_TAIL
 ;#define BLUESERIES_70A_MULTI
+;#define FC_45A_HV_MAIN 
+;#define FC_45A_HV_TAIL
+;#define FC_45A_HV_MULTI 
 ;#define HK_UBEC_6A_MAIN
 ;#define HK_UBEC_6A_TAIL
 ;#define HK_UBEC_6A_MULTI
@@ -417,6 +420,21 @@
 #if defined(BLUESERIES_70A_MULTI)
 .EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
 .INCLUDE "BlueSeries_70A.inc"		; Select BlueSeries 70A pinout
+#endif
+
+#if defined(FC_45A_HV_MAIN)
+.EQU	MODE 	= 	0			; Choose mode. Set to 0 for main motor
+.INCLUDE "Flycolor_45A_HV.inc"		; Select Flycolor 45A HV pinout
+#endif
+
+#if defined(FC_45A_HV_TAIL)
+.EQU	MODE 	= 	1			; Choose mode. Set to 1 for tail motor
+.INCLUDE "Flycolor_45A_HV.inc"		; Select Flycolor 45A HV pinout
+#endif
+
+#if defined(FC_45A_HV_MULTI)
+.EQU	MODE 	= 	2			; Choose mode. Set to 2 for multirotor
+.INCLUDE "Flycolor_45A_HV.inc"		; Select Flycolor 45A HV pinout
 #endif
 
 #if defined(HK_UBEC_6A_MAIN)
