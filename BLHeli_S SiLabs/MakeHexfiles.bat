@@ -204,7 +204,7 @@ call:compile
 SET ESC=W_H_
 SET MCU_48MHZ=1
 call:compile
-SET /A ESCNO+=1
+SET /A ESCNO+=3
 
 SET ESC=Z_L_
 SET MCU_48MHZ=0
