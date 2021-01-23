@@ -442,7 +442,7 @@ Set_Pwm_C MACRO
 IF FETON_DELAY == 0
 	setb	P0.CcomFET
 	mov	P0SKIP, #0FFh
-	mov	P1SKIP, #7Fh
+	mov	P1SKIP, #7Eh
 ELSE
 	mov	P0SKIP, #7Fh
 	mov	P1SKIP, #7Eh
