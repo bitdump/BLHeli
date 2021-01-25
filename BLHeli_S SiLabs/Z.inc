@@ -387,7 +387,7 @@ ENDM
 
 AcomFET_on MACRO
 IF FETON_DELAY == 0
-	clr	P1.ApwmFET
+	setb	P1.ApwmFET
 ENDIF
 	setb	P1.AcomFET
 ENDM
@@ -396,7 +396,7 @@ AcomFET_off MACRO
 ENDM
 BcomFET_on MACRO
 IF FETON_DELAY == 0
-	clr	P1.BpwmFET
+	setb	P1.BpwmFET
 ENDIF
 	setb	P1.BcomFET
 ENDM
@@ -405,7 +405,7 @@ BcomFET_off MACRO
 ENDM
 CcomFET_on MACRO
 IF FETON_DELAY == 0
-	clr	P1.CpwmFET
+	setb	P1.CpwmFET
 ENDIF
 	setb	P1.CcomFET
 ENDM
