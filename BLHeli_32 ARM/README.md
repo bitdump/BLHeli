@@ -17,16 +17,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-The folder "Rev32.7.4 Variable PWM frequency testcode" contains test code that supports 
-variable pwm frequency. You can configure motor pwm frequency to increase with throttle.
-The benefits of variable pwm frequency are:
-- Low frequency for low throttle gives good active braking where it is most needed
-- High frequency for higher throttle makes running smoother
-- The variable frequency will work as dithering making running even more smooth
-
-This test code also has several fixes.
-
-Note that for the latest functionality you will also need the latest version of BLHeliSuite32.
+Currently there is no test code published
 
 ## Discussion threads
 
