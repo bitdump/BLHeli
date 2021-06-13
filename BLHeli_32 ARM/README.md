@@ -17,7 +17,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-Currently there is no test code published
+Currently there is no general test code published
 
 ## Discussion threads
 
