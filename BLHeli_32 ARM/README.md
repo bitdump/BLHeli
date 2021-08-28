@@ -34,6 +34,7 @@ Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher.
   In this mode, the code calculates the kV*voltage and adjusts the low rpm power protection accordingly.
 - A new setting for pwm frequency high is added, called "By RPM".
   In this mode, motor pwm frequency is adjusted in a way that it stays away from problematic motor commutation frequencies.
+
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
 Feedback closes the loop of the process of continued improvement :).
 
