@@ -17,8 +17,8 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-Rev32.8.1 testcode is published in the folder "Rev32.8.1 testcode"
-Note that the testcode requires BLHeliSuite32 Rev32.8.0.7 or higher. 
+Rev32.8.2 testcode is published in the folder "Rev32.8.2 testcode"
+Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher. 
 - This code has a greatly reduced noise level in the Dshot real time erpm data.
   Which will improve the performance of Betaflight dynamic filtering, 
   as well as provide more accurate data in applications where the data is used directly.
@@ -32,6 +32,8 @@ Note that the testcode requires BLHeliSuite32 Rev32.8.0.7 or higher.
   This setting is intended for large low kV motors running on a fairly low battery voltage.
   But it can be used, and is indeed suitable for any motor kV and battery voltage.
   In this mode, the code calculates the kV*voltage and adjusts the low rpm power protection accordingly.
+- A new setting for pwm frequency high is added, called "By RPM".
+  In this mode, motor pwm frequency is adjusted in a way that it stays away from problematic motor commutation frequencies.
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
 Feedback closes the loop of the process of continued improvement :).
 
