@@ -2,7 +2,10 @@
 
 ## BLHeli_32 downloads  
 
-You can find BLHeliSuite32 here:   
+You can find BLHeliSuite32 here:
+https://github.com/bitdump/BLHeli/releases
+
+Or here:
 https://drive.google.com/drive/folders/1Y1bUMnRRolmMD_lezL0FYd3aMBrNzCig   
 or here:   
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite   
@@ -35,8 +38,8 @@ Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher.
 - A new setting for pwm frequency high is added, called "By RPM".
   In this mode, motor pwm frequency is adjusted in a way that it stays away from problematic motor commutation frequencies.
 
-The testcode is now published as a pre-release.
-You can go to the release section under "bitdump/BLHeli" and download the hex file you need.
+The testcode is now published as a pre-release here: https://github.com/bitdump/BLHeli/releases
+You can download the hex file you need.
 
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
 Feedback closes the loop of the process of continued improvement :).
