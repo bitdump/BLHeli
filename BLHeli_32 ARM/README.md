@@ -38,12 +38,14 @@ Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher.
 - A new setting for pwm frequency high is added, called "By RPM".
   In this mode, motor pwm frequency is adjusted in a way that it stays away from problematic motor commutation frequencies.
 
-The testcode is now published as a pre-release here: https://github.com/bitdump/BLHeli/releases
+The Rev32.8.2 testcode is now published as a pre-release here: https://github.com/bitdump/BLHeli/releases
 You can download the hex file you need.
 
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
 Feedback closes the loop of the process of continued improvement :).
 
+Rev32.8.9 testcode is published in the folder "Loaded startup testcode"
+This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
 
 ## Discussion threads
 
