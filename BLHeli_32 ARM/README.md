@@ -44,7 +44,7 @@ You can download the hex file you need.
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
 Feedback closes the loop of the process of continued improvement :).
 
-Rev32.8.9 testcode is published in the folder "Loaded startup testcode"
+Rev32.8.9 testcode is published in the folder "Loaded startup testcode".
 This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
 
 ## Discussion threads
