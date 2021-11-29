@@ -20,7 +20,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-Rev32.8.2 testcode is published in the folder "Rev32.8.2 testcode"
+Rev32.8.3 testcode is published in the folder "Rev32.8.3 testcode"
 Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher. 
 - This code has a greatly reduced noise level in the Dshot real time erpm data.
   Which will improve the performance of Betaflight dynamic filtering, 
@@ -37,8 +37,10 @@ Note that the testcode requires BLHeliSuite32 Rev32.8.1.1 or higher.
   In this mode, the code calculates the kV*voltage and adjusts the low rpm power protection accordingly.
 - A new setting for pwm frequency high is added, called "By RPM".
   In this mode, motor pwm frequency is adjusted in a way that it stays away from problematic motor commutation frequencies.
+- Improved rampup consistency. This can help make e.g. flip stops more precise.
+- Fixed a bug that caused MM32SPIN160 MCUs to occasionally hang
 
-The Rev32.8.2 testcode is now published as a pre-release here: https://github.com/bitdump/BLHeli/releases
+The Rev32.8.3 testcode is now published as a pre-release here: https://github.com/bitdump/BLHeli/releases
 You can download the hex file you need.
 
 Feedback on this testcode will be greatly appreciated, the RCG BLHeli_32 thread below is well suited for it.
