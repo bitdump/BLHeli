@@ -2,7 +2,7 @@
 
 ## BLHeli_32 MCUs 
 BLHeli_32 supports a variety of MCUs, in order to maximize performance and also to handle the current chip shortage.  
-Unfortunately there is inaccurate and misleading information cirulating in various media.
+Unfortunately there is inaccurate and misleading information relating to this circulating in various media.
 
 So to clarify:  
 All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support the "byRPM" feature, with the Rev32.8.3 testcode.  
