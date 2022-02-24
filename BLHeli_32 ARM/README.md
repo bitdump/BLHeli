@@ -1,7 +1,7 @@
 # BLHeli_32 info page  
 
 ## BLHeli_32 MCUs 
-BLHeli_32 supports a variety of MCUs, in order to maximize performance and also to handle the current chip shortage.
+BLHeli_32 supports a variety of MCUs, in order to maximize performance and also to handle the current chip shortage.  
 Unfortunately there is inaccurate and misleading information cirulating in various media.
 
 So to clarify:  
