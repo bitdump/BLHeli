@@ -5,7 +5,7 @@ BLHeli_32 supports a variety of MCUs, in order to maximize performance and also 
 Unfortunately there is inaccurate and misleading information relating to this circulating in various media.
 
 So to clarify:  
-All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support the "byRPM" feature, with the Rev32.8.3 testcode.  
+All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support the "ByRPM" feature, with Rev32.9 code.  
 All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support "any" pwm frequency range.  
 The supported range is determined by the hardware manufacturer, based upon choice of fets, driver capacitors etc.
 
