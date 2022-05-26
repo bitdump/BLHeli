@@ -129,7 +129,7 @@ ENDIF
 ;			EQU	7	;i
 ;			EQU	6	;i
 Rcp_In		EQU	5	;i
-;			EQU	4	;i 
+;			EQU	4	;i
 Comp_Com		EQU	3	;i
 Mux_A		EQU	2	;i
 Mux_C		EQU	1	;i

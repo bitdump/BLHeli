@@ -132,6 +132,10 @@ X_			EQU 24	; Reserved
 Y_			EQU 25	; Reserved
 Z_			EQU 26  ; X  X  RC X  CC MA MC MB    X  X  Cp Cc Bp Bc Ap Ac  	Like S, but pwm fets inverted
 
+A_X_		EQU 30	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
+B_X_		EQU 31	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
+C_X_		EQU 32	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
+
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
 ;ESCNO EQU A_
@@ -160,10 +164,13 @@ Z_			EQU 26  ; X  X  RC X  CC MA MC MB    X  X  Cp Cc Bp Bc Ap Ac  	Like S, but 
 ;ESCNO EQU X_
 ;ESCNO EQU Y_
 ;ESCNO EQU Z_
+;ESCNO EQU A_X_ ; Requires MCU_48MHZ=2
+;ESCNO EQU B_X_	; Requires MCU_48MHZ=2
+;ESCNO EQU C_X_	; Requires MCU_48MHZ=2
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
-;MCU_48MHZ EQU	1
+;MCU_48MHZ EQU	2
 
 ;**** **** **** **** ****
 ; Select the fet deadtime (or unselect for use with external batch compile file)
@@ -274,6 +281,18 @@ ENDIF
 
 IF ESCNO == Z_
 $include (Z.inc)        ; Select pinout Z
+ENDIF
+
+IF ESCNO == A_X_
+$include (A_X.inc)      ; Select pinout A_X
+ENDIF
+
+IF ESCNO == B_X_
+$include (B_X.inc)      ; Select pinout B_X
+ENDIF
+
+IF ESCNO == C_X_
+$include (C_X.inc)      ; Select pinout C_X
 ENDIF
 
 
@@ -495,7 +514,11 @@ ISEG AT 0D0h
 Temp_Storage:				DS	48		; Temporary storage
 
 ;**** **** **** **** ****
+IF MCU_48MHZ == 2
+CSEG AT 3000h            ; "Eeprom" segment
+ELSE
 CSEG AT 1A00h            ; "Eeprom" segment
+ENDIF
 EEPROM_FW_MAIN_REVISION		EQU	16		; Main revision of the firmware
 EEPROM_FW_SUB_REVISION		EQU	7		; Sub revision of the firmware
 EEPROM_LAYOUT_REVISION		EQU	33		; Revision of the EEPROM layout
@@ -545,7 +568,11 @@ Eep_Pgm_LED_Control:		DB	DEFAULT_PGM_LED_CONTROL			; EEPROM copy of programmed L
 
 Eep_Dummy:				DB	0FFh							; EEPROM address for safety reason
 
+IF MCU_48MHZ == 2
+CSEG AT 3060h
+ELSE
 CSEG AT 1A60h
+ENDIF
 Eep_Name:					DB	"                "				; Name tag (16 Bytes)
 
 ;**** **** **** **** ****
@@ -565,7 +592,7 @@ STARTUP_POWER_TABLE:  	DB 	04h, 06h, 08h, 0Ch, 10h, 18h, 20h, 30h, 40h, 60h, 80h
 ; No assumptions
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 t0_int:
 	inc	Timer0_X
 	reti
@@ -915,7 +942,7 @@ t2_int:	; Happens every 32ms
 	push	ACC
 	clr	TMR2CN0_TF2H				; Clear interrupt flag
 	inc	Timer2_X
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	A, Clock_Set_At_48MHz
 	jz 	t2_int_start
 
@@ -1084,7 +1111,7 @@ int0_int_fall_not_oneshot_42:
 
 int0_int_fall_not_oneshot_125:
 	; Regular signal - multiply by 43/1024
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Temp3		; Divide by 2
 	rrc	A
@@ -1290,7 +1317,7 @@ int0_int_do_throttle_gain:
 	jb	Flags1.MOTOR_STARTED, int0_int_startup_boosted	; Do not boost when changing direction in bidirectional mode
 
 	mov	A, Pwm_Limit_Beg				; Set 25% of max startup power as minimum power
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	rlc	A
 ENDIF
 	mov	Temp2, A
@@ -1308,7 +1335,7 @@ ENDIF
 int0_int_startup_boost_stall:
 	mov	A, Stall_Cnt					; Add an extra power boost during start
 	swap	A
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	rlc	A
 ENDIF
 	add	A, Temp3
@@ -1338,7 +1365,7 @@ int0_int_startup_boosted:
 	mov	A, Temp3
 	rrc	A
 	mov	Temp1, A
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Temp6
 	rrc	A
@@ -1686,7 +1713,7 @@ set_pwm_limit_low_rpm_exit:
 ;
 ;**** **** **** **** **** **** **** **** **** **** **** **** ****
 set_pwm_limit_high_rpm:
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Comm_Period4x_L
 	subb	A, #0A0h				; Limit Comm_Period to 160, which is 500k erpm
@@ -1888,7 +1915,7 @@ calc_next_comm_timing:		; Entry point for run phase
 	inc	Temp3			; If it is pending, then timer has already wrapped
 	setb	TMR2CN0_TR2		; Timer 2 enabled
 	setb	IE_EA
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Temp3
 	rrc	A
@@ -1913,7 +1940,7 @@ ENDIF
 	subb	A, Temp5
 	jb	Flags1.STARTUP_PHASE, calc_next_comm_startup
 
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	anl	A, #7Fh
 ENDIF
 	mov	Temp2, A
@@ -1928,7 +1955,7 @@ calc_next_comm_startup:
 	mov	Temp2, A
 	mov	A, Temp3
 	subb	A, Temp6				; Calculate the new extended commutation time
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	anl	A, #7Fh
 ENDIF
 	mov	Temp3, A
@@ -2237,7 +2264,7 @@ calc_new_wait_times:
 	clr	A
 	subb	A, Temp4				
 	mov	Temp2, A	
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Temp1				; Multiply by 2
 	rlc	A
@@ -2504,7 +2531,7 @@ wait_for_comp_out_start:
 	mov	Temp2, #27
 
 comp_scale_samples:
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	mov	A, Temp1
 	rlc	A
@@ -2568,7 +2595,7 @@ comp_read_wrong_extend_timeout:
 	jnb	Flags1.HIGH_RPM, comp_read_wrong_low_rpm	; Branch if not high rpm
 
 	mov	TMR3L, #00h				; Set timeout to ~1ms
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	TMR3H, #0F0h
 ELSE
 	mov	TMR3H, #0F8h
@@ -2582,7 +2609,7 @@ comp_read_wrong_timeout_set:
 comp_read_wrong_low_rpm:
 	mov	A, Comm_Period4x_H			; Set timeout to ~4x comm period 4x value
 	mov	Temp7, #0FFh				; Default to long
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	clr	C
 	rlc	A
 	jc	comp_read_wrong_load_timeout
@@ -3097,7 +3124,7 @@ scale_throttle_cal:
 	mov	A, Temp2
 	addc	A, #0
 	mov	Temp2, A
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	A, Temp1			; Shift to 11 bits
 	clr	C
 	rlc	A
@@ -3488,7 +3515,9 @@ pgm_start:
 	; Initialize stack
 	mov	SP, #0c0h			; Stack = 64 upper bytes of RAM
 	; Initialize VDD monitor
+IF MCU_48MHZ < 2
 	orl	VDM0CN, #080h    	; Enable the VDD monitor
+ENDIF
 	mov 	RSTSRC, #06h   	; Set missing clock and VDD monitor as a reset source if not 1S capable
 	; Set clock frequency
 	mov	CLKSEL, #00h		; Set clock divider to 1
@@ -3557,7 +3586,11 @@ input_high_check_2:
 	djnz	Temp2, input_high_check_2
 	djnz	Temp1, input_high_check_1
 
+IF MCU_48MHZ == 2
+	ljmp	0F000h			; Jump to bootloader
+ELSE
 	ljmp	1C00h			; Jump to bootloader
+ENDIF
 
 bootloader_done:
 	; Decode settings
@@ -3570,7 +3603,7 @@ bootloader_done:
 	; Switch power off
 	call	switch_power_off
 	; Set clock frequency
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	Set_MCU_Clk_24MHz
 ENDIF
 	; Setup timers for pwm input
@@ -3652,7 +3685,7 @@ ENDIF
 	setb	IE_ET1			; Enable timer 1 interrupts
 	setb	IE_EX1			; Enable int1 interrupts
 	; Setup variables for DSshot150
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	DShot_Timer_Preset, #128			; Load DShot sync timer preset (for DShot150)
 ELSE
 	mov	DShot_Timer_Preset, #192
@@ -3674,7 +3707,7 @@ ENDIF
 
 	; Setup variables for DShot300
 	mov	CKCON0, #0Ch					; Timer 0/1 clock is system clock (for DShot300)
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	DShot_Timer_Preset, #0			; Load DShot sync timer preset (for DShot300)
 ELSE
 	mov	DShot_Timer_Preset, #128
@@ -3694,7 +3727,7 @@ ENDIF
 
 	; Setup variables for DShot600
 	mov	CKCON0, #0Ch					; Timer 0/1 clock is system clock (for DShot600)
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	mov	DShot_Timer_Preset, #128			; Load DShot sync timer preset (for DShot600)
 ELSE
 	mov	DShot_Timer_Preset, #192
@@ -4260,7 +4293,7 @@ read_initial_temp:
 	mov	Pwm_Limit_By_Rpm, Pwm_Limit_Beg
 	setb	IE_EA
 	; Begin startup sequence
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	Set_MCU_Clk_48MHz
 ENDIF
 	jnb	Flags3.PGM_BIDIR, init_start_bidir_done	; Check if bidirectional operation
@@ -4512,7 +4545,7 @@ run_to_wait_for_power_on_stall_done:
 	call switch_power_off
 	mov	Flags0, #0				; Clear flags0
 	mov	Flags1, #0				; Clear flags1
-IF MCU_48MHZ == 1
+IF MCU_48MHZ >= 1
 	Set_MCU_Clk_24MHz
 ENDIF
 	setb	IE_EA
@@ -4545,7 +4578,11 @@ $include (BLHeliBootLoad.inc)			; Include source code for bootloader
 
 
 
+IF MCU_48MHZ == 2
+CSEG AT 2FFDh
+ELSE
 CSEG AT 19FDh
+ENDIF
 reset:
 ljmp	pgm_start
 

@@ -438,7 +438,7 @@ ELSE
 ENDIF
 ENDM
 Set_Pwms_Off MACRO
-	mov	P1SKIP, #7Fh
+	mov	P1SKIP, #3Fh
 ENDM
 
 Set_Comp_Phase_A MACRO

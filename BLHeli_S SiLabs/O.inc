@@ -22,7 +22,7 @@
 ;
 ;**** **** **** **** ****
 ;
-; Hardware definition file "O". Com fets are active low for H/L_N driver and EN_N/PWM driver. Low side pwm and 1S flag set
+; Hardware definition file "O". Com fets are active low for H/L_N driver and EN_N/PWM driver. Low side pwm
 ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap
 ;
 ;**** **** **** **** ****
