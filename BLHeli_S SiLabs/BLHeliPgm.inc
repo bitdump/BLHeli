@@ -167,7 +167,11 @@ write_eeprom_byte_from_acc:
 	mov	Temp8, A
 	clr	C
 	mov	A, DPH				; Check that address is not in bootloader area
+IF MCU_48MHZ == 2
+  subb  A, #0F0h
+ELSE
 	subb	A, #1Ch
+ENDIF
 	jc	($+3)
 
 	ret
