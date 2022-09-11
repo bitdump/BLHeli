@@ -133,7 +133,7 @@ Y_			EQU 25	; Reserved
 Z_			EQU 26  ; X  X  RC X  CC MA MC MB    X  X  Cp Cc Bp Bc Ap Ac  	Like S, but pwm fets inverted
 
 A_X_		EQU 30	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
-B_X_		EQU 31	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
+B_X_		EQU 31	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
 C_X_		EQU 32	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
 
 ;**** **** **** **** ****

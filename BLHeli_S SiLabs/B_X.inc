@@ -23,7 +23,7 @@
 ;**** **** **** **** ****
 ;
 ; Hardware definition file "B_X"
-; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
+; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
 ; PWM fets active high, on high side
 ; COM fets active high
 ;
