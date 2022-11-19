@@ -11,6 +11,8 @@
 10 DIGITAL_CMD_3D_MODE_ON  		      // Need 6x, no wait required
 11 DIGITAL_CMD_SETTINGS_REQUEST  	      // Currently not implemented
 12 DIGITAL_CMD_SAVE_SETTINGS  		      // Need 6x, wait at least 35ms before next command
+13 DIGITAL_CMD_EXTENDED_TELEMETRY_ENABLE        // Need 6x, wait at least 35ms before next command
+14 DIGITAL_CMD_EXTENDED_TELEMETRY_DISABLE       // Need 6x, wait at least 35ms before next command
 20 DIGITAL_CMD_SPIN_DIRECTION_NORMAL 	      // Need 6x, no wait required
 21 DIGITAL_CMD_SPIN_DIRECTION_REVERSED 	      // Need 6x, no wait required
 22 DIGITAL_CMD_LED0_ON 			      // No wait required
