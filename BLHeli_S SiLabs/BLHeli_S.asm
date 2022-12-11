@@ -105,15 +105,15 @@ $NOMOD51
 ;
 ;**** **** **** **** ****
 ; List of enumerated supported ESCs
-A_			EQU 1	; X  X  RC X  MC MB MA CC    X  X  Cc Cp Bc Bp Ac Ap
-B_			EQU 2	; X  X  RC X  MC MB MA CC    X  X  Ap Ac Bp Bc Cp Cc
-C_			EQU 3	; Ac Ap MC MB MA CC X  RC    X  X  X  X  Cc Cp Bc Bp
-D_			EQU 4	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Com fets inverted
-E_			EQU 5	; L1 L0 RC X  MC MB MA CC    X  L2 Cc Cp Bc Bp Ac Ap	A with LEDs
-F_			EQU 6	; X  X  RC X  MA MB MC CC    X  X  Cc Cp Bc Bp Ac Ap
-G_			EQU 7	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noninverted com fets
-H_			EQU 8	; RC X  X  X  MA MB CC MC    X  Ap Bp Cp X  Ac Bc Cc
-I_			EQU 9	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
+A_			EQU 1	  ; X  X  RC X  MC MB MA CC    X  X  Cc Cp Bc Bp Ac Ap
+B_			EQU 2	  ; X  X  RC X  MC MB MA CC    X  X  Ap Ac Bp Bc Cp Cc
+C_			EQU 3	  ; Ac Ap MC MB MA CC X  RC    X  X  X  X  Cc Cp Bc Bp
+D_			EQU 4	  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Com fets inverted
+E_			EQU 5	  ; L1 L0 RC X  MC MB MA CC    X  L2 Cc Cp Bc Bp Ac Ap	A with LEDs
+F_			EQU 6	  ; X  X  RC X  MA MB MC CC    X  X  Cc Cp Bc Bp Ac Ap
+G_			EQU 7	  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but noninverted com fets
+H_			EQU 8	  ; RC X  X  X  MA MB CC MC    X  Ap Bp Cp X  Ac Bc Cc
+I_			EQU 9	  ; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
 J_			EQU 10	; L2 L1 L0 RC CC MB MC MA    X  X  Cc Bc Ac Cp Bp Ap	LEDs
 K_			EQU 11	; X  X  MC X  MB CC MA RC    X  X  Ap Bp Cp Cc Bc Ac	Com fets inverted
 L_			EQU 12	; X  X  RC X  CC MA MB MC    X  X  Ac Bc Cc Ap Bp Cp
@@ -123,18 +123,20 @@ O_			EQU 15	; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap	Like D, but low
 P_			EQU 16	; X  X  RC MA CC MB MC X     X  Cc Bc Ac Cp Bp Ap X
 Q_			EQU 17	; Cp Bp Ap L1 L0 X  RC X     X  MA MB MC CC Cc Bc Ac    LEDs
 R_			EQU 18	; X  X  RC X  MC MB MA CC    X  X  Ac Bc Cc Ap Bp Cp
-S_			EQU 19  ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap    Like O, but com fets inverted
+S_			EQU 19   ; X  X  RC X  CC MA MC MB    X  X  Cc Cp Bc Bp Ac Ap    Like O, but com fets inverted
 T_			EQU 20	; RC X  MA X  MB CC MC X     X  X  Cp Bp Ap Ac Bc Cc
 U_			EQU 21	; MA MC CC MB RC L0 L1 L2    X  Cc Bc Ac Cp Bp Ap X	Like M, but with 3 LEDs
 V_			EQU 22	; Cc X  RC X  MC CC MB MA    X  Ap Ac Bp X  X  Bc Cp
 W_			EQU 23	; RC MC MB X  CC MA X  X     X  Ap Bp Cp X  X  X  X	Tristate gate driver
 X_			EQU 24	; Reserved
 Y_			EQU 25	; Reserved
-Z_			EQU 26  ; X  X  RC X  CC MA MC MB    X  X  Cp Cc Bp Bc Ap Ac  	Like S, but pwm fets inverted
+Z_			EQU 26   ; X  X  RC X  CC MA MC MB    X  X  Cp Cc Bp Bc Ap Ac  	Like S, but pwm fets inverted
 
-A_X_		EQU 30	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap
-B_X_		EQU 31	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
-C_X_		EQU 32	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
+A_X_		EQU 30	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap    PWM fets active high, on low side.  COM fets active low
+B_X_		EQU 31	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac    PWM fets active high, on high side. COM fets active high
+C_X_		EQU 32	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac    PWM fets active low, on high side.  COM fets active high
+D_X_		EQU 33	; X  X  RC CC MA MC MB X     X  X  Cc Cp Bc Bp Ac Ap    PWM fets active high, on high side. COM fets active high
+E_X_		EQU 34	; X  X  RC CC MA MB MC X     X  X  Ac Bc Cc Ap Bp Cp    PWM fets active high, on high side. COM fets active high
 
 ;**** **** **** **** ****
 ; Select the port mapping to use (or unselect all for use with external batch compile file)
@@ -164,9 +166,11 @@ C_X_		EQU 32	; X  X  RC CC MA MC MB X     X  X  Cp Cc Bp Bc Ap Ac
 ;ESCNO EQU X_
 ;ESCNO EQU Y_
 ;ESCNO EQU Z_
-;ESCNO EQU A_X_ ; Requires MCU_48MHZ=2
-;ESCNO EQU B_X_	; Requires MCU_48MHZ=2
-;ESCNO EQU C_X_	; Requires MCU_48MHZ=2
+;ESCNO EQU A_X_  ; Requires MCU_48MHZ=2
+;ESCNO EQU B_X_  ; Requires MCU_48MHZ=2
+;ESCNO EQU C_X_  ; Requires MCU_48MHZ=2
+;ESCNO EQU D_X_  ; Requires MCU_48MHZ=2
+;ESCNO EQU E_X_  ; Requires MCU_48MHZ=2
 
 ;**** **** **** **** ****
 ; Select the MCU type (or unselect for use with external batch compile file)
@@ -293,6 +297,14 @@ ENDIF
 
 IF ESCNO == C_X_
 $include (C_X.inc)      ; Select pinout C_X
+ENDIF
+
+IF ESCNO == D_X_
+$include (D_X.inc)      ; Select pinout D_X
+ENDIF
+
+IF ESCNO == E_X_
+$include (E_X.inc)      ; Select pinout E_X
 ENDIF
 
 
