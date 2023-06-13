@@ -31,6 +31,7 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 Rev32.9.9 testcode is published in the folder "Loaded startup testcode".
 This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
+The code is not suitable for multirotor applications.
 
 Rev32.9.5 testcode is published in the folder "Dshot extended telemetry testcode".
 - Added support for extended dshot telemetry   
