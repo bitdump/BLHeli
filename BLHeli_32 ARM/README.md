@@ -32,13 +32,13 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 Rev32.9.9 testcode is published in the folder "Loaded startup testcode".
 This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
 
-Rev32.9.4 testcode is published in the folder "Dshot extended telemetry testcode".
+Rev32.9.5 testcode is published in the folder "Dshot extended telemetry testcode".
 - Added support for extended dshot telemetry   
   Temp, volt, curr data now available over bidirectional dshot signal   
 - Reduced ESC and motor stresses during stall conditions   
   Timeout before shutting off power is reduced   
 - Added protection against unintentional spoolups   
-  Input signal is qualified for 200ms before starting, and during the first 5s of running, signal timeout is only 40ms (vs generally 320ms)   
+  Input signal is qualified before starting, and during the first 5s of running, signal timeout is only 30ms (vs generally 320ms)   
   Input signal loss does not lead to new detection of signal type (unless input line is held high more than 2 seconds so bootloader is entered)   
   So when changing input signal type, the ESC must be power cycled for it to take effect   
 - Some small changes to make thrust vs rpm more linear   
