@@ -7,7 +7,7 @@ Unfortunately there is inaccurate and misleading information relating to this ci
 So to clarify:  
 All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support the "ByRPM" feature, with Rev32.9 code.  
 All BLHeli_32 MCUs (F0, F3, F4, G0 etc) support "any" pwm frequency range.  
-The supported range is determined by the hardware manufacturer, based upon choice of fets, driver capacitors etc.
+The supported range is determined by the hardware manufacturer, based upon choice of fets, driver, capacitors etc.
 
 ## BLHeli_32 downloads  
 
@@ -20,7 +20,7 @@ or here:
 https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite   
 And the Android APP on Google Play:   
 https://play.google.com/store/apps/details?id=org.blheli.BLHeli_32  
-For users in regions where Google is not available, you can download the ".apk" file in the  
+For users in regions where Google Play is not available, you can download the ".apk" file in the  
 "BLHeli_32 Android APP" folder to your phone or tablet and open it. This will install the APP.  
 
 ## BLHeli_32 manual
@@ -29,22 +29,9 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-Rev32.9.9 testcode is published in the folder "Loaded startup testcode".
+Rev32.10.9 testcode is published in the folder "Loaded startup testcode".
 This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
 The code is not suitable for multirotor applications.
-
-Rev32.9.5 testcode is published in the folder "Dshot extended telemetry testcode".
-- Added support for extended dshot telemetry   
-  Temp, volt, curr data now available over bidirectional dshot signal   
-- Reduced ESC and motor stresses during stall conditions   
-  Timeout before shutting off power is reduced   
-- Added protection against unintentional spoolups   
-  Input signal is qualified before starting, and during the first 5s of running, signal timeout is only 30ms (vs generally 320ms)   
-  Input signal loss does not lead to new detection of signal type (unless input line is held high more than 2 seconds so bootloader is entered)   
-  So when changing input signal type, the ESC must be power cycled for it to take effect   
-- Some small changes to make thrust vs rpm more linear   
-  Primarily for static or quasi-static load conditions   
-- Some smaller fixes   
 
 ## Discussion threads
 
