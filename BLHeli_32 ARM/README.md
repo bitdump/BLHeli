@@ -29,9 +29,11 @@ You can find the manual in the link above: BLHeli_32 manual ARM Rev32.x.pdf
 
 ## Test code
 
-Rev32.10.9 testcode is published in the folder "Loaded startup testcode".
-This testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
-The code is not suitable for multirotor applications.
+Rev32.10.9 testcodes are published in the folder "Loaded startup testcode" and "Plane nondamped testcode".
+The "Loaded startup testcode" testcode has optimizations for starting motors that are loaded, like is often the case for thrusters or cars.
+The "Plane nondamped testcode" testcode has optimizations for planes that run nondamped mode.
+It prevents a small kick when starting up a motor that is already spinning.
+None of these codes are suitable for multirotor applications.
 
 ## Discussion threads
 
