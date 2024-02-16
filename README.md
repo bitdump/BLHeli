@@ -4,9 +4,9 @@ To view and use the files, click the "Clone or download" button on this page,
 and then select "Download ZIP" to download the repository to your computer.  
   
 For flashing, configuration and documentation, download the BLHeliSuite PC software:  
-From here: https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite  
-Or for BLHeliSuite32: https://github.com/bitdump/BLHeli/releases  
-Or the app here: https://github.com/bitdump/BLHeli/tree/master/BLHeli_32%20ARM/BLHeli_32%20Android%20APP or from Google Play  
+From [here](https://www.mediafire.com/folder/dx6kfaasyo24l/BLHeliSuite).  
+Or for BLHeliSuite32 [here](https://github.com/bitdump/BLHeli/releases).  
+Or the BLHeli_32 app [here](https://github.com/bitdump/BLHeli/tree/master/BLHeli_32%20ARM/BLHeli_32%20Android%20APP) or from Google Play.  
   
 BLHeli was the first code developed, written in assembly for Atmel and Silabs 8bit MCUs.  
 Three versions of the code were made, for heli main motor, tail motor and for multirotor.  
