@@ -22,13 +22,13 @@ BLHeli_32 also only supports multirotor applications, although it can also be us
 The code is closed source.  
 
 Documentation can be found here:  
-https://github.com/bitdump/BLHeli/blob/master/Atmel/BLHeli%20manual%20Atmel%20Rev14.x.pdf  
-https://github.com/bitdump/BLHeli/blob/master/SiLabs/BLHeli%20manual%20SiLabs%20Rev14.x.pdf  
-https://github.com/bitdump/BLHeli/blob/master/BLHeli_S%20SiLabs/BLHeli_S%20manual%20SiLabs%20Rev16.x.pdf  
-https://github.com/bitdump/BLHeli/blob/master/BLHeli_32%20ARM/BLHeli_32%20manual%20ARM%20Rev32.x.pdf  
+[BLHeli Atmel](https://github.com/bitdump/BLHeli/blob/master/Atmel/BLHeli%20manual%20Atmel%20Rev14.x.pdf)  
+[BLHeli Silabs](https://github.com/bitdump/BLHeli/blob/master/SiLabs/BLHeli%20manual%20SiLabs%20Rev14.x.pdf)  
+[BLHeli_S](https://github.com/bitdump/BLHeli/blob/master/BLHeli_S%20SiLabs/BLHeli_S%20manual%20SiLabs%20Rev16.x.pdf)  
+[BLHeli_32](https://github.com/bitdump/BLHeli/blob/master/BLHeli_32%20ARM/BLHeli_32%20manual%20ARM%20Rev32.x.pdf)  
 
-For more information, check out these threads:  
-http://www.rcgroups.com/forums/showthread.php?t=2136895 (for BLHeli)  
-https://www.rcgroups.com/forums/showthread.php?2640796 (for BLHeli_S)  
-https://www.rcgroups.com/forums/showthread.php?2864611 (for BLHeli_32)  
+For more information, check out these threads on RCG:  
+[BLHeli Atmel](http://www.rcgroups.com/forums/showthread.php?t=2136895)  
+[BLHeli_S](https://www.rcgroups.com/forums/showthread.php?2640796)  
+[BLHeli_32](https://www.rcgroups.com/forums/showthread.php?2864611)  
 
